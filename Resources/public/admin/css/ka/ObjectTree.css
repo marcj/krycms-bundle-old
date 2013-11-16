@@ -1,0 +1,208 @@
+.ka-objectTree {
+    position: relative;
+}
+
+.ka-objectTree-root {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 100%;
+}
+
+.ka-objectTree-objects {
+    display: none;
+}
+
+.ka-objectTree-top-dummy {
+    height: 30px;
+}
+
+.ka-objectTree-pages {
+    position: relative;
+    display: none;
+}
+
+.ka-objectTree-item-toggler {
+    position: relative;
+    top: 0px;
+    padding: 0px 8px;
+    font-family: Icomoon;
+    font-size: 11px;
+    color: gray;
+    display: inline-block;
+    vertical-align: top;
+}
+
+.ka-objectTree-item-toggler:hover {
+    color: silver;
+}
+
+.ka-objectTree-item,
+.ka-objectTree-drag-box {
+    position: relative;
+    display: block;
+    line-height: 30px;
+    height: 30px;
+    color: #444;
+    cursor: default;
+    white-space: nowrap;
+}
+
+.ka-objectTree-item-hover,
+.ka-objectTree-item-hover:link,
+.ka-objectTree-item-selectable:hover {
+    background-color: #e5e5e5;
+    color: #444;
+}
+
+.ka-objectTree-item-over {
+
+}
+
+.ka-objectTree-add {
+    position: absolute;
+    right: 5px;
+    top: 1px;
+}
+
+.ka-objectTree-item-children {
+    display: none;
+    position: relative;
+}
+
+.ka-objectTree-item-masks {
+    margin-right: 4px;
+    display: inline-block;
+}
+
+.ka-objectTree-item-masks img {
+    position: absolute;
+    top: 1px;
+    left: 0px;
+}
+
+.ka-objectTree-item-masks:before {
+    font-size: 16px;
+    /* color: #22638E; */
+}
+
+.ka-objectTree-item-selected,
+.ka-objectTree-item-selected:hover {
+    background-color: #22638E;
+    color: white;
+}
+
+.ka-objectTree-item-selected .ka-objectTree-item-masks:before {
+    color: white;
+}
+
+.ka-objectTree-item-selected .ka-objectTree-item-toggler,
+.ka-objectTree-item-selected:hover .ka-objectTree-item-toggler {
+    color: white;
+}
+
+.ka-objectTree-drag-box {
+    font-size: 11px;
+    position: absolute;
+    border: 1px solid silver;
+    background-color: #eee;
+    padding: 2px;
+    box-shadow: 1px 1px 1px #888;
+    z-index: 7000000;
+}
+
+.ka-objectTree-dropElement {
+    border-bottom: 1px dashed gray;
+}
+
+.ka-objectTree-item-title {
+    display: inline-block;
+    vertical-align: top;
+}
+
+.ka-objectTree-item-dragOver .ka-objectTree-item-title {
+    outline: 1px dotted silver;
+    background-color: #ddd;
+}
+
+.ka-objectTree-domain .ka-objectTree-item-title {
+    /*position: absolute;
+    left: 35px;
+    top: 1px;*/
+}
+
+.ka-objectTree-context {
+    position: absolute;
+    z-index: 50000000;
+    min-width: 100px;
+    left: 0px;
+    top: 0px;
+    padding: 3px 0px;
+    border: 1px solid gray;
+    border-left: 1px solid silver;
+    border-top: 1px solid silver;
+    background-color: #f5f5f5;
+    box-shadow: 0px 0px 2px gray;
+    -moz-border-radius: 4px;
+}
+
+.ka-objectTree-context a,
+.ka-objectTree-context a:link {
+    display: block;
+    line-height: 13px;
+    padding: 1px 5px 1px 8px;
+    cursor: pointer;
+    color: #444;
+}
+
+.ka-objectTree-context a:hover {
+    background-color: gray;
+    color: white;
+}
+
+.ka-objectTree-context a.noaction,
+.ka-objectTree-context a.noaction:link,
+.ka-objectTree-context a.noaction:hover,
+.ka-objectTree-context a.delimiter:hover {
+    color: #999;
+    background-color: transparent;
+}
+
+.ka-objectTree-context a.delimiter {
+    border-bottom: 1px solid #ddd;
+    padding-top: 1px;
+    height: 1px;
+    margin-bottom: 2px;
+}
+
+.ka-objectTree-context a.indented {
+    padding-left: 20px;
+}
+
+a.ka-objectTree-positionChooser-item,
+a.ka-objectTree-positionChooser-item:link {
+    color: silver;
+    margin-left: 10px;
+}
+
+a.ka-objectTree-positionChooser-item:hover {
+    color: #333;
+}
+
+a.ka-objectTree-positionChooser-item-active,
+a.ka-objectTree-positionChooser-item-active:link {
+    color: black;
+}
+
+.ka-objectTree-positionChooser-item .ka-objectTree-positionChooser-item-text {
+    visibility: hidden;
+    display: inline;
+    float: none;
+    color: green;
+}
+
+a.ka-objectTree-positionChooser-item:hover .ka-objectTree-positionChooser-item-text,
+a.ka-objectTree-positionChooser-item-active .ka-objectTree-positionChooser-item-text,
+a.ka-objectTree-positionChooser-item-active:link .ka-objectTree-positionChooser-item-text {
+    visibility: visible;
+}

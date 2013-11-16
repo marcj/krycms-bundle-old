@@ -1,0 +1,36 @@
+.ka-Splitter-main {
+    position: absolute;
+}
+
+.ka-Splitter-main-top,
+.ka-Splitter-main-bottom {
+    left: 0;
+    right: 0;
+    height: 5px;
+}
+
+.ka-Splitter-main-top {
+    top: 0;
+}
+
+.ka-Splitter-main-bottom {
+    top: 0;
+}
+
+.ka-Splitter-main-left,
+.ka-Splitter-main-right {
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    cursor: ew-resize;
+}
+
+.ka-Splitter-main-left {
+    left: 0;
+    border-left: 1px solid silver;
+}
+
+.ka-Splitter-main-right {
+    right: 0;
+    border-right: 1px solid silver;
+}

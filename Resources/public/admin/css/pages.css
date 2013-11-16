@@ -1,0 +1,85 @@
+.admin-pages-pane {
+    position: absolute;
+    display: none;
+    left: 0px;
+    right: 0px;
+    top: 0px;
+    bottom: 0px;
+    overflow: auto;
+    padding-top: 15px;
+}
+
+.ka-pages-nolayoutoverlay {
+    position: absolute;
+    left: 0px;
+    right: 0px;
+    top: 0px;
+    bottom: 0px;
+    background-image: url(../images/ka-pages-nolayout-bg.png);
+    background-repeat: no-repeat;
+    background-color: white;
+    background-position: right top;
+}
+
+.ka-pages-treeContainer .ka-pageTree-domain {
+    border-top: 1px solid #ddd;
+}
+
+.ka-pages-treeContainer .ka-pageTree-top-dummy {
+    height: 21px;
+}
+
+.ka-pages-nolayoutoverlay-text {
+    color: gray;
+    font-size: 30px;
+    position: absolute;
+    right: 300px;
+    top: 52px;
+}
+
+.admin-pages-pane-contents-actions {
+    height: 40px;
+    margin: auto;
+    text-align: left;
+    width: 350px;
+    border: 1px solid #ccc;
+    background-color: #e6e6e6;
+    border-top: 0px;
+    -moz-border-radius-bottomleft: 5px;
+    -moz-border-radius-bottomright: 5px;
+    position: relative;
+}
+
+.admin-pages-pane-contents-actions-layout {
+    position: absolute;
+    left: 80px;
+    top: 3px;
+    width: 135px;
+}
+
+.admin-pages-pane-contents-actions-versions {
+    position: absolute;
+    left: 321px;
+    top: 3px;
+    width: 135px;
+}
+
+.admin-pages-pane-contents-viewmodes {
+    position: absolute;
+    width: 70px;
+    height: 20px;
+    left: 100px;
+    top: 3px;
+}
+
+.ka-admin-pages-versioning-table td {
+    padding: 2px;
+}
+
+.ka-admin-pages-versioning-table tr:hover td {
+    background-color: #ddd;
+}
+
+.ka-admin-pages-versioning-table tr.activeVersion td {
+    background-color: #aff8ab;
+}

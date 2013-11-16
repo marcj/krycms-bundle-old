@@ -1,0 +1,57 @@
+.admin-layout-pane {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    bottom: 0px;
+    right: 0px;
+    overflow: auto;
+}
+
+.admin-layout-left {
+    position: absolute;
+    left: 3px;
+    width: 242px;
+    top: 3px;
+    bottom: 3px;
+    border: 1px solid silver;
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    background-color: white;
+    padding: 0px 0px;
+    overflow-y: scroll;
+}
+
+.admin-layout-left a,
+.admin-layout-left a:link {
+    display: block;
+    cursor: default;
+    padding: 2px 5px;
+}
+
+.admin-layout-theme-items a.active,
+.admin-layout-theme-items a.active:link {
+    background-color: #ddd;
+}
+
+.admin-layout-theme-items a:hover {
+    background-color: #f6f6f6;
+}
+
+.admin-layout-theme-items a,
+.admin-layout-theme-items a:link {
+    padding: 2px 5px 2px 15px;
+}
+
+.ka-system-layout-codemirror {
+    background-color: white;
+    border: 1px solid #bbb;
+}
+
+.ka-system-layout-codemirror .CodeMirror-scroll {
+    position: absolute;
+    left: 0px;
+    right: 0px;
+    top: 0px;
+    bottom: 0px;
+    height: 100%;
+}

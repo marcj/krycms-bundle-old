@@ -1,0 +1,39 @@
+.ka-textboxList-item {
+    border: 1px solid silver;
+    -moz-border-radius: 2px;
+    padding: 0px 2px;
+    line-height: 14px;
+    margin: 0px 1px;
+    margin-top: 2px;
+    margin-right: 5px;
+    display: inline-block;
+    background-color: #C2C2C2;
+    padding: 0px 4px;
+    position: relative;
+    padding-right: 13px;
+}
+
+.ka-textboxList-item-closer {
+    position: absolute;
+    width: 10px;
+    top: 1px;
+    right: 2px;
+    font-family: 'icomoon';
+    font-style: normal;
+    text-decoration: none;
+    font-size: 11px;
+}
+
+.ka-textboxList-item-closer:hover {
+    color: gray;
+}
+
+.ka-TextboxList {
+    min-height: 20px;
+    height: auto;
+}
+
+.ka-TextboxList > .ka-Select-box-title {
+    white-space: normal;
+    padding-bottom: 1px;
+}

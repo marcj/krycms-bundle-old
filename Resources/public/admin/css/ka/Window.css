@@ -1,0 +1,536 @@
+.kwindow-border {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    overflow: auto;
+    min-height: 250px;
+    background-color: #eee;
+}
+
+.kwindow-border > .ka-Layout-main-fixed {
+    bottom: 35px;
+    left: 25px;
+    right: 25px;
+    top: 25px;
+}
+
+.ka-frontpage-backend .kwindow-border {
+    left: 221px;
+}
+
+.ka-window-extend-head .kwindow-win-content {
+    top: 62px;
+}
+
+.kwindow-border-inline {
+    position: relative;
+}
+
+.kwindow-win-inline {
+    overflow: auto;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0px;
+    top: 0px;
+}
+
+.kwindow-border-shadow {
+    box-shadow: 0 8px 3em #888;
+}
+
+.kwindow-shadow-bottom {
+    position: absolute;
+    bottom: -41px;
+    background-image: url(../../images/kwindow-shadow-bottom.png);
+    background-repeat: repeat-x;
+    left: 31px;
+    height: 41px;
+    right: 30px;
+}
+
+.kwindow-shadow-left {
+    position: absolute;
+    bottom: 25px;
+    left: -31px;
+    width: 31px;
+    background-image: url(../../images/kwindow-shadow-left.png);
+    background-repeat: repeat-y;
+    top: 70px;
+}
+
+.kwindow-shadow-right {
+    position: absolute;
+    bottom: 25px;
+    right: -31px;
+    width: 31px;
+    background-image: url(../../images/kwindow-shadow-right.png);
+    background-repeat: repeat-y;
+    top: 70px;
+}
+
+.kwindow-shadow-top-right,
+.kwindow-shadow-top-left {
+    position: absolute;
+    background-image: url(../../images/kwindow-shadow-top-lr.png);
+    background-repeat: no-repeat;
+    top: 0px;
+    width: 31px;
+    height: 70px;
+}
+
+.kwindow-shadow-top-left {
+    left: -31px;
+}
+
+.kwindow-shadow-top-right {
+    right: -31px;
+    background-position: -35px 0px;
+}
+
+.kwindow-shadow-bottom-left,
+.kwindow-shadow-bottom-right {
+    position: absolute;
+    bottom: -41px;
+    background-image: url(../../images/kwindow-shadow-bottom-lr.png);
+    background-repeat: no-repeat;
+    width: 70px;
+    height: 66px;
+}
+
+.kwindow-shadow-bottom-left {
+    left: -39px;
+}
+
+.kwindow-shadow-bottom-right {
+    right: -40px;
+    background-position: -119px 0px;
+}
+
+.kwindow-win-trans {
+    left: 0px;
+    right: 0px;
+    top: 0px;
+    bottom: 0px;
+    background-color: #aaa;
+}
+
+.kwindow-win-printer {
+    position: absolute;
+    left: 5px;
+    top: 2px;
+    cursor: pointer;
+}
+
+.kwindow-win-title,
+.kwindow-win-title-inaktive {
+    position: absolute;
+    bottom: 10px;
+    left: 25px;
+    min-height: 22px;
+    line-height: 20px;
+    vertical-align: middle;
+    font-weight: bold;
+    text-align: left;
+    color: #555;
+    cursor: default;
+}
+
+.ka-kwindow-inFront {
+    color: #111;
+}
+
+.kwindow-win-buttonBar,
+.window-bottom-bar {
+    position: absolute;
+    height: 30px;
+    line-height: 30px;
+
+    text-align: right;
+    padding: 5px 15px;
+    bottom: 0;
+    left: 0;
+    border-top: 1px solid #e2e2e2;
+    right: 0;
+}
+
+/* make line-height working even if there are only block-inline events. */
+.kwindow-win-buttonBar::before {
+    content: "\a0";
+}
+
+/*
+.kwindow-win-titleGroups {
+    display: block;
+    padding: 10px;
+    margin: 0 15px;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 2px;
+}
+*/
+
+.kwindow-win-titleGroups > .ka-tabGroup:first-child {
+    margin-left: 0;
+}
+
+.kwindow-win-title-inaktive {
+    color: #555;
+}
+
+.kwindow-win-content {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: #f9f9f9;
+}
+
+
+.kwindow-win-content-stick {
+    top: 0;
+    border-top: 0;
+}
+
+
+.kwindow-win-content-with-bottom {
+    bottom: 45px;
+}
+
+
+.ka-windowEdit-actions,
+.ka-Window-bottom {
+    text-align: right;
+    position: absolute;
+    bottom: 5px;
+    left: 15px;
+    right: 15px;
+}
+
+/* make line-height working even if there are only block-inline events. */
+.ka-windowEdit-actions::before,
+.ka-Window-bottom::before {
+    content: "\a0";
+}
+
+.ka-windowEdit-actions a.icon-warning,
+.ka-Window-bottom a.icon-warning {
+    margin-right: 18px;
+}
+
+
+.kwindow-win-inline .kwindow-win-content {
+    top: 0px;
+}
+
+.kwindow-win-bottom {
+    position: absolute;
+    left: 0px;
+    right: 0px;
+    display: none;
+    height: 18px;
+    bottom: 0px;
+    /*background-color: #d4d0c8;*/
+    background-image: url(../../images/win-bottom-resize.png);
+    background-repeat: no-repeat;
+    background-position: right bottom;
+    border-top: 1px solid #777;
+    padding-left: 6px;
+    color: #444;
+    line-height: 18px;
+}
+
+.kwindow-win-bottom-maximized {
+    background-image: none;
+}
+
+.kwindow-iframe {
+    width: 100%;
+    height: 100%;
+    border: 0px;
+    padding: 0px;
+    margin: 0px;
+}
+
+.kwindow-win-titleBar {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.ka-window-extend-head .kwindow-win-titleBar {
+    top: 4px;
+}
+
+.kwindow-win-titleBarIcon {
+    margin-left: 2px;
+    width: 24px;
+    height: 16px;
+    background-repeat: no-repeat;
+    font-size: 14px;
+    text-align: center;
+    color: #444;
+    display: inline-block;
+    padding: 1px 0;
+}
+
+.kwindow-win-titleBarIcon:hover {
+    color: #333;
+}
+
+.kwindow-win-titleBarIcon:active {
+    color: #444;
+}
+
+.ka-kwindow-titlepath {
+    display: block;
+    line-height: 25px;
+    font-size: 12px;
+    font-weight: normal;
+    color: #aaa;
+}
+
+.ka-kwindow-titlepath img {
+    margin: 0 8px;
+    width: 4px;
+}
+
+.ka-kwindow-prompt {
+    position: absolute;
+    left: 20px;
+    top: 20px;
+    width: 230px;
+    background-color: #eee;
+    box-shadow: 0px 8px 15px #666;
+}
+
+.ka-kwindow-prompt input.text {
+    width: 220px;
+}
+
+.ka-kwindow-prompt-text {
+    padding: 5px;
+    padding-bottom: 40px;
+}
+
+.ka-kwindow-prompt-text-abs {
+    position: absolute;
+    top: 0px;
+    padding-top: 5px;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    left: 0px;
+    right: 0px;
+    bottom: 38px;
+    min-height: 50px;
+    padding-bottom: 5px;
+}
+
+.ka-kwindow-prompt-bottom {
+    position: absolute;
+    text-align: right;
+    left: 0px;
+    right: 10px;
+    bottom: 8px;
+    height: 25px;
+}
+
+.kwindow-win-content h3,
+h3.kryn-headline {
+    margin: 0px;
+    cursor: default;
+    font-weight: normal;
+    padding-left: 1px;
+    color: #555;
+    height: 23px;
+    line-height: 23px;
+    font-size: 11px;
+    padding: 0px 3px;
+}
+
+.ka-kwindow-content-withBottomBar {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 41px;
+    overflow: auto;
+}
+
+.ka-kwindow-loader-content {
+    width: 200px;
+    margin: auto;
+    height: 30px;
+    line-height: 20px;
+
+    border-radius: 2px;
+    -moz-border-radius: 2px;
+    -webkit-border-radius: 2px;
+
+    font-size: 18px;
+    font-weight: bold;
+    padding: 25px;
+    color: white;
+
+    position: relative;
+    background-color: #22638E;
+}
+
+.ka-kwindow-sizer {
+    position: absolute;
+    background-color: white;
+}
+
+.ka-kwindow-sizer-ne,
+.ka-kwindow-sizer-se,
+.ka-kwindow-sizer-nw,
+.ka-kwindow-sizer-sw {
+    width: 8px;
+    height: 8px;
+}
+
+.ka-kwindow-sizer-n {
+    cursor: n-resize;
+    right: 2px;
+    left: 2px;
+    top: -4px;
+    height: 6px;
+}
+
+.ka-kwindow-sizer-ne {
+    cursor: ne-resize;
+    top: -4px;
+    right: -4px;
+}
+
+.ka-kwindow-sizer-e {
+    cursor: e-resize;
+    right: -4px;
+    bottom: 2px;
+    top: 2px;
+    width: 6px;
+}
+
+.ka-kwindow-sizer-se {
+    cursor: se-resize;
+    right: -4px;
+    bottom: -4px;
+}
+
+.ka-kwindow-sizer-s {
+    cursor: s-resize;
+    right: 2px;
+    left: 2px;
+    bottom: -4px;
+    height: 6px;
+}
+
+.ka-kwindow-sizer-sw {
+    cursor: sw-resize;
+    left: -4px;
+    bottom: -4px;
+}
+
+.ka-kwindow-sizer-w {
+    cursor: w-resize;
+    left: -4px;
+    bottom: 2px;
+    top: 2px;
+    width: 6px;
+}
+
+.ka-kwindow-sizer-nw {
+    cursor: nw-resize;
+    left: -4px;
+    top: -4px;
+}
+
+.ka-Window-sidebar {
+    position: absolute;
+    right: 0;
+    top: 25px;
+    bottom: 35px;
+    width: 150px;
+    background-color: #5c5c5c;
+}
+
+.ka-Window-sidebar-container {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    overflow: auto;
+}
+
+
+.ka-Window-sidebar h2 {
+    color: white;
+    padding: 0 15px;
+}
+
+.ka-Window-sidebar a.ka-Button,
+.ka-Window-sidebar a.ka-Button:hover,
+.ka-Window-sidebar a.ka-Button:active {
+    display: block;
+    background-color: transparent;
+    box-shadow: none;
+    color: white;
+    border: 0;
+    padding: 0 15px;
+    text-align: left;
+    margin: 0;
+    cursor: pointer;
+}
+
+.ka-Window-sidebar a.ka-Button-pressed,
+.ka-Window-sidebar a.ka-Button-pressed:link,
+.ka-Window-sidebar a.ka-Button-pressed:hover,
+.ka-Window-sidebar a.ka-Button-pressed:active {
+    top: 0;
+    box-shadow: none;
+    background-color: #3d3d3d;
+}
+
+.ka-Window-sidebar .ka-Splitter-main {
+    left: -20px;
+    border-left: 0;
+    width: 20px;
+}
+.ka-Window-sidebar .ka-ButtonGroup {
+    margin: 0;
+    display: block;
+    white-space: pre;
+    border-top: 1px solid gray;
+}
+
+
+.ka-Window-sidebar .ka-ButtonGroup:first-child {
+    border-top: 0;
+}
+
+.ka-Window-sidebar a.ka-Button:hover {
+    background-color: #6e6e6e;
+}
+
+.ka-Window-sidebar a.ka-Button-deactivate:hover {
+    cursor: default;
+    color: gray;
+    background-color: transparent;
+}
+
+.ka-Window-sidebar-container-small h2 {
+    display: none;
+}
+
+.ka-Window-sidebar-container-small .ka-Button > span {
+    display: none;
+}
+
+
+.ka-Window-sidebar-delimiter {
+    border-top: 1px solid #808080;
+}

@@ -1,0 +1,15 @@
+.ka-admin-nodes-frontend-wrapper {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+    left: 0px;
+}
+
+.ka-admin-nodes-frontend-wrapper iframe {
+    position: absolute;
+    display: block;
+    border: 0;
+    height: 100%;
+    width: 100%;
+}

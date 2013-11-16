@@ -1,0 +1,9 @@
+.admin-system-desktopSettings-defaultImages img {
+    margin: 5px;
+    border: 1px solid silver;
+}
+
+.admin-system-desktopSettings-defaultImages img.active {
+    margin: 4px;
+    border: 2px solid gray;
+}

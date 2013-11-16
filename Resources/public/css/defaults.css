@@ -1,0 +1,15 @@
+p {
+    margin: 0 0 1em;
+}
+
+.ka-contentType-image.align-left {
+    text-align: left;
+}
+
+.ka-contentType-image.align-center {
+    text-align: center;
+}
+
+.ka-contentType-image.align-right {
+    text-align: right;
+}

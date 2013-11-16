@@ -1,0 +1,9 @@
+.ka-ActionBar {
+    padding: 5px 0;
+    text-align: right;
+    height: 30px;
+}
+
+.ka-ActionBar-left {
+    text-align: left;
+}

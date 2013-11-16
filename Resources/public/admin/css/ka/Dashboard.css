@@ -1,0 +1,55 @@
+.ka-Dashboard-active {
+    /* background-color: #22638E; */
+}
+
+.ka-Dashboard {
+    padding: 5px;
+}
+
+.ka-Dashboard-widget {
+    background-color: #fcfcfc;
+    margin: 4px;
+    display: block;
+    float: left;
+    width: 255px;
+    height: 215px;
+    color: #444;
+    border: 1px solid #e2e2e2;
+
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+.ka-Dashboard-widget h3 {
+    margin: 0;
+    padding: 5px;
+    font-size: 13px;
+
+    -moz-border-radius-topleft: 5px;
+    -moz-border-radius-topright: 5px;
+    border-top-right-radius: 5px;
+    border-top-left-radius: 5px;
+    -webkit-border-top-right-radius: 5px;
+    -webkit-border-top-left-radius: 5px;
+}
+
+.ka-Dashboard-widget-grid-1 {
+    /*width: 215px;*/
+}
+
+.ka-Dashboard-widget-grid-2 {
+    width: 518px;
+}
+
+.ka-Dashboard-widget-grid-3 {
+    width: 781px;
+}
+
+.ka-Dashboard-widget-grid-4 {
+    width: 890px;
+}
+
+.ka-Dashboard-widget-grid-5 {
+    width: 1115px;
+}

@@ -1,0 +1,145 @@
+.ka-widget-main {
+    border: 1px solid gray;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+    position: relative;
+    min-height: 75px;
+
+    background-color: #777777;
+
+    color: white;
+    -moz-box-shadow: 0 0 8px #999999;
+    -webkit-box-shadow: 0 0 8px #999999;
+    box-shadow: 0 0 8px #999999;
+    margin-bottom: 10px;
+}
+
+.ka-widget-overview {
+    background-color: #eee;
+    border: 1px solid silver;
+    background-image: none;
+    -moz-box-shadow: 0px 0px 0px;
+    -webkit-box-shadow: 0px 0px 0px;
+    box-shadow: 0px 0px 0px;
+    color: #555;
+}
+
+.ka-widget-title {
+    padding: 6px 4px 5px 5px;
+    color: white;
+    margin: 4px 0px;
+    margin-top: 0px;
+    font-weight: bold;
+    font-size: 11px;
+}
+
+.ka-widget-content {
+    position: absolute;
+    top: 25px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+}
+
+.ka-widget-bottom {
+    position: absolute;
+    display: none;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    height: 0px;
+    border-top: 1px solid #aaa;
+
+}
+
+.ka-widget-main .ka-Table-head th {
+    border-bottom: 1px solid gray;
+    border-left: 1px solid #555555;
+    color: #EEEEEE;
+    background-color: #616161;
+}
+
+.ka-widget-main .ka-Table-head {
+    background-color: #666666;
+}
+
+.ka-widget-main .ka-Table-body td {
+    color: #eee;
+}
+
+.ka-widget-main .ka-Table-body tr.two td {
+    background-color: #717171;
+}
+
+.ka-widget-main .ka-Table-body tr.one td {
+    background-color: #7b7b7b;
+}
+
+.ka-widget-main a,
+.ka-widget-main a:link {
+    color: #eee;
+}
+
+.ka-widget-knoptodesktop {
+    position: absolute;
+    right: 5px;
+    top: 5px;
+    cursor: pointer;
+}
+
+.ka-widget-overview .ka-widget-content {
+    top: 26px;
+}
+
+.ka-widget-overview .ka-widget-title {
+    -moz-border-radius-topleft: 5px;
+    -moz-border-radius-topright: 5px;
+    background-color: #ccc;
+    border-bottom: 1px solid #b5b5b5;
+    color: #555;
+    font-weight: normal;
+}
+
+.ka-widget-overview .ka-Table-head {
+    background-color: #ddd;
+    border-left: 0px;
+}
+
+.ka-widget-overview .ka-Table-head th {
+    color: #777;
+    border: 0px;
+    border-bottom: 1px solid #ddd;
+}
+
+.ka-widget-overview .ka-Table-body td,
+.ka-widget-overview .ka-Table-body td a,
+.ka-widget-overview .ka-Table-body td a:link {
+    color: #444;
+}
+
+.ka-widget-overview .ka-Table-body tr.two td {
+    background-color: #e4e4e4;
+}
+
+.ka-widget-overview .ka-Table-body tr.one td {
+    background-color: #e9e9e9;
+}
+
+.ka-widget-overview .ka-widget-content {
+    bottom: 2px;
+}
+
+.ka-widget-overview .ka-widget-bottom {
+    height: 2px;
+    border-top: 1px solid #ccc;
+}
+
+.ka-widget-main .ka-Table-body tr:hover td {
+    background-color: #999;
+}
+
+.ka-widget-overview .ka-Table-body tr:hover td {
+    background-color: #ddd;
+}
+

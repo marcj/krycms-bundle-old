@@ -1,0 +1,94 @@
+.ka-List {
+    position: absolute;
+    left: 0;
+    top: 46px;
+    bottom: 0px;
+    right: 0;
+    border: 1px solid #ddd;
+    background-color: white;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.ka-List-split {
+    padding: 6px;
+    border-bottom: 1px solid #ddd;
+    background-color: #eee;
+    color: gray;
+}
+
+.ka-List-item {
+    border-bottom: 1px solid #ddd;
+    cursor: pointer;
+    padding: 6px;
+    color: #333;
+    position: relative;
+
+    -moz-transition-duration: .3s;
+    -webkit-transition-duration: .3s;
+    -o-transition-duration: .3s;
+    -ms-transition-duration: .3s;
+    transition-duration: .3s;
+}
+
+.ka-List-item h2 {
+    padding: 0px;
+    margin: 1px 0px 4px 0px;
+    font-size: 16px;
+    line-height: 18px;
+    font-weight: normal;
+}
+
+.ka-List-item .sub {
+    color: #aaa;
+}
+
+.ka-List-item:hover {
+    background-color: #F6F6F6;
+}
+
+.ka-List-item.active,
+.ka-List-item.active:hover {
+    background-color: #22638e;
+    color: white;
+}
+
+.ka-List-item.active h1,
+.ka-List-item.active h2,
+.ka-List-item.active h3 {
+    color: white;
+}
+
+
+.ka-List-loader:hover {
+    background-image: none;
+    background-color: transparent;
+}
+
+.ka-List-info,
+.ka-List-loader {
+    padding: 10px;
+    color: silver;
+    text-align: center;
+    cursor: default;
+}
+
+.ka-List-showRemove .ka-List-item-remove {
+    display: block;
+}
+
+.ka-List-item-remove {
+    position: absolute;
+    background-color: white;
+    right: 0;
+    top: 0;
+    display: none;
+    cursor: default;
+    bottom: 0;
+    -moz-transition-duration: .3s;
+    -webkit-transition-duration: .3s;
+    -o-transition-duration: .3s;
+    -ms-transition-duration: .3s;
+    transition-duration: .3s;
+    padding: 5px;
+}

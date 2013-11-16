@@ -1,0 +1,1155 @@
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
+.ka-admin, .ka-normalize {
+    font-family: "SourceSansPro-Regular", "Lucida Grande", "DejaVu Sans", "Bitstream Vera Sans", "Segoe UI", "Tahoma", sans-serif;
+    font-size: 14px;
+    margin: 0px;
+    padding: 0px;
+    line-height: normal;
+    text-align: left;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: geometricPrecision;
+    font-smooth: never;
+}
+
+.ka-admin table {
+    border-collapse: separate;
+}
+
+.ka-admin .CodeMirror-gutter {
+    z-index: auto;
+}
+
+.ka-admin h1,
+.ka-admin h2,
+.ka-admin h3 {
+    font-weight: normal;
+    font-family: "SourceSansPro-Semibold";
+}
+
+.ka-admin h1 {
+    font-size: 36px;
+    color: #797979;
+    line-height: 50px;
+    margin: 5px 0;
+    padding: 0;
+    font-family: "SourceSansPro-Light", "SourceSansPro-Regular", "Lucida Grande", "DejaVu Sans", "Bitstream Vera Sans", "Segoe UI", "Tahoma", sans-serif;
+}
+
+.ka-admin h2 {
+    font-size: 26px;
+    color: #666;
+    line-height: 30px;
+    margin: 5px 0;
+    padding: 0;
+}
+
+
+.ka-admin h2.light,
+.ka-admin h3.light {
+    font-family: "SourceSansPro-Light", "SourceSansPro-Regular", "Lucida Grande", "DejaVu Sans", "Bitstream Vera Sans", "Segoe UI", "Tahoma", sans-serif;
+}
+
+.ka-clear {
+    clear: both;
+}
+
+.ka-admin h3 {
+    text-transform: uppercase;
+}
+
+body.hide-scrollbar {
+    overflow: hidden;
+}
+
+a[class^="icon-"],
+a[class*=" icon-"]{
+    color: #444;
+    text-decoration: none;
+    line-height: 28px;
+    padding: 0 2px;
+}
+
+td {
+    vertical-align: top;
+}
+
+.ka-scrolling {
+    overflow: auto;
+    position: relative;
+    -webkit-overflow-scrolling: touch;
+    -webkit-backface-visibility: hidden;
+    -webkit-perspective: 1000;
+}
+
+.ka-Full {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+}
+
+.ka-Full-top {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+}
+
+.ka-Full-bottom {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.ka-Full-left {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.ka-Full-right {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.kryn_wysiwyg_toolbar > div > div {
+    display: block !important;
+    width: auto !important;
+
+}
+
+.kryn_wysiwyg_toolbar .mce-menubar {
+    width: auto !important;
+    height: auto !important;
+}
+.kryn_wysiwyg_toolbar .mce-container {
+    position: relative !important;
+    top: 0 !important;
+    background: transparent;
+    border: 0;
+}
+
+.kryn_wysiwyg_toolbar .mce-container,
+.kryn_wysiwyg_toolbar .mce-container > div,
+.kryn_wysiwyg_toolbar .mce-container > div > div {
+    width: auto !important;
+    height: auto !important;
+    white-space: normal !important;
+    text-align: center;
+    border-radius: 0;
+    -webkit-border-radius: 0;
+    -moz-border-radius: 0;
+    box-shadow: none;
+}
+
+.kryn_wysiwyg_toolbar .mce-btn-group .mce-btn.mce-disabled,
+.kryn_wysiwyg_toolbar .mce-btn-group .mce-btn.mce-disabled:hover,
+.kryn_wysiwyg_toolbar .mce-btn-group .mce-btn.mce-active,
+.kryn_wysiwyg_toolbar .mce-btn-group .mce-btn.mce-active:hover,
+.kryn_wysiwyg_toolbar .mce-btn-group .mce-btn:active,
+.kryn_wysiwyg_toolbar .mce-btn-group .mce-btn:hover,
+.kryn_wysiwyg_toolbar .mce-btn-group .mce-btn:focus,
+.kryn_wysiwyg_toolbar .mce-btn:hover,
+.kryn_wysiwyg_toolbar .mce-btn:focus,
+.kryn_wysiwyg_toolbar .mce-btn {
+    background-image: none;
+    box-shadow: none;
+}
+/*
+.kryn_cke_toolbar {
+    position: relative !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: auto !important;
+    box-shadow: 0 0 0 #000 !important;
+    box-shadow: none !important;
+}
+
+.kryn_cke_toolbar .cke_inner,
+.kryn_cke_toolbar .cke_top {
+    background: transparent !important;
+    border: 0 !important;
+    padding: 0 !important;
+}
+
+.cke_top,
+.cke_bottom,
+.cke_chrome {
+    -webkit-box-shadow: none !important;
+    -moz-box-shadow: none !important;
+    box-shadow: none !important;
+}
+
+.cke_bottom,
+.cke_top {
+    background-image: none !important;
+    background: #E9E9E9 !important;
+}
+
+.cke_top {
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    background-image: none !important;
+}
+
+
+.kryn_cke_toolbar .cke_combo_button,
+.kryn_cke_toolbar .cke_toolgroup {
+    border-radius: 0;
+    -webkit-border-radius: 0;
+    -moz-border-radius: 0;
+    background-image: none;
+    background: #fefefe;
+    border: 1px solid #C0C0C0;
+}
+
+.kryn_cke_toolbar .cke_toolbar_separator {
+    display: none;
+}
+
+.kryn_cke_toolbar .cke_toolgroup .cke_toolbar_separator {
+    display: inline;
+}
+
+.kryn_cke_toolbar .cke_combo_button:hover {
+    background-image: none !important;
+    background: #eee !important;
+}
+
+
+.kryn_cke_toolbar .cke_button_on,
+.kryn_cke_toolbar .cke_combo_on .cke_combo_button,
+.kryn_cke_toolbar .cke_combo_on .cke_combo_button:active,
+.kryn_cke_toolbar .cke_combo_on .cke_combo_button:hover {
+    background-image: none !important;
+    background: #ddd !important;
+    -webkit-box-shadow: none !important;
+    -moz-box-shadow: none !important;
+    box-shadow: none !important;
+    border: 1px solid #C0C0C0;
+}
+
+.kryn_cke_toolbar .cke_button_on {
+    border: 0;
+}
+*/
+
+
+.ka-admin div,
+.ka-admin span {
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: -moz-none;
+    -o-user-select: none;
+    user-select: none;
+}
+
+.ka-admin {
+    -webkit-tap-highlight-color: transparent;
+    background-color: #eee;
+}
+
+.ka-admin a,
+.ka-admin a:link {
+    color: gray;
+}
+
+a.ka-admin a:hover {
+    color: #333;
+}
+
+.ka-admin a img,
+.ka-admin a:link img {
+    border: 0px;
+}
+
+.ka-admin img {
+    border: 0px;
+}
+
+.ka-admin input,
+.ka-admin select,
+.ka-admin textarea {
+    outline: 0;
+}
+
+.selectable,
+div.selectable span, div.selectable div,
+td.selectable span, td.selectable div,
+span.selectable span, div.selectable div {
+    -webkit-user-select: text;
+    -khtml-user-select: text;
+    -moz-user-select: text;
+    -o-user-select: text;
+    user-select: text;
+}
+
+.ka-border {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    overflow: hidden;
+    bottom: 0;
+}
+
+.ka-app-container {
+    position: absolute;
+    left: 0;
+    top: 61px;
+    right: 0;
+    bottom: 0;
+
+    -webkit-transition:all 0.2s ease-out;
+    -moz-transition:all 0.2s ease-out;
+    -o-transition:all 0.2s ease-out;
+    transition:all 0.2s ease-out;
+}
+
+.ka-main-dialog-container > .ka-dialog-overlay {
+    background-color: #F5F5F5;
+}
+
+.ka-main-dialog-container > .ka-dialog-overlay > .ka-dialog {
+    box-shadow: none;
+    position: relative;
+    padding: 0 50px;
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.ka-desktop {
+    position: absolute;
+    top: 31px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: auto;
+}
+
+.ka-main-dialog-container {
+    position: absolute;
+    left: 0;
+    top: 61px;
+    right: 0;
+    bottom: 0;
+}
+
+.ka-main-menu-wm-tabs {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 30px;
+    right: 0;
+    background-color: #ddd;
+    border-bottom: 1px solid silver;
+}
+
+.ka-wm-tab {
+    line-height: 30px;
+    display: inline-block;
+    height: 30px;
+    padding: 0 15px;
+    padding-right: 25px;
+    background-color: #d3d3d3;
+    border-right: 1px solid #c5c5c5;
+    cursor: default;
+    color: #666;
+    position: relative;
+}
+
+.ka-wm-tab > a,
+.ka-wm-tab > a:link {
+    position: absolute;
+    right: 3px;
+    top: 8px;
+    display: block;
+    font-size: 14px;
+    height: 12px;
+    line-height: 12px;
+    padding: 2px;
+    text-decoration: none;
+}
+
+.ka-wm-tab > a:hover {
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    border-radius: 3px;
+    background-color: silver;
+    color: white;
+}
+
+
+.ka-wm-tab > a:active {
+    background-color: gray;
+}
+
+.ka-wm-tab:before {
+    padding-right: 10px;
+    color: #444;
+}
+
+a.ka-wm-tab:hover {
+    background-color: #c8c8c8;
+}
+
+.ka-wm-tab-active,
+.ka-wm-tab-active:hover {
+    background-color: #eee;
+    height: 31px;
+    color: #333;
+}
+
+.ka-main-menu {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    overflow: hidden;
+    text-align: center;
+}
+/*
+.ka-main-menu-icons .ka-mainLinks {
+    overflow-x: hidden;
+}
+
+.ka-main-menu-icons .ka-main-menu-item > span,
+.ka-main-menu-icons .ka-main-menu-title {
+    display: none;
+}
+
+.ka-mainLinks {
+    position: absolute;
+    left: 0;
+    right: 17px;
+    bottom: 0;
+    top: 0;
+    overflow: auto;
+    padding-top: 15px;
+    -webkit-overflow-scrolling: touch;
+}
+
+.ka-main-menu-additional {
+    float: right;
+    padding-top: 5px;
+    height: 70px;
+    font-size: 10px;
+}*/
+
+.ka-main-menu-top {
+    height: 60px;
+    line-height: 60px;
+    color: white;
+    background-color: #22638e;
+    border-bottom: 1px solid black;
+    position: relative;
+}
+/*
+.ka-main-menu-top-navigation {
+    display: inline-block;
+    height: 75px;
+    line-height: 75px;
+    margin-left: 15px;
+}
+
+.ka-main-menu-top-sub {
+    height: 40px;
+    line-height: 40px;
+    background-color: #1D1D22;
+    text-align: right;
+}
+
+div.ka-main-menu-additional img.arrowUp:hover {
+    background-color: #399bc7;
+}*/
+
+.ka-main-menu-user {
+    color: white;
+    padding: 0 15px;
+    height: 60px;
+    float: right;
+    border-left: 1px solid #39739a;
+    line-height: 18px;
+    position: relative;
+}
+
+.ka-main-menu-user > h2 {
+    margin: 0;
+    padding: 0;
+    color: white;
+    display: inline-block;
+    font-size: 14px;
+    font-weight: normal;
+    line-height: 20px;
+    padding-top: 12px;
+}
+
+.ka-main-menu-user .username {
+    color: #ddd;
+}
+
+.ka-border .ka-main-menu-user a.ka-Button,
+.ka-border .ka-main-menu-user a.ka-Button:link {
+    background-color: transparent;
+    background: transparent;
+    color: #bdd1dd;
+    border: 0;
+    border-radius: 0;
+    -moz-border-radius: 0;
+    -webkit-border-radius: 0;
+    margin: 0px 7px;
+    display: inline-block;
+    line-height: 17px;
+    box-shadow: none;
+}
+
+.ka-border .ka-main-menu-user a.ka-Button:hover {
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.ka-main-menu-user .profile-image {
+    max-width: 20px;
+    margin: 0 15px;
+    vertical-align: text-bottom;
+}/*
+
+.ka-menu-item-children {
+    padding-left: 15px;
+    display: none;
+}
+
+a.ka-main-menu-item:before {
+    padding-right: 10px;
+    font-size: 12px;
+}
+
+a.ka-main-menu-item,
+a.ka-main-menu-item:link {
+    line-height: 22px;
+    padding: 8px 5px;
+    padding-left: 55px;
+    color: white;
+    text-shadow: 0px 1px 0px #333;
+    text-decoration: none;
+    display: block;
+    min-height: 22px;
+    cursor: pointer;
+    position: relative;
+    outline: 0;
+    font-family: "SourceSansPro-Regular";
+    font-size: 15px;
+}
+
+.ka-main-menu-top-navigation a.ka-main-menu-item,
+.ka-main-menu-top-navigation a.ka-main-menu-item:link {
+    display: inline-block;
+    padding: 0 15px;
+    padding-top: 5px;
+    line-height: 70px;
+}
+
+.ka-main-menu-top-navigation a.ka-main-menu-item:before {
+    font-size: 16px;
+    line-height: 16px;
+}
+
+a.ka-menu-item-childopener,
+a.ka-menu-item-childopener:link {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    bottom: 0;
+    width: 18px;
+    border-right: 0px;
+    padding: 0px;
+    line-height: 32px;
+    text-align: center;
+}
+
+a.ka-menu-item-childopener:hover {
+    background-color: #C7C7C7;
+}
+
+.ka-main-menu a.ka-menu-item-hasChilds,
+.ka-main-menu a.ka-menu-item-hasChilds:link {
+    padding-right: 26px;
+}
+
+div.ka-mainLinks a.ka-menu-item-childopener img,
+div.ka-mainLinks a.ka-menu-item-childopener:link img {
+    vertical-align: middle;
+}
+
+.ka-main-menu .ka-main-menu-item-hasImageAsIcon {
+    padding-left: 28px;
+}
+
+.ka-main-menu .ka-main-menu-item-hasNoIcon {
+    padding-left: 45px;
+}*/
+
+.ka-menu-withRightTopBorderRadius {
+    -moz-border-radius-topright: 5px;
+    -webkit-border-top-right-radius: 5px;
+    border-top-right-radius: 5px;
+}
+
+div.ka-mainLinks a.bar-dock-logo {
+    width: 30px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.ka-main-menu-login-name {
+    text-decoration: none;
+    padding: 8px 5px;
+    padding-top: 8px;
+    font-weight: bold;
+}
+/*
+.bar-dock-logo-menu-submenu {
+    position: absolute;
+    right: 0px;
+    top: -10px;
+}
+
+.ka-main-menu a img {
+    border: 0px
+}
+
+.ka-mainLinks [class^="icon-"]:before,
+.ka-mainLinks [class*=" icon-"]:before {
+    padding-right: 7px;
+    color: white;
+    font-size: 16px;
+    line-height: 20px;
+    vertical-align: text-top;
+    position: absolute;
+    left: 22px;
+}
+
+.ka-main-menu-headline {
+    color: #2B4552;
+    text-shadow: 0 1px 0 #DFDFDF;
+    text-transform: uppercase;
+    padding: 6px 13px;
+    margin: 0;
+    font-size: 11px;
+    line-height: 14px;
+    cursor: pointer;
+}
+
+.ka-main-menu-splitter {
+    height: 1px;
+    background-color: #242729;
+    margin: 10px 0;
+}
+
+h2.ka-main-menu-title {
+    color: #C5C5C5;
+    margin: 0;
+    padding: 5px;
+    font-size: 16px;
+    font-family: "SourceSansPro-Light";
+    padding-left: 10px;
+}
+
+div.ka-mainLinks-splitter {
+    position: absolute;
+    right: 0;
+    width: 15px;
+    top: 6px;
+    bottom: 0px;
+    color: #bdbdbd;
+    font-size: 20px;
+    line-height: 12px;
+    text-align: center;
+    border-right: 0;
+    cursor: ew-resize;
+}
+
+.ka-mainLinks-splitter > div {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    margin-top: -18px;
+}
+
+.ka-mainLinks-splitter > a {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 15px;
+    padding-left: 0;
+    color: white;
+    display: block;
+    font-size: 16px;
+}
+
+.ka-mainLinks-splitter > a:hover {
+    background-color: #888;
+    cursor: default;
+}*/
+/*
+a.ka-main-menu-item:hover {
+    background-color: rgba(47, 140, 189, 0.3);
+}
+
+.ka-main-menu-additional .icon-eye {
+}
+
+.ka-iconbar-item.icon-users {
+    color: #1A445A;
+    padding-right: 5px;
+    font-size: 16px;
+}
+
+.ka-iconbar-item.icon-users span {
+    padding-left: 5px;
+    font-size: 12px;
+}
+
+a.ka-main-menu-item-open,
+a.ka-main-menu-item-open:link {
+    background-color: rgba(47, 140, 189, 0.2);
+}
+
+.ka-mainLinks a.ka-main-menu-item-active,
+.ka-mainLinks a.ka-main-menu-item-active:link,
+.ka-mainLinks a.ka-main-menu-item-active:hover {
+    background-color: #22638e;
+    color: white;
+    text-shadow: 0 1px 0 #444;
+    border-left: 5px solid #1A5574;
+    padding-left: 50px;
+}
+
+.ka-main-menu-top-navigation a.ka-main-menu-item-active,
+.ka-main-menu-top-navigation a.ka-main-menu-item-active:link,
+.ka-main-menu-top-navigation a.ka-main-menu-item-active:hover {
+    border-top: 5px solid #1A5574;
+    padding-top: 0px;
+}
+
+.ka-main-menu a.ka-main-menu-item-active:before {
+    background-color: transparent;
+    color: white;
+    left: 17px;
+}*/
+
+.ka-iconbar-item {
+    white-space: nowrap;
+    height: 60px;
+    padding: 0px 5px;
+    line-height: 60px;
+    position: relative;
+    display: inline-block;
+}
+
+.ka-iconbar-item > a,
+.ka-iconbar-item > a:link {
+    color: #f3f3f3;
+    font-size: 14px;
+    padding: 0 2px;
+    display: inline-block;
+    text-decoration: none;
+    position: relative;
+    text-shadow: 0px 1px 0px #333
+}
+
+.ka-iconbar-item > a:hover:before {
+    color: #ccc;
+}
+
+.ka-iconbar-item > a:active:before {
+    color: #999;
+}
+
+.input-round-wrapper {
+    -moz-border-radius: 7px;
+    -webkit-border-radius: 7px;
+    border-radius: 7px;
+    border: 1px solid #888;
+    padding-right: 8px;
+    border-top: 1px solid #666;
+}
+
+.ka-search {
+    position: relative;
+    padding: 0 25px;
+    height: 75px;
+    display: inline-block;
+    line-height: 75px;
+    border-left: 1px solid #39739A;
+}
+
+.ka-search .ka-Input-text {
+    box-shadow: none;
+    border: 0;
+}
+
+.ka-menu-dialog-cat {
+    background-color: #F3F3F3;
+    border-top: 1px solid #E0E0E0;
+    padding: 5px;
+}
+
+.ka-menu-dialog-cat:nth-child(2n) {
+    background-color: #EFEFEF;
+}
+
+a.ka-menu-dialog-link {
+    display: inline-block;
+    margin: 15px;
+    padding: 5px;
+    font-size: 16px;
+    color: #444;
+    cursor: pointer;
+    text-align: center;
+}
+
+.ka-menu-dialog-link > span {
+    display: block;
+    padding-bottom: 7px;
+}
+
+a.ka-menu-dialog-link:hover {
+    border: 1px solid #C0C0C0;
+    background-color: #F3F3F3;
+    margin: 14px;
+}
+
+.ka-main-menu a {
+    position: relative;
+    top: 2px;
+    cursor: pointer;
+    display: inline-block;
+    padding: 6px 11px;
+    border-top-right-radius: 4px;
+    border-top-left-radius: 4px;
+    background-color: #236a97;
+    background-color: #175074;
+    font-size: 13px;
+    color: white;
+    line-height: 14px;
+}
+
+.ka-main-menu a:before {
+    padding-right: 5px;
+}
+
+a.ka-main-menu-start {
+    width: 40px;
+}
+
+.ka-main-menu a:hover {
+    background-color: #47799B;
+}
+
+img.ka-main-menu-start {
+    width: 30px;
+}
+
+.ka-main-menu-top-logo {
+    width: 115px;
+    margin-left: 18px;
+    position: relative;
+    top: 18px;
+    vertical-align: top;
+}
+
+.ka-search-query-icon {
+    position: absolute;
+    right: 31px;
+    top: 31px;
+}
+
+a.ka-create-search-index-icon.green {
+    background-position: left -19px;
+}
+
+a.ka-create-search-index-icon.yellow {
+    background-position: left -38px;
+}
+
+a.ka-create-search-index-icon.red {
+    background-position: left -57px;
+}
+
+.ka-mini-search {
+    position: absolute;
+    bottom: 27px;
+    left: 5px;
+    width: 250px;
+    min-height: 46px;
+    background-color: #F7F7F7;
+    padding: 4px;
+    z-index: 1500000;
+    border: 1px solid #C5C5C5;
+    border-bottom: 0px;
+    max-height: 80%;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.ka-mini-search-loading {
+    padding: 5px;
+}
+
+.ka-mini-search-loading img {
+    margin-right: 4px;
+}
+
+.ka-mini-search-results h3 {
+    border-bottom: 1px dotted #aaa;
+    font-size: 12px;
+    color: #444;
+    margin: 2px 0px;
+    padding: 2px 0px;
+}
+
+.ka-mini-search-results ul {
+    padding-left: 19px;
+}
+
+.ka-mini-search-results a,
+.ka-mini-search-results a:link {
+    display: block;
+    margin-bottom: 2px;
+}
+
+.ka-linkcontext-main {
+    position: absolute;
+    top: 40px;
+    left: 0px;
+    background-repeat: repeat-x;
+    background-color: #817f84;
+    background-color: #656465;
+    -moz-border-radius-bottomleft: 5px;
+    -moz-border-radius-bottomright: 5px;
+}
+
+.ka-linkcontext-sub {
+    box-shadow: 1px 1px silver;
+    background-color: #444;
+    padding: 2px 0px;
+    border: 2px solid silver;
+    -moz-border-radius-topleft: 5px;
+    -moz-border-radius-topright: 5px;
+    z-index: 120000;
+}
+
+.ka-linkcontext-main a,
+.ka-linkcontext-main a:link {
+    display: block;
+    color: white;
+    padding: 5px 9px;
+    cursor: pointer;
+    border-bottom: 1px solid #777;
+}
+
+.ka-linkcontext-main a:hover {
+    color: white;
+    background-color: #78767a;
+}
+
+.ka-linkcontext-main a.ka-linkcontext-opener,
+.ka-linkcontext-main a.ka-linkcontext-opener:link {
+    border-bottom: 1px solid #aaa;
+}
+
+.ka-linkcontext-main a.ka-linkcontext-last,
+.ka-linkcontext-main a.ka-linkcontext-last:link {
+    -moz-border-radius-bottomleft: 5px;
+    -moz-border-radius-bottomright: 5px;
+    border-bottom: 0px;
+}
+
+.ka-linkcontext-sub a.ka-linkcontext-last,
+.ka-linkcontext-sub a.ka-linkcontext-last:link {
+    -moz-border-radius-bottomleft: 0px;
+    -moz-border-radius-bottomright: 0px;
+}
+
+.ka-pages-tree-elementPropertyToolbar {
+    position: absolute;
+    left: 0px;
+    width: 100%;
+    bottom: 0px;
+    border-top: 2px solid #aaa;
+    -moz-border-radius-topleft: 3px;
+    -moz-border-radius-topright: 3px;
+    /*
+        overflow: auto;
+    */
+    background-color: #cacaca;
+}
+
+.ka-pages-tree-elementPropertyToolbarTitle {
+    font-weight: bold;
+    border-bottom: 1px solid #aaa;
+    padding: 2px 3px;
+    color: #666;
+    background-color: #bbb;
+    margin-bottom: 1px;
+    clear: both;
+    cursor: pointer;
+}
+
+.ka-pages-tree-elementPropertyToolbarContent {
+    height: 0px;
+    overflow: auto;
+    padding-bottom: 15px;
+    padding-top: 3px;
+    visibility: hidden;
+}
+
+.ka-pages-tree .ka-pages-tree-elementPropertyToolbar {
+    overflow: hidden;
+    width: 100%;
+}
+
+.ka-pages-layoutContent-ePanel {
+    border-top: 2px solid #999;
+    float: left;
+    margin-top: 3px;
+    padding-top: 3px;
+}
+
+.ka-pages-tree-elementPropertyToolbarToggler {
+    position: absolute;
+    left: 0px;
+    right: 0px;
+    top: -6px;
+    height: 6px;
+    background-image: url(../images/ka-admin-possibleContenItems-toggler.png);
+}
+
+.ka-pages-tree-elementPropertyToolbar .ka-field-main-small {
+    width: 190px;
+    padding: 0px 2px;
+}
+
+.ka-pages-tree-elementPropertyToolbar .ka-field-main-small .ka-field-field {
+    margin-left: 9px;
+    margin-top: 2px;
+    margin-bottom: 3px;
+}
+
+.ka-pages-tree-elementPropertyToolbar select {
+    margin: 1px;
+}
+
+.ka-searchcontext {
+    position: absolute;
+    top: 60px;
+    width: 350px;
+    text-align: left;
+    height: 150px;
+    background-color: #eee;
+    border: 4px solid #444444;
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    border-radius: 4px;
+    -moz-box-shadow: 0 0 2em #656465;
+    -webkit-box-shadow: 0 0 2em #656465;
+    box-shadow: 0 0 2em #656465;
+
+    z-index: 101000;
+}
+
+.ka-searchcontext-content {
+    position: absolute;
+    left: 0px;
+    right: 0px;
+    top: 0px;
+    bottom: 30px;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.ka-searchcontext-bottom {
+    position: absolute;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    height: 29px;
+    line-height: 29px;
+    background-color: #ddd;
+    padding-right: 5px;
+    border-top: 1px solid #ccc;
+}
+
+.ka-searchcontext-arrow {
+    position: absolute;
+    right: 10px;
+    top: -12px;
+    width: 15px;
+    height: 8px;
+}
+
+.ka-pages-pluginchooserpane {
+    position: absolute;
+    left: 0px;
+    bottom: 0px;
+    height: 0px;
+    width: 0px;
+    background-color: #eee;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    -moz-border-radius-topright: 3px;
+    -moz-border-radius-topleft: 3px;
+    border-right: 1px solid #aaa;
+    border-top: 2px solid #aaa;
+}
+
+/**
+*
+* Styles for ka.Buttons, ka.Tabs etc
+* for a white background
+*
+*/
+.ka-main-menu-light .kwindow-win-buttonGroup {
+    border-bottom: 1px solid #999; /*#888;*/
+    border-right: 1px solid #999; /*#777;*/
+    border-left: 1px solid #999; /*#777;*/
+    border-top: 1px solid #777; /*#555;*/
+    box-shadow: 0px 1px 0px #eee;
+}
+
+.ka-loader-main-absolute {
+    left: 0px;
+    right: 0px;
+    top: 0px;
+    bottom: 0px;
+    position: absolute;
+}
+
+@-webkit-keyframes blink {
+    from {
+        opacity: 1.0;
+    }
+    to {
+        opacity: 0.0;
+    }
+}
+
+.blink {
+    -webkit-animation-name: blink;
+    -webkit-animation-iteration-count: infinite;
+    -webkit-animation-timing-function: cubic-bezier(1.0, 0, 0, 1.0);
+    -webkit-animation-duration: 2s;
+}

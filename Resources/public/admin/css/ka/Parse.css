@@ -1,0 +1,4 @@
+.ka-parse-table > tbody > tr > td,
+.ka-parse-table > tr > td {
+    padding: 2px 4px;
+}

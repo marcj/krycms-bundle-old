@@ -1,0 +1,192 @@
+a.ka-Button,
+a.ka-Button:link {
+    white-space: nowrap;
+    padding: 0px 10px;
+
+    position: relative;
+
+    cursor: default;
+    color: #444;
+    line-height: 28px;
+    height: 30px;
+    font-weight: normal;
+    text-align: center;
+
+    margin: 0 4px;
+    background-color: #fefefe;
+
+    text-decoration: none;
+    outline: 0;
+    position: relative;
+    vertical-align: top;
+
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+
+    display: inline-block;
+    border: 1px solid #ddd;
+
+    -webkit-transition: all 0.3s ease-out;
+    -moz-transition: all 0.3s ease-out;
+    -o-transition: all 0.3s ease-out;
+    transition: all 0.3s ease-out;
+}
+
+
+a.ka-Button > span {
+    position: relative;
+}
+
+.ka-ActionBar a.ka-Button,
+.ka-ActionBar a.ka-Button:link,
+.ka-windowEdit-action-bar a.ka-Button,
+.ka-windowEdit-action-bar a.ka-Button:link,
+.kwindow-win-titleGroups a.ka-Button,
+.kwindow-win-titleGroups a.ka-Button:link {
+    line-height: 28px;
+    height: 30px;
+}
+
+a.ka-Button:last-child {
+    margin-right: 0;
+}
+
+a.ka-Button:first-child {
+    margin-left: 0;
+}
+
+a.ka-Button:before {
+    padding-left: 0px;
+    position: relative;
+    top: 1px;
+}
+
+a.ka-Button-textAndIcon:before {
+    padding-right: 5px;
+}
+
+.ka-admin aa.ka-Button:hover,
+a.ka-Button:hover {
+    background-color: #fafafa;
+    color: #111;
+}
+
+a.ka-Button:focus {
+    border: 1px solid #3E9BCB;
+
+    outline: 0;
+    border-color: rgba(47, 140, 189, 0.9);
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(47, 140, 189, 0.6);
+    -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(47, 140, 189, 0.6);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(47, 140, 189, 0.6);
+    box-shadow: 0 0 0 3px rgba(47, 140, 189, 0.2);
+
+    -moz-transition-duration: .1s;
+    -webkit-transition-duration: .1s;
+    -o-transition-duration: .1s;
+    -ms-transition-duration: .1s;
+    transition-duration: .1s;
+
+    color: black;
+}
+
+a.ka-Button:active,
+a.ka-Button-pressed,
+a.ka-Button-pressed:link,
+a.ka-Button-pressed:hover,
+a.ka-Button-pressed:active {
+    background-color: #dfdfdf;
+    border: 1px solid #d6d6d6;
+}
+
+div.button-list {
+    text-align: right;
+    padding-right: 5px;
+    position: absolute;
+    left: 0px;
+    right: 0px;
+    height: 30px;
+    bottom: -1px;
+    border-top: 1px solid gray;
+    line-height: 28px;
+    background: #aaa;
+}
+
+a.ka-Button img {
+    position: relative;
+    top: 3px;
+    left: -3px;
+}
+
+a.ka-Button-red, a.ka-Button-red:link {
+    color: white;
+    background: #b23935;
+}
+
+a.ka-Button-red:hover {
+    color: #eee;
+}
+
+a.ka-Button-red:active {
+    background: #af1715;
+}
+
+.ka-admin aa.ka-Button-blue,
+.ka-admin aa.ka-Button-blue:link,
+a.ka-Button-blue,
+a.ka-Button-blue:link {
+    color: white;
+    background: #22638E;
+    border: 1px solid #265F85;
+}
+
+a.ka-Button-blue:hover {
+    color: #eee;
+    background: #205A81;
+}
+
+a.ka-Button-blue:active {
+    background: #154A66;
+}
+
+.ka-admin aa.ka-Button-deactivate,
+.ka-admin aa.ka-Button-deactivate:link,
+aa.ka-Button-deactivate,
+aa.ka-Button-deactivate:link,
+aa.ka-Button-deactivate:active,
+aa.ka-Button-deactivate:hover {
+    cursor: default;
+    color: gray;
+    background-color: transparent;
+}
+
+a.ka-Button-loading:before {
+    content: url(../../images/loading.gif?v1);
+}
+
+a.ka-Button-progress {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    background-color: gray;
+}
+
+a.ka-Button-stopLoading-done,
+a.ka-Button-stopLoading-failed {
+}
+
+body .ka-Window-sidebar a.ka-Button-stopLoading-done,
+body .ka-Window-sidebar a.ka-Button-stopLoading-done:hover,
+a.ka-Button-stopLoading-done:hover,
+a.ka-Button-stopLoading-done {
+    background-color: #487E48;
+}
+
+body .ka-Window-sidebar a.ka-Button-stopLoading-failed,
+body .ka-Window-sidebar a.ka-Button-stopLoading-failed:hover,
+a.ka-Button-stopLoading-failed:hover,
+a.ka-Button-stopLoading-failed {
+    background-color: #7E4848;
+}

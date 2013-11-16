@@ -1,0 +1,86 @@
+<config>
+    <bundle>
+        <adminAssets>
+            <asset>@KrynCmsBundle/admin/mootools-core-1.4.5-fixed-memory-leak.js</asset>
+            <asset>@KrynCmsBundle/admin/mootools-more.js</asset>
+            <assets>@KrynCmsBundle/admin/js/mootools-extras/*.js</assets>
+            <asset>@KrynCmsBundle/admin/mowla.min.js</asset>
+
+            <asset>@KrynCmsBundle/admin/js/ka.js</asset>
+            <asset>@KrynCmsBundle/admin/js/ka/AdminInterface.js</asset>
+            <asset>@KrynCmsBundle/admin/js/ka/Button.js</asset>
+            <asset>@KrynCmsBundle/admin/js/ka/Select.js</asset>
+            <asset>@KrynCmsBundle/admin/js/ka/Checkbox.js</asset>
+            <asset>@KrynCmsBundle/admin/js/ka/Base.js</asset>
+
+            <asset>@KrynCmsBundle/admin/js/ka/ObjectTree.js</asset>
+            <asset>@KrynCmsBundle/admin/js/ka/TabGroup.js</asset>
+            <asset>@KrynCmsBundle/admin/js/ka/WindowEdit.js</asset>
+            <asset>@KrynCmsBundle/admin/js/ka/WindowList.js</asset>
+            <asset>@KrynCmsBundle/admin/js/ka/Select.js</asset>
+            <asset>@KrynCmsBundle/admin/js/ka/FieldAbstract.js</asset>
+            <assets>@KrynCmsBundle/admin/js/ka/*.js</assets>
+            <assets>@KrynCmsBundle/admin/js/lib/*.js</assets>
+            <assets>@KrynCmsBundle/admin/js/ka/DashboardWidgets/Base.js</assets>
+            <assets>@KrynCmsBundle/admin/js/ka/DashboardWidgets/*.js</assets>
+
+            <asset>@KrynCmsBundle/admin/js/ka/FieldTypes/Text.js</asset>
+            <asset>@KrynCmsBundle/admin/js/ka/FieldTypes/Object.js</asset>
+            <asset>@KrynCmsBundle/admin/js/ka/FieldTypes/Select.js</asset>
+            <assets>@KrynCmsBundle/admin/js/ka/FieldTypes/*.js</assets>
+            <assets>@KrynCmsBundle/admin/js/ka/LabelTypes/*.js</assets>
+
+            <assets>@KrynCmsBundle/admin/js/ka/ContentTypes/*.js</assets>
+            <assets>@KrynCmsBundle/admin/js/ka/ui/*.js</assets>
+
+            <assets>@KrynCmsBundle/admin/js/extras/*.js</assets>
+            <asset compression="false">@KrynCmsBundle/tinymce/tinymce.dev.js</asset>
+
+            <asset>@KrynCmsBundle/admin/icons/style.css</asset>
+            <asset>@KrynCmsBundle/codemirror/lib/codemirror.js</asset>
+            <asset>@KrynCmsBundle/codemirror/addon/mode/loadmode.js</asset>
+            <asset>@KrynCmsBundle/codemirror/lib/codemirror.css</asset>
+
+            <asset>@KrynCmsBundle/font/SourceCodePro/Light/fonts.css</asset>
+            <asset>@KrynCmsBundle/font/SourceCodePro/Regular/fonts.css</asset>
+            <asset>@KrynCmsBundle/font/SourceSansPro/Light/fonts.css</asset>
+            <asset>@KrynCmsBundle/font/SourceSansPro/Regular/fonts.css</asset>
+            <asset>@KrynCmsBundle/font/SourceSansPro/Semibold/fonts.css</asset>
+            <assets>@KrynCmsBundle/admin/css/ai.css</assets>
+            <assets>@KrynCmsBundle/admin/css/ka/*.css</assets>
+            <assets>@KrynCmsBundle/admin/css/ka/ui/*.css</assets>
+        </adminAssets>
+        <streams>
+            <stream id="load">
+                <class>Admin\Controller\DashboardWidgets</class>
+                <method>load</method>
+            </stream>
+
+            <stream id="space">
+                <class>Admin\Controller\DashboardWidgets</class>
+                <method>space</method>
+            </stream>
+
+            <stream id="uptime">
+                <class>Admin\Controller\DashboardWidgets</class>
+                <method>uptime</method>
+            </stream>
+
+            <stream id="analytics">
+                <class>Admin\Controller\DashboardWidgets</class>
+                <method>analytics</method>
+            </stream>
+
+            <stream id="latency">
+                <class>Admin\Controller\DashboardWidgets</class>
+                <method>latency</method>
+            </stream>
+
+            <stream id="latencies">
+                <class>Admin\Controller\DashboardWidgets</class>
+                <method>latencies</method>
+            </stream>
+
+        </streams>
+    </bundle>
+</config>

@@ -1,0 +1,73 @@
+parameters:
+     kryn.core.class: Kryn\CmsBundle\Core
+     kryn.cache.fast.factory.class: Kryn\CmsBundle\Cache\Factory
+     kryn.cache.fast.class: Kryn\CmsBundle\Cache\AbstractCache
+
+     kryn.page.response.class: Kryn\CmsBundle\PageResponse
+
+     kryn.filesystem.local.class: Flysystem\Filesystem
+     kryn.filesystem.web.class: Kryn\CmsBundle\Filesystem\WebFilesystem
+     kryn.filesystem.adapter.local.class: Kryn\CmsBundle\Filesystem\Adapter\Local
+     kryn.filesystem.local.mode: 0644
+
+     kryn.configuration.class: Kryn\CmsBundle\Configuration\SystemConfig
+     kryn.configuration.database.class: Kryn\CmsBundle\Configuration\Database
+
+     kryn.configuration.database.connection.main.class: Kryn\CmsBundle\Configuration\Connection
+
+services:
+     kryn.cms:
+         class: %kryn.core.class%
+         arguments: ["@service_container"]
+
+     kryn.cache.fast:
+         class: %kryn.cache.fast.class%
+         factory_class: %kryn.cache.fast.factory.class%
+         factory_method: createFast
+         arguments: [@event_dispatcher]
+
+     kryn.page.response:
+         class: %kryn.page.response.class%
+         calls:
+            - [setKrynCore, ["@kryn.cms"]]
+
+     kryn.configuration:
+         class: %kryn.configuration.class%
+         calls:
+            - [setDatabase, ["@kryn.configuration.database"]]
+
+     kryn.configuration.database:
+         class: %kryn.configuration.database.class%
+         calls:
+            - [addConnection, ["@kryn.configuration.database.connection.main"]]
+
+     kryn.configuration.database.connection.main:
+         class: %kryn.configuration.database.connection.main.class%
+         calls:
+            - [setType, ["%database_driver%"]]
+            - [setServer, ["%database_host%"]]
+            - [setPort, ["%database_port%"]]
+            - [setName, ["%database_name%"]]
+            - [setUsername, ["%database_user%"]]
+            - [setPassword, ["%database_password%"]]
+
+     kryn.filesystem.adapter.local:
+         class: %kryn.filesystem.adapter.local.class%
+         arguments: ["%kernel.root_dir%", "%kryn.filesystem.local.mode%"]
+     kryn.filesystem.adapter.cache:
+         class: %kryn.filesystem.adapter.local.class%
+         arguments: ["%kernel.cache_dir%", "%kryn.filesystem.local.mode%"]
+
+     kryn.filesystem.local:
+         class: %kryn.filesystem.local.class%
+         arguments: ["@kryn.filesystem.adapter.local"]
+
+     kryn.filesystem.cache:
+         class: %kryn.filesystem.local.class%
+         arguments: ["@kryn.filesystem.adapter.cache"]
+
+     kryn.filesystem.web:
+         class: %kryn.filesystem.web.class%
+         arguments: ["@kryn.cms"]
+
+     # todo, add filesystem.web

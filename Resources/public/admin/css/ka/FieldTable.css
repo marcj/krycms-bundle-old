@@ -1,0 +1,46 @@
+.ka-fieldTable-hide-definition .ka-fieldTable-definition {
+    display: none;
+}
+
+.ka-fieldTable-hide-definition .ka-fieldTable-key-info {
+    display: none;
+}
+
+.ka-fieldTable-showDefinition {
+    position: absolute;
+    top: 6px;
+    left: 220px;
+    display: none;
+}
+
+.ka-fieldTable-hide-definition .ka-fieldTable-showDefinition {
+    display: block;
+}
+
+.ka-fieldTable-showDefinition-show .ka-fieldTable-definition {
+    display: block;
+}
+
+.ka-fieldTable-showDefinition-show-sub > .ka-fieldTable-definition {
+    display: block;
+}
+
+.ka-fieldTable-children .ka-fieldTable-item {
+    border: 1px solid silver;
+    margin: 4px;
+}
+
+.ka-fieldTable-item {
+    background-color: #E8E8E8;
+    padding-bottom: 5px;
+}
+
+.ka-fieldTable-item-header {
+    border-bottom: 1px solid silver;
+    background-color: #E1E1E1;
+    padding: 3px;
+}
+
+.ka-fieldTable-children {
+    padding-left: 20px;
+}

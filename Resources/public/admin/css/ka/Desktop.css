@@ -1,0 +1,54 @@
+.ka-desktop-icon {
+    position: absolute;
+    max-width: 100px;
+    height: 55px;
+    text-align: center;
+}
+
+.ka-desktop-icon:before {
+    color: white;
+    font-size: 36px;
+    padding-top: 5px;
+}
+
+.ka-desktop-icon-title {
+    padding: 2px;
+    color: white;
+    text-shadow: 0px 0px 2px black;
+    font-size: 11px;
+    cursor: default;
+    white-space: normal;
+    font-weight: bold;
+}
+
+.ka-desktop-icon:hover .ka-desktop-icon-title {
+    color: #eee;
+}
+
+.ka-desktop-icon-active .ka-desktop-icon-title {
+    background-color: #aaa;
+    -moz-border-radius: 5px;
+}
+
+.ka-desktop-context {
+    position: absolute;
+    padding: 2px;
+    border: 1px solid #ccc;
+    border-right: 1px solid #aaa;
+    border-bottom: 1px solid #aaa;
+    background-color: #f0f0f0;
+    -moz-border-radius: 5px;
+    box-shadow: 1px 1px 2px #ccc;
+    -moz-box-shadow: 1px 1px 2px #ccc;
+}
+
+.ka-desktop-context a,
+.ka-desktop-context a:link {
+    display: block;
+    padding: 3px 40px 3px 15px;
+}
+
+.ka-desktop-context a:hover {
+    background-color: #ddd;
+    cursor: default;
+}

@@ -1,0 +1,109 @@
+.ka-Table,
+.ka-Table-head,
+.ka-Table-body {
+    width: 100%;
+    background-color: #f7f7f7;
+}
+
+.ka-Table-valign-center td,
+.ka-Table-valign-middle td {
+    vertical-align: middle;
+}
+
+
+.ka-Table-valign-bottom td {
+    vertical-align: bottom;
+}
+
+
+.ka-Table-absolute .ka-Table-body,
+.ka-Table-absolute .ka-Table-head {
+    border: 0;
+}
+
+.ka-Table {
+    border: 1px solid #dcdcdc;
+    border-top: 0;
+    border-bottom: 0;
+}
+
+.ka-Table-absolute {
+    border: 0;
+}
+
+.ka-Table-head {
+    border-bottom: 0;
+    table-layout: fixed;
+}
+
+.ka-Table-absolute {
+    position: absolute;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    top: 0px;
+}
+
+.ka-Table > thead > tr > th,
+.ka-Table-head th,
+.ka-Table > tbody > tr > td,
+.ka-Table-body td {
+    border-bottom: 1px solid #E9E9E9;
+}
+
+.ka-Table > thead > tr > th,
+.ka-Table-head > tr > th {
+    font-weight: normal;
+    font-size: 14px;
+    text-align: left;
+    padding: 5px;
+    color: #555;
+    border-top: 1px solid #ececec;
+    border-bottom: 1px solid #d6d6d6;
+    line-height: 20px;
+    background: #f2f2f2;
+}
+
+.ka-Table-absolute tr > th {
+    border-top: 0;
+}
+
+.ka-Table-head-container {
+    position: absolute;
+    height: 31px;
+    top: 0px;
+    left: 0px;
+    right: 16px;
+}
+
+.ka-Table-body-container {
+    position: absolute;
+    left: 0px;
+    top: 31px;
+    right: 0px;
+    bottom: 0px;
+}
+
+.ka-Table > tbody  > tr > td,
+.ka-Table-body > tr > td {
+    padding: 5px;
+    cursor: default;
+    line-height: 18px;
+}
+
+.ka-Table tr.active > td,
+.ka-Table tr.active:hover > td,
+.ka-Table-body tr.active > td,
+.ka-Table-body tr.active:hover > td {
+    background-color: #22638e;
+    color: white;
+}
+
+.ka-Table tr.active > td a,
+.ka-Table-body tr.active a:link {
+    color: white;
+}
+
+.ka-Table-hover tr:hover > td {
+    background-color: rgba(243, 243, 243, 0.48);
+}
