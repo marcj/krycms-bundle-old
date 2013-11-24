@@ -14,6 +14,8 @@ use Kryn\CmsBundle\Core;
 //use Kryn\CmsBundle\Utils;
 use Kryn\CmsBundle\Model\Session;
 use Kryn\CmsBundle\Model\User;
+use Kryn\CmsBundle\Model\UserGroup;
+use Kryn\CmsBundle\Model\UserQuery;
 
 /**
  * Client class.
@@ -279,7 +281,7 @@ abstract class ClientAbstract
         $storage->setClass('\Core\Client\StoreDatabase');
         $clientConfig->setSessionStorage($storage);
 
-        $krynUsers = new \Core\Client\KrynUsers($clientConfig);
+        $krynUsers = new KrynUsers($this->getKrynCore(), $clientConfig);
 
         $state = $krynUsers->checkCredentials($login, $password);
 
@@ -364,13 +366,10 @@ abstract class ClientAbstract
             foreach ($this->config['defaultGroup'] as $item) {
 
                 if (preg_match('/' . $item['login'] . '/', $user['username']) == 1) {
-                    dbInsert(
-                        'system_user_group',
-                        array(
-                            'group_id' => $item['group'],
-                            'user_id' => $user['id']
-                        )
-                    );
+                    $userGroup = new UserGroup();
+                    $userGroup->setGroupId($item['group']);
+                    $userGroup->setUserId($item['id']);
+                    $userGroup->save();
                 }
             }
         }
@@ -382,7 +381,7 @@ abstract class ClientAbstract
      *
      * @param int $userId
      *
-     * @return \Core\Client\ClientAbstract $this
+     * @return ClientAbstract $this
      * @throws \Exception
      */
     public function setUser($userId = null)
@@ -392,7 +391,7 @@ abstract class ClientAbstract
         }
 
         if ($userId !== null) {
-            $user = \Users\Models\UserQuery::create()->findPk($userId);
+            $user = UserQuery::create()->findPk($userId);
 
             if (!$user) {
                 throw new \Exception('User not found ' . $userId);
@@ -491,7 +490,7 @@ abstract class ClientAbstract
      *
      * @param $id
      *
-     * @return bool|\Users\Models\Session Returns false, if something went wrong otherwise a Session object.
+     * @return bool|\Kryn\CmsBundle\Model\Session Returns false, if something went wrong otherwise a Session object.
      * @throws \Exception
      */
     public function createSessionById($id)
@@ -509,7 +508,7 @@ abstract class ClientAbstract
             return false;
         }
 
-        $session = new \Users\Models\Session();
+        $session = new Session();
         $session->setId($id)
             ->setTime(time())
             ->setPage(Kryn::getRequestedPath(true))
@@ -640,7 +639,7 @@ abstract class ClientAbstract
      *
      * @param $token
      *
-     * @return \Users\Models\Session false if the session does not exist, and Session object, if found.
+     * @return \Kryn\CmsBundle\Model\Session false if the session does not exist, and Session object, if found.
      */
     public function loadSessionStore($token)
     {
@@ -703,9 +702,9 @@ abstract class ClientAbstract
     /**
      * Generates a salt for a hashed password
      *
-     * @param  int $pLenth
+     * @param  int $length
      *
-     * @return tring ascii
+     * @return string
      */
     public static function getSalt($length = 64)
     {
@@ -722,14 +721,16 @@ abstract class ClientAbstract
      * Injects the passwd hash from config.php into $string
      *
      * @param  string $string
+     * @param  Core $krynCore
      *
-     * @return binary
+     * @return string
      */
-    public static function injectConfigPasswdHash($string)
+    public static function injectConfigPasswdHash($string, Core $krynCore)
     {
         $result = '';
         $len = mb_strlen($string);
-        $clen = mb_strlen(Kryn::$config['passwdHashKey']);
+        $hashKey = $krynCore->getSystemConfig()->getPasswordHashKey();
+        $clen = mb_strlen($hashKey);
 
         for ($i = 0; $i < $len; $i++) {
             $s = hexdec(bin2hex(mb_substr($string, $i, 1)));
@@ -737,7 +738,7 @@ abstract class ClientAbstract
             while ($j > $clen) {
                 $j -= $clen + 1;
             } //CR
-            $c = hexdec(bin2hex(mb_substr(Kryn::$config['passwdHashKey'], $j, 1)));
+            $c = hexdec(bin2hex(mb_substr($hashKey, $j, 1)));
             $result .= pack("H*", $s + $c);
         }
 
@@ -746,9 +747,8 @@ abstract class ClientAbstract
 
     /**
      * Returns a hashed password with salt.
-     *
      */
-    public static function getHashedPassword($password, $salt)
+    public static function getHashedPassword($password, $salt, Core $krynCore)
     {
         $hash = hash('sha512', ($password . $salt) . $salt) . hash(
                 'sha512',
@@ -756,7 +756,7 @@ abstract class ClientAbstract
             );
 
         for ($i = 0; $i < 201; $i++) {
-            $hash = self::injectConfigPasswdHash($hash);
+            $hash = self::injectConfigPasswdHash($hash, $krynCore);
             $hash = hash(
                     'sha512',
                     $i % 2 ?
@@ -771,7 +771,7 @@ abstract class ClientAbstract
     /**
      * @param  string $loginTrigger
      *
-     * @return Auth   $this
+     * @return ClientAbstract   $this
      */
     public function setLoginTrigger($loginTrigger)
     {
@@ -791,7 +791,7 @@ abstract class ClientAbstract
     /**
      * @param  string $logoutTrigger
      *
-     * @return \Core\Client\ClientAbstract $this
+     * @return ClientAbstract $this
      */
     public function setLogoutTrigger($logoutTrigger)
     {
@@ -882,7 +882,7 @@ abstract class ClientAbstract
     }
 
     /**
-     * @return \Core\Cache\Controller
+     * @return SessionStorageInterface
      */
     public function getStore()
     {
@@ -890,7 +890,7 @@ abstract class ClientAbstract
     }
 
     /**
-     * @param \Core\Config\Client $clientConfig
+     * @param Client $clientConfig
      */
     public function setClientConfig($clientConfig)
     {
@@ -898,7 +898,7 @@ abstract class ClientAbstract
     }
 
     /**
-     * @return \Core\Config\Client
+     * @return Client
      */
     public function getClientConfig()
     {

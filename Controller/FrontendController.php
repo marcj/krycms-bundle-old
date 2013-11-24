@@ -6,6 +6,8 @@ use Kryn\CmsBundle\Controller;
 use Kryn\CmsBundle\Model\Base\DomainQuery;
 use Kryn\CmsBundle\Model\NodeQuery;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\EventDispatcher\GenericEvent;
+use Symfony\Component\HttpFoundation\Response;
 
 class FrontendController extends Controller
 {
@@ -23,7 +25,12 @@ class FrontendController extends Controller
         }
 
         $pageResponse = $this->getKrynCore()->getPageResponse();
-        return $pageResponse;
+
+        $page = $this->getKrynCore()->getCurrentPage();
+        $pageResponse->setTitle($page->getTitle());
+        $pageResponse->renderContent();
+
+        return $pageResponse; //new Response('<body>ho</body>');
     }
 
     protected function isEditMode()
@@ -88,16 +95,18 @@ class FrontendController extends Controller
             $hostname = $request->get('_kryn_domain') ? : $request->getHost();
         }
 
+        $domain = null;
         $possibleLanguage = $this->getPossibleLanguage();
         $hostnameWithLanguage = $hostname . '/' . $possibleLanguage;
 
         $cachedDomains = $this->getKrynCore()->getDistributedCache('core/domains');
 
-        if ($cachedDomains) {
+        if (false && $cachedDomains) {
+            var_dump($cachedDomains);
             $cachedDomains = \unserialize($cachedDomains);
         }
 
-        if (!$cachedDomains) {
+        if (!is_array($cachedDomains)) {
 
             $cachedDomains = array();
             $domains = DomainQuery::create()->find();
@@ -133,9 +142,11 @@ class FrontendController extends Controller
             $this->getKrynCore()->setDistributedCache('core/domains', $created);
 
         }
+
         //search redirect
-        if ($redirectToDomain = $cachedDomains['!redirects'][$hostnameWithLanguage] ||
-            $redirectToDomain = $cachedDomains['!redirects'][$hostname]
+        if (isset($cachedDomains['!redirects'])
+            && (isset($cachedDomains['!redirects'][$hostnameWithLanguage]) && $redirectToDomain = $cachedDomains['!redirects'][$hostnameWithLanguage])
+            || (isset($cachedDomains['!redirects'][$hostname]) && $redirectToDomain = $cachedDomains['!redirects'][$hostname])
         ) {
             $domain = $cachedDomains[$redirectToDomain];
             $dispatcher->dispatch('core/domain-redirect', new GenericEvent($domain));
@@ -143,12 +154,13 @@ class FrontendController extends Controller
         }
 
         //search alias
-        if (($aliasHostname = $cachedDomains['!aliases'][$hostnameWithLanguage]) ||
-            ($aliasHostname = $cachedDomains['!aliases'][$hostname])
+        if (isset($cachedDomains['!aliases']) &&
+            (($aliasHostname = $cachedDomains['!aliases'][$hostnameWithLanguage]) ||
+            ($aliasHostname = $cachedDomains['!aliases'][$hostname]))
         ) {
             $domain = $cachedDomains[$aliasHostname];
             $hostname = $aliasHostname;
-        } else {
+        } else if (isset($cachedDomains[$hostname])) {
             $domain = $cachedDomains[$hostname];
         }
 
@@ -157,6 +169,7 @@ class FrontendController extends Controller
             return;
         }
 
+        $this->getKrynCore()->setCurrentDomain($domain);
         $domain->setRealDomain($hostname);
 
         return $domain;
@@ -166,8 +179,8 @@ class FrontendController extends Controller
     {
         $url = self::getRequest()->getPathInfo();
 
-        $domain = Kryn::$domain->getId();
-        $urls = self::getCachedUrlToPage($domain);
+        $domain = $this->getKrynCore()->getCurrentDomain()->getId();
+        $urls = $this->getKrynCore()->getUtils()->getCachedUrlToPage($domain);
 
         //extract extra url attributes
         $found = $end = false;
@@ -176,16 +189,17 @@ class FrontendController extends Controller
 
         do {
 
-            $id = $urls[$possibleUrl];
+            $id = isset($urls[$possibleUrl]) ? $urls[$possibleUrl] : 0;
 
             if ($id > 0 || $possibleUrl == '') {
                 $found = true;
             } elseif (!$found) {
-                $id = Kryn::$urls['alias'][$possibleUrl];
+                $id = isset($urls['alias']) && isset($urls['alias'][$possibleUrl]) ? $urls['alias'][$possibleUrl] : 0;
                 if ($id > 0) {
                     $found = true;
                     //we found a alias
-                    Kryn::redirectToPage($id);
+                    die('redirect to ' . $id);
+                    //Kryn::redirectToPage($id);
                 } else {
                     $possibleUrl = $next;
                 }
@@ -238,68 +252,24 @@ class FrontendController extends Controller
         }
         $url = $possibleUrl;
 
-        Kryn::$isStartpage = false;
+//        Kryn::$isStartpage = false;
 
         if ($url == '') {
-            $pageId = Kryn::$domain->getStartnodeId();
+            $pageId = $this->getKrynCore()->getCurrentDomain()->getStartnodeId();
 
             if (!$pageId > 0) {
-                self::getEventDispatcher()->dispatch('core/domain-no-start-page');
+                $this->getKrynCore()->getEventDispatcher()->dispatch('core/domain-no-start-page');
             }
 
-            Kryn::$isStartpage = true;
+//            Kryn::$isStartpage = true;
         } else {
             $pageId = $id;
         }
 
+        $page = NodeQuery::create()
+            ->findOneById($pageId);
+
+        $this->getKrynCore()->setCurrentPage($page);
         return $pageId;
     }
-
-    public function &getCachedUrlToPage($domainId)
-    {
-
-        $cacheKey = 'core/urls/' . $domainId;
-        $urls = self::getDistributedCache($cacheKey);
-
-        if (!$urls) {
-
-            $nodes = NodeQuery::create()
-                ->select(array('id', 'urn', 'lvl', 'type'))
-                ->filterByDomainId($domainId)
-                ->orderByBranch()
-                ->find();
-
-            //build urls array
-            $urls = array();
-            $level = array();
-
-            foreach ($nodes as $node) {
-                if ($node['lvl'] == 0) {
-                    continue;
-                } //root
-                if ($node['type'] == 3) {
-                    continue;
-                } //deposit
-
-                if ($node['type'] == 2 || $node['urn'] == '') {
-                    //folder or empty url
-                    $level[$node['lvl'] + 0] = ($level[$node['lvl'] - 1]) ? : '';
-                    continue;
-                }
-
-                $url = ($level[$node['lvl'] - 1]) ? : '';
-                $url .= '/' . $node['urn'];
-
-                $level[$node['lvl'] + 0] = $url;
-
-                $urls[$url] = $node['id'];
-            }
-
-            self::setDistributedCache($cacheKey, $urls);
-
-        }
-
-        return $urls;
-    }
-
 }

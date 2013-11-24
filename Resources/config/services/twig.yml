@@ -1,0 +1,42 @@
+services:
+     kryn.twig.extension.navigation:
+         class: Kryn\CmsBundle\Twig\NavigationExtension
+         arguments: ["@kryn.cms"]
+         tags:
+            - { name: twig.extension }
+
+     kryn.twig.extension.nodeIsActive:
+         class: Kryn\CmsBundle\Twig\NodeIsActiveExtension
+         arguments: ["@kryn.cms"]
+         tags:
+            - { name: twig.extension }
+
+     kryn.twig.extension.nodeUrl:
+         class: Kryn\CmsBundle\Twig\NodeUrlExtension
+         arguments: ["@kryn.cms"]
+         tags:
+            - { name: twig.extension }
+
+     kryn.twig.extension.addCss:
+         class: Kryn\CmsBundle\Twig\AddCssExtension
+         arguments: ["@kryn.cms"]
+         tags:
+            - { name: twig.extension }
+
+     kryn.twig.extension.resizeImage:
+         class: Kryn\CmsBundle\Twig\ResizeImageExtension
+         arguments: ["@kryn.cms"]
+         tags:
+            - { name: twig.extension }
+
+     kryn.twig.extension.breadcrumb:
+         class: Kryn\CmsBundle\Twig\BreadcrumbExtension
+         arguments: ["@kryn.cms"]
+         tags:
+            - { name: twig.extension }
+
+     kryn.twig.extension.contentSlot:
+         class: Kryn\CmsBundle\Twig\ContentSlotExtension
+         arguments: ["@kryn.cms"]
+         tags:
+            - { name: twig.extension }

@@ -8,11 +8,24 @@ use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 class KrynCmsBundle extends Bundle
 {
+    /**
+     * @var UniversalClassLoader
+     */
+    protected $additionalLoader;
+
     public function boot()
     {
         parent::boot();
-        $loader = new UniversalClassLoader();
-        $loader->registerNamespaceFallback($this->container->get('kernel')->getCacheDir().'/propel-classes/');
-        $loader->register();
+        $this->additionalLoader = new UniversalClassLoader();
+        $this->additionalLoader->registerNamespaceFallback($this->container->get('kernel')->getCacheDir().'/propel-classes/');
+        $this->additionalLoader->register();
+    }
+
+    /**
+     * Shutdowns the Bundle.
+     */
+    public function shutdown()
+    {
+        unset($this->additionalLoader);
     }
 }

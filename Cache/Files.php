@@ -2,9 +2,6 @@
 
 namespace Kryn\CmsBundle\Cache;
 
-use \Kryn\CmsBundle\Filesystem\Adapter\Local;
-use Flysystem\Filesystem;
-
 class Files extends AbstractCache
 {
     private $path;
@@ -18,16 +15,19 @@ class Files extends AbstractCache
      */
     private $useJson = false;
 
-    private $falLayer;
-
     /**
      * {@inheritdoc}
      */
     public function setup($config)
     {
+        if (!isset($config['path'])) {
+            $config['path'] = $this->cacheConfig->getKrynCore()->getKernel()->getCacheDir() . '/object-cache/';
+        }
         $this->path = $config['path'];
 
-        if (AbstractCache::getFastestCacheClass() == '\Core\Cache\Files') {
+        $fastestCache = AbstractCache::getFastestCacheClass();
+        if ($fastestCache->getClass() == '\Kryn\CmsBundle\Cache\Files') {
+            //we've no opcode cacher, so use JSON, because it's faster
             $this->useJson = true;
         }
 
@@ -38,8 +38,6 @@ class Files extends AbstractCache
         if (isset($config['prefix'])) {
             $this->prefix = $config['prefix'];
         }
-
-        $this->falLayer = new Local('', ['root' => $config['path']]);
     }
 
     /**
@@ -47,10 +45,11 @@ class Files extends AbstractCache
      */
     public function testConfig($config)
     {
-        $adapter = new Local($config['path']);
-        $this->falLayer = new Filesystem($adapter);
+        if (!isset($config['path'])) {
+            $config['path'] = $this->cacheConfig->getKrynCore()->getKernel()->getCacheDir() . '/object-cache/';
+        }
 
-        if (!$this->falLayer->createDir('.')) {
+        if (!file_exists($config['path']) && !mkdir($config['path'])) {
             throw new \Exception('Can not create cache folder: ' . $config['path']);
         }
 
@@ -64,12 +63,9 @@ class Files extends AbstractCache
 
     public function getPath($key)
     {
-        return $this->path . $this->prefix . urlencode($key) . ($this->useJson ? '.json' : '.php');
-    }
+        $dirs = str_split(md5($key), 4);
 
-    public function getInternalPath($key)
-    {
-        return $this->prefix . urlencode($key) . ($this->useJson ? '.json' : '.php');
+        return $this->path . $this->prefix . implode('/', $dirs)  .'/'. urlencode($key) . ($this->useJson ? '.json' : '.php');
     }
 
     /**
@@ -82,6 +78,7 @@ class Files extends AbstractCache
         if (!file_exists($path)) {
             return false;
         }
+
         $h = fopen($path, 'r');
 
         $maxTries = 400; //wait max. 2 seconds, otherwise force it
@@ -112,7 +109,9 @@ class Files extends AbstractCache
     protected function doSet($key, $value, $timeout = 0)
     {
         $path = $this->getPath($key);
-        $this->falLayer->createFile($this->getInternalPath($key));
+        if (!is_dir(dirname($path))) {
+            mkdir(dirname($path), 0777, true);
+        }
 
         if (!$this->useJson) {
             $value = '<' . "?php \nreturn " . var_export($value, true) . ";\n";

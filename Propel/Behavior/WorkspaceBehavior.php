@@ -39,7 +39,7 @@ class WorkspaceBehavior extends Behavior
      *
      * @var callable
      */
-    private $workspaceGetter = '\\Core\\WorkspaceManager::getCurrent';
+    private $workspaceGetter = '\\Kryn\\CmsBundle\\Propel\\WorkspaceManager::getCurrent';
 
     /**
      * @param callable $workspaceGetter

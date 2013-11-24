@@ -19,7 +19,7 @@ use Symfony\Component\Console\Output\Output;
 use Propel\Generator\Config\XmlToArrayConverter;
 use Propel\Generator\Config\ArrayToPhpConverter;
 
-class BuildCommand extends AbstractCommand
+class SchemaUpdateCommand extends AbstractCommand
 {
     const DEFAULT_INPUT_DIRECTORY   = '.';
     const DEFAULT_INPUT_FILE        = 'runtime-conf.xml';
@@ -33,8 +33,8 @@ class BuildCommand extends AbstractCommand
     {
         parent::configure();
         $this
-            ->setName('kryncms:models:build')
-            ->setDescription('Builds all propel models in kryn bundles.')
+            ->setName('kryncms:schema:update')
+            ->setDescription('Updates the schema of the configured database.')
         ;
     }
 
@@ -45,6 +45,6 @@ class BuildCommand extends AbstractCommand
     {
         $propelHelper = new PropelHelper($this->getKrynCore());
 
-        echo $propelHelper->generateClasses();
+        echo $propelHelper->updateSchema()."\n";
     }
 }

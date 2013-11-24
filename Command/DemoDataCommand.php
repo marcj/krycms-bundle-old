@@ -12,6 +12,7 @@ namespace Kryn\CmsBundle\Command;
 
 use Kryn\CmsBundle\Propel\PropelHelper;
 use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -19,7 +20,7 @@ use Symfony\Component\Console\Output\Output;
 use Propel\Generator\Config\XmlToArrayConverter;
 use Propel\Generator\Config\ArrayToPhpConverter;
 
-class BuildCommand extends AbstractCommand
+class DemoDataCommand extends AbstractCommand
 {
     const DEFAULT_INPUT_DIRECTORY   = '.';
     const DEFAULT_INPUT_FILE        = 'runtime-conf.xml';
@@ -33,8 +34,10 @@ class BuildCommand extends AbstractCommand
     {
         parent::configure();
         $this
-            ->setName('kryncms:models:build')
-            ->setDescription('Builds all propel models in kryn bundles.')
+            ->setName('kryncms:install:demo')
+            ->setDescription('Installs demo data.')
+            ->addArgument('hostname', InputArgument::REQUIRED, 'The hostname of the domain we should add. Example: 127.0.0.1')
+            ->addArgument('path', InputArgument::REQUIRED, 'The path of the domain we should add. Example: /kryn-1.0/ or just /')
         ;
     }
 
@@ -43,8 +46,21 @@ class BuildCommand extends AbstractCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $propelHelper = new PropelHelper($this->getKrynCore());
+        define('KRYN_MANAGER', true);
+        $krynCore = $this->getKrynCore();
 
-        echo $propelHelper->generateClasses();
+        $packageManager = new \Kryn\CmsBundle\PackageManager();
+        $packageManager->setDomain($input->getArgument('hostname'));
+        $packageManager->setPath($input->getArgument('path'));
+
+        $packageManager->installDatabase($krynCore);
+
+//        foreach ($krynCore->getKernel()->getBundles() as $bundle) {
+//            $class = $bundle->getNamespace() . '\\PackageManager';
+//            if (class_exists($class)) {
+//                $packageManager = new $class;
+//                $packageManager->installDatabase($krynCore);
+//            }
+//        }
     }
 }

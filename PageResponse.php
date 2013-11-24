@@ -81,7 +81,7 @@ class PageResponse extends Response
     /**
      * @var bool
      */
-    private $resourceCompression = true;
+    private $resourceCompression = false;
 
     /**
      * Constructor
@@ -241,6 +241,15 @@ class PageResponse extends Response
     }
 
     /**
+     *
+     */
+    public function renderContent()
+    {
+        $html = $this->buildHtml();
+        $this->setContent($html);
+    }
+
+    /**
      * Builds the HTML skeleton, sends all HTTP headers and the HTTP body.
      *
      * This handles the SearchEngine stuff as well.
@@ -250,17 +259,12 @@ class PageResponse extends Response
     public function send()
     {
         $this->prepare($this->getKrynCore()->getRequest());
-
         $this->setCharset('utf-8');
-
-        $html = $this->buildHtml();
-        $this->setContent($html);
-
-        $this->getKrynCore()->getEventDispatcher()->dispatch('core.page-response-send-pre');
+        $this->getKrynCore()->getEventDispatcher()->dispatch('core/page-response-send-pre');
 
         //search engine, todo
         if (false && Kryn::$disableSearchEngine == false) {
-            SearchEngine::createPageIndex($html);
+            SearchEngine::createPageIndex($this->getContent());
         }
 
         return parent::send();
@@ -369,35 +373,51 @@ class PageResponse extends Response
             return '';
         }
 
-        Kryn::$themeProperties = array();
+//        Kryn::$themeProperties = array();
         $propertyPath = '';
 
-        $layout = Kryn::$page->getLayout();
-        if (false !== ($pos = strpos($layout, '/'))) {
-            $layout = substr($layout, 0, $pos);
+        $layout = $layoutPath = $page->getLayout();
+        if (false !== ($pos = strpos($layoutPath, '/'))) {
+            $layout = substr($layoutPath, 0, $pos);
+            $layoutPath = substr($layoutPath, $pos);
         }
-        $layout = explode('.', $layout);
-        $bundleName = Kryn::getBundleName($layout[0]);
+        $layoutSplitted = explode('.', $layout);
+        $bundleName = substr($layoutSplitted[0], 1);
 
-        if ($config = Kryn::getConfig($bundleName)) {
-            $theme = $config->getTheme($layout[1]);
-            if ($theme) {
-                $propertyPath = '@' . $bundleName . '/' . $theme->getId();
-            }
+        try {
+            $layoutBundle = $this->getKrynCore()->getKernel()->getBundle($bundleName);
+        } catch (\Exception $e) {
+            throw new \LogicException(sprintf(
+                'Could not found bundle `%s` for layout `%s`.',
+                $bundleName,
+                $layoutPath
+            ), 0, $e);
+        }
+
+        $bundleConfig = $this->getKrynCore()->getConfig($layoutBundle->getName());
+
+        $theme = $bundleConfig->getTheme($layoutSplitted[1]);
+        if ($theme) {
+            $propertyPath = '@' . $bundleName . '/' . $theme->getId();
         }
 
         if ($propertyPath) {
-            if ($themeProperties = kryn::$domain->getThemeProperties()) {
-                Kryn::$themeProperties = $themeProperties->getByPath($propertyPath);
-            }
+//            if ($themeProperties = kryn::$domain->getThemeProperties()) {
+//                Kryn::$themeProperties = $themeProperties->getByPath($propertyPath);
+//            }
         }
 
-        $layout = $page->getLayout();
+        $layoutPath = str_replace('/', ':', $layoutPath);
 
-        return Kryn::getInstance()->renderView(
-            $layout,
+        $template = $this->getKrynCore()->getTemplating();
+
+        PageController::setCurrentRenderPage($page->getId());
+
+        return $template->render(
+            $bundleName . ':' . $layoutPath,
             array(
-                'themeProperties' => Kryn::$themeProperties
+                'baseUrl' => $this->getBaseHref(),
+                'themeProperties' => [] //Kryn::$themeProperties
             )
         );
     }
@@ -740,7 +760,7 @@ class PageResponse extends Response
                     if ($css['path']) {
                         if (false !== strpos($css['path'], "://")) {
                             $result .= sprintf(
-                                '<link rel="stylesheet" type="text/css" href="%s" %s',
+                                PHP_EOL.'    <link rel="stylesheet" type="text/css" href="%s" %s',
                                 $css['path'],
                                 $this->getTagEndChar()
                             );
@@ -749,7 +769,7 @@ class PageResponse extends Response
                         }
                     } else {
                         $result .= sprintf(
-                            '<style type="text/css">' . chr(10) . '%s' . chr(10) . '</style>' . chr(10),
+                            PHP_EOL.'    <style type="text/css">' . chr(10) . '%s' . chr(10) . '</style>' . chr(10),
                             $css['content']
                         );
                     }
@@ -767,7 +787,7 @@ class PageResponse extends Response
                 if ($css['path']) {
                     if (false !== strpos($css['path'], "://")) {
                         $result .= sprintf(
-                            '<link rel="stylesheet" type="text/css" href="%s" %s',
+                            PHP_EOL.'    <link rel="stylesheet" type="text/css" href="%s" %s',
                             $css['path'],
                             $this->getTagEndChar()
                         );
@@ -778,7 +798,7 @@ class PageResponse extends Response
                         $modifiedTime = file_exists($file) ? filemtime($file) : '';
 
                         $result .= sprintf(
-                            '<link rel="stylesheet" type="%s" href="%s" %s',
+                            PHP_EOL.'    <link rel="stylesheet" type="%s" href="%s" %s',
                             $css['type'],
                             $public . ($modifiedTime ? '?c=' . $modifiedTime : ''),
                             $this->getTagEndChar()

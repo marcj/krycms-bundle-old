@@ -3,6 +3,7 @@
 namespace Kryn\CmsBundle;
 
 use Kryn\CmsBundle\Model\AppLockQuery;
+use Kryn\CmsBundle\Model\Base\NodeQuery;
 use Symfony\Component\HttpFoundation\Response;
 
 class Utils
@@ -10,6 +11,8 @@ class Utils
     private $inErrorHandler = false;
 
     public $latency = array();
+
+    protected $cachedPageToUrl = [];
 
     /**
      * @var Core
@@ -46,6 +49,170 @@ class Utils
         $exception->setMessage($text ? : 'Debug stop.');
 
         static::exceptionHandler($exception);
+    }
+
+    /**
+     * Returns Domain object
+     *
+     * @param int $domainId If not defined, it returns the current domain.
+     *
+     * @return \Core\Models\Domain
+     * @static
+     */
+    public function getDomain($domainId = null)
+    {
+        if (!$domainId) {
+            return self::$domain;
+        }
+
+        if ($domainSerialized = $this->getKrynCore()->getDistributedCache('core/object-domain/' . $domainId)) {
+            return unserialize($domainSerialized);
+        }
+
+        $domain = Models\DomainQuery::create()->findPk($domainId);
+
+        if (!$domain) {
+            return false;
+        }
+
+        //todo, do it via setFastCache
+        $this->getKrynCore()->setDistributedCache('core/object-domain/' . $domainId, serialize($domain));
+
+        return $domain;
+    }
+
+    /**
+     * Returns a super fast cached Page object.
+     *
+     * @param  int $pageId If not defined, it returns the current page.
+     *
+     * @return \Page
+     * @static
+     */
+    public function getPage($pageId = null)
+    {
+        if (!$pageId) {
+            return $this->getKrynCore()->getCurrentPage();
+        }
+
+        $data = $this->getKrynCore()->getDistributedCache('core/object/node/' . $pageId);
+
+        if (!$data) {
+            $page = NodeQuery::create()->findPk($pageId);
+            $this->getKrynCore()->setDistributedCache('core/object/node/' . $pageId, serialize($page));
+        } else {
+            $page = unserialize($data);
+        }
+
+        return $page ?: false;
+    }
+
+    /**
+     * Returns the domain of the given $id page.
+     *
+     * @static
+     *
+     * @param  integer $id
+     *
+     * @return integer|null
+     */
+    public function getDomainOfPage($id)
+    {
+        $id2 = null;
+
+        $page2Domain = $this->getKrynCore()->getDistributedCache('core/node/toDomains');
+
+        if (!is_array($page2Domain)) {
+            $page2Domain = $this->updatePage2DomainCache();
+        }
+
+        $id = ',' . $id . ',';
+        foreach ($page2Domain as $domain_id => &$pages) {
+            $pages = ',' . $pages . ',';
+            if (strpos($pages, $id) !== false) {
+                $id2 = $domain_id;
+            }
+        }
+
+        return $id2;
+    }
+
+    public function updatePage2DomainCache()
+    {
+        $r2d = array();
+        $items = NodeQuery::create()
+            ->select(['Id', 'DomainId'])
+            ->find();
+
+        foreach ($items as $item) {
+            $r2d[$item['DomainId']] = (isset($r2d[$item['DomainId']]) ? $r2d[$item['DomainId']] : '') . $item['Id'] . ',';
+        }
+
+        $this->getKrynCore()->setDistributedCache('core/node/toDomains', $r2d);
+
+        return $r2d;
+    }
+
+    /**
+     * @param  integer $domainId
+     *
+     * @return array
+     */
+    public function &getCachedPageToUrl($domainId)
+    {
+        if (isset($cachedPageToUrl[$domainId])) {
+            return $cachedPageToUrl[$domainId];
+        }
+
+        $cachedPageToUrl[$domainId] = array_flip($this->getCachedUrlToPage($domainId));
+
+        return $cachedPageToUrl[$domainId];
+    }
+
+    public function &getCachedUrlToPage($domainId)
+    {
+        $cacheKey = 'core/urls/' . $domainId;
+        $urls = $this->getKrynCore()->getDistributedCache($cacheKey);
+
+        if (!$urls) {
+
+            $nodes = NodeQuery::create()
+                ->select(array('id', 'urn', 'lvl', 'type'))
+                ->filterByDomainId($domainId)
+                ->orderByBranch()
+                ->find();
+
+            //build urls array
+            $urls = array();
+            $level = array();
+
+            foreach ($nodes as $node) {
+                if ($node['lvl'] == 0) {
+                    continue;
+                } //root
+                if ($node['type'] == 3) {
+                    continue;
+                } //deposit
+
+                if ($node['type'] == 2 || $node['urn'] == '') {
+                    //folder or empty url
+                    $level[$node['lvl'] + 0] = isset($level[$node['lvl'] - 1]) ? $level[$node['lvl'] - 1] : '';
+                    continue;
+                }
+
+                $url = isset($level[$node['lvl'] - 1]) ? $level[$node['lvl'] - 1] : '';
+                $url .= '/' . $node['urn'];
+
+                $level[$node['lvl'] + 0] = $url;
+
+                $urls[$url] = $node['id'];
+            }
+
+            $this->getKrynCore()->setDistributedCache($cacheKey, $urls);
+
+        }
+
+        return $urls;
     }
 
     /**
@@ -140,8 +307,14 @@ class Utils
             );
         }
 
-        $this->getKrynCore()->getLogger()->error(sprintf('Exception %s: %s', $data['exceptions'][0]['title'], $data['exceptions'][0]['message']));
-        $exceptionView = $this->getKrynCore()->getInstance()->renderView('@CoreBundle/internal-error.html.smarty', $data, false);
+        $this->getKrynCore()->getLogger()->error(
+            sprintf('Exception %s: %s', $data['exceptions'][0]['title'], $data['exceptions'][0]['message'])
+        );
+        $exceptionView = $this->getKrynCore()->getInstance()->renderView(
+            '@CoreBundle/internal-error.html.smarty',
+            $data,
+            false
+        );
         $this->getKrynCore()->getLogRequest()->setExceptions($exceptionView);
         $response = new Response($exceptionView, 500);
         $response->send();
@@ -269,9 +442,12 @@ class Utils
                 }
             } else {
                 $content .= '/* File `' . $cssFile . '` not exist. */';
-                $this->getKrynCore()->getLogger()->addError(sprintf('Can not find css file `%s` [%s]', $file, $assetPath));
+                $this->getKrynCore()->getLogger()->addError(
+                    sprintf('Can not find css file `%s` [%s]', $file, $assetPath)
+                );
             }
         }
+
         return $content;
     }
 

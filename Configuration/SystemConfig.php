@@ -204,7 +204,7 @@ class SystemConfig extends Model {
     public function getCache($orCreate = false)
     {
         if ($orCreate && null === $this->cache) {
-            $this->cache = new Cache();
+            $this->cache = new Cache(null, $this->getKrynCore());
         }
         return $this->cache;
     }

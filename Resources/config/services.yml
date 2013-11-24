@@ -2,6 +2,9 @@ parameters:
      kryn.core.class: Kryn\CmsBundle\Core
      kryn.cache.fast.factory.class: Kryn\CmsBundle\Cache\Factory
      kryn.cache.fast.class: Kryn\CmsBundle\Cache\AbstractCache
+     kryn.content.render.class: Kryn\CmsBundle\ContentRender
+
+     kryn.navigation.class: Kryn\CmsBundle\Navigation
 
      kryn.page.response.class: Kryn\CmsBundle\PageResponse
 
@@ -10,7 +13,7 @@ parameters:
      kryn.filesystem.adapter.local.class: Kryn\CmsBundle\Filesystem\Adapter\Local
      kryn.filesystem.local.mode: 0644
 
-     kryn.configuration.class: Kryn\CmsBundle\Configuration\SystemConfig
+#     kryn.configuration.class: Kryn\CmsBundle\Configuration\SystemConfig
      kryn.configuration.database.class: Kryn\CmsBundle\Configuration\Database
 
      kryn.configuration.database.connection.main.class: Kryn\CmsBundle\Configuration\Connection
@@ -31,10 +34,15 @@ services:
          calls:
             - [setKrynCore, ["@kryn.cms"]]
 
-     kryn.configuration:
-         class: %kryn.configuration.class%
-         calls:
-            - [setDatabase, ["@kryn.configuration.database"]]
+     kryn.content.render:
+         class: %kryn.content.render.class%
+         arguments: ["@kryn.cms"]
+#
+#     kryn.configuration:
+#         class: %kryn.configuration.class%
+#         calls:
+#            - [setDatabase, ["@kryn.configuration.database"]]
+#            - [setKrynCore, ["@kryn.cms"]]
 
      kryn.configuration.database:
          class: %kryn.configuration.database.class%
@@ -70,4 +78,6 @@ services:
          class: %kryn.filesystem.web.class%
          arguments: ["@kryn.cms"]
 
-     # todo, add filesystem.web
+     kryn.navigation:
+         class: %kryn.navigation.class%
+         arguments: ["@kryn.cms"]

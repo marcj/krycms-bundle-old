@@ -78,9 +78,9 @@
         <column name="layouts" type="LONGVARCHAR" required="false"/>
         <column name="phplocale" type="VARCHAR" size="128" required="false"/>
         <column name="path" type="VARCHAR" size="64" required="false"/>
-        <column name="theme_properties" type="OBJECT" phpType="Properties" required="false"/>
-        <column name="extension_properties" type="OBJECT" phpType="Properties" required="false"/>
-        <column name="session_properties" type="OBJECT" phpType="Properties" required="false"/>
+        <column name="theme_properties" type="OBJECT" phpType="\Kryn\CmsBundle\Properties" required="false"/>
+        <column name="extension_properties" type="OBJECT" phpType="\Kryn\CmsBundle\Properties" required="false"/>
+        <column name="session_properties" type="OBJECT" phpType="\Kryn\CmsBundle\Properties" required="false"/>
         <column name="email" type="VARCHAR" size="64" required="false"/>
         <column name="search_index_key" type="VARCHAR" size="255" required="false"/>
         <column name="robots" type="LONGVARCHAR" required="false"/>

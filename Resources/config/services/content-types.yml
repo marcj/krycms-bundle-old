@@ -1,0 +1,12 @@
+parameters:
+     kryn.content.types.class: Kryn\CmsBundle\ContentTypes\ContentTypes
+     kryn.content.types.text.class: Kryn\CmsBundle\ContentTypes\TypeText
+
+services:
+     kryn.content.types:
+         class: %kryn.content.types.class%
+
+     kryn.content.types.text:
+         class: %kryn.content.types.text.class%
+         tags:
+             - { name: kryn.content.type, alias: text }

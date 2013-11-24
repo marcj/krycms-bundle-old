@@ -59,6 +59,11 @@ abstract class AbstractCache implements CacheInterface
     protected $config;
 
     /**
+     * @var Cache
+     */
+    protected $cacheConfig;
+
+    /**
      * @var
      */
     protected $eventDispatcher;
@@ -75,6 +80,7 @@ abstract class AbstractCache implements CacheInterface
     {
         $this->withInvalidationChecks = $withInvalidationChecks;
 
+        $this->cacheConfig = $cacheConfig;
         $this->config = $cacheConfig->getOptions()->toArray();
         $this->testConfig($this->config);
         $this->setup($this->config);

@@ -4,6 +4,7 @@ namespace Kryn\CmsBundle\Configuration;
 
 use \Kryn\CmsBundle\Core as Kryn;
 
+use Kryn\CmsBundle\Core;
 use \Kryn\CmsBundle\Exceptions\FileNotWritableException;
 
 class Model implements \ArrayAccess
@@ -152,13 +153,17 @@ class Model implements \ArrayAccess
 
     /**
      * @param \DOMElement|array|string $values
-     * @param Bundle      $config
+     * @param Core                     $krynCore
      */
-    public function __construct($values = null, Bundle $config = null, $krynCore = null)
+    public function __construct($values = null, Core $krynCore = null)
     {
         if (null === $this->rootName) {
             $array = explode('\\', get_called_class());
             $this->rootName = lcfirst(array_pop($array));
+        }
+
+        if ($krynCore) {
+            $this->setKrynCore($krynCore);
         }
 
         if ($values) {

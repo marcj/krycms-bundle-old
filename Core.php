@@ -7,6 +7,7 @@ use Kryn\CmsBundle\Client\ClientAbstract;
 use Kryn\CmsBundle\Configuration\Client;
 use Kryn\CmsBundle\Configuration\SystemConfig;
 use Kryn\CmsBundle\Exceptions\BundleNotFoundException;
+use Kryn\CmsBundle\Model\Node;
 use Kryn\CmsBundle\Propel\PropelHelper;
 use Symfony\Component\EventDispatcher\GenericEvent;
 use Symfony\Component\HttpFoundation\Request;
@@ -69,13 +70,21 @@ class Core
     protected $cache;
 
     /**
+     * @var Model\Domain
+     */
+    protected $currentDomain;
+
+    /**
+     * @var Model\Node
+     */
+    protected $currentPage;
+
+    /**
      * @param $container
      */
     function __construct($container)
     {
         $this->container = $container;
-
-        $this->loadSystemConfig();
 
         /*
          * Propel orm initialisation.
@@ -90,6 +99,7 @@ class Core
 //        if ($domainClientConfig->isAutoStart()) {
 //            $this->getClient()->start();
 //        }
+
     }
 
     /**
@@ -292,7 +302,7 @@ class Core
     /**
      * Load SystemConfig to $this->systemConfig
      */
-    protected function loadSystemConfig()
+    protected function loadSy22323stemConfig()
     {
         $fastestCacheClass = Cache\AbstractCache::getFastestCacheClass();
 
@@ -341,7 +351,17 @@ class Core
      */
     public function getSystemConfig()
     {
-        return $this->container->get('kryn.configuration');
+        if (null === $this->systemConfig) {
+            //$fastestCacheClass = Cache\AbstractCache::getFastestCacheClass();
+
+            $configArray = [];
+            $this->systemConfig = new SystemConfig($configArray, $this);
+            $database = $this->container->get('kryn.configuration.database');
+            $this->systemConfig->setDatabase($database);
+        }
+
+        return $this->systemConfig;
+        //return $this->container->get('kryn.configuration');
     }
 
     /**
@@ -349,7 +369,7 @@ class Core
      */
     public function getCurrentPage()
     {
-        return null;
+        return $this->currentPage;
     }
 
     /**
@@ -357,7 +377,23 @@ class Core
      */
     public function getCurrentDomain()
     {
-        return null;
+        return $this->currentDomain;
+    }
+
+    /**
+     * @param Model\Node $currentPage
+     */
+    public function setCurrentPage($currentPage)
+    {
+        $this->currentPage = $currentPage;
+    }
+
+    /**
+     * @param Model\Domain $currentDomain
+     */
+    public function setCurrentDomain($currentDomain)
+    {
+        $this->currentDomain = $currentDomain;
     }
 
     /**
@@ -405,6 +441,14 @@ class Core
     }
 
     /**
+     * @return Navigation
+     */
+    public function getNavigation()
+    {
+        return $this->container->get('kryn.navigation');
+    }
+
+    /**
      * @return \Kryn\CmsBundle\Cache\AbstractCache
      */
     public function getCache()
@@ -412,7 +456,6 @@ class Core
         if (null === $this->cache) {
             $cache = $this->getSystemConfig()->getCache(true);
             $class = $cache->getClass();
-            var_dump($class);
             $this->cache = new $class($cache);
         }
 
@@ -424,7 +467,16 @@ class Core
      */
     public function getTemplating()
     {
+        $this->container->get('twig')->addGlobal('baseUrl', $this->getRequest()->getBaseUrl() . '/');
         return $this->container->get('templating');
+    }
+
+    /**
+     * @return ContentRender
+     */
+    public function getContentRender()
+    {
+        return $this->container->get('kryn.content.render');
     }
 
     /**
@@ -433,6 +485,15 @@ class Core
     public function getWebCacheDir()
     {
         return 'web/cache/';
+    }
+
+    /**
+     * @param string $type
+     * @return ContentTypes\TypeInterface
+     */
+    public function getContentRenderType($type)
+    {
+        return $this->container->get('kryn.content.types.' . $type);
     }
 
     /**
@@ -469,25 +530,86 @@ class Core
         return $this->configs;
     }
 
+    public function getNodeUrl($nodeOrId, $fullUrl = false)
+    {
+        $id = $nodeOrId;
+        if ($nodeOrId instanceof Node) {
+            $id = $nodeOrId->getId();
+        }
+
+        $domainId = $nodeOrId instanceof Node ? $nodeOrId->getDomainId() : $this->getUtils()->getDomainOfPage($nodeOrId + 0);
+        $currentDomain = $this->getCurrentDomain();
+
+        $urls =& $this->getUtils()->getCachedPageToUrl($domainId);
+        $url = isset($urls[$id]) ? $urls[$id] : '';
+
+        //do we need to add app_dev.php/ or something?
+        $prefix = substr($this->getRequest()->getBaseUrl(), strlen($this->getRequest()->getBasePath()));
+        if (false !== $prefix) {
+            $url = substr($prefix, 1) . $url;
+        }
+
+        if ($fullUrl || !$currentDomain || $domainId != $currentDomain->getId()) {
+            $domain = $currentDomain ? : $this->getUtils()->getDomain($domainId);
+
+            $domainName = $domain->getRealDomain();
+            if ($domain->getMaster() != 1) {
+                $url = $domainName . $domain->getPath() . $domain->getLang() . '/' . $url;
+            } else {
+                $url = $domainName . $domain->getPath() . $url;
+            }
+
+            $url = 'http' . ($this->getRequest()->isSecure() ? 's' : '') . '://' . $url;
+        }
+
+        //crop last /
+        if (substr($url, -1) == '/') {
+            $url = substr($url, 0, -1);
+        }
+
+        //crop first /
+        if (substr($url, 0, 1) == '/') {
+            $url = substr($url, 1);
+        }
+
+        if ($url == '/') {
+            $url = '.';
+        }
+
+        return $url;
+    }
+
+    /**
+     * @param string $path
+     * @param string $suffix
+     * @return string
+     * @throws Exceptions\BundleNotFoundException
+     */
     public function resolvePath($path, $suffix = '')
     {
-        if (strpos($path, '@') !== false) {
-            preg_match('/(\@[a-zA-Z0-9\-_\.\\\\]+)/', $path, $matches);
-            if ($matches && isset($matches[1])) {
-                try {
-                    $bundle = $this->getKernel()->getBundle(substr($matches[1], 1));
-                } catch (\InvalidArgumentException $e) {
-                    throw new BundleNotFoundException(sprintf(
-                        'Bundle for `%s` (%s) not found.',
-                        $matches[1],
-                        $path
-                    ), 0, $e);
-                }
-                if ($suffix && '/' !== $suffix[0]) {
-                    $suffix = '/' . $suffix;
-                }
-                $path = str_replace($matches[1], $bundle->getPath() . $suffix, $path);
+        $path = preg_replace('/:+/', '/', $path);
+        preg_match('/\@?([a-zA-Z0-9\-_\.\\\\]+)/', $path, $matches);
+        if ($matches && isset($matches[1])) {
+            try {
+                $bundle = $this->getKernel()->getBundle($matches[1]);
+            } catch (\InvalidArgumentException $e) {
+                throw new BundleNotFoundException(sprintf(
+                    'Bundle for `%s` (%s) not found.',
+                    $matches[1],
+                    $path
+                ), 0, $e);
             }
+            if ($suffix && '/' !== $suffix[0]) {
+                $suffix = '/' . $suffix;
+            }
+
+            $path = substr($path, strlen($matches[1]));
+
+            if ((!$suffix || '/' === substr($suffix, -1)) && '/' === $path[0]) {
+                $path = substr($path, 1);
+            }
+
+            $path = $bundle->getPath() . $suffix . $path;
         }
 
         return $path;

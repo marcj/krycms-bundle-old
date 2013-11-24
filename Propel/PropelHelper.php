@@ -405,8 +405,10 @@ class PropelHelper
 
     public function loadConfig()
     {
-        if (file_exists($file = $this->getKrynCore()->getKernel()->getCacheDir() . '/propel-config.php')) {
-            include($file);
+        $config  = $this->getKrynCore()->getKernel()->getCacheDir() . '/propel-config.php';
+        $classes = $this->getKrynCore()->getKernel()->getCacheDir() . '/propel-classes/';
+        if (file_exists($config) && file_exists($classes)) {
+            include($config);
 
             return true;
         }
