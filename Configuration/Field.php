@@ -410,7 +410,7 @@ class Field extends Model
      */
     public function getColumnName()
     {
-        return camelcase2Underscore($this->getId());
+        return $this->getKrynCore()->getUtils()->camelcase2Underscore($this->getId());
     }
 
     /**

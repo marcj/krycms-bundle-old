@@ -1,6 +1,7 @@
 parameters:
      kryn.content.types.class: Kryn\CmsBundle\ContentTypes\ContentTypes
      kryn.content.types.text.class: Kryn\CmsBundle\ContentTypes\TypeText
+     kryn.content.types.plugin.class: Kryn\CmsBundle\ContentTypes\TypePlugin
 
 services:
      kryn.content.types:
@@ -10,3 +11,9 @@ services:
          class: %kryn.content.types.text.class%
          tags:
              - { name: kryn.content.type, alias: text }
+
+     kryn.content.types.plugin:
+         class: %kryn.content.types.plugin.class%
+         arguments: ["@kryn.cms"]
+         tags:
+             - { name: kryn.content.type, alias: plugin }

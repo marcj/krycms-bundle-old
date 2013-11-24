@@ -127,6 +127,14 @@ class Core
     }
 
     /**
+     * @return Objects
+     */
+    public function getObjects()
+    {
+        return $this->container->get('kryn.objects');
+    }
+
+    /**
      * @return \Symfony\Component\HttpKernel\Log\LoggerInterface
      */
     public function getLogger()
@@ -472,6 +480,14 @@ class Core
     }
 
     /**
+     * @return \Symfony\Bundle\FrameworkBundle\Routing\Router
+     */
+    public function getRouter()
+    {
+        return $this->container->get('router');
+    }
+
+    /**
      * @return ContentRender
      */
     public function getContentRender()
@@ -480,20 +496,19 @@ class Core
     }
 
     /**
+     * @return ContentTypes\ContentTypes
+     */
+    public function getContentTypes()
+    {
+        return $this->container->get('kryn.content.types');
+    }
+
+    /**
      * @return string
      */
     public function getWebCacheDir()
     {
         return 'web/cache/';
-    }
-
-    /**
-     * @param string $type
-     * @return ContentTypes\TypeInterface
-     */
-    public function getContentRenderType($type)
-    {
-        return $this->container->get('kryn.content.types.' . $type);
     }
 
     /**
@@ -535,6 +550,10 @@ class Core
         $id = $nodeOrId;
         if ($nodeOrId instanceof Node) {
             $id = $nodeOrId->getId();
+        }
+
+        if (!$nodeOrId) {
+            $nodeOrId = $this->getCurrentPage();
         }
 
         $domainId = $nodeOrId instanceof Node ? $nodeOrId->getDomainId() : $this->getUtils()->getDomainOfPage($nodeOrId + 0);
@@ -668,7 +687,7 @@ class Core
         }
         $hash = md5(implode('.', $hashes));
 
-        if (false && $cached) {
+        if ($cached) {
             $cached = unserialize($cached);
             if (is_array($cached) && $cached['md5'] == $hash) {
                 $this->configs = $cached['data'];

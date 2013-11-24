@@ -40,6 +40,28 @@ class Utils
         return $this->krynCore;
     }
 
+    public function underscore2Camelcase($value)
+    {
+        return $this->char2Camelcase($value, '_');
+    }
+
+    public function char2Camelcase($value, $char = '_')
+    {
+        $ex = explode($char, $value);
+        $return = '';
+        foreach ($ex as $str) {
+            $return .= ucfirst($str);
+        }
+
+        return $return;
+    }
+
+    public function camelcase2Underscore($pValue)
+    {
+        return strtolower(preg_replace('/([a-z])([A-Z])/', '$1_$2', $pValue));
+    }
+
+
     /**
      * @param string $text
      */
@@ -104,7 +126,7 @@ class Utils
             $page = unserialize($data);
         }
 
-        return $page ?: false;
+        return $page ? : false;
     }
 
     /**
@@ -209,7 +231,6 @@ class Utils
             }
 
             $this->getKrynCore()->setDistributedCache($cacheKey, $urls);
-
         }
 
         return $urls;

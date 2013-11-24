@@ -101,14 +101,13 @@ class FrontendController extends Controller
 
         $cachedDomains = $this->getKrynCore()->getDistributedCache('core/domains');
 
-        if (false && $cachedDomains) {
-            var_dump($cachedDomains);
-            $cachedDomains = \unserialize($cachedDomains);
+        if ($cachedDomains) {
+            $cachedDomains = @\unserialize($cachedDomains);
         }
 
         if (!is_array($cachedDomains)) {
-
             $cachedDomains = array();
+
             $domains = DomainQuery::create()->find();
             foreach ($domains as $domain) {
                 $key = $domain->getDomain();
@@ -137,10 +136,7 @@ class FrontendController extends Controller
                 }
             }
 
-            $created = microtime();
-            $cachedDomains['!created'] = $created;
-            $this->getKrynCore()->setDistributedCache('core/domains', $created);
-
+            $this->getKrynCore()->setDistributedCache('core/domains', serialize($cachedDomains));
         }
 
         //search redirect
@@ -270,6 +266,7 @@ class FrontendController extends Controller
             ->findOneById($pageId);
 
         $this->getKrynCore()->setCurrentPage($page);
-        return $pageId;
+
+        return $page ? $pageId : null;
     }
 }

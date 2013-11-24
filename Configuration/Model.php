@@ -309,7 +309,7 @@ class Model implements \ArrayAccess
                             }
 
                             if (class_exists($clazz)) {
-                                $obj = new $clazz($child, null, $this->getKrynCore());
+                                $obj = new $clazz($child, $this->getKrynCore());
                                 $setterValue[] = $obj;
                             } else {
                                 if ($key = $child->attributes->getNamedItem('key')) {
@@ -327,7 +327,7 @@ class Model implements \ArrayAccess
                                         $clazz = $namespace . ucfirst($subChild->nodeName);
                                     }
                                     if (class_exists($clazz)) {
-                                        $object = new $clazz($subChild, null, $this->getKrynCore());
+                                        $object = new $clazz($subChild, $this->getKrynCore());
                                         $setterValue[] = $object;
                                     } else {
                                         if ($key = $subChild->attributes->getNamedItem('key')) {
@@ -341,7 +341,7 @@ class Model implements \ArrayAccess
                         }
                     } else {
                         if (class_exists($clazz)) {
-                            $setterValue = new $clazz($child, null, $this->getKrynCore());
+                            $setterValue = new $clazz($child, $this->getKrynCore());
                         }
                     }
                 }

@@ -5,7 +5,7 @@ namespace Kryn\CmsBundle\Twig;
 use Kryn\CmsBundle\Core;
 use Kryn\CmsBundle\Model\Node;
 
-class NodeUrlExtension extends \Twig_Extension
+class GlobalsExtension extends \Twig_Extension
 {
     /**
      * @var Core
@@ -27,26 +27,14 @@ class NodeUrlExtension extends \Twig_Extension
 
     public function getName()
     {
-        return 'nodeUrl';
+        return 'globals';
     }
 
-    public function getFilters()
+    public function getGlobals()
     {
         return array(
-            'url' => new \Twig_SimpleFilter('url', [$this, 'getUrl'])
+            'kryn' => $this->krynCore
         );
-    }
-
-    public function getFunctions()
-    {
-        return array(
-            'currentUrl' => new \Twig_SimpleFunction('currentUrl', [$this, 'getUrl'])
-        );
-    }
-
-    public function getUrl($nodeOrId = false)
-    {
-        return $this->getKrynCore()->getNodeUrl($nodeOrId);
     }
 
 }

@@ -210,6 +210,16 @@ class ContentRender
     }
 
     /**
+     * @param string $type
+     * @return ContentTypes\TypeInterface
+     */
+    public function getTypeRenderer($type)
+    {
+        $contentTypes = $this->getKrynCore()->getContentTypes();
+        return $contentTypes->getType($type);
+    }
+
+    /**
      * Build HTML for given content.
      *
      * @param Content $content
@@ -223,7 +233,7 @@ class ContentRender
         $type = $content->getType();
 
         try {
-            $typeRenderer = $this->getKrynCore()->getContentRenderType($type);
+            $typeRenderer = $this->getTypeRenderer($type);
             $typeRenderer->setContent($content);
             $typeRenderer->setParameters($parameters);
         } catch(\Exception $e) {

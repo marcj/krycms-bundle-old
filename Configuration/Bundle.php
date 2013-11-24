@@ -577,7 +577,7 @@ class Bundle extends Model
         $this->objects = [];
         foreach ($objects as $object) {
             $object->setBundle($this);
-            $this->objects[\Core\Object::normalizeObjectKey($object->getId())] = $object;
+            $this->objects[$this->getKrynCore()->getObjects()->normalizeObjectKey($object->getId())] = $object;
         }
     }
 

@@ -22,11 +22,13 @@ class ContentTypesCompilerPass implements CompilerPassInterface {
             'kryn.content.type'
         );
 
-        foreach ($taggedServices as $id => $attributes) {
-            $definition->addMethodCall(
-                'addType',
-                array($attributes['alias'], new Reference($id))
-            );
+        foreach ($taggedServices as $id => $tagAttributes) {
+            foreach ($tagAttributes as $attributes) {
+                $definition->addMethodCall(
+                    'addType',
+                    array($attributes['alias'], new Reference($id))
+                );
+            }
         }
     }
 }

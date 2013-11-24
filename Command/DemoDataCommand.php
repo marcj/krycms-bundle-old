@@ -49,18 +49,21 @@ class DemoDataCommand extends AbstractCommand
         define('KRYN_MANAGER', true);
         $krynCore = $this->getKrynCore();
 
-        $packageManager = new \Kryn\CmsBundle\PackageManager();
+        $mainPackageManager = 'Kryn\CmsBundle\PackageManager';
+        $packageManager = new $mainPackageManager();
         $packageManager->setDomain($input->getArgument('hostname'));
         $packageManager->setPath($input->getArgument('path'));
 
-        $packageManager->installDatabase($krynCore);
+        $packageManager->installDemoData($krynCore);
 
-//        foreach ($krynCore->getKernel()->getBundles() as $bundle) {
-//            $class = $bundle->getNamespace() . '\\PackageManager';
-//            if (class_exists($class)) {
-//                $packageManager = new $class;
-//                $packageManager->installDatabase($krynCore);
-//            }
-//        }
+        foreach ($krynCore->getKernel()->getBundles() as $bundle) {
+            $class = $bundle->getNamespace() . '\\PackageManager';
+            if ($class !== $mainPackageManager && class_exists($class)) {
+                $packageManager = new $class;
+                if (method_exists($packageManager, 'installDemoData')) {
+                    $packageManager->installDemoData($krynCore);
+                }
+            }
+        }
     }
 }

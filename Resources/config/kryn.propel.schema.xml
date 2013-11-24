@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<database namespace="Kryn\CmsBundle\Model" name="default">
+<database name="default">
     <table name="system_acl" phpName="Acl" idMethod="native">
         <column name="id" type="INTEGER" primaryKey="true" autoIncrement="true"/>
         <column name="object" type="VARCHAR" size="64" required="false"/>

@@ -63,9 +63,7 @@ class PackageManager {
         return $this->path;
     }
 
-
-
-    public function installDatabase(Core $krynCore)
+    public function installDemoData(Core $krynCore)
     {
         \Kryn\CmsBundle\Model\DomainQuery::create()->deleteAll();
         \Kryn\CmsBundle\Model\NodeQuery::create()->deleteAll();
@@ -146,7 +144,7 @@ class PackageManager {
                             'plugin',
                             '',
                             $defaultContentTemplate,
-                            '{"bundle":"PublicationBundle","plugin":"listing","options":{"itemsPerPage":10,"maxPages":10,"detailPage":"","template":"default.html.twig","categoryId":[],"enableRss":false}}'
+                            '{"bundle":"KrynPublicationBundle","plugin":"listing","options":{"itemsPerPage":10,"maxPages":10,"detailPage":"","template":"default.html.twig","categoryId":[],"enableRss":false}}'
                         )
                     ),
                     '2' => array(
@@ -154,7 +152,7 @@ class PackageManager {
                             'plugin',
                             '» CATEGORIES',
                             $defaultContentTemplate,
-                            '{"bundle":"PublicationBundle","plugin":"categoryList","options":{"listNode":"1","template":"default.html.twig","category_rsn":[]}}'
+                            '{"bundle":"KrynPublicationBundle","plugin":"categoryList","options":{"listNode":"1","template":"default.html.twig","category_rsn":[]}}'
                         ),
                     )
                 ),

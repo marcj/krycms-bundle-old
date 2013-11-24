@@ -2,6 +2,7 @@
 
 namespace Kryn\CmsBundle;
 
+use Kryn\CmsBundle\Model\Content;
 use Symfony\Component\HttpFoundation\Response;
 
 /**

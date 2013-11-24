@@ -1,5 +1,6 @@
 parameters:
      kryn.core.class: Kryn\CmsBundle\Core
+     kryn.objects.class: Kryn\CmsBundle\Objects
      kryn.cache.fast.factory.class: Kryn\CmsBundle\Cache\Factory
      kryn.cache.fast.class: Kryn\CmsBundle\Cache\AbstractCache
      kryn.content.render.class: Kryn\CmsBundle\ContentRender
@@ -22,6 +23,10 @@ services:
      kryn.cms:
          class: %kryn.core.class%
          arguments: ["@service_container"]
+
+     kryn.objects:
+         class: %kryn.objects.class%
+         arguments: ["@kryn.cms"]
 
      kryn.cache.fast:
          class: %kryn.cache.fast.class%
@@ -81,3 +86,11 @@ services:
      kryn.navigation:
          class: %kryn.navigation.class%
          arguments: ["@kryn.cms"]
+
+
+
+     kryn.pluginResponse.listener:
+        class: Kryn\CmsBundle\EventListener\PluginSubRequest
+        arguments: ["@kryn.cms"]
+        tags:
+            - { name: kernel.event_listener, event: kernel.view }

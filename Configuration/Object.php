@@ -312,12 +312,12 @@ class Object extends Model
         ///resolve relations
         //if a object has a MANY_TO_ONE relation to another, then we create a virtual field to the other.
         foreach ($this->getFields() as $field) {
-            if ($field->getObjectRelation() == \Core\ORM\ORMAbstract::MANY_TO_ONE) {
-                $objectName = \Core\Object::getName($field['object']);
-                $bundleName = strtolower(\Core\Object::getBundleName($field['object']));
+            if ($field->getObjectRelation() == \Kryn\CmsBundle\ORM\ORMAbstract::MANY_TO_ONE) {
+                $objectName = $this->getKrynCore()->getObjects()->getName($field['object']);
+                $bundleName = strtolower($this->getKrynCore()->getObjects()->getBundleName($field['object']));
                 $fieldName = lcfirst($field['objectRefRelationName'] ? : $this->getId());
 
-                $bundle = Kryn::getConfig($bundleName);
+                $bundle = $this->getKrynCore()->getConfig($bundleName);
                 if ($bundle && $object = $bundle->getObject($objectName)) {
                     $objectName = $this->getBundle()->getName() . ':' . $this->getId();
                     $virtualField = new Field(array(
@@ -325,7 +325,7 @@ class Object extends Model
                         'virtual' => true,
                         'label' => 'Auto Object Relation (' . $objectName . ')',
                         'object' => $objectName,
-                        'objectRelation' => \Core\ORM\ORMAbstract::ONE_TO_MANY
+                        'objectRelation' => \Kryn\CmsBundle\ORM\ORMAbstract::ONE_TO_MANY
                     ));
 
                     $object->addVirtualField($virtualField);
@@ -1091,7 +1091,7 @@ class Object extends Model
     }
 
     /**
-     * @param \Core\Config\Condition $limitDataSets
+     * @param \Kryn\CmsBundle\Configuration\Condition $limitDataSets
      */
     public function setLimitDataSets($limitDataSets)
     {
@@ -1100,7 +1100,7 @@ class Object extends Model
     }
 
     /**
-     * @return \Core\Config\Condition
+     * @return \Kryn\CmsBundle\Configuration\Condition
      */
     public function getLimitDataSets()
     {

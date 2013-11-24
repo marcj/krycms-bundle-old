@@ -18,27 +18,6 @@ abstract class AbstractType implements TypeInterface
     private $parameters;
 
     /**
-     * @var Core
-     */
-    protected $krynCore;
-
-    /**
-     * @param Core $krynCore
-     */
-    public function setKrynCore($krynCore)
-    {
-        $this->krynCore = $krynCore;
-    }
-
-    /**
-     * @return Core
-     */
-    public function getKrynCore()
-    {
-        return $this->krynCore;
-    }
-
-    /**
      * @param Content $content
      */
     public function setContent(Content $content)

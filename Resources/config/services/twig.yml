@@ -40,3 +40,9 @@ services:
          arguments: ["@kryn.cms"]
          tags:
             - { name: twig.extension }
+
+     kryn.twig.extension.globals:
+         class: Kryn\CmsBundle\Twig\GlobalsExtension
+         arguments: ["@kryn.cms"]
+         tags:
+            - { name: twig.extension }

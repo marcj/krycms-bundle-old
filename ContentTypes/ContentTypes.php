@@ -11,9 +11,22 @@ class ContentTypes {
      */
     protected $types;
 
-    public function addType($alias, $contentType)
+    /**
+     * @param string $type
+     * @param AbstractType $contentType
+     */
+    public function addType($type, $contentType)
     {
-        $this->types[$alias] = $contentType;
+        $this->types[$type] = $contentType;
+    }
+
+    /**
+     * @param string $type
+     * @return AbstractType
+     */
+    public function getType($type)
+    {
+        return $this->types[$type];
     }
 
 }

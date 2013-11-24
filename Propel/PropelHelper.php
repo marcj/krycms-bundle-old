@@ -181,7 +181,7 @@ class PropelHelper
     {
         $tmp = $this->getKrynCore()->getKernel()->getCacheDir() . '/';
 
-        if (!file_exists($tmp . 'propel/runtime-conf.xml')) {
+        if (!file_exists($tmp . 'propel')) {
             self::writeXmlConfig();
             self::writeBuildProperties();
             self::collectSchemas();
@@ -344,8 +344,8 @@ class PropelHelper
         $xml = '<?xml version="1.0"?>
 <config>
     <propel>
-        <datasources default="kryn">
-            <datasource id="kryn">
+        <datasources default="default">
+            <datasource id="default">
                 <adapter>' . $adapter . '</adapter>
                 ';
 
@@ -372,32 +372,32 @@ class PropelHelper
     </propel>
 </config>';
 
-
-        $fs->put('propel/runtime-conf.xml', $xml);
+//        $fs->put('propel/runtime-conf.xml', $xml);
         $fs->put('propel/buildtime-conf.xml', $xml);
 
-        $input = new ArrayInput(array(
-            '--input-dir' => $path . '/propel/',
-            '--output-dir' => $path . '/propel/',
-            '--verbose' => 'vvv'
-        ));
-        $command = new ConfigConvertXmlCommand();
-        $command->getDefinition()->addOption(
-            new InputOption('--verbose', '-v|vv|vvv', InputOption::VALUE_NONE, '') //because migrationDiffCommand access this option
-        );
-
-        $output = new StreamOutput(fopen('php://memory', 'rw'));
-        $command->run($input, $output);
+//
+//        $input = new ArrayInput(array(
+//            '--input-dir' => $path . '/propel/',
+//            '--output-dir' => $path . '/propel/',
+//            '--verbose' => 'vvv'
+//        ));
+//        $command = new ConfigConvertXmlCommand();
+//        $command->getDefinition()->addOption(
+//            new InputOption('--verbose', '-v|vv|vvv', InputOption::VALUE_NONE, '') //because migrationDiffCommand access this option
+//        );
+//
+//        $output = new StreamOutput(fopen('php://memory', 'rw'));
+//        $command->run($input, $output);
 
         $fs->createDir('propel-classes');
 
-        if ($fs->has('propel-config.php')) {
-            $fs->delete('propel-config.php');
-        }
+//        if ($fs->has('propel-config.php')) {
+//            $fs->delete('propel-config.php');
+//        }
 
-        $fs->rename('propel/config.php', 'propel-config.php');
+//        $fs->rename('propel/config.php', 'propel-config.php');
 
-        include($path . '/propel-config.php');
+//        include($path . '/propel-config.php');
 
         return true;
     }
@@ -408,7 +408,7 @@ class PropelHelper
         $config  = $this->getKrynCore()->getKernel()->getCacheDir() . '/propel-config.php';
         $classes = $this->getKrynCore()->getKernel()->getCacheDir() . '/propel-classes/';
         if (file_exists($config) && file_exists($classes)) {
-            include($config);
+//            include($config);
 
             return true;
         }
@@ -446,7 +446,7 @@ class PropelHelper
         $sql = explode(";\n", $sql);
 
         $this->loadConfig();
-        $con = Propel::getWriteConnection('kryn');
+        $con = Propel::getWriteConnection('default');
         $con->beginTransaction();
         try {
             foreach ($sql as $query) {
@@ -469,6 +469,10 @@ class PropelHelper
     {
         $cacheDir = $this->getKrynCore()->getKernel()->getCacheDir() . '/propel/';
 
+        if (!is_dir($cacheDir)) {
+            mkdir($cacheDir);
+        }
+
         $finder = Finder::create()
             ->in($cacheDir)
             ->files()
@@ -479,7 +483,7 @@ class PropelHelper
             unlink($file->getPathname());
         }
 
-        $schemeData = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n  <database name=\"kryn\" defaultIdMethod=\"native\"\n";
+        $schemeData = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n  <database name=\"default\" defaultIdMethod=\"native\"\n";
 
         $krynBehavior = '<behavior name="\\Kryn\\CmsBundle\\Propel\\KrynBehavior" />';
 
@@ -580,7 +584,7 @@ class PropelHelper
 
         $sql = $obj->getUpSQL();
 
-        $sql = $sql['kryn'];
+        $sql = $sql['default'];
 //        unlink($lastMigrationFile);
 
         // todo
