@@ -5,6 +5,7 @@ namespace Kryn\CmsBundle\ContentTypes;
 use Kryn\CmsBundle\Model\Content;
 
 use Kryn\CmsBundle\Exceptions\PluginException;
+use Kryn\CmsBundle\PageResponse;
 use Kryn\CmsBundle\PluginResponse;
 use Propel\Runtime\Exception\LogicException;
 use Symfony\Component\HttpFoundation\Request;
@@ -114,6 +115,7 @@ class TypePlugin extends AbstractType
                         $request->attributes->add(
                             array(
                                  '_controller' => $clazz . '::' . $method,
+                                 '_content' => $this->getContent(),
                                  'options' => $this->plugin['options'] ?: array()
                             )
                         );
@@ -137,6 +139,10 @@ class TypePlugin extends AbstractType
 
                         ob_start();
                         $response = $this->getKrynCore()->getKernel()->handle($request, HttpKernelInterface::SUB_REQUEST);
+                        //EventListener\PluginRequestListener converts all PluginResponse objects to PageResponses
+                        if ($response instanceof PageResponse) {
+                            $response = $response->getPluginResponse($this->getContent()->getId());
+                        }
                         $ob = ob_get_clean();
 
                         $dispatcher->removeListener(

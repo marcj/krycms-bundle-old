@@ -46,3 +46,14 @@ services:
          arguments: ["@kryn.cms"]
          tags:
             - { name: twig.extension }
+
+     kryn.twig.extension.unsearchable:
+         class: Kryn\CmsBundle\Twig\UnsearchableExtension
+         tags:
+            - { name: twig.extension }
+
+     kryn.twig.extension.translate:
+         class: Kryn\CmsBundle\Twig\TranslateExtension
+         arguments: ["@kryn.translator"]
+         tags:
+            - { name: twig.extension }

@@ -34,14 +34,21 @@ class ContentRender
      */
     private $krynCore;
 
+    /**
+     * @var StopwatchHelper
+     */
+    private $stopwatch;
+
     private $cachedSlotContents = array();
 
     /**
      * @param Core $krynCore
+     * @param StopwatchHelper $stopwatch
      */
-    function __construct(Core $krynCore)
+    function __construct(Core $krynCore, StopwatchHelper $stopwatch)
     {
         $this->krynCore = $krynCore;
+        $this->stopwatch = $stopwatch;
     }
 
     /**
@@ -113,6 +120,9 @@ class ContentRender
      */
     public function renderContents(&$contents, $slotProperties)
     {
+        $title = sprintf('Slot %s [%d]', $slotProperties['name'], $slotProperties['id']);
+        $this->stopwatch->start($title, 'Kryn');
+
         $filteredContents = array();
         if (!($contents instanceof \Traversable)) {
             return;
@@ -206,6 +216,8 @@ class ContentRender
 //            return '';
 //        }
 
+        $this->stopwatch->stop($title, 'Kryn');
+
         return $html;
     }
 
@@ -231,12 +243,15 @@ class ContentRender
     public function renderContent(Content $content, $parameters = array())
     {
         $type = $content->getType();
+        $title = sprintf('Content %d [%s]', $content->getId(), $type);
+        $this->stopwatch->start($title, 'Kryn');
 
         try {
             $typeRenderer = $this->getTypeRenderer($type);
             $typeRenderer->setContent($content);
             $typeRenderer->setParameters($parameters);
         } catch(\Exception $e) {
+            $this->stopwatch->stop($title);
             throw new TypeNotFoundException(sprintf(
                 'Type renderer for `%s` not found. [%s]',
                 $content->getType(),
@@ -278,6 +293,7 @@ class ContentRender
         $argument = array(&$result, $data);
         $this->getKrynCore()->getEventDispatcher()->dispatch('core/render/content', new GenericEvent($argument));
 
+        $this->stopwatch->stop($title);
         return $result;
     }
 

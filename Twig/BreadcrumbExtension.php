@@ -42,20 +42,32 @@ class BreadcrumbExtension extends \Twig_Extension
     public function breadcrumb($view = 'KrynCmsBundle:Default:breadcrumb.html.twig')
     {
         $breadcrumbs = [];
-        foreach ($this->getKrynCore()->getCurrentPage()->getParents() as $parent) {
-            if ($parent->getType() >= 2) continue;
-            $a = $parent->toArray(TableMap::TYPE_STUDLYPHPNAME);
-            $a['url'] = $this->getKrynCore()->getNodeUrl($parent);
-            $breadcrumbs[] = $a;
+        $page = $this->getKrynCore()->getCurrentPage();
+
+        $cacheKey = 'core/breadcrumbs/' . $page->getId();
+        if ($cache = $this->getKrynCore()->getDistributedCache($cacheKey)) {
+            if (is_string($cache)) {
+                return $cache;
+            }
+        }
+
+        foreach ($page->getParents() as $parent) {
+            if ($parent->getType() >= 2) {
+                continue;
+            }
+            $breadcrumbs[] = $parent;
         }
 
         $data = [
             'domain' => $this->getKrynCore()->getCurrentDomain(),
-            'baseUrl' => $this->getKrynCore()->getCurrentDomain(),
+            'baseUrl' => $this->getKrynCore()->getPageResponse()->getBaseHref(),
             'breadcrumbs' => $breadcrumbs,
             'currentPage' => $this->getKrynCore()->getCurrentPage()
         ];
-        return $this->getKrynCore()->getTemplating()->render($view, $data);
+
+        $html = $this->getKrynCore()->getTemplating()->render($view, $data);
+        $this->getKrynCore()->setDistributedCache($cacheKey, $html);
+        return $html;
     }
 
 }

@@ -26,11 +26,6 @@ class Core
     protected $container;
 
     /**
-     * @var PageResponse
-     */
-    protected $pageResponse;
-
-    /**
      * @var Request
      */
     protected $request;
@@ -219,7 +214,7 @@ class Core
 
         if ($timestamp !== null) {
             $cache = $fastCache->get($key);
-            if ($cache['timestamp'] == $timestamp) {
+            if (is_array($cache) && isset($cache['timestamp']) && $cache['timestamp'] == $timestamp) {
                 return $cache['data'];
             }
         }
@@ -457,6 +452,14 @@ class Core
     }
 
     /**
+     * @return StopwatchHelper
+     */
+    public function getStopwatch()
+    {
+        return $this->container->get('kryn.stopwatch');
+    }
+
+    /**
      * @return \Kryn\CmsBundle\Cache\AbstractCache
      */
     public function getCache()
@@ -622,7 +625,7 @@ class Core
                 $suffix = '/' . $suffix;
             }
 
-            $path = substr($path, strlen($matches[1]));
+            $path = substr($path, strlen($matches[1]) + 1);
 
             if ((!$suffix || '/' === substr($suffix, -1)) && '/' === $path[0]) {
                 $path = substr($path, 1);

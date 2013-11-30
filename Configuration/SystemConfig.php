@@ -12,6 +12,7 @@ class SystemConfig extends Model {
     see: http://www.php.net/manual/en/timezones.php
     ',
         'systemTitle' => 'The system title of this installation.',
+        'languages' => 'Comma separated list of supported languages. (systemwide)',
         'bundles' => '
     A list of installed bundles. Enter here the PHP FQDN (Will be resolved through PSR-0 and then loaded)
 
@@ -44,6 +45,11 @@ class SystemConfig extends Model {
      * @var string
      */
     protected $adminUrl = 'kryn';
+
+    /**
+     * @var string
+     */
+    protected $languages = 'en';
 
     /**
      * @var string
@@ -186,6 +192,22 @@ class SystemConfig extends Model {
                 }
             }
         }
+    }
+
+    /**
+     * @param string $languages
+     */
+    public function setLanguages($languages)
+    {
+        $this->languages = $languages;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLanguages()
+    {
+        return $this->languages;
     }
 
     /**

@@ -2,8 +2,3 @@ kryn_cms_admin:
     prefix:   /kryn
     resource: "@KrynCmsBundle/Controller/Admin"
     type:     annotation
-
-kryn_cms_frontend:
-    prefix:   /
-    resource: "@KrynCmsBundle/Controller/FrontendController.php"
-    type:     annotation

@@ -4,6 +4,7 @@ namespace Kryn\CmsBundle;
 
 use Kryn\CmsBundle\Model\Content;
 use Symfony\Component\HttpFoundation\Response;
+use Kryn\CmsBundle\Controller\PageController;
 
 /**
  * This is the response, we use to generate the basic html skeleton.
@@ -85,11 +86,32 @@ class PageResponse extends Response
     private $resourceCompression = false;
 
     /**
+     * @var StopwatchHelper
+     */
+    private $stopwatch;
+
+    /**
      * Constructor
      */
     public function __construct($content = '', $status = 200, $headers = array())
     {
         parent::__construct($content, $status, $headers);
+    }
+
+    /**
+     * @param StopwatchHelper $stopwatch
+     */
+    public function setStopwatch($stopwatch)
+    {
+        $this->stopwatch = $stopwatch;
+    }
+
+    /**
+     * @return StopwatchHelper
+     */
+    public function getStopwatch()
+    {
+        return $this->stopwatch;
     }
 
     /**
@@ -246,8 +268,13 @@ class PageResponse extends Response
      */
     public function renderContent()
     {
+        $page = $this->getKrynCore()->getCurrentPage();
+        $this->setTitle($page->getTitle());
+
+        $this->getStopwatch()->start("Render PageResponse");
         $html = $this->buildHtml();
         $this->setContent($html);
+        $this->getStopwatch()->stop("Render PageResponse");
     }
 
     /**
@@ -279,25 +306,6 @@ class PageResponse extends Response
     public function buildHtml()
     {
         $body = $this->buildBody();
-
-//        $header = $this->getTitleTag();
-//        $header .= $this->getBaseHrefTag();
-//        $header .= $this->getContentTypeTag();
-//        $header .= $this->getMetaLanguageTag();
-//        $header .= $this->getFaviconTag();
-//
-//        $header .= $this->getAdditionalHeaderTags();
-//
-//        $header .= $this->getCssTags();
-//        $header .= $this->getCssContent();
-//
-//        $header .= $this->getScriptTags('top');
-//
-//        $beforeBodyClose = '';
-//
-//        $beforeBodyClose .= $this->getScriptTags('bottom');
-//
-//        $docType = $this->getDocTypeDeclaration();
 
         $templating = $this->getKrynCore()->getTemplating();
 
@@ -628,10 +636,12 @@ class PageResponse extends Response
      */
     public function patch(array $diff)
     {
+        $refClass = new \ReflectionClass($this);
+        $defaults = $refClass->getDefaultProperties();
         foreach ($diff as $key => $value) {
             if (is_array($value) && is_array($this->$key)) {
                 $this->$key = array_merge($this->$key, $value);
-            } else {
+            } else if (isset($defaults[$key]) && $value != $defaults[$key]) {
                 $this->$key = $value;
             }
         }
@@ -694,8 +704,9 @@ class PageResponse extends Response
      */
     public function setPluginResponse(PluginResponse $response)
     {
-        $param = $response->getControllerRequest()->attributes->get('_route_params');
-        $this->pluginResponse[$param['_content']->getId()] = $response;
+        /** @var $content Content */
+        $content = $response->getControllerRequest()->attributes->get('_content');
+        $this->pluginResponse[$content->getId()] = $response;
 
         return $this;
     }
@@ -796,7 +807,10 @@ class PageResponse extends Response
                         $file = $this->getKrynCore()->resolvePath($css['path'], 'Resources/public');
                         $public = $this->getKrynCore()->resolveWebPath($css['path']);
 
-                        $modifiedTime = file_exists($file) ? filemtime($file) : '';
+                        if (!file_exists($file)) {
+                            continue;
+                        }
+                        $modifiedTime = filemtime($file);
 
                         $result .= sprintf(
                             PHP_EOL.'    <link rel="stylesheet" type="%s" href="%s" %s',

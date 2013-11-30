@@ -6,7 +6,7 @@ use Kryn\CmsBundle\Exceptions\FileNotFoundException;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller as sController;
 use Symfony\Component\HttpFoundation\Response;
 
-class Controller extends sController
+class PluginController extends sController
 {
     /**
      * @return Core
@@ -22,6 +22,11 @@ class Controller extends sController
     public function getPageResponse()
     {
         return $this->getKrynCore()->getPageResponse();
+    }
+
+    public function setOptions(&$values, $defaults)
+    {
+        $values = array_merge($defaults, $values);
     }
 
 
@@ -138,7 +143,7 @@ class Controller extends sController
             $this->getKrynCore()->setDistributedCache($cacheKey, $cache);
         }
 
-        return $this->renderView($view, $cache['data']);
+        return new PluginResponse($this->renderView($view, $cache['data']));
 
     }
 
@@ -199,12 +204,10 @@ class Controller extends sController
 
             $this->getKrynCore()->setDistributedCache($cacheKey, $cache);
 
-        }
-
-        if ($cache['responseDiff']) {
+        } else if ($cache['responseDiff']) {
             $this->getKrynCore()->getPageResponse()->patch($cache['responseDiff']);
         }
 
-        return new Response($cache['content']);
+        return new PluginResponse($cache['content']);
     }
 }

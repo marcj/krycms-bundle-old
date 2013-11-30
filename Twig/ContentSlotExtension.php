@@ -3,8 +3,8 @@
 namespace Kryn\CmsBundle\Twig;
 
 use Kryn\CmsBundle\Core;
-use Kryn\CmsBundle\Model\Base\Node;
-use Kryn\CmsBundle\PageController;
+use Kryn\CmsBundle\Model\Node;
+use Kryn\CmsBundle\Controller\PageController;
 
 class ContentSlotExtension extends \Twig_Extension
 {

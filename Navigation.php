@@ -115,7 +115,6 @@ class Navigation
         }
 
         $data['navigation'] = $navigation ?: false;
-
         if ($navigation !== false) {
 
             $html = $kryn->getTemplating()->render($view, $data);

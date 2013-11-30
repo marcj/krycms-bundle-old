@@ -2,7 +2,7 @@
     <a href="{{ baseUrl }}">{{ domain.getDomain() }}</a>
 
 {% for crumb in breadcrumbs %}
-    » <a href="{{ crumb.url }}">{{  crumb.title }}</a>
+    » <a href="{{ crumb|url }}">{{  crumb.getTitle() }}</a>
 {% endfor %}
 
     » <a href="{{ currentPage|url }}">{{ currentPage.getTitle() }}</a>

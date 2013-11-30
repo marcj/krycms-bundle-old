@@ -4,8 +4,14 @@ parameters:
      kryn.cache.fast.factory.class: Kryn\CmsBundle\Cache\Factory
      kryn.cache.fast.class: Kryn\CmsBundle\Cache\AbstractCache
      kryn.content.render.class: Kryn\CmsBundle\ContentRender
+     kryn.routes.loader: Kryn\CmsBundle\Router\FrontendLoader
 
      kryn.navigation.class: Kryn\CmsBundle\Navigation
+     kryn.stopwatch.class: Kryn\CmsBundle\StopwatchHelper
+     kryn.translator.class: Kryn\CmsBundle\Translation\Translator
+
+     kryn.pluginResponse.listener.class: Kryn\CmsBundle\EventListener\PluginResponseListener
+     kryn.frontendRoutes.listener.class: Kryn\CmsBundle\EventListener\FrontendRouteListener
 
      kryn.page.response.class: Kryn\CmsBundle\PageResponse
 
@@ -38,10 +44,11 @@ services:
          class: %kryn.page.response.class%
          calls:
             - [setKrynCore, ["@kryn.cms"]]
+            - [setStopwatch, ["@kryn.stopwatch"]]
 
      kryn.content.render:
          class: %kryn.content.render.class%
-         arguments: ["@kryn.cms"]
+         arguments: ["@kryn.cms", "@kryn.stopwatch"]
 #
 #     kryn.configuration:
 #         class: %kryn.configuration.class%
@@ -87,10 +94,23 @@ services:
          class: %kryn.navigation.class%
          arguments: ["@kryn.cms"]
 
-
-
      kryn.pluginResponse.listener:
-        class: Kryn\CmsBundle\EventListener\PluginSubRequest
+        class: %kryn.pluginResponse.listener.class%
+        arguments: ["@kryn.cms", "@kryn.frontendRoutes.listener"]
+        tags:
+            - { name: kernel.event_listener, event: kernel.response }
+            - { name: kernel.event_listener, event: kernel.view }
+
+     kryn.frontendRoutes.listener:
+        class: %kryn.frontendRoutes.listener.class%
         arguments: ["@kryn.cms"]
         tags:
-            - { name: kernel.event_listener, event: kernel.view }
+            - { name: kernel.event_listener, event: kernel.request, priority: 33 }
+
+     kryn.translator:
+        class: %kryn.translator.class%
+        arguments: ["@kryn.cms"]
+
+     kryn.stopwatch:
+        class: %kryn.stopwatch.class%
+        arguments: ["@debug.stopwatch"]

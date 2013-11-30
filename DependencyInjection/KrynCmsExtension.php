@@ -26,6 +26,5 @@ class KrynCmsExtension extends Extension
         $loader->load('services.yml');
         $loader->load('services/content-types.yml');
         $loader->load('services/twig.yml');
-
     }
 }
