@@ -6,6 +6,8 @@ parameters:
      kryn.content.render.class: Kryn\CmsBundle\ContentRender
      kryn.routes.loader: Kryn\CmsBundle\Router\FrontendLoader
 
+     kryn.acl.class: Kryn\CmsBundle\ACL
+
      kryn.navigation.class: Kryn\CmsBundle\Navigation
      kryn.stopwatch.class: Kryn\CmsBundle\StopwatchHelper
      kryn.translator.class: Kryn\CmsBundle\Translation\Translator
@@ -15,10 +17,10 @@ parameters:
 
      kryn.page.response.class: Kryn\CmsBundle\PageResponse
 
-     kryn.filesystem.local.class: Flysystem\Filesystem
+     kryn.filesystem.local.class: Kryn\CmsBundle\Filesystem\Filesystem
+     kryn.filesystem.cache.class: Kryn\CmsBundle\Filesystem\Filesystem
      kryn.filesystem.web.class: Kryn\CmsBundle\Filesystem\WebFilesystem
      kryn.filesystem.adapter.local.class: Kryn\CmsBundle\Filesystem\Adapter\Local
-     kryn.filesystem.local.mode: 0644
 
 #     kryn.configuration.class: Kryn\CmsBundle\Configuration\SystemConfig
      kryn.configuration.database.class: Kryn\CmsBundle\Configuration\Database
@@ -38,7 +40,7 @@ services:
          class: %kryn.cache.fast.class%
          factory_class: %kryn.cache.fast.factory.class%
          factory_method: createFast
-         arguments: [@event_dispatcher]
+         arguments: ["@kryn.cms"]
 
      kryn.page.response:
          class: %kryn.page.response.class%
@@ -73,18 +75,27 @@ services:
 
      kryn.filesystem.adapter.local:
          class: %kryn.filesystem.adapter.local.class%
-         arguments: ["%kernel.root_dir%", "%kryn.filesystem.local.mode%"]
+         arguments: ["/"]
+         calls:
+             - [setRoot, ["%kernel.root_dir%/.."]]
+
      kryn.filesystem.adapter.cache:
          class: %kryn.filesystem.adapter.local.class%
-         arguments: ["%kernel.cache_dir%", "%kryn.filesystem.local.mode%"]
+         arguments: ["/"]
+         calls:
+             - [setRoot, ["%kernel.cache_dir%"]]
 
      kryn.filesystem.local:
          class: %kryn.filesystem.local.class%
-         arguments: ["@kryn.filesystem.adapter.local"]
+         arguments: ["@kryn.cms"]
+         calls:
+            - [setAdapter, ["@kryn.filesystem.adapter.local"]]
 
      kryn.filesystem.cache:
-         class: %kryn.filesystem.local.class%
-         arguments: ["@kryn.filesystem.adapter.cache"]
+         class: %kryn.filesystem.cache.class%
+         arguments: ["@kryn.cms"]
+         calls:
+            - [setAdapter, ["@kryn.filesystem.adapter.cache"]]
 
      kryn.filesystem.web:
          class: %kryn.filesystem.web.class%
@@ -114,3 +125,7 @@ services:
      kryn.stopwatch:
         class: %kryn.stopwatch.class%
         arguments: ["@debug.stopwatch"]
+
+     kryn.acl:
+        class: %kryn.acl.class%
+        arguments: ["@kryn.cms", "@kryn.objects"]

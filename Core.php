@@ -5,6 +5,7 @@ namespace Kryn\CmsBundle;
 use Flysystem\Filesystem;
 use Kryn\CmsBundle\Client\ClientAbstract;
 use Kryn\CmsBundle\Configuration\Client;
+use Kryn\CmsBundle\Configuration\Model;
 use Kryn\CmsBundle\Configuration\SystemConfig;
 use Kryn\CmsBundle\Exceptions\BundleNotFoundException;
 use Kryn\CmsBundle\Model\Node;
@@ -12,7 +13,7 @@ use Kryn\CmsBundle\Propel\PropelHelper;
 use Symfony\Component\EventDispatcher\GenericEvent;
 use Symfony\Component\HttpFoundation\Request;
 
-class Core
+class Core extends Controller
 {
 
     /**
@@ -98,51 +99,6 @@ class Core
     }
 
     /**
-     * @return \Flysystem\FilesystemInterface
-     */
-    public function getFileSystem()
-    {
-        return $this->container->get('kryn.filesystem.local');
-    }
-
-    /**
-     * @return \Flysystem\FilesystemInterface
-     */
-    public function getCacheFileSystem()
-    {
-        return $this->container->get('kryn.filesystem.cache');
-    }
-
-    /**
-     * @return \Kryn\CmsBundle\Filesystem\WebFilesystem
-     */
-    public function getWebFileSystem()
-    {
-        return $this->container->get('kryn.filesystem.web');
-    }
-
-    /**
-     * @return Objects
-     */
-    public function getObjects()
-    {
-        return $this->container->get('kryn.objects');
-    }
-
-    /**
-     * @return \Symfony\Component\HttpKernel\Log\LoggerInterface
-     */
-    public function getLogger()
-    {
-        return $this->container->get('logger');
-    }
-
-    public function isAdmin()
-    {
-        return false !== strpos($this->getRequest()->attributes->get('_controller'), 'Controller\Admin');
-    }
-
-    /**
      * Marks a code as invalidate beginning at $time.
      * This is the distributed cache controller. Use it if you want
      * to invalidate caches on a distributed backend (use by `setCache()`
@@ -205,6 +161,7 @@ class Core
      */
     public function getDistributedCache($key)
     {
+        $this->getStopwatch()->start(sprintf('Get Cache `%s`', $key));
         $fastCache = $this->getFastCache();
         $distributedCache = $this->getCache();
 
@@ -212,14 +169,28 @@ class Core
         $timestamp = $distributedCache->get($invalidationKey);
         $cache = null;
 
+        $result = null;
         if ($timestamp !== null) {
             $cache = $fastCache->get($key);
             if (is_array($cache) && isset($cache['timestamp']) && $cache['timestamp'] == $timestamp) {
-                return $cache['data'];
+                $result = $cache['data'];
             }
         }
+        $this->getStopwatch()->stop(sprintf('Get Cache `%s`', $key));
 
-        return null;
+        return $result;
+    }
+
+    /**
+     * @param $key
+     */
+    public function deleteDistributedCache($key)
+    {
+        $fastCache = $this->getFastCache();
+        $distributedCache = $this->getCache();
+
+        $fastCache->delete($key);
+        $distributedCache->delete($key . '/!invalidationCheck');
     }
 
     /**
@@ -266,6 +237,13 @@ class Core
     }
 
     /**
+     * Returns the current adminClient instance.
+     * If not exists, we create it and start the session process.
+     *
+     * Note that this method creates a new AbstractClient instance and starts
+     * the whole session process mechanism (with sending sessions ids etc)
+     * if the adminClient does not exists already.
+     *
      * @return ClientAbstract
      */
     public function getAdminClient()
@@ -273,7 +251,7 @@ class Core
         $systemClientConfig = $this->getSystemConfig()->getClient(true);
         $defaultClientClass = $systemClientConfig->getClass();
 
-        if ($this->isAdmin()) {
+        if ($this->isAdmin() && null === $this->adminClient) {
             $this->client = $this->adminClient = new $defaultClientClass($this, $systemClientConfig);
             $this->adminClient->start();
         }
@@ -356,11 +334,52 @@ class Core
     {
         if (null === $this->systemConfig) {
             //$fastestCacheClass = Cache\AbstractCache::getFastestCacheClass();
+//            $fastCache = $this->getFastCache();
+//            $cacheKey = 'core/config/' . $this->getKernel()->getEnvironment();
 
-            $configArray = [];
-            $this->systemConfig = new SystemConfig($configArray, $this);
-            $database = $this->container->get('kryn.configuration.database');
-            $this->systemConfig->setDatabase($database);
+            $configFile = $this->getKernel()->getRootDir() . '/config/config.kryn.xml';
+            $configEnvFile = $this->getKernel()->getRootDir() . '/config/config.kryn_' . $this->getKernel()->getEnvironment() . '.xml';
+            if (file_exists($configEnvFile)) {
+                $configFile = $configEnvFile;
+            }
+
+            $cacheFile = $configFile . '.cache.php';
+            $systemConfigCached = @file_get_contents($cacheFile);
+
+            $cachedSum = 0;
+            if ($systemConfigCached) {
+                $cachedSum = substr($systemConfigCached, 0, 32);
+                $systemConfigCached = substr($systemConfigCached, 33);
+            }
+
+            $systemConfigHash = file_exists($configFile) ? md5(filemtime($configFile)) : -1;
+
+            Model::$serialisationKrynCore = $this;
+//            $systemConfigCached = $systemConfigCached ? unserialize($systemConfigCached) : ['md5' => 0, 'data' => false];
+            Model::$serialisationKrynCore = null;
+
+            if ($systemConfigCached && $cachedSum === $systemConfigHash) {
+                Model::$serialisationKrynCore = $this;
+                $this->systemConfig  = @unserialize($systemConfigCached);
+                Model::$serialisationKrynCore = null;
+            }
+
+            if (!$this->systemConfig) {
+                $configXml = file_exists($configFile) ? file_get_contents($configFile) : [];
+                $this->systemConfig = new SystemConfig($configXml, $this);
+
+//                $cached = serialize([
+//                        'md5'  => $systemConfigHash,
+//                        'data' => $this->systemConfig
+//                    ]);
+//                $fastCache->set($cacheKey, $cached);
+                file_put_contents($cacheFile, $systemConfigHash."\n".serialize($this->systemConfig));
+            }
+
+            if (!$this->systemConfig->getDatabase()) {
+                $database = $this->container->get('kryn.configuration.database');
+                $this->systemConfig->setDatabase($database);
+            }
         }
 
         return $this->systemConfig;
@@ -400,14 +419,6 @@ class Core
     }
 
     /**
-     * @return PageResponse
-     */
-    public function getPageResponse()
-    {
-        return $this->container->get('kryn.page.response');
-    }
-
-    /**
      * @return Request
      */
     public function getRequest()
@@ -417,46 +428,6 @@ class Core
         }
 
         return $this->request;
-    }
-
-    /**
-     * @return \AppKernel
-     */
-    public function getKernel()
-    {
-        return $this->container->get('kernel');
-    }
-
-    /**
-     * @return \Symfony\Component\EventDispatcher\EventDispatcherInterface
-     */
-    public function getEventDispatcher()
-    {
-        return $this->container->get('event_dispatcher');
-    }
-
-    /**
-     * @return \Kryn\CmsBundle\Cache\CacheInterface
-     */
-    public function getFastCache()
-    {
-        return $this->container->get('kryn.cache.fast');
-    }
-
-    /**
-     * @return Navigation
-     */
-    public function getNavigation()
-    {
-        return $this->container->get('kryn.navigation');
-    }
-
-    /**
-     * @return StopwatchHelper
-     */
-    public function getStopwatch()
-    {
-        return $this->container->get('kryn.stopwatch');
     }
 
     /**
@@ -474,36 +445,25 @@ class Core
     }
 
     /**
+     * Returns the short bundle name of $bundleName.
+     *
+     * It's used for example in the web/bundles/ directory.
+     *
+     * @param string $bundleName
+     * @return string
+     */
+    public function getShortBundleName($bundleName)
+    {
+        return preg_replace('/bundle$/', '', strtolower($bundleName));
+    }
+
+    /**
      * @return \Symfony\Bundle\FrameworkBundle\Templating\EngineInterface
      */
     public function getTemplating()
     {
         $this->container->get('twig')->addGlobal('baseUrl', $this->getRequest()->getBaseUrl() . '/');
         return $this->container->get('templating');
-    }
-
-    /**
-     * @return \Symfony\Bundle\FrameworkBundle\Routing\Router
-     */
-    public function getRouter()
-    {
-        return $this->container->get('router');
-    }
-
-    /**
-     * @return ContentRender
-     */
-    public function getContentRender()
-    {
-        return $this->container->get('kryn.content.render');
-    }
-
-    /**
-     * @return ContentTypes\ContentTypes
-     */
-    public function getContentTypes()
-    {
-        return $this->container->get('kryn.content.types');
     }
 
     /**
@@ -546,6 +506,41 @@ class Core
         }
 
         return $this->configs;
+    }
+
+    /**
+     * Returns all Symfony Bundles that have at least a kryn configuration.
+     *
+     * @return \Symfony\Component\HttpKernel\Bundle\BundleInterface[]
+     */
+    public function getBundles()
+    {
+        $bundles = [];
+        foreach ($this->getKernel()->getBundles() as $bundleName => $bundle) {
+            if ($this->getConfig($bundleName)) {
+                $bundles[] = $bundle;
+            }
+        }
+        return $bundles;
+    }
+
+    /**
+     * @param string $bundleName
+     * @return \Symfony\Component\HttpKernel\Bundle\BundleInterface
+     */
+    public function getBundle($bundleName)
+    {
+        $bundleName = strtolower($bundleName);
+        foreach ($this->getBundles() as $bundle) {
+            if (strtolower($bundle->getName()) == $bundleName || $this->getShortBundleName($bundle->getName()) == $bundleName) {
+                return $bundle;
+            }
+        }
+    }
+
+    public function isActiveBundle($bundleName)
+    {
+        return null !== $this->getBundle($bundleName);
     }
 
     public function getNodeUrl($nodeOrId, $fullUrl = false)
@@ -631,7 +626,12 @@ class Core
                 $path = substr($path, 1);
             }
 
-            $path = $bundle->getPath() . $suffix . $path;
+            $bundlePath = $bundle->getPath();
+            if ('/' !== substr($bundlePath, -1)) {
+                $bundlePath .= '/';
+            }
+
+            $path = $bundlePath . $suffix . $path;
         }
 
         return $path;
@@ -653,25 +653,22 @@ class Core
      */
     public function resolveWebPath($path)
     {
-        if (strpos($path, '@') !== false) {
-            preg_match('/\@([a-zA-Z0-9\-_\.\\\\]+)/', $path, $matches);
-            if ($matches && isset($matches[1])) {
-                try {
-                    $bundle = $this->getKernel()->getBundle($matches[1]);
-                } catch (\InvalidArgumentException $e) {
-                    throw new BundleNotFoundException(sprintf(
-                        'Bundle for `%s` (%s) not found.',
-                        $matches[1],
-                        $path
-                    ), 0, $e);
-                }
-                $targetDir = 'bundles/' . preg_replace('/bundle$/', '', strtolower($bundle->getName()));
-
-                return str_replace($matches[0], $targetDir, $path);
+        preg_match('/(\@?[a-zA-Z0-9\-_\.\\\\]+)/', $path, $matches);
+        if ($matches && isset($matches[1])) {
+            try {
+                $bundle = $this->getKernel()->getBundle(str_replace('@', '', $matches[1]));
+            } catch (\InvalidArgumentException $e) {
+                throw new BundleNotFoundException(sprintf(
+                    'Bundle for `%s` (%s) not found.',
+                    $matches[1],
+                    $path
+                ), 0, $e);
             }
-        }
+            $targetDir = 'bundles/' . preg_replace('/bundle$/', '', strtolower($bundle->getName()));
 
-        return 'bundles/' . $path;
+            return $targetDir . substr($path, strlen($matches[0]));
+        }
+        return $path;
     }
 
     /**
@@ -679,6 +676,7 @@ class Core
      */
     public function loadBundleConfigs($forceNoCache = false)
     {
+        $this->getStopwatch()->start('Load Bundle Configs');
         $cached = $this->getFastCache()->get('core/configs');
         $bundles = array_keys($this->container->getParameter('kernel.bundles'));
 
@@ -691,10 +689,13 @@ class Core
         $hash = md5(implode('.', $hashes));
 
         if ($cached) {
+            Model::$serialisationKrynCore = $this;
             $cached = unserialize($cached);
             if (is_array($cached) && $cached['md5'] == $hash) {
                 $this->configs = $cached['data'];
+                $this->configs->setCore($this);
             }
+            Model::$serialisationKrynCore = null;
         }
 
         if (!$this->configs) {
@@ -723,6 +724,7 @@ class Core
                 }
             }
         }
+        $this->getStopwatch()->stop('Load Bundle Configs');
     }
 
 }

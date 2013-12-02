@@ -9,4 +9,12 @@ interface AdapterInterface {
 
     public function write($path, $content);
     public function read($path);
+    public function has($path);
+    public function delete($path);
+    public function hash($path);
+
+    public function getFiles($path);
+    public function getFile($path);
+
+    public function loadConfig();
 }

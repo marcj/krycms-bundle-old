@@ -37,6 +37,8 @@ class FrontendRouter {
      */
     protected $routes;
 
+    protected $foundPageUrl;
+
     function __construct(Core $krynCore, Request $request)
     {
         $this->request = $request;
@@ -99,6 +101,10 @@ class FrontendRouter {
     public function loadRoutes(RouteCollection $routes)
     {
         $uri = $this->getRequest()->getPathInfo();
+
+        if ($this->getKrynCore()->isAdmin()) {
+            return;
+        }
 
         if ($this->searchDomain() && $this->searchPage($uri)) {
             $this->routes = $routes;
@@ -269,6 +275,7 @@ class FrontendRouter {
      */
     public function registerPluginRoutes()
     {
+        $this->getKrynCore()->getStopwatch()->start('Register Plugin Routes');
         //add all router to current router and fire sub-request
         $cacheKey = 'core/node/plugins-' . $this->getKrynCore()->getCurrentPage()->getId();
         $plugins = $this->getKrynCore()->getDistributedCache($cacheKey);
@@ -365,6 +372,7 @@ class FrontendRouter {
                 }
             }
         }
+        $this->getKrynCore()->getStopwatch()->stop('Register Plugin Routes');
     }
 
     /**
@@ -436,7 +444,7 @@ class FrontendRouter {
         $cachedDomains = $this->getKrynCore()->getDistributedCache('core/domains');
 
         if ($cachedDomains) {
-            $cachedDomains = @\unserialize($cachedDomains);
+            $cachedDomains = @unserialize($cachedDomains);
         }
 
         if (!is_array($cachedDomains)) {
@@ -499,7 +507,6 @@ class FrontendRouter {
 
         if (!$domain) {
             $dispatcher->dispatch('core/domain-not-found', new GenericEvent($hostname));
-
             return;
         }
 
@@ -580,7 +587,7 @@ class FrontendRouter {
         $diff = substr($url, strlen($possibleUrl), strlen($url));
 
         $this->foundPageUrl = $possibleUrl;
-        $this->pluginPath = '/' !== $diff ? substr($diff, 1) : null;
+//        $this->pluginPath = '/' !== $diff ? substr($diff, 1) : null;
 
         if (substr($diff, 0, 1) != '/') {
             $diff = '/' . $diff;

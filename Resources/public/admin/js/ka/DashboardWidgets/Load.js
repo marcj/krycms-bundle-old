@@ -1,7 +1,7 @@
 ka.DashboardWidgets.Load = new Class({
     Extends: ka.DashboardWidgets.Base,
 
-    streamPath: 'admin/load',
+    streamPath: 'KrynCmsBundle/load',
 
     create: function () {
         this.header = new Element('h3', {

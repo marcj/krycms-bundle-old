@@ -372,30 +372,29 @@ class PropelHelper
     </propel>
 </config>';
 
-//        $fs->put('propel/runtime-conf.xml', $xml);
+        $fs->put('propel/runtime-conf.xml', $xml);
         $fs->put('propel/buildtime-conf.xml', $xml);
 
-//
-//        $input = new ArrayInput(array(
-//            '--input-dir' => $path . '/propel/',
-//            '--output-dir' => $path . '/propel/',
-//            '--verbose' => 'vvv'
-//        ));
-//        $command = new ConfigConvertXmlCommand();
-//        $command->getDefinition()->addOption(
-//            new InputOption('--verbose', '-v|vv|vvv', InputOption::VALUE_NONE, '') //because migrationDiffCommand access this option
-//        );
-//
-//        $output = new StreamOutput(fopen('php://memory', 'rw'));
-//        $command->run($input, $output);
+        $input = new ArrayInput(array(
+            '--input-dir' => $path . '/propel/',
+            '--output-dir' => $path . '/propel/',
+            '--verbose' => 'vvv'
+        ));
+        $command = new ConfigConvertXmlCommand();
+        $command->getDefinition()->addOption(
+            new InputOption('--verbose', '-v|vv|vvv', InputOption::VALUE_NONE, '') //because migrationDiffCommand access this option
+        );
+
+        $output = new StreamOutput(fopen('php://memory', 'rw'));
+        $command->run($input, $output);
 
         $fs->createDir('propel-classes');
 
-//        if ($fs->has('propel-config.php')) {
-//            $fs->delete('propel-config.php');
-//        }
+        if ($fs->has('propel-config.php')) {
+            $fs->delete('propel-config.php');
+        }
 
-//        $fs->rename('propel/config.php', 'propel-config.php');
+        $fs->rename('propel/config.php', 'propel-config.php');
 
 //        include($path . '/propel-config.php');
 
@@ -405,12 +404,11 @@ class PropelHelper
 
     public function loadConfig()
     {
-//        $config  = $this->getKrynCore()->getKernel()->getCacheDir() . '/propel-config.php';
+        $config  = $this->getKrynCore()->getKernel()->getCacheDir() . '/propel-config.php';
         $classes = $this->getKrynCore()->getKernel()->getCacheDir() . '/propel-classes/';
-//        if (file_exists($config) && file_exists($classes)) {
-        if (file_exists($classes)) {
-//            include($config);
-
+        if (file_exists($config) && file_exists($classes)) {
+//        if (file_exists($classes)) {
+            include($config);
             return true;
         }
 
@@ -484,7 +482,9 @@ class PropelHelper
             unlink($file->getPathname());
         }
 
-        $schemeData = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n  <database name=\"default\" defaultIdMethod=\"native\"\n";
+
+        $prefix = $this->getKrynCore()->getSystemConfig()->getDatabase()->getPrefix();
+        $schemeData = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n  <database name=\"default\" tablePrefix=\"$prefix\" defaultIdMethod=\"native\"\n";
 
         $krynBehavior = '<behavior name="\\Kryn\\CmsBundle\\Propel\\KrynBehavior" />';
 
@@ -508,8 +508,6 @@ class PropelHelper
             }
 
         }
-
-        file_put_contents($cacheDir . 'schema.xml', $schemeData . "></database>");
 
         return true;
     }
@@ -613,7 +611,6 @@ class PropelHelper
         $properties = '
 propel.mysql.tableType = InnoDB
 
-propel.tablePrefix = ' . $this->getKrynCore()->getSystemConfig()->getDatabase()->getPrefix() . '
 propel.platform = ' . $platform . '
 propel.database.encoding = utf8
 propel.project = kryn

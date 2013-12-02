@@ -3,18 +3,10 @@
 namespace Kryn\CmsBundle;
 
 use Kryn\CmsBundle\Exceptions\FileNotFoundException;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller as sController;
 use Symfony\Component\HttpFoundation\Response;
 
-class PluginController extends sController
+class PluginController extends Controller
 {
-    /**
-     * @return Core
-     */
-    public function getKrynCore()
-    {
-        return $this->get('kryn.cms');
-    }
 
     /**
      * @return PageResponse

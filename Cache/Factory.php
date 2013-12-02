@@ -6,7 +6,7 @@ use Kryn\CmsBundle\Configuration\Cache;
 
 class Factory {
 
-    public static function createFast(){
+    public static function createFast($krynCore){
         $class = '\Kryn\CmsBundle\Cache\\';
 
         if (function_exists('apc_store')) {
@@ -19,7 +19,7 @@ class Factory {
             $class .= 'Files';
         }
 
-        $cacheConfig = new Cache();
+        $cacheConfig = new Cache(null, $krynCore);
         $cacheConfig->setClass($class);
         return new $class($cacheConfig);
     }

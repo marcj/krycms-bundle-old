@@ -8,7 +8,7 @@ ka.FieldTypes.Files = new Class({
 
     initialize: function (pFieldInstance, pOptions) {
 
-        pOptions.object = 'Core\\File';
+        pOptions.object = 'KrynCmsBundle:File';
         pOptions.objectBranch = pOptions.directory;
         pOptions.objectLabel = 'name';
         pOptions.labelTemplate = '{name}';

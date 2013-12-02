@@ -2,9 +2,8 @@
 
 namespace Kryn\CmsBundle\Configuration;
 
-use Admin\Utils;
-use Core\Kryn;
-use Core\SystemFile;
+use Kryn\CmsBundle\Objects;
+use Symfony\Component\HttpKernel\Bundle\BundleInterface;
 
 class Bundle extends Model
 {
@@ -20,7 +19,7 @@ class Bundle extends Model
     protected $id;
 
     /**
-     * @var \Core\Bundle
+     * @var
      */
     private $bundleClass;
 
@@ -124,6 +123,30 @@ class Bundle extends Model
         $value = array_merge($value, parent::toArray($printDefaults));
 
         return $value;
+    }
+
+
+    /**
+     * Returns the path to the composer.json
+     *
+     * @return string
+     */
+    public function getComposerPath()
+    {
+        return $this->getBundleClass()->getPath() . 'composer.json';
+    }
+
+    /**
+     * Returns the composer configuration as array.
+     *
+     * @return array
+     */
+    public function getComposer()
+    {
+        $path = $this->getComposerPath();
+        if (file_exists($file = $path)) {
+            return json_decode(file_get_contents($file), true);
+        }
     }
 
     /**
@@ -262,20 +285,20 @@ class Bundle extends Model
     /**
      * Returns the Bundle class object.
      *
-     * @return \Core\Bundle
+     * @return BundleInterface
      */
     public function getBundleClass()
     {
         if (!$this->bundleClass) {
-            $this->bundleClass = Kryn::getBundle($this->getBundleName());
+            $this->bundleClass = $this->getKrynCore()->getKernel()->getBundle($this->getBundleName());
         }
         return $this->bundleClass;
     }
 
     /**
-     * @param \Core\Bundle $class
+     * @param BundleInterface $class
      */
-    public function setBundleClass(\Core\Bundle $class)
+    public function setBundleClass(BundleInterface $class)
     {
         $this->bundleClass = $class;
     }
@@ -589,7 +612,7 @@ class Bundle extends Model
     public function getObject($id)
     {
         if (null !== $this->objects) {
-            return $this->objects[\Core\Object::normalizeObjectKey($id)];
+            return $this->objects[Objects::normalizeObjectKey($id)];
         }
     }
 

@@ -1,7 +1,7 @@
 ka.DashboardWidgets.LatencyChart = new Class({
     Extends: ka.DashboardWidgets.Base,
 
-    streamPath: 'admin/latencies',
+    streamPath: 'KrynCmsBundle/latencies',
 
     create: function () {
         this.header = new Element('h3', {

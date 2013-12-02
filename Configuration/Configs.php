@@ -61,6 +61,7 @@ class Configs implements \IteratorAggregate
         foreach ($this->getConfigFiles($bundleName) as $file) {
             $hash[] = filemtime($file);
         }
+
         return md5(implode('.', $hash));
     }
 
@@ -112,7 +113,7 @@ class Configs implements \IteratorAggregate
                     }
                     $priority = 0;
                     if ($bundle->attributes->getNamedItem('priority')) {
-                        $priority = (int) $bundle->attributes->getNamedItem('priority')->nodeValue;
+                        $priority = (int)$bundle->attributes->getNamedItem('priority')->nodeValue;
                     }
 
                     $configs[$bundleName][$priority][$file] = $bundle;
@@ -141,7 +142,7 @@ class Configs implements \IteratorAggregate
      *
      * @param array $configs
      *
-     * @return \Core\Config\Bundle[]
+     * @return \Kryn\CmsBundle\Configuration\Bundle[]
      */
     public function parseConfig(array $configs)
     {
@@ -152,7 +153,8 @@ class Configs implements \IteratorAggregate
             foreach ($priorities as $configs) {
                 foreach ($configs as $file => $bundleElement) {
                     if (!isset($bundleConfigs[$bundleName])) {
-                        $bundleConfigs[$bundleName] = new Bundle($bundleName, null, $this->getCore());
+                        $bundleConfigs[strtolower($bundleName)] = $bundleConfigs[$bundleName] =
+                            new Bundle($bundleName, null, $this->getCore());
                     }
 
                     $bundleConfigs[$bundleName]->import($bundleElement, $file);
@@ -163,6 +165,7 @@ class Configs implements \IteratorAggregate
                 //$bundleConfigs[$bundleName]->setupObject($this->getCore());
             }
         }
+
         return $bundleConfigs;
     }
 
@@ -189,10 +192,10 @@ class Configs implements \IteratorAggregate
         $result = array();
         foreach ($this->configElements as $config) {
             $value = $config->toArray();
-            $bundle = $config->getBundleClass();
-            $value['composer'] = $bundle->getComposer() ? : [];
+            $value['composer'] = $config->getComposer() ? : [];
             $result[strtolower($config->getName())] = $value;
         }
+
         return $result;
     }
 

@@ -2,6 +2,8 @@
 
 namespace Kryn\CmsBundle\Configuration;
 
+use Kryn\CmsBundle\Core;
+
 class Cache extends Model
 {
     protected $docBlock = '
@@ -48,7 +50,7 @@ class Cache extends Model
     public function getOptions()
     {
         if (null === $this->options) {
-            $this->options = new Options();
+            $this->options = new Options(null, $this->getKrynCore());
         }
         return $this->options;
     }

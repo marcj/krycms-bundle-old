@@ -1,0 +1,22 @@
+<config>
+  <bundle>
+    <theme id="CoreDefaults">
+      <label>Kryn.cms Demo Theme</label>
+      <content>
+        <label>Default</label>
+        <file>@KrynDemoTheme/content_default.tpl</file>
+      </content>
+    </theme>
+    <themes>
+      <theme id="coreLayouts">
+        <label>Core layouts</label>
+        <contents>
+          <content>
+            <label>Default</label>
+            <file>@CoreBundle/content_default.tpl</file>
+          </content>
+        </contents>
+      </theme>
+    </themes>
+  </bundle>
+</config>

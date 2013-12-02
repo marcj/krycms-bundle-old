@@ -40,28 +40,6 @@ class Utils
         return $this->krynCore;
     }
 
-    public function underscore2Camelcase($value)
-    {
-        return $this->char2Camelcase($value, '_');
-    }
-
-    public function char2Camelcase($value, $char = '_')
-    {
-        $ex = explode($char, $value);
-        $return = '';
-        foreach ($ex as $str) {
-            $return .= ucfirst($str);
-        }
-
-        return $return;
-    }
-
-    public function camelcase2Underscore($pValue)
-    {
-        return strtolower(preg_replace('/([a-z])([A-Z])/', '$1_$2', $pValue));
-    }
-
-
     /**
      * @param string $text
      */
@@ -78,7 +56,7 @@ class Utils
      *
      * @param int $domainId If not defined, it returns the current domain.
      *
-     * @return \Core\Models\Domain
+     * @return \Kryn\CmsBundle\Model\Domain
      * @static
      */
     public function getDomain($domainId = null)
@@ -91,13 +69,12 @@ class Utils
             return unserialize($domainSerialized);
         }
 
-        $domain = Models\DomainQuery::create()->findPk($domainId);
+        $domain = Model\DomainQuery::create()->findPk($domainId);
 
         if (!$domain) {
             return false;
         }
 
-        //todo, do it via setFastCache
         $this->getKrynCore()->setDistributedCache('core/object-domain/' . $domainId, serialize($domain));
 
         return $domain;
@@ -661,6 +638,105 @@ class Utils
             AppLockQuery::create()->filterById($id)->delete();
             dbDelete('system_app_lock', array('id' => $id));
         } catch (\Exception $e) {
+        }
+    }
+
+    /**
+     * Returns cached propel object.
+     *
+     * @param  int   $objectClassName If not defined, it returns the current page.
+     * @param  mixed $objectPk        Propel PK for $objectClassName int, string or array
+     *
+     * @return mixed Propel object
+     * @static
+     */
+    public function getPropelCacheObject($objectClassName, $objectPk)
+    {
+        if (is_array($objectPk)) {
+            $npk = '';
+            foreach ($objectPk as $k) {
+                $npk .= urlencode($k) . '_';
+            }
+        } else {
+            $pk = urlencode($objectPk);
+        }
+
+        $cacheKey = 'core/object-caching.' . strtolower(preg_replace('/[^\w]/', '.', $objectClassName)) . '/' . $pk;
+        if ($serialized = $this->getKrynCore()->getDistributedCache($cacheKey)) {
+            return unserialize($serialized);
+        }
+
+        return $this->setPropelCacheObject($objectClassName, $objectPk);
+    }
+
+    /**
+     * Returns propel object and cache it.
+     *
+     * @param int   $objectClassName If not defined, it returns the current page.
+     * @param mixed $objectPk        Propel PK for $objectClassName int, string or array
+     * @param mixed $object          Pass the object, if you did already fetch it.
+     *
+     * @return mixed Propel object
+     */
+    public function setPropelCacheObject($object2ClassName, $object2Pk, $object = false)
+    {
+        $pk = $object2Pk;
+        if ($pk === null && $object) {
+            $pk = $object->getPrimaryKey();
+        }
+
+        if (is_array($pk)) {
+            $npk = '';
+            foreach ($pk as $k) {
+                $npk .= urlencode($k) . '_';
+            }
+        } else {
+            $pk = urlencode($pk);
+        }
+
+        $cacheKey = 'core/object-caching.' . strtolower(preg_replace('/[^\w]/', '.', $object2ClassName)) . '/' . $pk;
+
+        $clazz = $object2ClassName . 'Query';
+        $object2 = $object;
+        if (!$object2) {
+            $object2 = $clazz::create()->findPk($object2Pk);
+        }
+
+        if (!$object2) {
+            return false;
+        }
+
+        $this->getKrynCore()->setDistributedCache($cacheKey, serialize($object2));
+
+        return $object2;
+
+    }
+
+    /**
+     * Removes a object from the cache.
+     *
+     * @param int   $objectClassName If not defined, it returns the current page.
+     * @param mixed $objectPk        Propel PK for $objectClassName int, string or array
+     */
+    public function removePropelCacheObject($objectClassName, $objectPk = null)
+    {
+        $pk = $objectPk;
+        if ($pk !== null) {
+            if (is_array($pk)) {
+                $npk = '';
+                foreach ($pk as $k) {
+                    $npk .= urlencode($k) . '_';
+                }
+            } else {
+                $pk = urlencode($pk);
+            }
+        }
+        $cacheKey = 'core/object-caching.' . strtolower(preg_replace('/[^\w]/', '.', $objectClassName));
+
+        if ($objectPk) {
+            $this->getKrynCore()->deleteDistributedCache($cacheKey . '/' . $pk);
+        } else {
+            $this->getKrynCore()->invalidateCache($cacheKey);
         }
     }
 

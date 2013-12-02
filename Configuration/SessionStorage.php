@@ -16,7 +16,7 @@ class SessionStorage extends Model
     /**
      * @var string
      */
-    protected $class = '\Kryn\CmsBundle\Client\StoreDatabase';
+    protected $class = 'Kryn\CmsBundle\Client\StoreDatabase';
 
     /**
      * @var Options

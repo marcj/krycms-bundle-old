@@ -21,6 +21,11 @@ class KrynCmsBundle extends Bundle
         $container->addCompilerPass(new ContentTypesCompilerPass());
     }
 
+    public function loadBundles($kernel, &$bundles)
+    {
+        $core = $kernel->getContainer()->get('kryn.core');
+    }
+
     public function boot()
     {
         parent::boot();

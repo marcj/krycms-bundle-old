@@ -1014,7 +1014,7 @@ ka.Window = new Class({
         }.bind(this);
 
         this.customJsClassAsset =
-            new Asset.javascript(_pathAdmin + 'admin/backend/custom-js?module=' + this.getModule() + '&code=' +
+            new Asset.javascript(_pathAdmin + 'admin/backend/custom-js?bundle=' + this.getModule() + '&code=' +
                 javascript +
                 '&onLoad=' + this.customId);
     },

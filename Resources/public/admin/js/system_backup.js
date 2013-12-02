@@ -160,7 +160,7 @@ var admin_system_backup = new Class({
                         fields: {
                             id: {
                                 type: 'object',
-                                object: 'Core\\Node'
+                                object: 'KrynCmsBundle::Node'
                             }
                         }
                     }
@@ -779,7 +779,7 @@ var admin_system_backup = new Class({
 
                 new ka.Field({
                     type: 'object',
-                    object: 'Core\\Node'
+                    object: 'KrynCmsBundle::Node'
                 }, li, {win: this.win})
 
             }.bind(this));

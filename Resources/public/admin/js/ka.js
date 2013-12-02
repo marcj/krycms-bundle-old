@@ -960,7 +960,7 @@ ka.loadLanguage = function (pLang) {
 
     Cookie.write('kryn_language', pLang);
 
-    Asset.javascript(_pathAdmin + 'admin/ui/languagePluralForm?lang=' + pLang);
+    Asset.javascript(_pathAdmin + 'admin/ui/language-plural?lang=' + pLang);
 
     new Request.JSON({url: _pathAdmin + 'admin/ui/language?lang=' +
         pLang, async: false, noCache: 1, onComplete: function (pResponse) {
@@ -1272,7 +1272,7 @@ ka.getObjectDefinition = function (pObjectKey) {
     pObjectKey = ka.normalizeObjectKey(pObjectKey);
 
     var module = ("" + pObjectKey.split(':')[0]).toLowerCase();
-    var name = pObjectKey.split(':')[1];
+    var name = pObjectKey.split(':')[1].toLowerCase();
 
     if (ka.settings.configs[module] && ka.settings.configs[module]['objects'][name]) {
         var config = ka.settings.configs[module]['objects'][name];

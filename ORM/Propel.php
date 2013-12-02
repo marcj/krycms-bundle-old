@@ -5,7 +5,7 @@ namespace Kryn\CmsBundle\ORM;
 use Kryn\CmsBundle\Configuration\Condition;
 use Kryn\CmsBundle\Configuration\ConditionSubSelect;
 use Kryn\CmsBundle\Configuration\Object as ConfigObject;
-use Kryn\CmsBundle\Object;
+use Kryn\CmsBundle\Objects;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
 use Propel\Runtime\Collection\ObjectCollection;
@@ -194,8 +194,9 @@ class Propel extends ORMAbstract
         //filer relation fields
         foreach ($relationFields as $relation => &$objectFields) {
 
-            $objectName = $relations[$relation]->getRightTable()->getPhpName();
-            $def = Object::getDefinition(lcfirst($objectName));
+//            $objectName = $relations[$relation]->getRightTable()->getPhpName();
+            $relationDef = $this->getDefinition()->getFieldByRelationName($relation);
+            $def = $this->getKrynCore()->getObjects()->getDefinition($relationDef->getObject());
             $limit = $def['blacklistSelection'];
             if (!$limit) {
                 continue;
@@ -269,8 +270,8 @@ class Propel extends ORMAbstract
         if (!$objectName && class_exists($clazz = $this->definition->getPropelClassName())) {
             return $clazz;
         }
-        $clazz = Object::normalizeObjectKey($objectName ?: $this->objectKey);
-        $clazz = ucfirst(Object::getNamespace($clazz) . '\\Models\\' . Object::getName($clazz));
+        $clazz = Objects::normalizeObjectKey($objectName ?: $this->objectKey);
+        $clazz = ucfirst($this->getKrynCore()->getObjects()->getNamespace($clazz) . '\\Model\\' . $this->getKrynCore()->getObjects()->getName($clazz));
         return $clazz;
     }
 
@@ -298,15 +299,15 @@ class Propel extends ORMAbstract
      */
     public function mapOptions($query, $options = array())
     {
-        if ($options['limit']) {
+        if (isset($options['limit'])) {
             $query->limit($options['limit']);
         }
 
-        if ($options['offset']) {
+        if (isset($options['offset'])) {
             $query->offset($options['offset']);
         }
 
-        if (is_array($options['order'])) {
+        if (isset($options['order']) && is_array($options['order'])) {
             foreach ($options['order'] as $field => $direction) {
                 if (!$this->tableMap->hasColumnByPhpName(ucfirst($field))) {
                     throw new \FieldNotFoundException(tf('Field %s in object %s not found', $field, $this->objectKey));
@@ -545,7 +546,7 @@ class Propel extends ORMAbstract
 
         $clazz = $this->getPhpName();
 
-        while ($row = dbFetch($stmt)) {
+        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
             $result[] = $this->populateRow(
                 $clazz,
                 $row,
@@ -555,7 +556,6 @@ class Propel extends ORMAbstract
                 $options['permissionCheck']
             );
         }
-        dbFree($stmt);
 
         return $result;
     }
@@ -875,7 +875,7 @@ class Propel extends ORMAbstract
                     if ($fieldValue) {
                         $foreignQuery = $this->getQueryClass($field['object']);
                         $foreignClass = $this->getPhpName($field['object']);
-                        $foreignObjClass = \Kryn\CmsBundle\Object::getClass($field['object']);
+                        $foreignObjClass = $this->getKrynCore()->getObjects()->getClass($field['object']);
 
                         if ($field['objectRelation'] == ORMAbstract::ONE_TO_MANY) {
 
@@ -883,7 +883,7 @@ class Propel extends ORMAbstract
                             $coll->setModel(ucfirst($foreignClass));
 
                             foreach ($fieldValue as $foreignItem) {
-                                $pk = Object::getObjectPk($field['object'], $foreignItem);
+                                $pk = $this->getKrynCore()->getObjects()->getObjectPk($field['object'], $foreignItem);
                                 $item2 = null;
                                 if ($pk) {
                                     $pk = $this->getPropelPk($pk);
@@ -966,9 +966,7 @@ class Propel extends ORMAbstract
 
         $stmt = $this->getStm($query, $condition);
 
-        $row = dbFetch($stmt);
-
-        dbFree($stmt);
+        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
 
         return current($row) + 0;
     }
@@ -1160,7 +1158,7 @@ class Propel extends ORMAbstract
             //fetch root object entry
             $scopeField = 'get' . ucfirst($this->definition['nestedRootObjectField']);
             $scopeId = $item->$scopeField();
-            $root = Object::get($this->definition['nestedRootObject'], $scopeId);
+            $root = $this->getKrynCore()->getObjects()->get($this->definition['nestedRootObject'], $scopeId);
             $root['_object'] = $this->definition['nestedRootObject'];
             $result[] = $root;
 

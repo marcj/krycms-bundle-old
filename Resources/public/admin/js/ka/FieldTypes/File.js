@@ -44,7 +44,7 @@ ka.FieldTypes.File = new Class({
             selectionOnlyFiles: this.options.selectionOnlyFiles,
             selectionOnlyFolders: this.options.selectionOnlyFolders
         };
-        pOptions.objects = ['Core\\File'];
+        pOptions.objects = ['KrynCmsBundle:File'];
 
         this.parent(pFieldInstance, pOptions);
     }

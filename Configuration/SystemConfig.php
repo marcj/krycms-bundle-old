@@ -455,7 +455,14 @@ class SystemConfig extends Model {
      */
     public function getAdminUrl()
     {
-        return $this->adminUrl;
+        $url = $this->adminUrl;
+        if ('/' !== substr($url, 0, 1)){
+            $url = '/' . $url;
+        }
+        if ('/' !== substr($url, -1)){
+            $url .= '/';
+        }
+        return $url;
     }
 
     /**

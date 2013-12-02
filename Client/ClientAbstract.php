@@ -68,7 +68,7 @@ abstract class ClientAbstract
     /**
      * Instance of Cache class
      *
-     * @var \Core\Client\SessionStorageInterface
+     * @var SessionStorageInterface
      */
     private $store;
 
@@ -109,6 +109,13 @@ abstract class ClientAbstract
             throw new \LogicException(sprintf('Class `%s` has the wrong interface. \Core\Client\SessionStorageInterface needed.', $clazz));
         }
         $this->store = $store;
+    }
+
+    public function getConfigValue($key)
+    {
+        if (isset($this->config[$key])) {
+            return $this->config[$key];
+        }
     }
 
     /**
@@ -189,7 +196,7 @@ abstract class ClientAbstract
     {
         $this->getSession()->setTime(time());
         $this->getSession()->setRefreshed($this->session->getRefreshed() + 1);
-        $this->getSession()->setPage(substr(Kryn::getRequestedPath(true), 0, 255));
+        $this->getSession()->setPage(substr($this->getKrynCore()->getRequest()->getRequestUri(), 0, 255));
 
         setCookie(
             $this->getTokenId(),
@@ -247,7 +254,7 @@ abstract class ClientAbstract
         }
 
         if (null === $this->user) {
-            $this->user = Kryn::getPropelCacheObject('Users\Models\User', $this->getSession()->getUserId());
+            $this->user = $this->getKrynCore()->getUtils()->getPropelCacheObject('Kryn\CmsBundle\Model\User', $this->getSession()->getUserId());
         }
 
         return $this->user;
@@ -278,7 +285,7 @@ abstract class ClientAbstract
     {
         $clientConfig = new Client();
         $storage = new SessionStorage();
-        $storage->setClass('\Core\Client\StoreDatabase');
+        $storage->setClass('Kryn\CmsBundle\Client\StoreDatabase');
         $clientConfig->setSessionStorage($storage);
 
         $krynUsers = new KrynUsers($this->getKrynCore(), $clientConfig);
@@ -300,10 +307,6 @@ abstract class ClientAbstract
     {
         if (!$this->getStarted()) {
             $this->start();
-        }
-
-        if (!$this->config['noDelay']) {
-            // sleep(1);
         }
 
         if ($login == 'admin') {
@@ -478,7 +481,7 @@ abstract class ClientAbstract
         }
 
         //after 25 tries, we stop and log it.
-        Kryn::getLogger()->critical(
+        $this->getKrynCore()->getLogger()->critical(
             "The system just tried to create a session 25 times, but can't generate a new free session id.'.
                         'Maybe the caching server is full and you forgot to setup a cronjob for the garbage collector."
         );
@@ -511,13 +514,13 @@ abstract class ClientAbstract
         $session = new Session();
         $session->setId($id)
             ->setTime(time())
-            ->setPage(Kryn::getRequestedPath(true))
+            ->setPage($this->getKrynCore()->getRequest()->getRequestUri())
             ->setRefreshed(0)
             ->setUseragent($_SERVER['HTTP_USER_AGENT']);
 
         //in some countries it's not allowed to store the IP per default
-        if (!$this->config['noIPStorage']) {
-            $session->setIp($_SERVER['X-Forwarded-For'] ? : $_SERVER['REMOTE_ADDR']);
+        if (!isset($this->config['noIPStorage'])) {
+            $session->setIp($this->getKrynCore()->getRequest()->getClientIp());
         }
 
         try {

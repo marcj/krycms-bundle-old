@@ -85,12 +85,15 @@ class Translator implements TranslationInterface
         }
 
         include_once($this->getPluralPhpFunctionFile($lang));
+
+        return $this->messages;
     }
 
 
     public function getPluralPhpFunctionFile($lang)
     {
         $fs = $this->krynCore->getCacheFileSystem();
+
         $file = 'core_gettext_plural_fn_' . $lang . '.php';
         if (!$fs->has($file)) {
             $pluralForm = $this->getPluralForm($lang, true);
@@ -103,10 +106,33 @@ if (!function_exists('gettext_plural_fn_$lang')) {
     }
 }
 ";
-            $fs->put($file, $code);
+            $fs->write($file, $code);
         }
 
-        return $fs->getAdapter()->getRoot() . $file;
+        return $fs->getAdapter()->getRoot() . '/' . $file;
+    }
+
+
+    /**
+     * @param $lang
+     *
+     * @return string Returns the public accessible file path
+     */
+    public function getPluralJsFunctionFile($lang)
+    {
+        $fs = $this->krynCore->getWebFileSystem();
+
+        $file = 'cache/core_gettext_plural_fn_' . $lang . '.js';
+        if (!$fs->has($file)) {
+            $pluralForm = $this->getPluralForm($lang, true);
+
+            $code = "function gettext_plural_fn_$lang(n){\n";
+            $code .= "    return " . $pluralForm . ";\n";
+            $code .= "}";
+            $fs->write($file, $code);
+        }
+
+        return 'cache/core_gettext_plural_fn_' . $lang . '.js';
     }
 
     public function getLanguage($file)
@@ -240,7 +266,7 @@ if (!function_exists('gettext_plural_fn_$lang')) {
                 return $this->messages[$id];
             }
         } else {
-            return ($count === null || $count === false || $count === 1) ? $id : $plural;
+            return $id;
         }
     }
 

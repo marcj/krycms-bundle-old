@@ -1,0 +1,298 @@
+<config>
+  <bundle>
+    <objects>
+      <object id="File">
+        <label>File</label>
+        <table>system_file</table>
+        <class>Kryn\CmsBundle\ORM\ObjectFile</class>
+        <labelField>path</labelField>
+        <dataModel>custom</dataModel>
+        <nested>true</nested>
+        <treeLabel>name</treeLabel>
+        <treeIcon>type</treeIcon>
+        <treeIconMapping>
+          <icon id="dir">#icon-folder-4</icon>
+        </treeIconMapping>
+        <treeInterfaceClass>ka.FileTree</treeInterfaceClass>
+        <treeInterface>custom</treeInterface>
+        <treeDefaultIcon>#icon-paper</treeDefaultIcon>
+        <browserInterfaceClass>ka.Files</browserInterfaceClass>
+        <browserInterface>custom</browserInterface>
+        <browserOptions>
+          <field id="onlyUserDefined" type="checkbox">
+            <label>Only user defined files</label>
+          </field>
+          <field id="search" type="checkbox">
+            <label>Enable search</label>
+          </field>
+          <field id="path" type="folder">
+            <label>Start path</label>
+          </field>
+          <field id="selectionOnlyFolders" type="checkbox">
+            <label>Only folders</label>
+          </field>
+          <field id="selectionOnlyFiles" type="checkbox">
+            <label>Only files</label>
+          </field>
+          <field id="onlyLocal" type="checkbox">
+            <label>Only local files</label>
+            <desc>Exclude all external files in magic folders</desc>
+          </field>
+          <field id="returnPath" type="checkbox">
+            <label>Return path</label>
+            <desc>Instead of returning the object id</desc>
+          </field>
+        </browserOptions>
+        <fields>
+          <field id="id" type="number" primaryKey="true" autoIncrement="true">
+            <label>ID</label>
+          </field>
+          <field id="path" type="text">
+            <label>Path</label>
+          </field>
+          <field id="name" type="text">
+            <label>Name</label>
+          </field>
+          <field id="type" type="select">
+            <label>Type</label>
+          </field>
+          <field id="size" type="number">
+            <label>Size</label>
+            <desc>In bytes</desc>
+          </field>
+          <field id="ctime" type="datetime">
+            <label>Created</label>
+          </field>
+          <field id="mtime" type="datetime">
+            <label>Modified</label>
+          </field>
+        </fields>
+      </object>
+      <object id="Node">
+        <label>Node</label>
+        <desc>Pages, Links, Trays and Navigation folder</desc>
+        <table>system_node</table>
+        <labelField>title</labelField>
+        <defaultSelection>type, title, alternativeTitle, urn, layout, visible, target</defaultSelection>
+        <nested>true</nested>
+        <nestedRootAsObject>true</nestedRootAsObject>
+        <nestedRootObject>core\Domain</nestedRootObject>
+        <nestedRootObjectField>domainId</nestedRootObjectField>
+        <nestedRootObjectLabelField>domain</nestedRootObjectLabelField>
+        <treeFields>type, title, accessDenied, accessFromGroups, visible</treeFields>
+        <treeIcon>type</treeIcon>
+        <treeInterfaceClass>ka.NodeTree</treeInterfaceClass>
+        <treeInterface>custom</treeInterface>
+        <treeRootObjectIconPath>#world</treeRootObjectIconPath>
+        <treeRootObjectFixedIcon>true</treeRootObjectFixedIcon>
+        <treeRootFieldTemplate>{domain}</treeRootFieldTemplate>
+        <fields>
+          <field id="id" type="number" primaryKey="true" autoIncrement="true">
+            <label>ID</label>
+          </field>
+          <field id="pid" type="number">
+            <label>Parent ID</label>
+          </field>
+          <field id="domainId" type="number">
+            <label>Domain ID</label>
+          </field>
+          <field id="type" type="number">
+            <label>Type</label>
+          </field>
+          <field id="title" type="text">
+            <label>Title</label>
+          </field>
+          <field id="alternativeTitle" type="text">
+            <label>Page title</label>
+          </field>
+          <field id="urn" type="text">
+            <label>URN</label>
+            <required>true</required>
+          </field>
+          <field id="link" type="text">
+            <label>Link</label>
+          </field>
+          <field id="lft" type="number"/>
+          <field id="rgt" type="number"/>
+          <field id="target" type="text">
+            <label>Link target</label>
+          </field>
+          <field id="visible" type="checkbox">
+            <label>Visible in navigation</label>
+          </field>
+          <field id="accessDenied" type="checkbox">
+            <label>Access denied</label>
+            <desc>For everyone. This removes the page from the navigation.</desc>
+          </field>
+          <field id="meta" type="text">
+            <label>Meta tags</label>
+          </field>
+          <field id="forceHttps" type="checkbox">
+            <label>Force HTTPS</label>
+          </field>
+          <field id="accessFrom" type="datetime"/>
+          <field id="accessTo" type="datetime"/>
+          <field id="accessRedirectTo" type="page"/>
+          <field id="accessNohidenavi" type="checkbox"/>
+          <field id="accessNeedVia" type="number"/>
+          <field id="accessFromGroups" type="text"/>
+          <field id="searchWords" type="text"/>
+          <field id="unsearchable" type="checkbox"/>
+          <field id="layout" type="layout"/>
+          <field id="content" type="object">
+            <label>Contents</label>
+            <object>core:content</object>
+            <objectRelation>1ToN</objectRelation>
+            <objectRelationName>content</objectRelationName>
+            <options/>
+          </field>
+        </fields>
+        <publicUrlGenerator>Core\PageController::getPublicUrl</publicUrlGenerator>
+      </object>
+      <object id="Domain">
+        <label>Domain</label>
+        <table>system_domain</table>
+        <labelField>domain</labelField>
+        <labelTemplate>[{lang}] {domain}</labelTemplate>
+        <defaultSelection>domain, lang</defaultSelection>
+        <multiLanguage>true</multiLanguage>
+        <fields>
+          <field id="id" type="number" primaryKey="true" autoIncrement="true">
+            <label>ID</label>
+          </field>
+          <field id="domain" type="text">
+            <label>Domain name</label>
+          </field>
+          <field id="lang" type="lang">
+            <label>Language</label>
+          </field>
+          <field id="master" type="checkbox">
+            <label>Language master</label>
+          </field>
+          <field id="alias" type="text">
+            <label>Domain Aliases</label>
+            <desc>A comma separated list of domain names.</desc>
+          </field>
+          <field id="redirect" type="text">
+            <label>Domain Redirects</label>
+            <desc>A comma separated list of domain redirections.</desc>
+          </field>
+          <field id="startnodeId" type="object">
+            <label>Startpage</label>
+            <object>Core\Node</object>
+            <objectRelation>1ToN</objectRelation>
+            <objectRelationName>startnode</objectRelationName>
+            <required>true</required>
+          </field>
+          <field id="resourceCompression" type="checkbox">
+            <label>Resource compression</label>
+            <desc>JS and CSS compression.</desc>
+          </field>
+          <field id="path" type="text">
+            <label>Path</label>
+            <desc>If your installation does not point to a domain name directly but is in a subfolder, then this is the name of this folder. Default /.</desc>
+            <default>/</default>
+            <required>true</required>
+          </field>
+          <field id="email" type="text">
+            <label>Email</label>
+            <desc>If errors/exceptions appear the system prints this email to the user.</desc>
+          </field>
+          <field id="robots" type="textarea">
+            <label>robots.txt</label>
+            <desc>The content of the robots.txt file for this domain.</desc>
+          </field>
+          <field id="favicon" type="file">
+            <label>Favicon path.</label>
+          </field>
+        </fields>
+      </object>
+      <object id="Language">
+        <label>Language</label>
+        <table>system_langs</table>
+        <labelField>title</labelField>
+        <labelTemplate>{title} ({langtitle}, {code})</labelTemplate>
+        <defaultSelection>title, langtitle, code</defaultSelection>
+        <fields>
+          <field id="code" type="text" primaryKey="true"/>
+          <field id="title" type="text"/>
+          <field id="langtitle" type="text"/>
+          <field id="userdefined" type="checkbox"/>
+          <field id="visible" type="checkbox"/>
+        </fields>
+      </object>
+      <object id="Workspace">
+        <label>Workspace</label>
+        <table>system_workspace</table>
+        <fields>
+          <field id="id" type="number" primaryKey="true" autoIncrement="true"/>
+          <field id="title" type="text">
+            <label>Title</label>
+          </field>
+          <field id="ownerId" type="object">
+            <object>Users\User</object>
+            <objectRelation>nTo1</objectRelation>
+            <objectLabel>name</objectLabel>
+            <objectRelationName>owner</objectRelationName>
+          </field>
+          <field id="created" type="datetime"/>
+        </fields>
+      </object>
+      <object id="EntryPoint">
+        <label>EntryPoint</label>
+        <class>Kryn\CmsBundle\ORM\ObjectEntryPoint</class>
+        <labelField>title</labelField>
+        <dataModel>custom</dataModel>
+        <nested>true</nested>
+        <fields>
+          <field id="path" type="text" primaryKey="true"/>
+          <field id="title" type="text"/>
+          <field id="type" type="text"/>
+        </fields>
+      </object>
+      <object id="Content">
+        <label>Contents</label>
+        <table>system_content</table>
+        <labelField>id</labelField>
+        <defaultSelection>nodeId,boxId,template,type,content</defaultSelection>
+        <fields>
+          <field id="id" type="number" primaryKey="true" autoIncrement="true">
+            <label>ID</label>
+          </field>
+          <field id="nodeId" type="object">
+            <label>Node</label>
+            <object>Core\Node</object>
+            <objectRelation>nTo1</objectRelation>
+            <objectLabel>title</objectLabel>
+            <objectRelationName>Node</objectRelationName>
+            <objectRefRelationName>Content</objectRefRelationName>
+          </field>
+          <field id="boxId" type="number"/>
+          <field id="sort" type="number"/>
+          <field id="title" type="text"/>
+          <field id="content" type="textarea"/>
+          <field id="template" type="text"/>
+          <field id="type" type="text"/>
+          <field id="hide" type="checkbox"/>
+          <field id="unsearchable" type="text"/>
+        </fields>
+      </object>
+      <object id="View">
+        <label>Template View</label>
+        <desc>Template views</desc>
+        <class>\Admin\Models\ObjectView</class>
+        <labelField>name</labelField>
+        <dataModel>custom</dataModel>
+        <nested>true</nested>
+        <fields>
+          <field id="path" type="text" primaryKey="true">
+            <label>Path</label>
+          </field>
+          <field id="name" type="text">
+            <label>File name</label>
+          </field>
+        </fields>
+      </object>
+    </objects>
+  </bundle>
+</config>

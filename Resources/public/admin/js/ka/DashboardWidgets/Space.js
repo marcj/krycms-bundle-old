@@ -1,7 +1,7 @@
 ka.DashboardWidgets.Space = new Class({
     Extends: ka.DashboardWidgets.Base,
 
-    streamPath: 'admin/space',
+    streamPath: 'KrynCmsBundle/space',
 
     gauges: [],
 

@@ -25,7 +25,7 @@ class Files extends AbstractCache
         }
         $this->path = $config['path'];
 
-        $fastestCache = AbstractCache::getFastestCacheClass();
+        $fastestCache = AbstractCache::getFastestCacheClass($this->cacheConfig->getKrynCore());
         if ($fastestCache->getClass() == '\Kryn\CmsBundle\Cache\Files') {
             //we've no opcode cacher, so use JSON, because it's faster
             $this->useJson = true;

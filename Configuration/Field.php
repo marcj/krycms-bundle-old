@@ -2,6 +2,8 @@
 
 namespace Kryn\CmsBundle\Configuration;
 
+use Kryn\CmsBundle\Tools;
+
 class Field extends Model
 {
     protected $attributes = ['id', 'type', 'primaryKey', 'autoIncrement'];
@@ -410,7 +412,7 @@ class Field extends Model
      */
     public function getColumnName()
     {
-        return $this->getKrynCore()->getUtils()->camelcase2Underscore($this->getId());
+        return Tools::camelcase2Underscore($this->getId());
     }
 
     /**
@@ -797,7 +799,7 @@ class Field extends Model
     }
 
     /**
-     * @param \Core\Config\Field $parentField
+     * @param \Kryn\CmsBundle\Configuration\Field $parentField
      */
     public function setParentField($parentField)
     {
@@ -805,7 +807,7 @@ class Field extends Model
     }
 
     /**
-     * @return \Core\Config\Field
+     * @return \Kryn\CmsBundle\Configuration\Field
      */
     public function getParentField()
     {

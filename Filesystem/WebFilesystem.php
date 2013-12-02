@@ -2,59 +2,33 @@
 
 namespace Kryn\CmsBundle\Filesystem;
 
-use Flysystem\Filesystem;
 use Kryn\CmsBundle\Core;
+use Kryn\CmsBundle\File\FileInfo;
+use Kryn\CmsBundle\Model\File;
+use Kryn\CmsBundle\File\FileInfoInterface;
+use Kryn\CmsBundle\Filesystem\Adapter\AdapterInterface;
+use Propel\Runtime\Propel;
+use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 
-class WebFilesystem
+class WebFilesystem extends Filesystem
 {
-
-    //todo
-    /**
-     * @var Core
-     */
-    protected $krynCore;
 
     /**
      * @var array
      */
-    protected $layers = [];
-
-    /**
-     * @param Core $krynCore
-     */
-    function __construct(Core $krynCore)
-    {
-        $this->krynCore = $krynCore;
-    }
-
-    /**
-     * @param \Kryn\CmsBundle\Core $krynCore
-     */
-    public function setKrynCore($krynCore)
-    {
-        $this->krynCore = $krynCore;
-    }
-
-    /**
-     * @return \Kryn\CmsBundle\Core
-     */
-    public function getKrynCore()
-    {
-        return $this->krynCore;
-    }
+    protected $adapterInstances = [];
 
     /**
      * @param string $path
-     * @return Filesystem
+     * @return AdapterInterface
      */
-    public function getLayer($path)
+    public function getAdapter($path = null)
     {
         $adapterClass = '\Kryn\CmsBundle\Filesystem\Adapter\Local';
 
-        $params[0] = $this->getKrynCore()->getKernel()->getRootDir() . '/../web/';
-        $params[1] = null;
+        $params['root'] = realpath($this->getKrynCore()->getKernel()->getRootDir() . '/../web/');
 
-        if ('/' !== $path[0]) {
+        if ($path && '/' !== $path[0]) {
             $path = '/' . $path;
         }
 
@@ -69,8 +43,8 @@ class WebFilesystem
             $firstFolder = '/';
         }
 
-        if (isset($this->layers[$firstFolder])) {
-            return $this->layers[$firstFolder];
+        if (isset($this->adapterInstances[$firstFolder])) {
+            return $this->adapterInstances[$firstFolder];
         }
 
         if ('/' !== $firstFolder) {
@@ -88,80 +62,86 @@ class WebFilesystem
             }
         }
 
-        $adapter = $this->newAdapter($adapterClass, $params);
+        $adapter = $this->newAdapter($adapterClass, $firstFolder, $params);
         $adapter->setMountPath($firstFolder);
 
-        $fs = new Filesystem($adapter);
+        if ($adapter instanceof ContainerAwareInterface) {
+            $adapter->setContainer($this->getKrynCore()->getKernel()->getContainer());
+        }
 
-        return $this->layers[$firstFolder] = $fs;
+        $adapter->loadConfig();
+
+        return $this->adapterInstances[$firstFolder] = $adapter;
     }
 
     /**
      * @param string $class
-     * @param array  $params
+     * @param string $mountPath
+     * @param array $params
      * @return \Kryn\CmsBundle\Filesystem\Adapter\AdapterInterface
      */
-    public function newAdapter($class, $params)
+    public function newAdapter($class, $mountPath, $params)
     {
-        switch ($class) {
-            case '\Kryn\CmsBundle\Filesystem\Adapter\Local':
-                return new $class($params[0], $params[1]);
-        }
-
-        return new $class($params);
-    }
-
-    /**
-     * Removes the name of the mount point from the proper layer.
-     * Also removes '..' and replaces '//' => '/'
-     *
-     * This is needed because the file layer gets the relative path under his own root.
-     * Forces a / at the beginning, removes the trailing / if exists.
-     *
-     * @param  string|array $path
-     *
-     * @return string
-     */
-    public function normalizePath($path)
-    {
-        if (is_array($path)) {
-            $result = [];
-            foreach ($path as $p) {
-                $result[] = $this->normalizePath($p);
-            }
-
-            return $result;
-        } else {
-            if (strpos($path, '@') === 0) {
-                $path = $this->getKrynCore()->resolvePath($path);
-            }
-
-            if ('/' !== $path[0]) {
-                $path = '/' . $path;
-            }
-
-            if ('/' === substr($path, -1)) {
-                $path = substr($path, 0, -1);
-            }
-
-            $fs = static::getLayer($path);
-            $path = substr($path, strlen($fs->getAdapter()->getMountPath()));
-
-            $path = str_replace('..', '', $path);
-            $path = str_replace('//', '/', $path);
-
-            return $path;
-        }
+        return new $class($mountPath, $params);
     }
 
     /**
      * @param string $path
-     * @param string $content
-     * @return mixed
+     * @return \Kryn\CmsBundle\Model\File[]
      */
-    public function put($path, $content)
+    public function getFiles($path)
     {
-        $fs = $this->getLayer($path);
-        return $fs->put($this->normalizePath($path), $content);
+        $items = parent::getFiles($path);
+        $fs = $this->getAdapter($path);
+
+        if ($fs->getMountPath()) {
+            foreach ($items as &$file) {
+                $file->setMountPoint($fs->getMountPath());
+            }
+        }
+
+        if ('/' === $path) {
+            foreach ($this->getKrynCore()->getSystemConfig()->getMountPoints() as $mountPoint) {
+                $fileInfo = new FileInfo();
+                $fileInfo->setPath('/' . $mountPoint->getPath());
+                $fileInfo->setIcon($mountPoint->getIcon());
+                $fileInfo->setType(FileInfo::DIR);
+                $fileInfo->setMountPoint(true);
+                array_unshift($items, $fileInfo);
+            }
+        }
+
+        return $items;
     }
+
+
+    /**
+     * Translates the internal id to the real path.
+     * Example: getPath(45) => '/myImageFolder/Picture1.png'
+     *
+     * @static
+     *
+     * @param  integer|string $id String for backward compatibility
+     *
+     * @return string
+     */
+    public function getPath($id)
+    {
+        if (!is_numeric($id)) {
+            return $id;
+        }
+
+        //page bases caching here
+        $sql = 'SELECT path
+        FROM ' . $this->getKrynCore()->getSystemConfig()->getDatabase()->getPrefix() . 'system_file
+        WHERE id = ' . ($id + 0);
+        $con = Propel::getReadConnection('default');
+        $stmt = $con->prepare($sql);
+
+        $stmt->execute();
+
+        return $stmt->fetchColumn();
+
+    }
+
 }

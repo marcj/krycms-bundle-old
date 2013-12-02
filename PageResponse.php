@@ -2,6 +2,7 @@
 
 namespace Kryn\CmsBundle;
 
+use Kryn\CmsBundle\Exceptions\BundleNotFoundException;
 use Kryn\CmsBundle\Model\Content;
 use Symfony\Component\HttpFoundation\Response;
 use Kryn\CmsBundle\Controller\PageController;
@@ -268,9 +269,6 @@ class PageResponse extends Response
      */
     public function renderContent()
     {
-        $page = $this->getKrynCore()->getCurrentPage();
-        $this->setTitle($page->getTitle());
-
         $this->getStopwatch()->start("Render PageResponse");
         $html = $this->buildHtml();
         $this->setContent($html);
@@ -286,6 +284,10 @@ class PageResponse extends Response
      */
     public function send()
     {
+        if (!$this->getContent()) {
+            $this->renderContent();
+        }
+
         $this->prepare($this->getKrynCore()->getRequest());
         $this->setCharset('utf-8');
         $this->getKrynCore()->getEventDispatcher()->dispatch('core/page-response-send-pre');
@@ -377,6 +379,7 @@ class PageResponse extends Response
      */
     public function buildBody()
     {
+        $this->getKrynCore()->getStopwatch()->start('Build PageBody');
         $page = $this->getKrynCore()->getCurrentPage();
         if (!$page) {
             return '';
@@ -422,13 +425,17 @@ class PageResponse extends Response
 
         PageController::setCurrentRenderPage($page->getId());
 
-        return $template->render(
+        $html = $template->render(
             $bundleName . ':' . $layoutPath,
             array(
                 'baseUrl' => $this->getBaseHref(),
                 'themeProperties' => [] //Kryn::$themeProperties
             )
         );
+
+        $this->getKrynCore()->getStopwatch()->stop('Build PageBody');
+
+        return $html;
     }
 
     /**
@@ -641,8 +648,10 @@ class PageResponse extends Response
         foreach ($diff as $key => $value) {
             if (is_array($value) && is_array($this->$key)) {
                 $this->$key = array_merge($this->$key, $value);
-            } else if (isset($defaults[$key]) && $value != $defaults[$key]) {
-                $this->$key = $value;
+            } else {
+                if (isset($defaults[$key]) && $value != $defaults[$key]) {
+                    $this->$key = $value;
+                }
             }
         }
     }
@@ -772,7 +781,7 @@ class PageResponse extends Response
                     if ($css['path']) {
                         if (false !== strpos($css['path'], "://")) {
                             $result .= sprintf(
-                                PHP_EOL.'    <link rel="stylesheet" type="text/css" href="%s" %s',
+                                PHP_EOL . '    <link rel="stylesheet" type="text/css" href="%s" %s',
                                 $css['path'],
                                 $this->getTagEndChar()
                             );
@@ -781,7 +790,7 @@ class PageResponse extends Response
                         }
                     } else {
                         $result .= sprintf(
-                            PHP_EOL.'    <style type="text/css">' . chr(10) . '%s' . chr(10) . '</style>' . chr(10),
+                            PHP_EOL . '    <style type="text/css">' . chr(10) . '%s' . chr(10) . '</style>' . chr(10),
                             $css['content']
                         );
                     }
@@ -799,7 +808,7 @@ class PageResponse extends Response
                 if ($css['path']) {
                     if (false !== strpos($css['path'], "://")) {
                         $result .= sprintf(
-                            PHP_EOL.'    <link rel="stylesheet" type="text/css" href="%s" %s',
+                            PHP_EOL . '    <link rel="stylesheet" type="text/css" href="%s" %s',
                             $css['path'],
                             $this->getTagEndChar()
                         );
@@ -813,7 +822,7 @@ class PageResponse extends Response
                         $modifiedTime = filemtime($file);
 
                         $result .= sprintf(
-                            PHP_EOL.'    <link rel="stylesheet" type="%s" href="%s" %s',
+                            PHP_EOL . '    <link rel="stylesheet" type="%s" href="%s" %s',
                             $css['type'],
                             $public . ($modifiedTime ? '?c=' . $modifiedTime : ''),
                             $this->getTagEndChar()
@@ -886,8 +895,8 @@ class PageResponse extends Response
                                 $js['path']
                             );
                         } else {
-                            $file = $this->getKrynCore()->resolvePath($js['path'], 'Resources/public');
-                            $public = $this->getKrynCore()->resolveWebPath($js['path']);
+                            $file = $this->getAssetPath($js['path']);
+                            $public = $this->getPublicAssetPath($js['path']);
 
                             if (file_exists($file)) {
                                 $jsContent .= "/* ($public, {$js['path']}) - $file */\n\n";
@@ -913,8 +922,9 @@ class PageResponse extends Response
                     if (false !== strpos($js['path'], "://")) {
                         $result .= sprintf('<script type="%s" src="%s"></script>' . chr(10), $js['type'], $js['path']);
                     } else {
-                        $file = $this->getKrynCore()->resolvePath($js['path'], 'Resources/public');
-                        $public = $this->getKrynCore()->resolveWebPath($js['path']);
+
+                        $file = $this->getAssetPath($js['path']);
+                        $public = $this->getPublicAssetPath($js['path']);
 
                         $modifiedTime = file_exists($file) ? filemtime($file) : null;
 
@@ -935,7 +945,37 @@ class PageResponse extends Response
         }
 
         return $result;
+    }
 
+    public function getAssetPath($path)
+    {
+        try {
+            return $this->getKrynCore()->resolvePath($path, 'Resources/public');
+        } catch (BundleNotFoundException $e) {
+            return $path;
+        }
+    }
+
+    public function getPublicAssetPath($path)
+    {
+        try {
+            $path = $this->getKrynCore()->resolveWebPath($path);
+            if (file_exists($path)) {
+                return $path;
+            }
+        } catch (BundleNotFoundException $e) {
+        }
+
+        //do we need to add app_dev.php/ or something?
+        $prefix = substr(
+            $this->getKrynCore()->getRequest()->getBaseUrl(),
+            strlen($this->getKrynCore()->getRequest()->getBasePath())
+        );
+        if (false !== $prefix) {
+            $path = substr($prefix, 1) . '/' . $path;
+        }
+
+        return $path;
     }
 
 }

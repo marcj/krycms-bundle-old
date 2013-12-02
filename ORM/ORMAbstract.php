@@ -2,6 +2,7 @@
 
 namespace Kryn\CmsBundle\ORM;
 use Kryn\CmsBundle\Configuration\Condition;
+use Kryn\CmsBundle\Core;
 
 /**
  * ORM Abstract class for objects.
@@ -55,20 +56,43 @@ abstract class ORMAbstract
     public $definition;
 
     /**
+     * @var Core
+     */
+    protected $krynCore;
+
+    /**
      * Constructor
      *
      * @param string $objectKey
      * @param Object $definition
+     * @param Core $krynCore
      */
-    public function __construct($objectKey, $definition)
+    public function __construct($objectKey, $definition, Core $krynCore)
     {
-        $this->objectKey = \Kryn\CmsBundle\Object::normalizeObjectKey($objectKey);
+        $this->objectKey = \Kryn\CmsBundle\Objects::normalizeObjectKey($objectKey);
         $this->definition = $definition;
+        $this->krynCore = $krynCore;
         foreach ($this->definition->getFields() as $field) {
             if ($field->isPrimaryKey()) {
                 $this->primaryKeys[] = $field->getId();
             }
         }
+    }
+
+    /**
+     * @param Core $krynCore
+     */
+    public function setKrynCore($krynCore)
+    {
+        $this->krynCore = $krynCore;
+    }
+
+    /**
+     * @return Core
+     */
+    public function getKrynCore()
+    {
+        return $this->krynCore;
     }
 
     public function getDefinition()

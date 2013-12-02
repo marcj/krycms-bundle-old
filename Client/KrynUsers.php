@@ -19,11 +19,11 @@ class KrynUsers extends ClientAbstract
     {
         $userColumn = 'username';
 
-        if ($this->config['emailLogin'] && strpos($login, '@') !== false && strpos($login, '.') !== false) {
+        if ($this->getConfigValue('emailLogin') && strpos($login, '@') !== false && strpos($login, '.') !== false) {
             $userColumn = 'email';
         }
 
-        $con = Propel::getWriteConnection('kryn');
+        $con = Propel::getWriteConnection('default');
 
         $stmt = $con->prepare(
             "
@@ -43,7 +43,7 @@ class KrynUsers extends ClientAbstract
 
         if (isset($row['id']) && $row['id'] > 0) {
 
-            $hash = self::getHashedPassword($password, $row['passwd_salt']);
+            $hash = self::getHashedPassword($password, $row['passwd_salt'], $this->getKrynCore());
 
             if (!$hash || $hash != $row['passwd']) {
                 return false;

@@ -1,4 +1,3 @@
 kryn_cms_admin:
-    prefix:   /kryn
-    resource: "@KrynCmsBundle/Controller/Admin"
+    resource: "@KrynCmsBundle/Controller/Admin/"
     type:     annotation

@@ -963,7 +963,7 @@ ka.Files = new Class({
             this.sideTree = new ka.Field({
                 type: 'tree',
                 noWrapper: true,
-                object: 'Core\\File',
+                object: 'KrynCmsBundle:File',
                 onMove: this.sidebarTreeMoved.bind(this),
                 onReady: this.sidebarTreeReady.bind(this)
             }, this.infos);
@@ -1039,6 +1039,7 @@ ka.Files = new Class({
         if (!this.currentFile) {
             //we entered a own path
             //check first what it is, and the continue;
+            console.log('load', pPath);
             this.curRequest = new Request.JSON({url: _pathAdmin + 'admin/file/single', noCache: 1,
                 noErrorReporting: ['FileNotExistException', 'AccessDeniedException'],
                 onComplete: function(pResponse) {
@@ -1057,6 +1058,7 @@ ka.Files = new Class({
                     }
 
                     this.currentFile = pResponse.data;
+                    console.log(this.currentFile.path);
                     this.path2File[this.currentFile.path] = this.currentFile;
                     this.path2File[pResponse.data.path] = this.currentFile;
 
@@ -1621,7 +1623,7 @@ ka.Files = new Class({
     },
 
     getDownloadUrl: function(file) {
-        return document.location.origin + document.location.pathname.dirname() + '/' + _pathAdmin + 'admin/file/content?' + Object.toQueryString({
+        return document.location.origin + document.location.pathname + '/admin/file/content?' + Object.toQueryString({
             path: file.path || file.id,
             mtime: file.modifiedTime
         });

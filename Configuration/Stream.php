@@ -2,9 +2,11 @@
 
 namespace Kryn\CmsBundle\Configuration;
 
+use Symfony\Component\DependencyInjection\ContainerAwareInterface;
+
 class Stream extends Model
 {
-    protected $attributes = ['id'];
+    protected $attributes = ['path'];
 
     /**
      * @var string
@@ -24,7 +26,7 @@ class Stream extends Model
     /**
      * @var string
      */
-    protected $id;
+    protected $path;
 
     /**
      * @param string $class
@@ -43,22 +45,20 @@ class Stream extends Model
     }
 
     /**
-     * @param string $id
+     * @param string $path
      */
-    public function setId($id)
+    public function setPath($path)
     {
-        $this->id = $id;
+        $this->path = $path;
     }
 
     /**
      * @return string
      */
-    public function getId()
+    public function getPath()
     {
-        return $this->id;
+        return $this->path;
     }
-
-
 
     /**
      * @param string $label
@@ -94,8 +94,15 @@ class Stream extends Model
 
     public function run(&$response)
     {
-        $callable = array($this->getClass(), $this->getMethod());
+        $clazz = $this->getClass();
+        $method = $this->getMethod();
+        $controller = new $clazz();
 
+        if ($controller instanceof ContainerAwareInterface) {
+            $controller->setContainer($this->getKrynCore()->getKernel()->getContainer());
+        }
+
+        $callable = array($controller, $method);
         $parameters = array(&$response);
         call_user_func_array($callable, $parameters);
     }

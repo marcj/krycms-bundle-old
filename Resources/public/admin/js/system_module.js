@@ -177,7 +177,7 @@ var admin_system_module = new Class({
                 }.bind(this));
 
 
-                var systemModules = ['Core\\CoreBundle', 'Admin\\AdminBundle', 'Users\\UsersBundle'];
+                var systemModules = ['KrynCmsBundle'];
                 Array.each(bundles, function(bundle) {
                     if (-1 !== systemModules.indexOf(bundle['class'])) {
                         return;
@@ -544,7 +544,7 @@ var admin_system_module = new Class({
 
             var actions = new Element('div');
             var bActions = new Element('div');
-            if (!['Core\\CoreBundle', 'Admin\\AdminBundle', 'Users\\UsersBundle'].contains(key)) {
+            if (!['KrynCmsBundle'].contains(key)) {
                 if (item.activated) {
                     var deactivate = new ka.Button(_('Deactivate'))
 

@@ -2,6 +2,8 @@
 
 namespace Kryn\CmsBundle\Configuration;
 
+use Kryn\CmsBundle\Tools;
+
 class Object extends Model
 {
     protected $attributes = ['id'];
@@ -557,6 +559,22 @@ class Object extends Model
         return $withVirtual ? array_merge($this->fields ?: [], $this->virtualFields ?: []) : $this->fields;
     }
 
+    /**
+     * @param string $name
+     * @return Field
+     */
+    public function getFieldByRelationName($name)
+    {
+        $name = strtolower($name);
+        if (null !== $this->fields) {
+            foreach ($this->fields as $field) {
+                if (strtolower($field->getObjectRelationName()) == $name) {
+                    return $field;
+                }
+            }
+        }
+    }
+
     public function getFieldsArray()
     {
         $fields = array();
@@ -576,7 +594,8 @@ class Object extends Model
     public function getField($fieldId)
     {
         if (null !== $this->fields) {
-            return $this->fields[camelcase2Underscore($fieldId)];
+            $id = Tools::camelcase2Underscore($fieldId);
+            return isset($this->fields[$id]) ? $this->fields[$id] : null;
         }
     }
 

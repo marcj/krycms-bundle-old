@@ -2,6 +2,8 @@
 
 namespace Kryn\CmsBundle\Configuration;
 
+use Kryn\CmsBundle\Tools;
+
 
 /**
  * Class Asset
@@ -16,6 +18,8 @@ class  Condition extends Model
      * @var array
      */
     protected $rules = [];
+
+    protected $tableName;
 
     /**
      * @param array|Condition $condition
@@ -61,7 +65,7 @@ class  Condition extends Model
      */
     public function fromPk($condition, $objectKey)
     {
-        $this->rules = static::primaryKeyToCondition($condition, $objectKey);
+        $this->rules = $this->primaryKeyToCondition($condition, $objectKey);
     }
     /**
      * @param array|Condition $condition
@@ -184,9 +188,9 @@ class  Condition extends Model
         $def = null;
 
         if ($objectKey) {
-            $def = \Core\Object::getDefinition($objectKey);
+            $def = $this->getKrynCore()->getObjects()->getDefinition($objectKey);
             if ($def) {
-                $tableName = \Core\Kryn::getSystemConfig()->getDatabase()->getPrefix() . $def->getTable();
+                $tableName = $this->getKrynCore()->getSystemConfig()->getDatabase()->getPrefix() . $def->getTable();
             }
         }
 
@@ -196,7 +200,7 @@ class  Condition extends Model
 
         if (is_array($condition) && !is_numeric(key($condition))) {
             //array( 'bla' => 'hui' );
-            return static::create(static::primaryKeyToCondition($condition, $objectKey))->toSql(
+            return static::create($this->primaryKeyToCondition($condition, $objectKey))->toSql(
                 $params,
                 $objectKey,
                 $usedFieldNames
@@ -205,7 +209,7 @@ class  Condition extends Model
 
         if ($condition[0] && is_array($condition[0]) && !is_numeric(key($condition[0]))) {
             //array( array('bla' => 'bla', ... );
-            return static::create(static::primaryKeyToCondition($condition, $objectKey))->toSql(
+            return static::create($this->primaryKeyToCondition($condition, $objectKey))->toSql(
                 $params,
                 $objectKey,
                 $usedFieldNames
@@ -214,7 +218,7 @@ class  Condition extends Model
 
         if (!is_array($condition[0]) && !$condition[0] instanceof Condition) {
             //array( 1, 2, 3 );
-            return static::create(static::primaryKeyToCondition($condition, $objectKey))->toSql(
+            return static::create($this->primaryKeyToCondition($condition, $objectKey))->toSql(
                 $params,
                 $objectKey,
                 $usedFieldNames
@@ -270,9 +274,9 @@ class  Condition extends Model
         $def = null;
 
         if (!$tableName && $objectKey) {
-            $def = \Core\Object::getDefinition($objectKey);
+            $def = $this->getKrynCore()->getObjects()->getDefinition($objectKey);
             if ($def) {
-                $tableName = \Core\Kryn::getSystemConfig()->getDatabase()->getPrefix() . $def->getTable();
+                $tableName = $this->getKrynCore()->getSystemConfig()->getDatabase()->getPrefix() . $def->getTable();
             }
         }
 
@@ -288,11 +292,11 @@ class  Condition extends Model
                 $columnName = $field->getColumnName();
             }
         } else {
-            $columnName = camelcase2Underscore($fieldName);
+            $columnName = Tools::camelcase2Underscore($fieldName);
         }
 
         if (!is_numeric($condition[0])) {
-            $result = ($tableName ? dbQuote($tableName) . '.' : '') . dbQuote($columnName) . ' ';
+            $result = ($tableName ? Tools::dbQuote($tableName) . '.' : '') . Tools::dbQuote($columnName) . ' ';
             if ($usedFieldNames !== null) {
                 $usedFieldNames[] = $condition[0];
             }
@@ -301,13 +305,13 @@ class  Condition extends Model
         }
 
         if (strtolower($condition[1]) == 'regexp') {
-            $result .= strtolower(\Core\Kryn::getSystemConfig()->getDatabase()->getMainConnection()->getType()) == 'mysql' ? 'REGEXP' : '~';
+            $result .= strtolower($this->getKrynCore()->getSystemConfig()->getDatabase()->getMainConnection()->getType()) == 'mysql' ? 'REGEXP' : '~';
         } else {
             $result .= $condition[1];
         }
 
         if (!is_numeric($condition[0])) {
-            if ($condition[2] !== null) {
+            if (isset($condition[2]) && $condition[2] !== null) {
                 if ($condition[2] instanceof ConditionSubSelect) {
                     $result .= ' (' . $condition[2]->toSql($params, $objectKey, $usedFieldNames). ') ';
                 } else {
@@ -346,7 +350,7 @@ class  Condition extends Model
      * @param string $pTable
      * @return array
      */
-    public static function primaryKeyToCondition($condition, $objectKey = null, $pTable = '')
+    public function primaryKeyToCondition($condition, $objectKey = null, $pTable = '')
     {
         $result = array();
 
@@ -377,8 +381,8 @@ class  Condition extends Model
             return $condition;
         }
 
-        if ($objectKey && \Core\Object::getDefinition($objectKey)) {
-            $primaries = \Core\Object::getPrimaryList($objectKey);
+        if ($objectKey && $this->getKrynCore()->getObjects()->getDefinition($objectKey)) {
+            $primaries = $this->getKrynCore()->getObjects()->getPrimaryList($objectKey);
         }
 
         if (array_key_exists(0, $condition)) {
@@ -484,7 +488,7 @@ class  Condition extends Model
             }
 
             if (is_array($condition) && is_string($condition[0]) && is_string($condition[1])){
-                $res = static::checkRule($objectItem, $condition, $objectKey);
+                $res = $this->checkRule($objectItem, $condition, $objectKey);
             } else if ($condition instanceof Condition){
                 $res = $condition->satisfy($objectItem, $objectKey);
             } else if (is_array($condition)) {
@@ -512,7 +516,7 @@ class  Condition extends Model
         return $complied === null ? true : ($complied ? true : false);
     }
 
-    public static function checkRule(&$objectItem, $condition, $objectKey = null)
+    public function checkRule(&$objectItem, $condition, $objectKey = null)
     {
         $field = $condition[0];
         $operator = $condition[1];
@@ -522,7 +526,7 @@ class  Condition extends Model
             $ovalue = $field;
         } else {
             $ovalue = $objectItem[$field];
-            if (null === $ovalue && $objectKey && $definition = \Core\Object::getDefinition($objectKey)) {
+            if (null === $ovalue && $objectKey && $definition = $this->getKrynCore()->getObjects()->getDefinition($objectKey)) {
                 $tableName = substr($field, 0, strpos($field, '.'));
                 $fieldName = substr($field, strpos($field, '.') + 1);
                 if ($tableName === Kryn::getSystemConfig()->getDatabase()->getPrefix().$definition->getTable()) {

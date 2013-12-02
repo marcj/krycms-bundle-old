@@ -3,6 +3,8 @@
 namespace Kryn\CmsBundle;
 
 use Kryn\CmsBundle\Configuration\Condition;
+use Kryn\CmsBundle\Exceptions\ObjectNotFoundException;
+use Kryn\CmsBundle\ORM\Propel;
 use Symfony\Component\EventDispatcher\GenericEvent;
 
 class Objects
@@ -176,7 +178,7 @@ class Objects
         }
 
         if (!$objectKey) {
-            throw new \LogicException(tf('The url `%s` does not contain a object key.', $internalUrl));
+            throw new \LogicException(sprintf('The url `%s` does not contain a object key.', $internalUrl));
         }
 
         $params = array();
@@ -215,7 +217,7 @@ class Objects
      */
     public function getDefinition($objectKey)
     {
-        $objectKey = $this->normalizeObjectKey($objectKey);
+        $objectKey = Objects::normalizeObjectKey($objectKey);
         $temp = explode(':', $objectKey);
         $module = $temp[0];
         $name = $temp[1];
@@ -237,7 +239,7 @@ class Objects
      */
     public function getName($objectKey)
     {
-        $objectKey = $this->normalizeObjectKey($objectKey);
+        $objectKey = Objects::normalizeObjectKey($objectKey);
         $temp = explode(':', $objectKey);
         $config = $this->getKrynCore()->getConfig($temp[0]);
 
@@ -255,7 +257,7 @@ class Objects
      * @return null|string
      */
     public function getBundleName($objectKey) {
-        $objectKey = $this->normalizeObjectKey($objectKey);
+        $objectKey = Objects::normalizeObjectKey($objectKey);
         $temp = explode(':', $objectKey);
         $config = $this->getKrynCore()->getConfig($temp[0]);
 
@@ -274,7 +276,7 @@ class Objects
      */
     public function getNamespace($objectKey)
     {
-        $objectKey = $this->normalizeObjectKey($objectKey);
+        $objectKey = Objects::normalizeObjectKey($objectKey);
         $temp = explode(':', $objectKey);
         $config = $this->getKrynCore()->getConfig($temp[0]);
 
@@ -427,12 +429,12 @@ class Objects
         $withFieldNames = !is_numeric(key($pk));
 
         if (count($pks) == 1 && is_array($pk)) {
-            return $this->getKrynCore()->urlEncode($pk[$withFieldNames ? $pks[0] : 0]);
+            return $this->getKrynCore()->getUtils()->urlEncode($pk[$withFieldNames ? $pks[0] : 0]);
         } else {
             $c = 0;
             $urlId = array();
             foreach ($pks as $pk2) {
-                $urlId[] = $this->getKrynCore()->urlEncode($pk[$withFieldNames ? $pk2 : $c]);
+                $urlId[] = $this->getKrynCore()->getUtils()->urlEncode($pk[$withFieldNames ? $pk2 : $c]);
                 $c++;
             }
 
@@ -616,25 +618,25 @@ class Objects
         $obj = $this->getClass($objectKey);
         $definition = $this->getDefinition($objectKey);
 
-        if (!$options['fields']) {
+        if (!isset($options['fields'])) {
             $options['fields'] = $definition->getDefaultSelection() ? : '*';
         }
 
-        $conditionObject = new \Kryn\CmsBundle\Configuration\Condition();
+        $conditionObject = new \Kryn\CmsBundle\Configuration\Condition(null, $this->getKrynCore());
 
         if ($condition && is_array($condition)) {
             $conditionObject->fromPk($condition, $objectKey);
         } else if ($condition instanceof Condition) {
             $conditionObject = $condition;
         } else {
-            $conditionObject = new \Kryn\CmsBundle\Configuration\Condition();
+            $conditionObject = new \Kryn\CmsBundle\Configuration\Condition(null, $this->getKrynCore());
         }
 
         if ($limit = $obj->getDefinition()->getLimitDataSets()) {
             $conditionObject->mergeAnd($limit);
         }
 
-        if ($options['permissionCheck'] && $aclCondition = Permission::getListingCondition($objectKey)) {
+        if (isset($options['permissionCheck']) && $aclCondition = $this->getKrynCore()->getACL()->getListingCondition($objectKey)) {
             $conditionObject->mergeAndBegin($aclCondition);
         }
 
@@ -647,27 +649,30 @@ class Objects
      *
      * @param $objectKey
      *
-     * @return \Core\ORM\ORMAbstract
+     * @return \Kryn\CmsBundle\ORM\ORMAbstract
      * @throws \ObjectNotFoundException
      * @throws \Exception
      */
     public function &getClass($objectKey)
     {
-        if (!$this->instances[$objectKey]) {
+        if (!isset($this->instances[$objectKey])) {
             $definition = $this->getDefinition($objectKey);
 
             if (!$definition) {
-                throw new \ObjectNotFoundException(tf('Object `%s` not found.', $objectKey));
+                throw new ObjectNotFoundException(sprintf('Object `%s` not found.', $objectKey));
             }
 
             if ('custom' === $definition->getDataModel()) {
                 if (!class_exists($className = $definition['class'])) {
-                    throw new \Exception(tf('Class for %s (%s) not found.', $objectKey, $definition['class']));
+                    throw new \Exception(sprintf('Class for %s (%s) not found.', $objectKey, $definition['class']));
                 }
 
-                $this->instances[$objectKey] = new $className($objectKey, $definition);
+                $this->instances[$objectKey] = new $className($objectKey, $definition, $this->getKrynCore());
             } else {
-                $this->instances[$objectKey] = new \Core\ORM\Propel($objectKey, $definition);
+                $clazz = sprintf('\\Kryn\\CmsBundle\\ORM\\%s', ucfirst($definition->getDataModel()));
+                if (class_exists($clazz) || class_exists($clazz = $definition->getDataModel())) {
+                    $this->instances[$objectKey] = new $clazz($objectKey, $definition, $this->getKrynCore());
+                }
             }
         }
 
@@ -714,21 +719,21 @@ class Objects
     {
         $obj = $this->getClass($objectKey);
 
-        $conditionObject = new \Kryn\CmsBundle\Configuration\Condition();
+        $conditionObject = new \Kryn\CmsBundle\Configuration\Condition(null, $this->getKrynCore());
 
         if ($condition && is_array($condition)) {
             $conditionObject->fromPk($condition, $objectKey);
         } else if ($condition instanceof Condition) {
             $conditionObject = $condition;
         } else {
-            $conditionObject = new \Kryn\CmsBundle\Configuration\Condition();
+            $conditionObject = new \Kryn\CmsBundle\Configuration\Condition(null, $this->getKrynCore());
         }
 
         if ($limit = $obj->getDefinition()->getLimitDataSets()) {
             $conditionObject->mergeAnd($limit);
         }
 
-        if ($options['permissionCheck'] && $aclCondition = Permission::getListingCondition($objectKey)) {
+        if ($options['permissionCheck'] && $aclCondition = $this->getKrynCore()->getACL()->getListingCondition($objectKey)) {
             $conditionObject->mergeAndBegin($aclCondition);
         }
 
@@ -760,7 +765,7 @@ class Objects
             $pk = $obj->normalizePrimaryKey($pk);
         }
 
-        $conditionObject = new Condition();
+        $conditionObject = new Condition(null, $this->getKrynCore());
 
         if ($condition) {
             $conditionObject->fromPk($condition, $objectKey);
@@ -770,7 +775,7 @@ class Objects
             $conditionObject->mergeAnd($limit);
         }
 
-        if ($options['permissionCheck'] && $aclCondition = Permission::getListingCondition($objectKey)) {
+        if ($options['permissionCheck'] && $aclCondition = $this->getKrynCore()->getACL()->getListingCondition($objectKey)) {
             $conditionObject->mergeAndBegin($aclCondition);
         }
 
@@ -792,7 +797,7 @@ class Objects
      * @return mixed
      *
      * @throws \NoFieldWritePermission
-     * @throws \Core\Exceptions\InvalidArgumentException
+     * @throws \Kryn\CmsBundle\Exceptions\InvalidArgumentException
      */
     public function add(
         $objectKey,
@@ -804,8 +809,8 @@ class Objects
     ) {
 
         $pk = $this->normalizePk($objectKey, $pk);
-        $objectKey = $this->normalizeObjectKey($objectKey);
-        $targetObjectKey = $this->normalizeObjectKey($targetObjectKey);
+        $objectKey = Objects::normalizeObjectKey($objectKey);
+        $targetObjectKey = Objects::normalizeObjectKey($targetObjectKey);
 
         $obj = $this->getClass($objectKey);
 
@@ -815,8 +820,8 @@ class Objects
 
                 //todo, what if $targetObjectKey differs from $objectKey
 
-                if (!Permission::checkAdd($objectKey, $pk, $fieldName)) {
-                    throw new \NoFieldWritePermission(tf(
+                if (!$this->getKrynCore()->getACL()->checkAdd($objectKey, $pk, $fieldName)) {
+                    throw new \NoFieldWritePermission(sprintf(
                         "No update permission to field '%s' in item '%s' from object '%s'",
                         $fieldName,
                         $pk,
@@ -841,8 +846,8 @@ class Objects
 
         if ($targetObjectKey && $targetObjectKey != $objectKey) {
             if ($position == 'prev' || $position == 'next') {
-                throw new \Core\Exceptions\InvalidArgumentException(
-                    tf('Its not possible to use `prev` or `next` to add a new entry with a different object key. [target: %s, self: %s]',
+                throw new \InvalidArgumentException(
+                    sprintf('Its not possible to use `prev` or `next` to add a new entry with a different object key. [target: %s, self: %s]',
                         $targetObjectKey, $objectKey)
                 );
             }
@@ -895,23 +900,23 @@ class Objects
     {
         if ($options['permissionCheck']) {
 
-            $item = \Core\Object::get($objectKey, $pk, $options);
+            $item = $this->get($objectKey, $pk, $options);
             if (!$item) {
                 return false;
             }
 
-            if (!Permission::checkUpdateExact($objectKey, $pk)) {
+            if (!$this->getKrynCore()->getACL()->checkUpdateExact($objectKey, $pk)) {
                 return false;
             }
 
             foreach ($values as $fieldName => $value) {
-                if (!Permission::checkUpdateExact($objectKey, $pk, [$fieldName => $value])) {
-                    throw new \NoFieldWritePermission(tf("No update permission to field '%s' in item '%s' from object '%s'", $fieldName, $pk, $objectKey));
+                if (!$this->getKrynCore()->getACL()->checkUpdateExact($objectKey, $pk, [$fieldName => $value])) {
+                    throw new \NoFieldWritePermission(sprintf("No update permission to field '%s' in item '%s' from object '%s'", $fieldName, $pk, $objectKey));
                 }
             }
         }
 
-        $objectKey = $this->normalizeObjectKey($objectKey);
+        $objectKey = Objects::normalizeObjectKey($objectKey);
         $obj = $this->getClass($objectKey);
         $primaryKey = $obj->normalizePrimaryKey($pk);
 
@@ -952,20 +957,20 @@ class Objects
      */
     public function patch($objectKey, $pk, $values, $options = null)
     {
-        $objectKey = $this->normalizeObjectKey($objectKey);
+        $objectKey = Objects::normalizeObjectKey($objectKey);
         $obj = $this->getClass($objectKey);
         $pk = $obj->normalizePrimaryKey($pk);
 
         if ($options['permissionCheck']) {
 
-            $item = \Core\Object::get($objectKey, $pk, $options);
+            $item = $this->get($objectKey, $pk, $options);
             if (!$item) {
                 return false;
             }
 
             foreach ($values as $fieldName => $value) {
-                if (!Permission::checkUpdateExact($objectKey, $pk, [$fieldName => $value])) {
-                    throw new \NoFieldWritePermission(tf("No update permission to field '%s' in item '%s' from object '%s'", $fieldName, $pk, $objectKey));
+                if (!$this->getKrynCore()->getACL()->checkUpdateExact($objectKey, $pk, [$fieldName => $value])) {
+                    throw new \NoFieldWritePermission(sprintf("No update permission to field '%s' in item '%s' from object '%s'", $fieldName, $pk, $objectKey));
                 }
             }
         }
@@ -1018,7 +1023,7 @@ class Objects
      */
     public function remove($objectKey, $pk)
     {
-        $objectKey = $this->normalizeObjectKey($objectKey);
+        $objectKey = Objects::normalizeObjectKey($objectKey);
         $obj = $this->getClass($objectKey);
         $primaryKey = $obj->normalizePrimaryKey($pk);
 
@@ -1107,9 +1112,9 @@ class Objects
         } else {
             $obj = $this->getClass($objectKey);
 
-            $conditionObject = new Condition();
+            $conditionObject = new Condition(null, $this->getKrynCore());
 
-            if ($options['permissionCheck'] && $aclCondition = Permission::getListingCondition($objectKey)) {
+            if ($options['permissionCheck'] && $aclCondition = $this->getKrynCore()->getACL()->getListingCondition($objectKey)) {
                 $conditionObject->mergeAndBegin($aclCondition);
             }
 
@@ -1166,7 +1171,7 @@ class Objects
             $options['fields'] = implode(',', $fields);
         }
 
-        $conditionObject = new Condition();
+        $conditionObject = new Condition(null, $this->getKrynCore());
 
         if ($condition) {
             $conditionObject->fromPk($condition, $objectKey);
@@ -1176,7 +1181,7 @@ class Objects
             $conditionObject->mergeAnd($limit);
         }
 
-        if ($options['permissionCheck'] && $aclCondition = Permission::getListingCondition($objectKey)) {
+        if ($options['permissionCheck'] && $aclCondition = $this->getKrynCore()->getACL()->getListingCondition($objectKey)) {
             $conditionObject->mergeAndBegin($aclCondition);
         }
 
@@ -1349,7 +1354,7 @@ class Objects
         return $obj->normalizePrimaryKey($pk);
     }
 
-    public function normalizeObjectKey($key)
+    public static function normalizeObjectKey($key)
     {
         $key = str_replace('\\', ':', $key);
         $key = str_replace('/', ':', $key);

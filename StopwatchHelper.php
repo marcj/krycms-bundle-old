@@ -51,5 +51,14 @@ class StopwatchHelper {
         }
     }
 
+    /**
+     * @param string $name
+     */
+    public function lap($name){
+        if ($this->stopwatch) {
+            $this->stopwatch->lap($name);
+        }
+    }
+
 
 }

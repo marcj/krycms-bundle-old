@@ -1,7 +1,7 @@
 ka.DashboardWidgets.LiveVisitor = new Class({
     Extends: ka.DashboardWidgets.Base,
 
-    streamPath: 'admin/uptime',
+    streamPath: 'KrynCmsBundle/uptime',
 
     create: function () {
         this.header = new Element('h3', {

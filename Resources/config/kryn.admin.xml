@@ -51,33 +51,33 @@
             <assets>@KrynCmsBundle/admin/css/ka/ui/*.css</assets>
         </adminAssets>
         <streams>
-            <stream id="load">
-                <class>Admin\Controller\DashboardWidgets</class>
+            <stream path="load">
+                <class>Kryn\CmsBundle\Controller\Admin\DashboardWidgets</class>
                 <method>load</method>
             </stream>
 
-            <stream id="space">
-                <class>Admin\Controller\DashboardWidgets</class>
+            <stream path="space">
+                <class>Kryn\CmsBundle\Controller\Admin\DashboardWidgets</class>
                 <method>space</method>
             </stream>
 
-            <stream id="uptime">
-                <class>Admin\Controller\DashboardWidgets</class>
+            <stream path="uptime">
+                <class>Kryn\CmsBundle\Controller\Admin\DashboardWidgets</class>
                 <method>uptime</method>
             </stream>
 
-            <stream id="analytics">
-                <class>Admin\Controller\DashboardWidgets</class>
+            <stream path="analytics">
+                <class>Kryn\CmsBundle\Controller\Admin\DashboardWidgets</class>
                 <method>analytics</method>
             </stream>
 
-            <stream id="latency">
-                <class>Admin\Controller\DashboardWidgets</class>
+            <stream path="latency">
+                <class>Kryn\CmsBundle\Controller\Admin\DashboardWidgets</class>
                 <method>latency</method>
             </stream>
 
-            <stream id="latencies">
-                <class>Admin\Controller\DashboardWidgets</class>
+            <stream path="latencies">
+                <class>Kryn\CmsBundle\Controller\Admin\DashboardWidgets</class>
                 <method>latencies</method>
             </stream>
 

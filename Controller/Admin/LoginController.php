@@ -4,15 +4,11 @@ namespace Kryn\CmsBundle\Controller\Admin;
 
 use Kryn\CmsBundle\Model\NodeQuery;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Kryn\CmsBundle\PluginController;
 
-class MainController extends Controller
+class LoginController extends PluginController
 {
-    /**
-     * @Route("/")
-     */
-    public function indexAction()
+    public function showLogin()
     {
         $this->addMainResources();
         $this->addLanguageResources();
@@ -30,9 +26,8 @@ class MainController extends Controller
         $response->setResourceCompression(false);
         $response->setDomainHandling(false);
 
-        //$response->setTitle($this->getKrynCore()->getSystemConfig()->getSystemTitle() . ' | Kryn.cms Administration');
-
-        return $this->getKrynCore()->getPageResponse();
+        $response->setTitle($this->getKrynCore()->getSystemConfig()->getSystemTitle() . ' | Kryn.cms Administration');
+        return $response;
     }
 
     public function addSessionScripts()
@@ -49,7 +44,7 @@ class MainController extends Controller
         $session['sessionid'] = $client->getToken();
         $session['tokenid'] = $client->getTokenId();
         $session['lang'] = $client->getSession()->getLanguage();
-        $session['access'] = Permission::check('core:EntryPoint', '/admin');
+        $session['access'] = $this->get('kryn.acl')->check('KrynCmsBundle:EntryPoint', '/admin');
         if ($client->getUserId()) {
             $session['username'] = $client->getUser()->getUsername();
             $session['lastLogin'] = $client->getUser()->getLastlogin();
@@ -67,9 +62,9 @@ class MainController extends Controller
         $baseUrl = $this->getRequest()->getBaseUrl() . '/';
         $prefix = substr($this->getRequest()->getRequestUri(), strlen($baseUrl));
 
-        $response->addJsFile($prefix . '/admin/ui/possibleLangs?noCache=978699877');
+        $response->addJsFile($prefix . '/admin/ui/languages?noCache=978699877');
         $response->addJsFile($prefix . '/admin/ui/language?lang=en&javascript=1');
-        $response->addJsFile($prefix . '/admin/ui/languagePluralForm?lang=en');
+        $response->addJsFile($prefix . '/admin/ui/language-plural?lang=en');
     }
 
     public function addMainResources($options = array())
@@ -77,14 +72,24 @@ class MainController extends Controller
         $response = $this->getKrynCore()->getPageResponse();
 
         $baseUrl = $this->getRequest()->getBaseUrl();
-        $prefix = substr($this->getRequest()->getRequestUri(), strlen($baseUrl) + 1);
+        $path = substr($this->getRequest()->getRequestUri(), strlen($baseUrl) + 1);
 
         $options['noJs'] = isset($options['noJs']) ? $options['noJs'] : false;
+
+
+        //do we need to add app_dev.php/ or something?
+        $prefix = substr(
+            $this->getKrynCore()->getRequest()->getBaseUrl(),
+            strlen($this->getKrynCore()->getRequest()->getBasePath())
+        );
+        if (false !== $prefix) {
+            $path = substr($prefix, 1) . '/' . $path;
+        }
 
         $response->addJs(
             '
         window._path = window._baseUrl = ' . json_encode(dirname($baseUrl). '/') . '
-        window._pathAdmin = ' . json_encode($prefix)
+        window._pathAdmin = ' . json_encode($path . '/')
         );
 
         if ($this->getKrynCore()->getKernel()->isDebug()) {

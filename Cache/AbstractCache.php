@@ -13,6 +13,7 @@
 namespace Kryn\CmsBundle\Cache;
 
 use Kryn\CmsBundle\Configuration\Cache;
+use Kryn\CmsBundle\Core;
 
 /**
  * Cache controller
@@ -138,7 +139,7 @@ abstract class AbstractCache implements CacheInterface
      *
      * @return Cache
      */
-    public static function getFastestCacheClass()
+    public static function getFastestCacheClass(Core $krynCore)
     {
         $class = '\Core\Cache\\';
 
@@ -152,7 +153,7 @@ abstract class AbstractCache implements CacheInterface
             $class .= 'Files';
         }
 
-        $cacheConfig = new Cache();
+        $cacheConfig = new Cache(null, $krynCore);
         $cacheConfig->setClass($class);
         return $cacheConfig;
     }

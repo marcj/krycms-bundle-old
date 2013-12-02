@@ -14,9 +14,9 @@ ka.System = new Class({
             text: t('System')
         }).inject(this.container);
 
-        this.addSection('admin');
+        this.addSection('kryncmsbundle');
         Object.each(ka.settings.configs, function(config, key) {
-            if ('admin' !== key) {
+            if ('kryncmsbundle' !== key) {
                 this.addSection(key);
             }
         }, this);

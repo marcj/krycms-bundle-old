@@ -111,8 +111,8 @@ class Assets extends Model implements \IteratorAggregate
                 ->in(dirname($path));
 
             foreach ($files as $file) {
-                $asset = new Asset();
-                $file = ($bundleName ? $bundleName . '/' : '') . substr($file->getPathName(), $offset);
+                $asset = new Asset(null, $this->getKrynCore());
+                $file = ($bundleName ? $bundleName : '') . substr($file->getPathName(), $offset);
                 $asset->setPath($file);
                 $asset->setCompression($this->getCompression());
                 $this->assets[] = $asset;

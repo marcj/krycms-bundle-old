@@ -28,6 +28,8 @@ class Model implements \ArrayAccess
      */
     protected $krynCore;
 
+    public static $serialisationKrynCore;
+
     /**
      * Defines which values are attributes of the <rootName> element.
      *
@@ -155,7 +157,12 @@ class Model implements \ArrayAccess
      * @param \DOMElement|array|string $values
      * @param Core                     $krynCore
      */
-    public function __construct($values = null, Core $krynCore = null)
+    public function __construct($values = null, Core $krynCore)
+    {
+        $this->initialize($values, $krynCore);
+    }
+
+    public function initialize($values = null, $krynCore = null)
     {
         if (null === $this->rootName) {
             $array = explode('\\', get_called_class());
@@ -282,7 +289,7 @@ class Model implements \ArrayAccess
                 if (1 <= count($parameters)) {
                     $firstParameter = $parameters[0];
                     if ($firstParameter->getClass() && $className = $firstParameter->getClass()->name) {
-                        $setterValue = new $className($child);
+                        $setterValue = new $className($child, $this->getKrynCore());
                     }
                     $result = str_replace(array('[', ']'), '', $phpDocs['param']['type']);
                     $types = explode('|', $result);
@@ -349,7 +356,7 @@ class Model implements \ArrayAccess
 
             if (is_callable(array($this, $setter))) {
                 $this->$setter($setterValue);
-            } else if (!$this->$nodeName) {
+            } else if (!isset($this->$nodeName)) {
                 $this->extractExtraNodes($child, $this->additionalNodes);
             }
 
@@ -650,7 +657,8 @@ class Model implements \ArrayAccess
         }
 
         $method = new \ReflectionMethod($this, $getter);
-        if ($method->getParameters()[0] && 'orCreate' === $method->getParameters()[0]->getName()) {
+        $parameters = $method->getParameters();
+        if (isset($parameters[0]) && 'orCreate' === $parameters[0]->getName()) {
             $val = $this->$getter($printDefaults);
         } else {
             $val = $this->$getter();
@@ -699,7 +707,7 @@ class Model implements \ArrayAccess
         };
 
         if (null === $value || (is_scalar($value) && !in_array($key, $this->attributes)) || is_array($value) || $value instanceof Model) {
-            if ($comment = $this->docBlocks[$key]) {
+            if (isset($this->docBlocks[$key]) && $comment = $this->docBlocks[$key]) {
                 $comment = $doc->createComment($comment);
                 $append($comment);
             }
@@ -896,7 +904,7 @@ class Model implements \ArrayAccess
             if (1 <= count($parameters)) {
                 $firstParameter = $parameters[0];
                 if ($firstParameter->getClass() && $className = $firstParameter->getClass()->name) {
-                    $setterValue = new $className();
+                    $setterValue = new $className(null, $this->getKrynCore());
                     $setterValue->fromArray($value, $key);
                 }
                 if ($firstParameter->isArray() && is_array($value)){
@@ -918,7 +926,7 @@ class Model implements \ArrayAccess
                     if (is_array($value)) {
                         foreach ($value as $subKey => $subValue) {
                             if ($clazz) {
-                                $object = new $clazz();
+                                $object = new $clazz(null, $this->getKrynCore());
                                 $object->fromArray($subValue, $subKey);
                                 $setterValue[] = $object;
                             } else {
@@ -1131,5 +1139,10 @@ class Model implements \ArrayAccess
         }
 
         return $vars;
+    }
+
+    public function __wakeup()
+    {
+        $this->krynCore = Model::$serialisationKrynCore;
     }
 }
