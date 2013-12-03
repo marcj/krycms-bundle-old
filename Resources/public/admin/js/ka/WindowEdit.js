@@ -710,7 +710,7 @@ ka.WindowEdit = new Class({
             }).inject(document.id(this.topTabGroup));
 
             new Element('img', {
-                src: _path + 'bundles/admin/images/ka.mainmenu-additional.png',
+                src: _path + 'bundles/kryncms/admin/images/ka.mainmenu-additional.png',
                 style: 'left: 1px; top: 6px;'
             }).inject(this.tooMuchTabFieldsButton);
 
@@ -764,7 +764,7 @@ ka.WindowEdit = new Class({
                 if (tabButton && !tabButton.isPressed()) {
 
                     tabButton.startTip(t('Invalid input!'));
-                    tabButton.toolTip.loader.set('src', _path + 'bundles/admin/images/icons/error.png');
+                    tabButton.toolTip.loader.set('src', _path + 'bundles/kryncms/admin/images/icons/error.png');
                     tabButton.toolTip.loader.setStyle('position', 'relative');
                     tabButton.toolTip.loader.setStyle('top', '-2px');
                     document.id(tabButton.toolTip).setStyle('top',
@@ -788,7 +788,7 @@ ka.WindowEdit = new Class({
 
                 if (!this.languageTip) {
                     this.languageTip = new ka.Tooltip(this.languageSelect, _('Please fill!'), null, null,
-                        _path + 'bundles/admin/images/icons/error.png');
+                        _path + 'bundles/kryncms/admin/images/icons/error.png');
                 }
                 this.languageTip.show();
 

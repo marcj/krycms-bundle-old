@@ -12,7 +12,7 @@ ka.Tooltip = new Class({
         this.icon = pIcon;
 
         if (!this.icon) {
-            this.icon = _path + 'bundles/admin/images/loading.gif';
+            this.icon = _path + 'bundles/kryncms/admin/images/loading.gif';
         }
 
         if (pDirection) {

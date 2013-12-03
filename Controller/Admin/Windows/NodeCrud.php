@@ -246,7 +246,7 @@ class NodeCrud extends ObjectCrud
 
     public $addMultiple = true;
 
-    public $object = 'Core\\Node';
+    public $object = 'KrynCmsBundle:Node';
 
     public $preview = false;
 

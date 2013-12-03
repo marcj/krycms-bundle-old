@@ -67,7 +67,7 @@ class DomainCrud extends ObjectCrud
 
     public $export = false;
 
-    public $object = 'Core\\Domain';
+    public $object = 'KrynCmsBundle:Domain';
 
     public $preview = false;
 

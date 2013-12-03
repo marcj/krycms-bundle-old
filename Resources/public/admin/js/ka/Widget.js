@@ -53,7 +53,7 @@ ka.Widget = new Class({
             style: 'position: absolute; top: 4px; right: 22px;'
         }).inject(this.main);
 
-        var myPath = _path + 'bundles/admin/images/icons/';
+        var myPath = _path + 'bundles/kryncms/admin/images/icons/';
 
         this.ctrlPrevious = new Element('img', {
             src: myPath + 'control_back.png'
@@ -74,7 +74,7 @@ ka.Widget = new Class({
 
         this.content = new Element('div', {
             'class': 'ka-widget-content',
-            html: '<center><img src="' + _path + 'bundles/admin/images/ka-tooltip-loading.gif" /></center>'
+            html: '<center><img src="' + _path + 'bundles/kryncms/admin/images/ka-tooltip-loading.gif" /></center>'
         }).inject(this.main);
 
         this.bottom = new Element('div', {
@@ -243,7 +243,7 @@ ka.Widget = new Class({
 
         new Element('img', {
             'class': 'ka-widget-knoptodesktop',
-            'src': _path + 'bundles/admin/images/win-top-bar-link.png',
+            'src': _path + 'bundles/kryncms/admin/images/win-top-bar-link.png',
             title: _('Display this widget at desktop')
         }).addEvent('click', function () {
                 ka.desktop.addWidget(this.opts);

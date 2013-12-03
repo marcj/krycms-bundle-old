@@ -75,7 +75,7 @@ var admin_system_development_logs = new Class({
 
         document.id(this.logsTable).addClass('selectable');
 
-        var myPath = _path + 'bundles/admin/images/icons/';
+        var myPath = _path + 'bundles/kryncms/admin/images/icons/';
 
         this.logsCtrlPrevious = new Element('img', {
             src: myPath + 'control_back.png'

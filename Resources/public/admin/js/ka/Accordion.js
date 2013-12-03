@@ -48,7 +48,7 @@ ka.Accordion = new Class({
                     toggler.addClass('ka-Accordion-current');
 
                     _this.box.getElements('.ka-Accordion-toggler-img').each(function (img) {
-                        img.set('src', _path + 'bundles/admin/images/icons/tree_plus.png');
+                        img.set('src', _path + 'bundles/kryncms/admin/images/icons/tree_plus.png');
                     });
 
                     toggler.getElement('.ka-Accordion-toggler-img').set('src',
@@ -89,7 +89,7 @@ ka.Accordion = new Class({
 
         new Element('img', {
             'class': 'ka-Accordion-toggler-img',
-            src: _path + 'bundles/admin/images/icons/tree_plus.png'
+            src: _path + 'bundles/kryncms/admin/images/icons/tree_plus.png'
         }).inject(toggler, 'top');
 
         new Element('span', {

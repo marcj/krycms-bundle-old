@@ -966,7 +966,7 @@ ka.ObjectTree = new Class({
         var item = pA.objectEntry;
 
         var loader = new Element('img', {
-            src: _path + 'bundles/admin/images/loading.gif',
+            src: _path + 'bundles/kryncms/admin/images/loading.gif',
             style: 'position: relative; top: 3px;'
         }).inject(pA.span);
 

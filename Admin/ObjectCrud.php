@@ -903,7 +903,7 @@ class ObjectCrud
         $def = $this->getObjectDefinition();
         $acl = [];
         foreach ($def->getFields() as $field) {
-            if (!Permission::checkUpdateExact($this->getObject(), $item, [$field->getId()])) {
+            if (!$this->getKrynCore()->getACL()->checkUpdateExact($this->getObject(), $item, [$field->getId()])) {
                 $acl[] = $field->getId();
             }
         }

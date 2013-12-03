@@ -291,7 +291,7 @@ ka.FieldTypes.Condition = new Class({
         var actions = new Element('span',
             {style: 'position: relative; top: 3px; width: ' + parseInt((16 * 4) + 3) + 'px'}).inject(con, 'before');
 
-        new Element('img', {src: _path + 'bundles/admin/images/icons/arrow_up.png'})
+        new Element('img', {src: _path + 'bundles/kryncms/admin/images/icons/arrow_up.png'})
             .addEvent('click', function () {
                 if (div.getPrevious()) {
                     div.inject(div.getPrevious(), 'before');
@@ -300,7 +300,7 @@ ka.FieldTypes.Condition = new Class({
             }.bind(this))
             .inject(actions);
 
-        new Element('img', {src: _path + 'bundles/admin/images/icons/arrow_down.png'})
+        new Element('img', {src: _path + 'bundles/kryncms/admin/images/icons/arrow_down.png'})
             .addEvent('click', function () {
                 if (div.getNext()) {
                     div.inject(div.getNext(), 'after');
@@ -309,7 +309,7 @@ ka.FieldTypes.Condition = new Class({
             }.bind(this))
             .inject(actions);
 
-        new Element('img', {src: _path + 'bundles/admin/images/icons/delete.png'})
+        new Element('img', {src: _path + 'bundles/kryncms/admin/images/icons/delete.png'})
             .addEvent('click', function () {
                 this.getWin().confirm(t('Really delete?'), function (a) {
                     if (!a) {

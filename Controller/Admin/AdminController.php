@@ -98,6 +98,10 @@ class AdminController extends Controller
             $debugMode = true;
         }
 
+        if ('JSON' === $this->getRequest()->headers->get('x-request')) {
+            $exceptionHandler = null;
+        }
+
         if ('/' !== substr($url, 0, 1)) {
             $url = '/' . $url;
         }

@@ -867,7 +867,7 @@ ka.WindowCombine = new Class({
             return;
         }
         this.prevItemLoader.set('html',
-            '<img src="' + _path + 'bundles/admin/images/loading.gif" />' + '<br />' + _('Loading entries ...'));
+            '<img src="' + _path + 'bundles/kryncms/admin/images/loading.gif" />' + '<br />' + _('Loading entries ...'));
     },
 
     prevItemLoaderStop: function() {

@@ -3,6 +3,7 @@
 namespace Kryn\CmsBundle\ORM;
 use Kryn\CmsBundle\Configuration\Condition;
 use Kryn\CmsBundle\Core;
+use Kryn\CmsBundle\Tools;
 
 /**
  * ORM Abstract class for objects.
@@ -238,7 +239,7 @@ abstract class ORMAbstract
 
                 $key = $this->primaryKeys[$pos];
 
-                $item[$key] = Kryn::urlDecode($value);
+                $item[$key] = Tools::urlDecode($value);
             }
 
             if (count($this->primaryKeys) > count($item)) {

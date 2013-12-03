@@ -1223,7 +1223,7 @@ var admin_system_module_editWindow = new Class({
                 .inject(this.customMethodContainer);
 
             new Element('img', {
-                src: _path + 'bundles/admin/images/icons/pencil.png',
+                src: _path + 'bundles/kryncms/admin/images/icons/pencil.png',
                 'class': 'ka-system-module-windowEdit-methods-item-pencil',
                 title: t('Edit')
             })
@@ -1234,7 +1234,7 @@ var admin_system_module_editWindow = new Class({
                 .inject(a);
 
             new Element('img', {
-                src: _path + 'bundles/admin/images/icons/delete.png',
+                src: _path + 'bundles/kryncms/admin/images/icons/delete.png',
                 'class': 'ka-system-module-windowEdit-methods-item-remove',
                 title: t('Remove')
             })

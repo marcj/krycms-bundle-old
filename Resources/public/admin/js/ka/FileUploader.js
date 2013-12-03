@@ -85,7 +85,7 @@ ka.FileUploader = new Class({
         }).inject(tr);
 
         new Element('img', {
-            src: _path + 'bundles/admin/images/icons/delete.png',
+            src: _path + 'bundles/kryncms/admin/images/icons/delete.png',
             style: 'cursor: pointer;',
             title: _('Cancel upload')
         }).addEvent('click', function() {
@@ -599,7 +599,7 @@ ka.FileUploader = new Class({
             this.uploadTrs[ pFile.id ].status.set('html', '<span style="color: red">' + t('File size limit exceeded') + '</span>');
             new Element('img', {
                 style: 'position: relative; top: 2px; left: 2px;',
-                src: _path + 'bundles/admin/images/icons/error.png',
+                src: _path + 'bundles/kryncms/admin/images/icons/error.png',
                 title: t('The file size exceeds the limit allowed by upload_max_filesize or post_max_size on your server. Please contact the administrator.')
             }).inject(this.uploadTrs[ pFile.id ].status);
         } else {

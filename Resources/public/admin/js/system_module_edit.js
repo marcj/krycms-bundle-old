@@ -1718,7 +1718,7 @@ var admin_system_module_edit = new Class({
         var olpp = new Element('ol').inject(publicproperties);
 
         new Element('img', {
-            'src': _path + 'bundles/admin/images/icons/add.png',
+            'src': _path + 'bundles/kryncms/admin/images/icons/add.png',
             title: t('Add public property'),
             style: 'cursor: pointer; position: relative; top: 3px; margin-left: 3px;'
         }).addEvent('click', function() {
@@ -1743,7 +1743,7 @@ var admin_system_module_edit = new Class({
         var ol = new Element('ol').inject(properties);
 
         new Element('img', {
-            'src': _path + 'bundles/admin/images/icons/add.png',
+            'src': _path + 'bundles/kryncms/admin/images/icons/add.png',
             title: t('Add property'),
             style: 'cursor: pointer; position: relative; top: 3px; margin-left: 3px;'
         }).addEvent('click', function() {
@@ -1765,7 +1765,7 @@ var admin_system_module_edit = new Class({
             'class': 'layoutContainerLayout'
         }).inject(p);
         new Element('img', {
-            'src': _path + 'bundles/admin/images/icons/add.png',
+            'src': _path + 'bundles/kryncms/admin/images/icons/add.png',
             title: t('Add layout template'),
             style: 'cursor: pointer; position: relative; top: 3px; margin-left: 3px'
         }).addEvent('click', function() {
@@ -1788,7 +1788,7 @@ var admin_system_module_edit = new Class({
             'class': 'layoutContainerContent'
         }).inject(p);
         new Element('img', {
-            'src': _path + 'bundles/admin/images/icons/add.png',
+            'src': _path + 'bundles/kryncms/admin/images/icons/add.png',
             title: t('Add element template'),
             style: 'cursor: pointer; position: relative; top: 3px; margin-left: 3px'
         }).addEvent('click', function() {
@@ -1810,7 +1810,7 @@ var admin_system_module_edit = new Class({
             'class': 'layoutContainerNavigation'
         }).inject(p);
         new Element('img', {
-            'src': _path + 'bundles/admin/images/icons/add.png',
+            'src': _path + 'bundles/kryncms/admin/images/icons/add.png',
             title: t('Add navigation template'),
             style: 'cursor: pointer; position: relative; top: 3px; margin-left: 3px'
         }).addEvent('click', function() {

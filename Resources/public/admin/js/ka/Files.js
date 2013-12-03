@@ -13,7 +13,7 @@ ka.Files = new Class({
 
     __images: ['.jpg', '.jpeg', '.gif', '.png', '.bmp'],
     imageExtensions: ['jpg', 'jpeg', 'gif', 'png', 'bmp'],
-    textExtensions: ['html', 'js', 'scss', 'sass', 'less', 'css', 'txt'],
+    textExtensions: ['html', 'js', 'scss', 'sass', 'less', 'css', 'txt', 'php'],
     __ext: ['.css', '.tpl', '.js', '.html', '.htm'],
 
     systemFolders: ['/', '/bundles', '/cache'],
@@ -339,7 +339,7 @@ ka.Files = new Class({
         }.bind(this));
 
         new Element('img', {
-            src: _path + 'bundles/admin/images/icon-search-loupe.png',
+            src: _path + 'bundles/kryncms/admin/images/icon-search-loupe.png',
             style: 'position: absolute; right: 12px; top: 12px;'
         }).inject(searchContainer);
 
@@ -1058,16 +1058,15 @@ ka.Files = new Class({
                     }
 
                     this.currentFile = pResponse.data;
-                    console.log(this.currentFile.path);
                     this.path2File[this.currentFile.path] = this.currentFile;
-                    this.path2File[pResponse.data.path] = this.currentFile;
+                    this.path2File[pPath] = this.currentFile;
 
                     if (this.options.selection && (this.options.selectionValue == this.currentFile.path || this.options.selectionValue == this.currentFile.path.substr(1))) {
                         if (this.currentFile.path != '/') {
                             this.load(this.currentFile.path.substr(0, this.currentFile.path.lastIndexOf('/')));
                         }
                     } else {
-                        this.load(this.currentFile.path);
+                        this.load(pPath);
                     }
                 }.bind(this)}).get({path: pPath});
             return;
@@ -2315,7 +2314,7 @@ ka.Files = new Class({
             }).inject(this.container);
 
             this.previewDivResizer = new Element('div', {
-                style: 'position: absolute;right: -1px;bottom: -1px;width: 9px;' + 'height: 9px; opacity: 0.7; background-image: url(' + _path + 'bundles/admin/images/win-bottom-resize.png);' + 'cursor: se-resize; background-position: 0px 11px;'
+                style: 'position: absolute;right: -1px;bottom: -1px;width: 9px;' + 'height: 9px; opacity: 0.7; background-image: url(' + _path + 'bundles/kryncms/admin/images/win-bottom-resize.png);' + 'cursor: se-resize; background-position: 0px 11px;'
             }).inject(this.previewDiv);
 
             var img = this.lastPreviewedItem.getElement('img') || this.lastPreviewedItem.getElement('div');
@@ -2454,7 +2453,7 @@ ka.Files = new Class({
             }
 
             var image = new Element('img', {
-                src: _path + 'bundles/admin/images/ext/' + bg + '-mini.png'
+                src: _path + 'bundles/kryncms/admin/images/ext/' + bg + '-mini.png'
             });
 
             var size = ka.bytesToSize(file.size);
@@ -2807,7 +2806,7 @@ ka.Files = new Class({
             }).inject(this.searchPane);
         }
 
-        this.searchPaneContent.set('html', '<div style="text-align: center; padding-top: 25px;">' + '<img src="' + _path + 'bundles/admin/images/ka-tooltip-loading.gif" /><br />' + _('Searching ...') + '</div>');
+        this.searchPaneContent.set('html', '<div style="text-align: center; padding-top: 25px;">' + '<img src="' + _path + 'bundles/kryncms/admin/images/ka-tooltip-loading.gif" /><br />' + _('Searching ...') + '</div>');
 
         if (this.lastqrq) {
             this.lastqrq.cancel();
@@ -2855,7 +2854,7 @@ ka.Files = new Class({
                 }
 
                 var image = new Element('img', {
-                    src: _path + 'bundles/admin/images/ext/' + bg + '-mini.png'
+                    src: _path + 'bundles/kryncms/admin/images/ext/' + bg + '-mini.png'
                 }).inject(td);
 
                 var td = new Element('td').inject(tr);

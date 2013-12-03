@@ -534,6 +534,7 @@ class Objects
         $obj = $this->getClass($objectKey);
         $primaryKey = $obj->normalizePrimaryKey($pk);
         $pk2s = $obj->getPrimaryKeys();
+        $deleteFieldValues = null;
 
         if (!$options['fields']) {
             if ($selection = $obj->definition->getDefaultSelection()) {

@@ -482,11 +482,11 @@ ka.WindowList = new Class({
          }.bind(this));
          _
          this.exportNavi.addButton(this.exportType, '');
-         this.exportNavi.addButton(_('Export'), _path + 'bundles/admin/images/icons/table_go.png', this.exportTable.bind(this));
+         this.exportNavi.addButton(_('Export'), _path + 'bundles/kryncms/admin/images/icons/table_go.png', this.exportTable.bind(this));
          }
 
          if (this.classProperties['import']) {
-         this.exportNavi.addButton(_('Import'), _path + 'bundles/admin/images/icons/table_row_insert.png');
+         this.exportNavi.addButton(_('Import'), _path + 'bundles/kryncms/admin/images/icons/table_row_insert.png');
          }
 
 

@@ -462,7 +462,7 @@ ka.Window = new Class({
 
         if (!this.titleTextPath) {
             this.titleTextPath = new Element('img', {
-                src: _path + 'bundles/admin/images/ka-kwindow-title-path.png'
+                src: _path + 'bundles/kryncms/admin/images/ka-kwindow-title-path.png'
             }).inject(this.titleAdditional);
 
             this.titleText = new Element('span', {
@@ -492,7 +492,7 @@ ka.Window = new Class({
 
     addTitle: function (pText) {
         new Element('img', {
-            src: _path + 'bundles/admin/images/ka-kwindow-title-path.png'
+            src: _path + 'bundles/kryncms/admin/images/ka-kwindow-title-path.png'
         }).inject(this.titleAdditional);
 
         new Element('span', {
@@ -857,7 +857,7 @@ ka.Window = new Class({
         Array.each(path, function (label) {
 
             new Element('img', {
-                src: _path + 'bundles/admin/images/ka-kwindow-title-path.png'
+                src: _path + 'bundles/kryncms/admin/images/ka-kwindow-title-path.png'
             }).inject(this.titleTextContainer);
 
             new Element('span', {
@@ -871,7 +871,7 @@ ka.Window = new Class({
         }
 
         new Element('img', {
-            src: _path + 'bundles/admin/images/ka-kwindow-title-path.png'
+            src: _path + 'bundles/kryncms/admin/images/ka-kwindow-title-path.png'
         }).inject(this.titleTextContainer);
 
         new Element('span', {
@@ -923,7 +923,7 @@ ka.Window = new Class({
         if (this.entryPointDefinition.print === true) {
             this.printer = new Element('img', {
                 'class': 'kwindow-win-printer',
-                src: _path + 'bundles/admin/images/icons/printer.png'
+                src: _path + 'bundles/kryncms/admin/images/icons/printer.png'
             }).inject(this.border);
             this.printer.addEvent('click', this.print.bind(this));
         }
@@ -983,7 +983,7 @@ ka.Window = new Class({
         var noCache = (new Date()).getTime();
 
         if (this.getModule() == 'admin') {
-            this.customCssAsset = new Asset.css(_path + 'bundles/admin/css/' + javascript + '.css?noCache=' + noCache);
+            this.customCssAsset = new Asset.css(_path + 'bundles/kryncms/admin/css/' + javascript + '.css?noCache=' + noCache);
         } else {
             this.customCssAsset =
                 new Asset.css(_path + 'bundles/' + this.getModule() + '/admin/css/' + javascript + '.css?noCache=' +

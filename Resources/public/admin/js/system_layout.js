@@ -22,9 +22,9 @@ var admin_system_layout = new Class({
             this.topNavi.addButton(_('Navigations'), this.changeType.bind(this, 'navigations'));
 
         this.addNavi = this.win.addButtonGroup();
-        this.addNavi.addButton(_('Install a theme'), _path + 'bundles/admin/images/icons/package_add.png',
+        this.addNavi.addButton(_('Install a theme'), _path + 'bundles/kryncms/admin/images/icons/package_add.png',
             this.installTheme.bind(this));
-        this.addNavi.addButton(_('Develop a theme'), _path + 'bundles/admin/images/icons/layout_add.png',
+        this.addNavi.addButton(_('Develop a theme'), _path + 'bundles/kryncms/admin/images/icons/layout_add.png',
             this.addTheme.bind(this));
 
         this.panes = {};

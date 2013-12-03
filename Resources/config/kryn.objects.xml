@@ -76,7 +76,7 @@
         <defaultSelection>type, title, alternativeTitle, urn, layout, visible, target</defaultSelection>
         <nested>true</nested>
         <nestedRootAsObject>true</nestedRootAsObject>
-        <nestedRootObject>core\Domain</nestedRootObject>
+        <nestedRootObject>kryncmsbundle:domain</nestedRootObject>
         <nestedRootObjectField>domainId</nestedRootObjectField>
         <nestedRootObjectLabelField>domain</nestedRootObjectLabelField>
         <treeFields>type, title, accessDenied, accessFromGroups, visible</treeFields>
@@ -141,7 +141,7 @@
           <field id="layout" type="layout"/>
           <field id="content" type="object">
             <label>Contents</label>
-            <object>core:content</object>
+            <object>kryncmsbundle:content</object>
             <objectRelation>1ToN</objectRelation>
             <objectRelationName>content</objectRelationName>
             <options/>

@@ -133,7 +133,7 @@ ka.field_multiUpload = new Class({
             'class': 'multiUpload-delBtn'
         }).inject(fileNameDiv, 'bottom');
 
-        new Element('img', { 'src': _path + 'bundles/admin/images/icons/cross.png' }).inject(delBtn);
+        new Element('img', { 'src': _path + 'bundles/kryncms/admin/images/icons/cross.png' }).inject(delBtn);
         delBtn.storeKey = 'UFN' + this.uploadedFileNum;
         delBtn.addEvent('click', function () {
             _this.removeUploadedFile(this.storeKey);

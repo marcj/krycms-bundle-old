@@ -82,7 +82,7 @@ var admin_files_edit = new Class({
             var boxNavi = this.win.addButtonGroup();
             this.fileSaveGrp = boxNavi;
             this.saveBtn =
-                boxNavi.addButton(_('Save'), _path + 'bundles/admin/images/button-save.png', this.save.bind(this));
+                boxNavi.addButton(_('Save'), _path + 'bundles/kryncms/admin/images/button-save.png', this.save.bind(this));
             this.fileContainer = new Element('div', {
                 value: t('Loading ...'),
                 'class': 'admin-files-edit-fileContainer'
@@ -150,7 +150,7 @@ var admin_files_edit = new Class({
             }).inject(this.sidebarActions);
 
             new Element('img', {
-                src: _path + 'bundles/admin/images/icons/arrow_turn_left.png',
+                src: _path + 'bundles/kryncms/admin/images/icons/arrow_turn_left.png',
                 title: _('Rotate 90° left'),
                 style: 'cursor: pointer;'
             }).addEvent('click', this.rotate.bind(this, 'left')).inject(this.sidebarActions);
@@ -163,7 +163,7 @@ var admin_files_edit = new Class({
              this.saveBtn.setStyle('opacity', 0.4);*/
 
             new Element('img', {
-                src: _path + 'bundles/admin/images/icons/arrow_turn_right.png',
+                src: _path + 'bundles/kryncms/admin/images/icons/arrow_turn_right.png',
                 style: 'margin-left: 12px; cursor: pointer;',
                 title: _('Rotate 90° right')
             }).addEvent('click', this.rotate.bind(this, 'right')).inject(this.sidebarActions);
@@ -269,7 +269,7 @@ var admin_files_edit = new Class({
     _loadImageSidebar: function () {
 
         new Element('img', {
-            src: _path + 'bundles/admin/images/loading.gif'
+            src: _path + 'bundles/kryncms/admin/images/loading.gif'
         }).inject(this.sidebar);
 
         var path = this.win.params.file.path.substr(0, this.win.params.file.path.lastIndexOf('/'));
@@ -321,7 +321,7 @@ var admin_files_edit = new Class({
                 this.img.destroy();
                 this.td.empty();
                 new Element('img', {
-                    src: _path + 'bundles/admin/images/loading.gif',
+                    src: _path + 'bundles/kryncms/admin/images/loading.gif',
                 }).inject(this.td);
             }
 
@@ -331,7 +331,6 @@ var admin_files_edit = new Class({
     },
 
     loadImage: function (pImage) {
-
         this.td.empty();
 
         var loader = new ka.Loader(true, true).inject(this.td);

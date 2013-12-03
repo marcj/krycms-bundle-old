@@ -153,7 +153,7 @@ class Propel extends ORMAbstract
                         $relationFields[ucfirst($relationName)][] = $pk->getPhpName();
                     }
 
-                    if ('*' === $relationFieldSelection[0]) {
+                    if (isset($relationFieldSelection[0]) && '*' === $relationFieldSelection[0]) {
                         foreach ($relation->getRightTable()->getColumns() as $col) {
                             if (!$col->isPrimaryKey()) {
                                 $relationFields[ucfirst($relationName)][] = $col->getPhpName();
@@ -482,12 +482,12 @@ class Propel extends ORMAbstract
 
                         $condition = null;
                         if ($permissionCheck) {
-                            $condition = \Kryn\CmsBundle\Permission::getListingCondition($relationObjectName);
+                            $condition = $this->getKrynCore()->getACL()->getListingCondition($relationObjectName);
                         }
                         $sStmt = $this->getStm($sQuery, $condition);
 
                         $sItems = array();
-                        while ($subRow = dbFetch($sStmt)) {
+                        while ($subRow = $sStmt->fetch(\PDO::FETCH_ASSOC)) {
 
                             $sItem = new $sClazz();
                             $sItem->fromArray($subRow);
@@ -498,13 +498,12 @@ class Propel extends ORMAbstract
                             }
                             $sItems[] = $temp;
                         }
-                        dbFree($sStmt);
                     } else {
                         $get = 'get' . $relation->getPluralName();
                         $sItems = $item->$get();
                     }
 
-                    if ($sItems instanceof RuntimePropelObjectCollection) {
+                    if ($sItems instanceof ObjectCollection) {
                         $newRow[lcfirst($name)] = $sItems->toArray(null, null, TableMap::TYPE_STUDLYPHPNAME) ? : null;
                     } else if (is_array($sItems) && $sItems) {
                         $newRow[lcfirst($name)] = $sItems;
@@ -553,7 +552,7 @@ class Propel extends ORMAbstract
                 $selects,
                 $relations,
                 $relationFields,
-                $options['permissionCheck']
+                isset($options['permissionCheck']) ? $options['permissionCheck'] : null
             );
         }
 
@@ -600,8 +599,7 @@ class Propel extends ORMAbstract
 
         $stmt = $this->getStm($query);
 
-        $row = dbFetch($stmt);
-        dbFree($stmt);
+        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
 
         $clazz = $this->getPhpName();
 
@@ -1064,7 +1062,8 @@ class Propel extends ORMAbstract
 
         $clazz = $this->getPhpName();
 
-        while ($row = dbFetch($stmt)) {
+        $result = null;
+        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
             $item = $this->populateRow(
                 $clazz,
                 $row,
@@ -1113,8 +1112,6 @@ class Propel extends ORMAbstract
             }
             $result[] = $item;
         }
-
-        dbFree($stmt);
 
         return $result;
     }
