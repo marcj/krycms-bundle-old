@@ -581,7 +581,7 @@ class AdminController extends Controller
         foreach ($this->getKrynCore()->getConfigs() as $bundleConfig) {
             if ($streams = $bundleConfig->getStreams()) {
                 foreach ($streams as $stream) {
-                    $id = strtolower($bundleConfig->getName()) . '/' . $stream->getPath();
+                    $id = strtolower($bundleConfig->getBundleName()) . '/' . $stream->getPath();
                     if (false !== in_array($id, $__streams)) {
                         $stream->run($response);
                     }

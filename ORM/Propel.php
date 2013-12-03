@@ -105,7 +105,7 @@ class Propel extends ORMAbstract
             $relationMap = $tableMap->getRelations();
 
             foreach ($relationMap as $relationName => $relation) {
-                if (!$relations[$relationName]) {
+                if (!isset($relations[$relationName])) {
                     $relations[$relationName] = $relation;
 
                     //add columns
@@ -118,7 +118,7 @@ class Propel extends ORMAbstract
 
                     $cols = $relation->getRightTable()->getColumns();
                     foreach ($cols as $col) {
-                        if ($relation->getType == RelationMap::ONE_TO_ONE || $relation->getType == RelationMap::MANY_TO_ONE) {
+                        if ($relation->getType() == RelationMap::ONE_TO_ONE || $relation->getType() == RelationMap::MANY_TO_ONE) {
                             $fields2[$relationName . '.' . $col->getPhpName()] = $col;
                         } else {
                             $relationFields[ucfirst($relationName)][] = $col->getPhpName();
@@ -196,6 +196,9 @@ class Propel extends ORMAbstract
 
 //            $objectName = $relations[$relation]->getRightTable()->getPhpName();
             $relationDef = $this->getDefinition()->getFieldByRelationName($relation);
+            if (!$relationDef) {
+                continue;
+            }
             $def = $this->getKrynCore()->getObjects()->getDefinition($relationDef->getObject());
             $limit = $def['blacklistSelection'];
             if (!$limit) {

@@ -1,4 +1,4 @@
-var admin_system_module_editWindow = new Class({
+var kryncmsbundle_system_module_editWindow = new Class({
 
     Binds: ['applyFieldProperties'],
 

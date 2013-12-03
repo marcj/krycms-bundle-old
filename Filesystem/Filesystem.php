@@ -11,45 +11,15 @@ use Kryn\CmsBundle\Model\FileQuery;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Map\TableMap;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
+use Symfony\Component\Finder\Finder;
 
 class Filesystem
 {
-
-    //todo
-    /**
-     * @var Core
-     */
-    protected $krynCore;
 
     /**
      * @var AdapterInterface
      */
     protected $adapter;
-
-    /**
-     * @param Core $krynCore
-     */
-    function __construct(Core $krynCore)
-    {
-        $this->krynCore = $krynCore;
-    }
-
-    /**
-     * @param Core $krynCore
-     */
-    public function setKrynCore($krynCore)
-    {
-        $this->krynCore = $krynCore;
-    }
-
-    /**
-     * @return Core
-     */
-    public function getKrynCore()
-    {
-        return $this->krynCore;
-    }
-
     /**
      * @return AdapterInterface
      */
@@ -87,10 +57,6 @@ class Filesystem
 
             return $result;
         } else {
-            if (strpos($path, '@') === 0) {
-                $path = $this->getKrynCore()->resolvePath($path);
-            }
-
             if ('/' !== $path[0]) {
                 $path = '/' . $path;
             }
@@ -294,6 +260,28 @@ class Filesystem
         return $fs->hash($this->normalizePath($path));
     }
 
+    public function mkdir($path)
+    {
+        $fs = $this->getAdapter($path);
+        return $fs->mkdir($this->normalizePath($path));
+    }
+
+    public function rename($source, $target)
+    {
+        return $this->move($source, $target);
+    }
+
+    public function move($source, $target)
+    {
+        $fs = $this->getAdapter($source);
+        return $fs->move($this->normalizePath($source), $this->normalizePath($target), 'move');
+    }
+
+    public function copy($source, $target)
+    {
+        $fs = $this->getAdapter($source);
+        return $fs->copy($this->normalizePath($source), $this->normalizePath($target), 'copy');
+    }
 
     /**
      * List directory contents.
@@ -326,7 +314,7 @@ class Filesystem
         $path = $this->normalizePath($path);
 
         if ($path == '/trash') {
-            #return static::getTrashFiles();
+            #return $this->getTrashFiles();
         }
 
         $items = $fs->getFiles($path);

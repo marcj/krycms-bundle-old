@@ -1751,7 +1751,7 @@ ka.AdminInterface = new Class({
 
         new ka.Button(t('Indexed pages')).addEvent('click',
             function() {
-                ka.wm.open('admin/system/searchIndexerList');
+                ka.wm.open('kryncmsbundle/system/searchIndexerList');
             }).inject(this.openSearchContextBottom);
 
         this.openSearchContextClearIndex = new ka.Button(_('Clear index')).addEvent('click',
@@ -1827,7 +1827,7 @@ ka.AdminInterface = new Class({
          })
          */.addEvent('click',
             function() {
-                ka.wm.open('admin/system/module', {updates: 1});
+                ka.wm.open('kryncmsbundle/system/module', {updates: 1});
             }).inject(this.border);
         this.newUpdatesMenu.tween('top', 48);
     },

@@ -1,4 +1,4 @@
-var admin_system_module = new Class({
+var kryncmsbundle_system_module = new Class({
 
     /**
      * @var {ka.Dialog}
@@ -585,15 +585,15 @@ var admin_system_module = new Class({
             }
 
             new ka.Button(_('Info')).addEvent('click', function () {
-                ka.wm.open('admin/system/module/view', {name: key, type: 0}, -1, true);
+                ka.wm.open('kryncmsbundle/system/module/view', {name: key, type: 0}, -1, true);
             }.bind(this)).inject(actions);
 
             new ka.Button(_('Edit')).addEvent('click', function () {
-                ka.wm.open('admin/system/module/edit', {name: key});
+                ka.wm.open('kryncmsbundle/system/module/edit', {name: key});
             }.bind(this)).inject(actions);
 
             new ka.Button(_('Share')).addEvent('click', function () {
-                ka.wm.open('admin/system/module/publish', {name: key});
+                ka.wm.open('kryncmsbundle/system/module/publish', {name: key});
             }).inject(actions)
 
             var activeIcon = new Element('span', {
@@ -814,7 +814,7 @@ var admin_system_module = new Class({
 //
 //        new ka.Button(_('Details')).addEvent('click',
 //            function () {
-//                ka.wm.open('admin/system/module/view', {name: pItem.code, type: 1});
+//                ka.wm.open('kryncmsbundle/system/module/view', {name: pItem.code, type: 1});
 //            }).inject(line);
 //
 //        new ka.Button(_('To website')).set('href', 'http://www.kryn.org/extensions/' + pItem.name).set('target',
@@ -919,7 +919,7 @@ var admin_system_module = new Class({
 //
 //            new ka.Button(_('Install')).addEvent('click',
 //                function () {
-//                    ka.wm.open('admin/system/module/view', {name: item.code, type: 1});
+//                    ka.wm.open('kryncmsbundle/system/module/view', {name: item.code, type: 1});
 //                }).inject(div);
 //
 //        }.bind(this));

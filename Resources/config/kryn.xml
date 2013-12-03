@@ -28,6 +28,9 @@
         <clearCache>core/contents</clearCache>
         <clearCache>core/navigation</clearCache>
       </event>
+      <event key="core/bundle/schema-update">
+        <serviceCall>kryn.propelHelper::updateSchema</serviceCall>
+      </event>
     </listeners>
   </bundle>
 </config>

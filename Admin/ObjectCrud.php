@@ -11,7 +11,7 @@ use Kryn\CmsBundle\Core;
 use Kryn\CmsBundle\Exceptions\ObjectNotFoundException;
 use Symfony\Component\HttpFoundation\Request;
 
-class ObjectCrud
+class ObjectCrud implements ObjectCrudInterface
 {
     /**
      * Defines the table which should be accessed.

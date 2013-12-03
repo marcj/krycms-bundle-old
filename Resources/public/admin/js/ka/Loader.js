@@ -4,7 +4,7 @@ ka.Loader = new Class({
     Implements: [Events, Options],
 
     options: {
-        loader: 'bundles/admin/images/loader-sprites-18.png',
+        loader: 'bundles/kryncms/admin/images/loader-sprites-18.png',
         spriteWidth: 18,
         absolute: false,
         big: false,
@@ -20,7 +20,7 @@ ka.Loader = new Class({
         this.setOptions(pOptions);
 
         if (this.options.big) {
-            this.options.loader = 'bundles/admin/images/loader-sprites-64.png';
+            this.options.loader = 'bundles/kryncms/admin/images/loader-sprites-64.png';
             this.options.spriteWidth = 64;
         }
 

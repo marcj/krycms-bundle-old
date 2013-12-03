@@ -3,19 +3,31 @@
 namespace Kryn\CmsBundle\Controller\Admin\BundleManager;
 
 use Kryn\CmsBundle\Exceptions\BuildException;
-use Kryn\CmsBundle\ConfigurationAsset;
-use Kryn\CmsBundle\ConfigurationAssets;
-use Kryn\CmsBundle\ConfigurationBundle;
-use Kryn\CmsBundle\ConfigurationEntryPoint;
-use Kryn\CmsBundle\ConfigurationEvent;
-use Kryn\CmsBundle\ConfigurationModel;
-use Kryn\CmsBundle\ConfigurationObject;
-use Kryn\CmsBundle\ConfigurationPlugin;
-use Kryn\CmsBundle\ConfigurationTheme;
+use Kryn\CmsBundle\Configuration\Asset;
+use Kryn\CmsBundle\Configuration\Assets;
+use Kryn\CmsBundle\Core;
+use Kryn\CmsBundle\Configuration\Bundle;
+use Kryn\CmsBundle\Configuration\EntryPoint;
+use Kryn\CmsBundle\Configuration\Event;
+use Kryn\CmsBundle\Configuration\Model;
+use Kryn\CmsBundle\Configuration\Object;
+use Kryn\CmsBundle\Configuration\Plugin;
+use Kryn\CmsBundle\Configuration\Theme;
 use Kryn\CmsBundle\Exceptions\BundleNotFoundException;
+use Symfony\Component\DependencyInjection\ContainerAware;
+use Symfony\Component\Finder\Finder;
 
-class Editor
+class Editor extends ContainerAware
 {
+    /**
+     * @return Core
+     */
+    public function getKrynCore()
+    {
+        return $this->container->get('kryn.cms');
+    }
+
+
     /**
      * Returns the composer config.
      *
@@ -24,10 +36,11 @@ class Editor
      */
     public function getConfig($bundle)
     {
-        $bundle = Kryn::getBundle($bundle);
-        $config = $bundle->getComposer();
-        $config['_path'] = $bundle->getPath();
-        return $config;
+        if ($this->getKrynCore()->getBundle($bundle)) {
+            $config = $this->getKrynCore()->getUtils()->getComposerArray($bundle);
+            $config['_path'] = $this->getKrynCore()->getBundleDir($bundle);
+            return $config;
+        }
     }
 
     /**
@@ -38,8 +51,7 @@ class Editor
      */
     public function getBasic($bundle)
     {
-        $bundle = $this->getBundle($bundle);
-        $config = $bundle->getConfig();
+        $config = $this->getKrynCore()->getConfig($bundle);
 
         $result['streams'] = $config->propertyToArray('streams');
         $result['listeners'] = $config->propertyToArray('listeners');
@@ -51,7 +63,7 @@ class Editor
         $assets = [];
         if ($adminAssets) {
             foreach ($adminAssets as $asset) {
-                $asset = array_merge($asset->toArray(), ['type' => 'Kryn\CmsBundle\ConfigurationAsset' === get_class($asset) ? 'asset' : 'assets']);
+                $asset = array_merge($asset->toArray(), ['type' => 'Kryn\CmsBundle\Configuration\Asset' === get_class($asset) ? 'asset' : 'assets']);
                 $assets[] = $asset;
             }
         }
@@ -73,8 +85,7 @@ class Editor
      */
     public function saveBasic($bundle, $events = null, $listeners = null, $adminAssets = null, $falDrivers = null)
     {
-        $bundle = $this->getBundle($bundle);
-        $config = $bundle->getConfig();
+        $config = $this->getKrynCore()->getConfig($bundle);
 
         $config->propertyFromArray('events', $events);
         $config->propertyFromArray('listeners', $listeners);
@@ -104,35 +115,35 @@ class Editor
      */
     public function getWindows($bundle)
     {
-        $bundle = $this->getBundle($bundle);
+        $finder = Finder::create()
+            ->in($this->getKrynCore()->getBundleDir($bundle))
+            ->name('*.php');
 
-        $classes = find($bundle->getPath(), '*.php');
         $windows = array();
-        $whiteList = array('\Admin\ObjectCrud');
 
-        foreach ($classes as $class) {
-
-            $content = SystemFile::getContent($class);
+        foreach ($finder as $class) {
+            $content = file_get_contents($class->getPathname());
 
             if (preg_match(
-                '/class[\s\t]+([a-zA-Z0-9_]+)[\s\t]+extends[\s\t]+([a-zA-Z0-9_\\\\]*)[\s\t\n]*{/',
+                '/class[\s\t]+([a-zA-Z0-9_]+)[\s\t]/',
                 $content,
                 $matches
-            )
-            ) {
-                if (in_array($matches[2], $whiteList)) {
+            )) {
+                $clazz = $matches[1];
+                preg_match('/namespace ([a-zA-Z0-9_\\\\]*)/', $content, $namespace);
+                $namespace = $namespace[1];
+                if ($namespace) {
+                    $clazz = $namespace . '\\' . $clazz;
+                }
 
-                    $clazz = $matches[1];
+                $clazz = '\\' . $clazz;
 
-                    preg_match('/namespace ([a-zA-Z0-9_\\\\]*)/', $content, $namespace);
-                    $namespace = $namespace[1];
-                    if ($namespace) {
-                        $clazz = $namespace . '\\' . $clazz;
+                if (class_exists($clazz)) {
+                    $reflection = new \ReflectionClass($clazz);
+                    $instances = $reflection->getInterfaceNames();
+                    if (in_array('Kryn\CmsBundle\Admin\ObjectCrudInterface', $instances)) {
+                        $windows[$class->getPathname()] = $clazz;
                     }
-
-                    $clazz = '\\' . $clazz;
-
-                    $windows[$class] = $clazz;
                 }
             }
         }
@@ -148,8 +159,7 @@ class Editor
      */
     public function getPlugins($bundle)
     {
-        $bundle = $this->getBundle($bundle);
-        $config = $bundle->getConfig();
+        $config = $this->getKrynCore()->getConfig($bundle);
 
         return $config->getPluginsArray();
     }
@@ -162,8 +172,7 @@ class Editor
      */
     public function getThemes($bundle)
     {
-        $bundle = $this->getBundle($bundle);
-        $config = $bundle->getConfig();
+        $config = $this->getKrynCore()->getConfig($bundle);
 
         return $config->getThemesArray();
     }
@@ -177,8 +186,7 @@ class Editor
      */
     public function saveThemes($bundle, $themes = null)
     {
-        $bundle = $this->getBundle($bundle);
-        $config = $bundle->getConfig();
+        $config = $this->getKrynCore()->getConfig($bundle);
 
         if (is_string($themes)) {
             $themes = json_decode($themes, 1);
@@ -191,18 +199,18 @@ class Editor
 
     public function getDocu($bundle)
     {
-        $bundle = $this->getBundle($bundle);
-        $path = $bundle->getPath() . 'Resources/doc/index.md';
+        $path = $this->getKrynCore()->getBundleDir($bundle) . 'Resources/doc/index.md';
 
-        return SystemFile::getContent($path);
+        $fs = $this->getKrynCore()->getFileSystem();
+        return $fs->read($path);
     }
 
     public function saveDocu($bundle, $content)
     {
-        $bundle = $this->getBundle($bundle);
-        $path = $bundle->getPath() . 'Resources/doc/index.md';
+        $path = $this->getKrynCore()->getBundleDir($bundle) . 'Resources/doc/index.md';
 
-        return SystemFile::setContent($path, $content);
+        $fs = $this->getKrynCore()->getFileSystem();
+        return $fs->read($path, $content);
     }
 
     /**
@@ -214,8 +222,7 @@ class Editor
      */
     public function savePlugins($bundle, $plugins = null)
     {
-        $bundle = $this->getBundle($bundle);
-        $config = $bundle->getConfig();
+        $config = $this->getKrynCore()->getConfig($bundle);
 
         if (is_string($plugins)) {
             $plugins = json_decode($plugins, 1);
@@ -234,8 +241,7 @@ class Editor
      */
     public function getObjects($bundle)
     {
-        $bundle = $this->getBundle($bundle);
-        $config = $bundle->getConfig();
+        $config = $this->getKrynCore()->getConfig($bundle);
 
         return $config->getObjectsArray();
     }
@@ -249,8 +255,7 @@ class Editor
      */
     public function saveObjects($bundle, $objects = null)
     {
-        $bundle = $this->getBundle($bundle);
-        $config = $bundle->getConfig();
+        $config = $this->getKrynCore()->getConfig($bundle);
 
         if (is_string($objects)) {
             $objects = json_decode($objects, 1);
@@ -269,8 +274,7 @@ class Editor
      */
     public function getModel($bundle)
     {
-        $bundleClass = $this->getBundle($bundle);
-        $path = $bundleClass->getPath() . 'Resources/config/models.xml';
+        $path = $this->getKrynCore()->getBundleDir($bundle) . 'Resources/config/kryn.propel.schema.xml';
 
         return [
             'path' => $path,
@@ -290,8 +294,7 @@ class Editor
      */
     public function saveModel($bundle, $model = '')
     {
-        $bundleClass = $this->getBundle($bundle);
-        $path = $bundleClass->getPath() . 'Resources/config/models.xml';
+        $path = $this->getKrynCore()->getBundleDir($bundle) . 'Resources/config/kryn.propel.schema.xml';
 
         if (!is_writable($path)) {
             throw new \FileNotWritableException(tf('The model file `%s` for `%s` is not writable.', $path, $bundle));
@@ -311,10 +314,9 @@ class Editor
      */
     public function setModelFromObjects($bundle)
     {
-        $bundle = $this->getBundle($bundle);
-        $config = $bundle->getConfig();
+        $config = $this->getKrynCore()->getConfig($bundle);
 
-        $path = $bundle->getPath() . 'Resources/config/models.xml';
+        $path = $this->getKrynCore()->getBundleDir($bundle) . 'Resources/config/models.xml';
         if (!file_exists($path) && !touch($path)) {
             throw new BuildException(tf('File `%s` is not writeable.', $path));
         }
@@ -343,15 +345,6 @@ class Editor
         return false;
     }
 
-    public function getBundle($bundleClass)
-    {
-        $bundle = Kryn::getBundle($bundleClass);
-        if (!$bundle) {
-            throw new BundleNotFoundException(tf('Bundle `%s` not found.', $bundleClass));
-        }
-        return $bundle;
-    }
-
     /**
      * Returns entryPoints. Usually in Resources/config/kryn.entryPoints.xml.
      *
@@ -360,8 +353,7 @@ class Editor
      */
     public function getEntryPoints($bundle)
     {
-        $bundle = $this->getBundle($bundle);
-        $config = $bundle->getConfig();
+        $config = $this->getKrynCore()->getConfig($bundle);
 
         $entryPoints = $config->getEntryPointsArray();
         return $entryPoints;
@@ -376,8 +368,7 @@ class Editor
      */
     public function saveEntryPoints($bundle, $entryPoints = null)
     {
-        $bundle = $this->getBundle($bundle);
-        $config = $bundle->getConfig();
+        $config = $this->getKrynCore()->getConfig($bundle);
 
         $config->propertyFromArray('entryPoints', $entryPoints);
 

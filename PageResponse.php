@@ -759,7 +759,7 @@ class PageResponse extends Response
                         );
                     } else {
                         //local
-                        $file = $this->getKrynCore()->resolvePath($css['path'], 'Resources/public');
+                        $file = $this->getAssetPath($css['path']);
 
                         if (file_exists($file) && $modifiedTime = filemtime($file)) {
                             $cssCode .= $file . '_' . $modifiedTime;
@@ -796,7 +796,7 @@ class PageResponse extends Response
                     }
                 }
                 $cssContent = $this->getKrynCore()->getUtils()->compressCss($compressFiles, 'cache/');
-                $this->getKrynCore()->getWebFilesystem()->put('cache/' . $cssCachedFile, $cssContent);
+                $this->getKrynCore()->getWebFilesystem()->write('cache/' . $cssCachedFile, $cssContent);
             }
             $result .= sprintf(
                 '<link rel="stylesheet" type="text/css" href="cache/%s" %s',
@@ -813,13 +813,11 @@ class PageResponse extends Response
                             $this->getTagEndChar()
                         );
                     } else {
-                        $file = $this->getKrynCore()->resolvePath($css['path'], 'Resources/public');
-                        $public = $this->getKrynCore()->resolveWebPath($css['path']);
 
-                        if (!file_exists($file)) {
-                            continue;
-                        }
-                        $modifiedTime = filemtime($file);
+                        $file = $this->getAssetPath($css['path']);
+                        $public = $this->getPublicAssetPath($css['path']);
+
+                        $modifiedTime = file_exists($file) ? filemtime($file) : null;
 
                         $result .= sprintf(
                             PHP_EOL . '    <link rel="stylesheet" type="%s" href="%s" %s',
@@ -869,7 +867,7 @@ class PageResponse extends Response
                         if (file_exists($file) && $modifiedTime = filemtime($file)) {
                             $jsCode .= $file . '_' . $modifiedTime;
                         } else {
-                            Kryn::getLogger()->addError(tf('JavaScript file `%s` [%s] not found.', $file, $js['path']));
+                            $this->getKrynCore()->getLogger()->error(sprintf('JavaScript file `%s` [%s] not found.', $file, $js['path']));
                         }
                     }
                 } else {
@@ -908,7 +906,7 @@ class PageResponse extends Response
                         $jsContent .= $js['content'] . "\n\n\n";
                     }
                 }
-                $this->getKrynCore()->getWebFileSystem()->put('cache/' . $jsCachedFile, $jsContent);
+                $this->getKrynCore()->getWebFileSystem()->write('cache/' . $jsCachedFile, $jsContent);
             }
 
             $result .= '<script type="text/javascript" src="cache/' . $jsCachedFile . '" ></script>' . "\n";

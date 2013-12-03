@@ -9,6 +9,7 @@ use Kryn\CmsBundle\File\FileInfoInterface;
 use Kryn\CmsBundle\Filesystem\Adapter\AdapterInterface;
 use Propel\Runtime\Propel;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
+use Symfony\Component\Finder\Finder;
 
 class WebFilesystem extends Filesystem
 {
@@ -17,6 +18,37 @@ class WebFilesystem extends Filesystem
      * @var array
      */
     protected $adapterInstances = [];
+
+    /**
+     * @var Core
+     */
+    protected $krynCore;
+
+    /**
+     * @param Core $krynCore
+     */
+    function __construct(Core $krynCore)
+    {
+        $this->krynCore = $krynCore;
+    }
+
+    /**
+     * @param Core $krynCore
+     */
+    public function setKrynCore($krynCore)
+    {
+        $this->krynCore = $krynCore;
+    }
+
+    /**
+     * @return Core
+     */
+    public function getKrynCore()
+    {
+        return $this->krynCore;
+    }
+
+
 
     /**
      * @param string $path
@@ -144,4 +176,128 @@ class WebFilesystem extends Filesystem
 
     }
 
+    public function move($source, $target)
+    {
+        return $this->paste($source, $target, 'move');
+    }
+
+    public function copy($source, $target)
+    {
+        return $this->paste($source, $target, 'copy');
+    }
+
+    /**
+     * Copies or moves files to a destination.
+     * If the source is a folder, it copies recursively.
+     *
+     * @static
+     *
+     * @param  array|string $source
+     * @param  string       $target
+     * @param  string       $action move|copy
+     *
+     * @return bool
+     */
+    public function paste($source, $target, $action = 'move')
+    {
+        $files = (array)$source;
+        $action = strtolower($action);
+
+        $result = false;
+        foreach ($files as $file) {
+            $oldFile = str_replace('..', '', $file);
+            $oldFile = str_replace(chr(0), '', $oldFile);
+
+            $oldFs = $this->getAdapter($oldFile);
+            //if the $target is a folder with trailing slash, we move/copy the files _into_ it otherwise we replace.
+            $newPath = '/' === substr($target, -1) ? $target . basename($file) : $target;
+
+            $newFs = $this->getAdapter($newPath);
+
+            $file = null;
+            if ($newFs === $oldFs) {
+                $file = $this->getFile($oldFile);
+                $result = $newFs->$action($this->normalizePath($oldFile), $this->normalizePath($newPath));
+            } else {
+                //we need to move a folder from one file layer to another.
+                $file = $oldFs->getFile($this->normalizePath($oldFile));
+
+                if ($file['type'] == 'file') {
+                    $content = $oldFs->read($this->normalizePath($oldFile));
+                    $newFs->write($this->normalizePath($newPath), $content);
+                } else {
+                    if ('/' === $oldFs->getMountPath()) {
+                        //just directly upload the stuff
+                        $this->copyFolder($oldFs->getAdapter()->getRoot() . $oldFile, $newPath);
+                    } else {
+                        //we need to copy all files down to our local hdd temporarily
+                        //and upload then
+                        $folder = $this->downloadFolder($oldFile);
+                        $this->copyFolder($folder, $newPath);
+                        $this->getKrynCore()->getCacheFileSystem()->delete($folder);
+                    }
+                }
+                if ('move' === $action) {
+                    $oldFs->delete($this->normalizePath($oldFile));
+                    if ($this) {
+                        $file->setPath($this->normalizePath($newPath));
+                        $file->save();
+                    }
+                }
+            }
+            if ('move' === $action) {
+                $file->setPath($this->normalizePath($newPath));
+                $file->save();
+            }
+        }
+
+        return $result;
+    }
+
+    public function downloadFolder($path, $to = null)
+    {
+        $fs = $this->getAdapter($path);
+        $files = $fs->getFiles($this->normalizePath($path));
+
+        $to = $to ? : $this->getKrynCore()->getUtils()->createTempFolder('', false);
+        $tempFs = $this->getKrynCore()->getCacheFileSystem();
+
+        if (is_array($files)) {
+            foreach ($files as $file) {
+                if ('file' === $file['type']) {
+                    $content = $fs->read($this->normalizePath($path . '/' . $file['name']));
+                    $tempFs->write($to . '/' . $file['name'], $content);
+                } else {
+                   $this->downloadFolder($path . '/' . $file['name'], $to . '/' . $file['name']);
+                }
+            }
+        }
+
+        return $to;
+    }
+
+    public function copyFolder($from, $to)
+    {
+        $fs = $this->getAdapter($to);
+        $fs->mkdir($this->normalizePath($to));
+
+        $normalizedPath = $this->normalizePath($to);
+
+        $files = Finder::create()
+            ->in($from);
+
+        $result = true;
+
+        foreach ($files as $file) {
+            $newName = $normalizedPath . '/' . substr($file, strlen($from) + 1);
+
+            if (is_dir($file)) {
+                $result &= $fs->mkdir($this->normalizePath($newName));
+            } else {
+                $result &= $fs->write($this->normalizePath($newName), file_get_contents($file));
+            }
+        }
+
+        return $result;
+    }
 }

@@ -292,7 +292,7 @@ class Field extends Model
      */
     public function setOption($key, $value)
     {
-        $this->options = $this->options ?: new Options();
+        $this->options = $this->options ?: new Options(null, $this->getKrynCore());
         $this->options->setOption($key, $value);
     }
 

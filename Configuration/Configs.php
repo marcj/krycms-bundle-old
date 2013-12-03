@@ -116,7 +116,7 @@ class Configs implements \IteratorAggregate
                         $priority = (int)$bundle->attributes->getNamedItem('priority')->nodeValue;
                     }
 
-                    $configs[$bundleName][$priority][$file] = $bundle;
+                    $configs[strtolower($bundleName)][$priority][$file] = $bundle;
                 }
             }
         }
@@ -152,17 +152,16 @@ class Configs implements \IteratorAggregate
 
             foreach ($priorities as $configs) {
                 foreach ($configs as $file => $bundleElement) {
-                    if (!isset($bundleConfigs[$bundleName])) {
-                        $bundleConfigs[strtolower($bundleName)] = $bundleConfigs[$bundleName] =
-                            new Bundle($bundleName, null, $this->getCore());
+                    if (!isset($bundleConfigs[strtolower($bundleName)])) {
+                        $bundleConfigs[strtolower($bundleName)] = new Bundle($bundleName, null, $this->getCore());
                     }
 
-                    $bundleConfigs[$bundleName]->import($bundleElement, $file);
+                    $bundleConfigs[strtolower($bundleName)]->import($bundleElement, $file);
                 }
             }
 
-            if ($bundleConfigs[$bundleName]) {
-                //$bundleConfigs[$bundleName]->setupObject($this->getCore());
+            if ($bundleConfigs[strtolower($bundleName)]) {
+//                $bundleConfigs[strtolower($bundleName)]->setupObject($this->getCore());
             }
         }
 
@@ -176,6 +175,8 @@ class Configs implements \IteratorAggregate
      */
     public function getConfig($bundleName)
     {
+        $bundleName = strtolower($bundleName);
+
         return isset($this->configElements[$bundleName]) ? $this->configElements[$bundleName] : null;
     }
 
@@ -193,7 +194,7 @@ class Configs implements \IteratorAggregate
         foreach ($this->configElements as $config) {
             $value = $config->toArray();
             $value['composer'] = $config->getComposer() ? : [];
-            $result[strtolower($config->getName())] = $value;
+            $result[strtolower($config->getBundleName())] = $value;
         }
 
         return $result;

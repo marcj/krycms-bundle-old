@@ -40,6 +40,44 @@ class Utils
         return $this->krynCore;
     }
 
+    public function getComposerArray($bundleClass)
+    {
+        $path = $this->getKrynCore()->getBundleDir($bundleClass);
+        $fs = $this->getKrynCore()->getFileSystem();
+        if ($fs->has($file = $path . '/composer.json')) {
+            return json_decode($fs->read($file), true);
+        }
+    }
+
+    /**
+     * Creates a temp folder and returns its path.
+     * Please use TempFile::createFolder() class instead.
+     *
+     * @static
+     * @internal
+     *
+     * @param  string $prefix
+     * @param  bool   $fullPath Returns the full path on true and the relative to the current TempFolder on false.
+     *
+     * @return string Path with trailing slash
+     */
+    public function createTempFolder($prefix = '', $fullPath = true)
+    {
+        $tmp = $this->getKrynCore()->getKernel()->getCacheDir();
+
+        do {
+            $path = $tmp . $prefix . dechex(time() / mt_rand(100, 500));
+        } while (is_dir($path));
+
+        mkdir($path);
+
+        if ('/' !== substr($path, -1)) {
+            $path .= '/';
+        }
+
+        return $fullPath ? $path : substr($path, strlen($tmp));
+    }
+
     /**
      * @param string $text
      */
@@ -405,15 +443,16 @@ class Utils
             "border-radius",
         );
 
+        $root = realpath($this->getKrynCore()->getKernel()->getRootDir() . '/../');
         $content = '';
         foreach ($files as $assetPath) {
 
-            $cssFile = $this->getKrynCore()->resolvePublicPath($assetPath); //admin/css/style.css
+            $cssFile = $this->getKrynCore()->resolveWebPath($assetPath); //admin/css/style.css
             $cssDir = dirname($cssFile) . '/'; //admin/css/...
             $cssDir = str_repeat('../', substr_count($includePath, '/')) . $cssDir;
 
             $content .= "\n\n/* file: $assetPath */\n\n";
-            if (file_exists($file = 'web/bundles/' . $cssFile) || file_exists($file = 'web/' . $cssFile)) {
+            if (file_exists($file = $cssFile)) {
                 $h = fopen($file, "r");
                 if ($h) {
                     while (!feof($h) && $h) {

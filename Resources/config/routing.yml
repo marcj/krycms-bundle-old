@@ -1,3 +1,7 @@
+kryn_cms_admin_login:
+    resource: "@KrynCmsBundle/Controller/Admin/LoginController.php"
+    type:     annotation
+
 kryn_cms_admin:
-    resource: "@KrynCmsBundle/Controller/Admin/"
+    resource: "@KrynCmsBundle/Controller/Admin/AdminController.php"
     type:     annotation

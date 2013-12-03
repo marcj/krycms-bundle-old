@@ -7,9 +7,14 @@ use Kryn\CmsBundle\Filesystem\Adapter\AdapterInterface;
 
 interface FilesystemInterface {
 
-    public function write($path, $content);
+    public function write($path, $content = '');
     public function read($path);
     public function has($path);
+    public function mkdir($path);
+    public function delete($path);
+    public function rename($source, $target);
+    public function move($source, $target);
+    public function copy($source, $target);
 
     /**
      * @return AdapterInterface

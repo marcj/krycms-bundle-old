@@ -2,15 +2,19 @@
 
 namespace Kryn\CmsBundle\Controller\Admin\Object;
 
-use Core\Kryn;
-use Core\Object;
+use Kryn\CmsBundle\Admin\ObjectCrud;
+use Kryn\CmsBundle\Controller as KrynController;
+use Kryn\CmsBundle\Exceptions\ClassNotFoundException;
+use Kryn\CmsBundle\Exceptions\ObjectMisconfiguration;
+use Kryn\CmsBundle\Exceptions\ObjectNotFoundException;
+use Kryn\CmsBundle\Tools;
 
 /**
  * Controller
  *
  * Proxy class for \Core\Object
  */
-class Controller
+class Controller extends KrynController
 {
     /**
      * General object items output. /admin/object?uri=...
@@ -19,17 +23,17 @@ class Controller
      * @param  string                   $fields
      *
      * @return array|bool
-     * @throws \ObjectNotFoundException
+     * @throws ObjectNotFoundException
      */
     public function getItemPerUrl($url, $fields = null)
     {
-        list($objectKey, $object_id) = \Core\Object::parseUrl($url);
+        list($objectKey, $object_id) = $this->getObjects()->parseUrl($url);
 
-        $definition = \Core\Object::getDefinition($objectKey);
+        $definition = $this->getObjects()->getDefinition($objectKey);
         if (!$definition) {
-            throw new \ObjectNotFoundException(tf('Object %s does not exists.', $objectKey));
+            throw new ObjectNotFoundException(sprintf('Object %s does not exists.', $objectKey));
         }
-        return \Core\Object::get($objectKey, $object_id[0], array('fields' => $fields, 'permissionCheck' => true));
+        return $this->getObjects()->get($objectKey, $object_id[0], array('fields' => $fields, 'permissionCheck' => true));
     }
 
     /**
@@ -39,23 +43,23 @@ class Controller
      * @param  string                   $fields
      *
      * @return array|bool
-     * @throws \ObjectNotFoundException
-     * @throws \ClassNotFoundException
+     * @throws ObjectNotFoundException
+     * @throws ClassNotFoundException
      */
     public function getFieldItem($objectKey, $pk, $fields = null)
     {
-        $definition = \Core\Object::getDefinition($objectKey);
+        $definition = $this->getObjects()->getDefinition($objectKey);
         if (!$definition) {
-            throw new \ObjectNotFoundException(tf('Object %s does not exists.', $objectKey));
+            throw new ObjectNotFoundException(sprintf('Object %s does not exists.', $objectKey));
         }
 
         if ($definition['chooserFieldDataModel'] != 'custom') {
-            return \Core\Object::get($objectKey, $pk);
+            return $this->getObjects()->get($objectKey, $pk);
         } else {
 
             $class = $definition['chooserFieldDataModelClass'];
             if (!class_exists($class)) {
-                throw new \ClassNotFoundException(tf('Class %s can not be found.', $class));
+                throw new ClassNotFoundException(sprintf('Class %s can not be found.', $class));
             }
             $dataModel = new $class($objectKey);
 
@@ -73,20 +77,20 @@ class Controller
      *
      * @return array
      * @throws \Exception
-     * @throws \ClassNotFoundException
-     * @throws \ObjectNotFoundException
+     * @throws ClassNotFoundException
+     * @throws ObjectNotFoundException
      */
     public function getItemsByUrl($url, $fields = null, $returnKey = true, $returnKeyAsRequested = false)
     {
-        list($objectKey, $objectIds, $params) = \Core\Object::parseUrl($url);
+        list($objectKey, $objectIds, $params) = $this->getObjects()->parseUrl($url);
         //check if we got an id
         if ($objectIds[0] === '') {
-            throw new \Exception(tf('No id given in uri %s.', $url));
+            throw new \Exception(sprintf('No id given in uri %s.', $url));
         }
 
-        $definition = \Core\Object::getDefinition($objectKey);
+        $definition = $this->getObjects()->getDefinition($objectKey);
         if (!$definition) {
-            throw new \ObjectNotFoundException(tf('Object %s can not be found.', $objectKey));
+            throw new ObjectNotFoundException(sprintf('Object %s can not be found.', $objectKey));
         }
 
         $options['fields'] = $fields;
@@ -94,10 +98,10 @@ class Controller
 
         $items = array();
         if (count($objectIds) == 1) {
-            $items[] = \Core\Object::get($objectKey, $objectIds[0], $options);
+            $items[] = $this->getObjects()->get($objectKey, $objectIds[0], $options);
         } else {
             foreach ($objectIds as $primaryKey) {
-                if ($item = \Core\Object::get($objectKey, $primaryKey, $options)) {
+                if ($item = $this->getObjects()->get($objectKey, $primaryKey, $options)) {
                     $items[] = $item;
                 }
             }
@@ -109,22 +113,22 @@ class Controller
             if ($returnKeyAsRequested) {
 
                 //map requetsed id to real ids
-                $requestedIds = explode('/', \Core\Object::getCroppedObjectId($url));
+                $requestedIds = explode('/', $this->getObjects()->getCroppedObjectId($url));
                 $map = array();
                 foreach ($requestedIds as $id) {
-                    $pk = \Core\Object::parsePk($objectKey, $id);
-                    $map[\Core\Object::getObjectUrlId($objectKey, $pk[0]) + ''] = $id;
+                    $pk = $this->getObjects()->parsePk($objectKey, $id);
+                    $map[$this->getObjects()->getObjectUrlId($objectKey, $pk[0]) + ''] = $id;
                 }
 
                 if (is_array($items)) {
                     foreach ($items as &$item) {
-                        $pk = \Core\Object::getObjectUrlId($objectKey, $item);
+                        $pk = $this->getObjects()->getObjectUrlId($objectKey, $item);
                         $res[$map[$pk + '']] = $item;
                     }
                 }
 
             } else {
-                $primaryKeys = \Core\Object::getPrimaries($objectKey);
+                $primaryKeys = $this->getObjects()->getPrimaries($objectKey);
 
                 $c = count($primaryKeys);
                 $firstPK = key($primaryKeys);
@@ -168,8 +172,8 @@ class Controller
      *
      * @return array
      * @throws \Exception
-     * @throws \ClassNotFoundException
-     * @throws \ObjectNotFoundException
+     * @throws ClassNotFoundException
+     * @throws ObjectNotFoundException
      */
     public function getFieldItems(
         $objectKey,
@@ -181,9 +185,9 @@ class Controller
         $_ = null
     ) {
 
-        $definition = \Core\Object::getDefinition($objectKey);
+        $definition = $this->getObjects()->getDefinition($objectKey);
         if (!$definition) {
-            throw new \ObjectNotFoundException(tf('Object %s can not be found.', $objectKey));
+            throw new ObjectNotFoundException(sprintf('Object %s can not be found.', $objectKey));
         }
 
         $options = array(
@@ -194,13 +198,13 @@ class Controller
             'order' => $order
         );
 
-        $condition = \Admin\ObjectCrud::buildFilter($_);
+        $condition = ObjectCrud::buildFilter($_);
 
         if ($definition['fieldDataModel'] == 'custom') {
 
             $class = $definition['fieldDataModelClass'];
             if (!class_exists($class)) {
-                throw new \ClassNotFoundException(tf('The class %s can not be found.', $class));
+                throw new ClassNotFoundException(sprintf('The class %s can not be found.', $class));
             }
 
             $dataModel = new $class($objectKey);
@@ -209,12 +213,12 @@ class Controller
 
         } else {
 
-            $items = \Core\Object::getList($objectKey, $condition, $options);
+            $items = $this->getObjects()->getList($objectKey, $condition, $options);
 
         }
 
         if ($returnHash) {
-            $primaryKeys = \Core\Object::getPrimaries($objectKey);
+            $primaryKeys = $this->getObjects()->getPrimaries($objectKey);
 
             $c = count($primaryKeys);
             $firstPK = key($primaryKeys);
@@ -226,7 +230,7 @@ class Controller
                     if ($c > 1) {
                         $keys = array();
                         foreach ($primaryKeys as $key => &$field) {
-                            $keys[] = Kryn::urlEncode($item[$key]);
+                            $keys[] = Tools::urlEncode($item[$key]);
                         }
                         $res[implode(',', $keys)] = $item;
                     } else {
@@ -257,9 +261,9 @@ class Controller
      * @param mixed  $_
      *
      * @return array
-     * @throws \ObjectNotFoundException
-     * @throws \ClassNotFoundException
-     * @throws \ObjectMisconfiguration
+     * @throws ObjectNotFoundException
+     * @throws ClassNotFoundException
+     * @throws ObjectMisconfiguration
      */
     public function getBrowserItems(
         $objectKey,
@@ -271,13 +275,13 @@ class Controller
         $_ = null
     ) {
 
-        $definition = \Core\Object::getDefinition($objectKey);
+        $definition = $this->getObjects()->getDefinition($objectKey);
         if (!$definition) {
-            throw new \ObjectNotFoundException(tf('Object %s can not be found.', $objectKey));
+            throw new ObjectNotFoundException(sprintf('Object %s can not be found.', $objectKey));
         }
 
         if (!$definition['browserColumns']) {
-            throw new \ObjectMisconfiguration(tf('Object %s does not have browser columns.', $objectKey));
+            throw new ObjectMisconfiguration(sprintf('Object %s does not have browser columns.', $objectKey));
         }
 
         $fields2 = array_keys($definition['browserColumns']);
@@ -290,13 +294,13 @@ class Controller
             'order' => $order
         );
 
-        $condition = \Admin\ObjectCrud::buildFilter($_);
+        $condition = ObjectCrud::buildFilter($_);
 
         if ($definition['browserDataModel'] == 'custom') {
 
             $class = $definition['browserDataModelClass'];
             if (!class_exists($class)) {
-                throw new \ClassNotFoundException(tf('The class %s can not be found.', $class));
+                throw new ClassNotFoundException(sprintf('The class %s can not be found.', $class));
             }
 
             $dataModel = new $class($objectKey);
@@ -305,12 +309,12 @@ class Controller
 
         } else {
 
-            $items = \Core\Object::getList($objectKey, $condition, $options);
+            $items = $this->getObjects()->getList($objectKey, $condition, $options);
 
         }
 
         if ($returnHash) {
-            $primaryKeys = \Core\Object::getPrimaries($objectKey);
+            $primaryKeys = $this->getObjects()->getPrimaries($objectKey);
 
             $c = count($primaryKeys);
             $firstPK = key($primaryKeys);
@@ -322,7 +326,7 @@ class Controller
                     if ($c > 1) {
                         $keys = array();
                         foreach ($primaryKeys as $key => &$field) {
-                            $keys[] = Kryn::urlEncode($item[$key]);
+                            $keys[] = Tools::urlEncode($item[$key]);
                         }
                         $res[implode(',', $keys)] = $item;
                     } else {
@@ -339,13 +343,13 @@ class Controller
 
     public function getBrowserItemsCount($objectKey, $_ = null)
     {
-        $definition = \Core\Object::getDefinition($objectKey);
+        $definition = $this->getObjects()->getDefinition($objectKey);
         if (!$definition) {
-            throw new \ObjectNotFoundException(tf('Object %s can not be found.', $objectKey));
+            throw new ObjectNotFoundException(sprintf('Object %s can not be found.', $objectKey));
         }
 
         if (!$definition['browserColumns']) {
-            throw new \ObjectMisconfiguration(tf('Object %s does not have browser columns.', $objectKey));
+            throw new ObjectMisconfiguration(sprintf('Object %s does not have browser columns.', $objectKey));
         }
 
         $fields = array_keys($definition['browserColumns']);
@@ -354,13 +358,13 @@ class Controller
             'permissionCheck' => true
         );
 
-        $condition = \Admin\ObjectCrud::buildFilter($_);
+        $condition = ObjectCrud::buildFilter($_);
 
         if ($definition['browserDataModel'] == 'custom') {
 
             $class = $definition['browserDataModelClass'];
             if (!class_exists($class)) {
-                throw new \ClassNotFoundException(tf('The class %s can not be found.', $class));
+                throw new ClassNotFoundException(sprintf('The class %s can not be found.', $class));
             }
 
             $dataModel = new $class($objectKey);
@@ -369,7 +373,7 @@ class Controller
 
         } else {
 
-            $count = \Core\Object::getCount($objectKey, $condition, $options);
+            $count = $this->getObjects()->getCount($objectKey, $condition, $options);
 
         }
 

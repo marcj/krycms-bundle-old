@@ -1,0 +1,56 @@
+{
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "http:\/\/packages.kryn.org\/"
+        }
+    ],
+    "name": "kryncms\/kryn.cms",
+    "description": "A open-source enterprise Content-Management-System CMS and Content-Management-Framework CMF based on Propel and Symfony components.",
+    "keywords": [
+        "CMS",
+        "PHP CMS",
+        "WCMS"
+    ],
+    "license": "GPL",
+    "homepage": "http:\/\/www.kryn.org\/",
+    "authors": [
+        {
+            "name": "Marc J. Schmidt",
+            "homepage": "https:\/\/github.com\/marcj",
+            "email": "marc@kryn.org"
+        }
+    ],
+    "autoload": {
+        "psr-0": {
+            "Core": "src/",
+            "Admin": "src/",
+            "Users": "src/",
+            "Test": "tests/bundles/"
+        }
+    },
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=5.4",
+        "twig\/twig": ">=1.12",
+        "smarty\/smarty": ">=v3.1",
+        "marcj\/php-rest-service": "0.1.*",
+        "monolog\/monolog": ">=1.3.1",
+        "symfony\/http-kernel": ">=v2.1.7",
+        "symfony\/event-dispatcher": ">=v2.1.7",
+        "symfony\/dependency-injection": "2.4.*@dev",
+        "symfony\/routing": ">=v2.1.7",
+        "symfony\/console": ">=v2.1",
+        "marijnh\/codemirror": ">=v3.1",
+        "sybio\/image-workshop": "dev-master",
+        "tinymce\/tinymce": "*",
+        "propel\/propel": "dev-master",
+        "composer\/composer": "*",
+        "kryncms\/demotheme-bundle": "*",
+        "google\/closure-compiler": "*",
+        "symfony\/filesystem": "2.2.*",
+        "phpunit\/phpunit": "3.7.*",
+        "kryncms\/publication-bundle": "*",
+        "michelf/php-markdown": "1.3"
+    }
+}

@@ -1,4 +1,4 @@
-var admin_system_layout = new Class({
+var kryncmsbundle_system_layout = new Class({
 
     initialize: function (pWin) {
 
@@ -56,7 +56,7 @@ var admin_system_layout = new Class({
     },
 
     installTheme: function () {
-        ka.wm.open('admin/system/module', {themes: 1});
+        ka.wm.open('kryncmsbundle/system/module', {themes: 1});
     },
 
     addTheme: function () {
@@ -64,7 +64,7 @@ var admin_system_layout = new Class({
             if (!res) {
                 return;
             }
-            ka.wm.open('admin/system/module/add', {name: res});
+            ka.wm.open('kryncmsbundle/system/module/add', {name: res});
         })
     },
 
@@ -198,7 +198,7 @@ var admin_system_layout = new Class({
                     style: 'cursor: pointer;'
                 }).addEvent('click',
                     function () {
-                        ka.wm.open('admin/files/edit', {file: {path: '/' + path}});
+                        ka.wm.open('kryncmsbundle/files/edit', {file: {path: '/' + path}});
                     }).inject(li);
             }.bind(this));
         }

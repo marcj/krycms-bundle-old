@@ -8,6 +8,7 @@ use Kryn\CmsBundle\Configuration\Client;
 use Kryn\CmsBundle\Configuration\Model;
 use Kryn\CmsBundle\Configuration\SystemConfig;
 use Kryn\CmsBundle\Exceptions\BundleNotFoundException;
+use Kryn\CmsBundle\Exceptions\NotInAdministrationAreaException;
 use Kryn\CmsBundle\Model\Node;
 use Kryn\CmsBundle\Propel\PropelHelper;
 use Symfony\Component\EventDispatcher\GenericEvent;
@@ -92,10 +93,63 @@ class Core extends Controller
             $this->propelHelper->loadConfig();
         }
 
+        $this->prepareWebSymlinks();
+
 //        if ($domainClientConfig->isAutoStart()) {
 //            $this->getClient()->start();
 //        }
 
+    }
+
+    /**
+     * Creates all symlink in /web/<bundleName> to <bundlePath>/Resources/public
+     * if not already.
+     */
+    public function prepareWebSymlinks()
+    {
+        $cwdir = getcwd();
+        chdir($this->getKernel()->getRootDir() . '/..');
+        $bundles = 'web/bundles/';
+        if (!is_dir($bundles)) {
+            if (!@mkdir($bundles)) {
+                die(sprintf('Can not create `%s` directory. Please check permissions.', getcwd().'/'.$bundles));
+            }
+
+            chmod('vendor/google/closure-compiler/compiler.jar', 0644);
+        }
+
+        foreach ($this->getBundles() as $bundle) {
+            if ($bundle) {
+                $public = $bundle->getPath() . '/Resources/public';
+                if (is_dir($public)) {
+                    $web = $bundles . $this->getShortBundleName($bundle->getName());
+                    if (!is_link($web)) {
+                        symlink(realpath($public), $web);
+                    }
+                }
+            }
+        }
+        /*
+         * Move important CodeMirror from vendor to our public available folder
+         */
+        $files = array(
+            'addon',
+            'keymap',
+            'lib',
+            'mode',
+            'theme',
+            'LICENSE',
+            'README.md'
+        );
+
+        $dir = __DIR__ . '/Resources/public/codemirror/';
+
+        if (!file_exists($dir)) {
+            foreach ($files as $file) {
+                $createSymlink('vendor/marijnh/codemirror/' . $file, $dir . $file);
+            }
+        }
+        chdir($cwdir);
     }
 
     /**
@@ -251,7 +305,11 @@ class Core extends Controller
         $systemClientConfig = $this->getSystemConfig()->getClient(true);
         $defaultClientClass = $systemClientConfig->getClass();
 
-        if ($this->isAdmin() && null === $this->adminClient) {
+        if (!$this->isAdmin()) {
+            throw new NotInAdministrationAreaException('Not in the administration area.');
+        }
+
+        if (null === $this->adminClient) {
             $this->client = $this->adminClient = new $defaultClientClass($this, $systemClientConfig);
             $this->adminClient->start();
         }
@@ -493,7 +551,10 @@ class Core extends Controller
      */
     public function getConfig($bundleName)
     {
-        return $this->getConfigs()->getConfig($bundleName);
+        $bundle = $this->getBundle($bundleName);
+        if ($bundle) {
+            return $this->getConfigs()->getConfig($bundle->getName());
+        }
     }
 
     /**
@@ -509,7 +570,7 @@ class Core extends Controller
     }
 
     /**
-     * Returns all Symfony Bundles that have at least a kryn configuration.
+     * Returns all Symfony Bundles.
      *
      * @return \Symfony\Component\HttpKernel\Bundle\BundleInterface[]
      */
@@ -517,9 +578,7 @@ class Core extends Controller
     {
         $bundles = [];
         foreach ($this->getKernel()->getBundles() as $bundleName => $bundle) {
-            if ($this->getConfig($bundleName)) {
-                $bundles[] = $bundle;
-            }
+            $bundles[] = $bundle;
         }
         return $bundles;
     }
@@ -530,19 +589,56 @@ class Core extends Controller
      */
     public function getBundle($bundleName)
     {
-        $bundleName = strtolower($bundleName);
         foreach ($this->getBundles() as $bundle) {
-            if (strtolower($bundle->getName()) == $bundleName || $this->getShortBundleName($bundle->getName()) == $bundleName) {
+            if (strtolower($bundle->getName()) == strtolower($bundleName)
+                || $this->getShortBundleName($bundle->getName()) == strtolower($bundleName)
+                || get_class($bundle) == $bundleName
+            ) {
                 return $bundle;
             }
         }
     }
 
+    /**
+     * @param string $bundleName full className or bundleName or short bundleName
+     * @return string with leading /
+     */
+    public function getBundleDir($bundleName)
+    {
+        $bundle = $this->getBundle($bundleName);
+        $path = null;
+        if ($bundle) {
+            $path = $bundle->getPath();
+        } else {
+            if (class_exists($bundleName)) {
+                $reflection = new \ReflectionClass($bundleName);
+                $path = dirname($reflection->getFileName());
+            }
+        }
+        if ($path) {
+            if ('/' !== substr($path, -1)) {
+                $path .= '/';
+            }
+            return $path;
+        }
+    }
+
+    /**
+     * Checks if a (kryn) bundle is activated.
+     *
+     * @param string $bundleName
+     * @return bool
+     */
     public function isActiveBundle($bundleName)
     {
         return null !== $this->getBundle($bundleName);
     }
 
+    /**
+     * @param $nodeOrId
+     * @param bool $fullUrl
+     * @return string
+     */
     public function getNodeUrl($nodeOrId, $fullUrl = false)
     {
         $id = $nodeOrId;
@@ -606,6 +702,7 @@ class Core extends Controller
     {
         $path = preg_replace('/:+/', '/', $path);
         preg_match('/\@?([a-zA-Z0-9\-_\.\\\\]+)/', $path, $matches);
+        $root = realpath($this->getKernel()->getRootDir(). '/../');
         if ($matches && isset($matches[1])) {
             try {
                 $bundle = $this->getKernel()->getBundle($matches[1]);
@@ -631,10 +728,11 @@ class Core extends Controller
                 $bundlePath .= '/';
             }
 
-            $path = $bundlePath . $suffix . $path;
+            return $bundlePath . $suffix . $path;
+        } else {
+            return $root . $path;
         }
 
-        return $path;
     }
 
     /**
@@ -725,6 +823,16 @@ class Core extends Controller
             }
         }
         $this->getStopwatch()->stop('Load Bundle Configs');
+    }
+
+    /**
+     * Returns the installation id.
+     *
+     * @return string
+     */
+    public function getId()
+    {
+        return 'kryn-' . ($this->getSystemConfig()->getId() ? : 'no-id');
     }
 
 }

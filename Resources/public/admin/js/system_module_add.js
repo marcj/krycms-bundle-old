@@ -1,4 +1,4 @@
-var admin_system_module_add = new Class({
+var kryncmsbundle_system_module_add = new Class({
     initialize: function (pWin) {
         this.win = pWin;
         this.checkName(this.win.params.name);
@@ -45,7 +45,7 @@ var admin_system_module_add = new Class({
                 }).inject(d);
 
                 new ka.Button(_('Open extension editor'), function () {
-                    ka.wm.open('admin/system/module/edit', {name: pName});
+                    ka.wm.open('kryncmsbundle/system/module/edit', {name: pName});
                 }).inject(d);
 
             }

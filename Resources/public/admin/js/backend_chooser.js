@@ -1,4 +1,4 @@
-var admin_backend_chooser = new Class({
+var kryncmsbundle_backend_chooser = new Class({
 
     Implements: [Events, Options],
 

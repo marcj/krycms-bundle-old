@@ -18,8 +18,9 @@ use Kryn\CmsBundle\Model\SessionQuery;
 use Kryn\CmsBundle\Model\User;
 use Kryn\CmsBundle\Model\UserGroupQuery;
 use Kryn\CmsBundle\Model\UserQuery;use Propel\Runtime\Propel;
+use Symfony\Component\DependencyInjection\ContainerAware;
 
-class PackageManager {
+class PackageManager extends ContainerAware {
 
     /**
      * @var string
@@ -63,7 +64,15 @@ class PackageManager {
         return $this->path;
     }
 
-    public function installDemoData(Core $krynCore)
+    /**
+     * @return Core
+     */
+    public function getKrynCore()
+    {
+        return $this->container->get('kryn.cms');
+    }
+
+    public function installDemoData()
     {
         \Kryn\CmsBundle\Model\DomainQuery::create()->deleteAll();
         \Kryn\CmsBundle\Model\NodeQuery::create()->deleteAll();
@@ -520,7 +529,7 @@ class PackageManager {
         $admin->setLastName('strator');
         $admin->setEmail('admin@localhost');
         $admin->setActivate(1);
-        $admin->setPassword('admin', $krynCore);
+        $admin->setPassword('admin', $this->getKrynCore());
         $liveWorkspace = WorkspaceQuery::create()->findOneById(1);
         $admin->addWorkspace($liveWorkspace);
 

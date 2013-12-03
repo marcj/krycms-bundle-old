@@ -87,13 +87,11 @@ services:
 
      kryn.filesystem.local:
          class: %kryn.filesystem.local.class%
-         arguments: ["@kryn.cms"]
          calls:
             - [setAdapter, ["@kryn.filesystem.adapter.local"]]
 
      kryn.filesystem.cache:
          class: %kryn.filesystem.cache.class%
-         arguments: ["@kryn.cms"]
          calls:
             - [setAdapter, ["@kryn.filesystem.adapter.cache"]]
 
@@ -124,7 +122,7 @@ services:
 
      kryn.stopwatch:
         class: %kryn.stopwatch.class%
-        arguments: ["@debug.stopwatch"]
+        arguments: ["@?debug.stopwatch"]
 
      kryn.acl:
         class: %kryn.acl.class%

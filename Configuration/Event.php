@@ -45,6 +45,11 @@ class Event extends Model
     protected $calls;
 
     /**
+     * @var array
+     */
+    protected $serviceCalls;
+
+    /**
      * @var Condition
      */
     protected $condition;
@@ -58,7 +63,16 @@ class Event extends Model
         }
         if ($this->getClearCaches()) {
             foreach ($this->getClearCaches() as $cacheKey) {
-                Kryn::invalidateCache($cacheKey);
+                $this->getKrynCore()->invalidateCache($cacheKey);
+            }
+        }
+        if ($this->getServiceCalls()) {
+            foreach ($this->getServiceCalls() as $serviceCall) {
+                list($service, $method) = explode('::', $serviceCall);
+                if ($this->getKrynCore()->has($service)) {
+                    $service = $this->getKrynCore()->get($service);
+                    $service->$method($event);
+                }
             }
         }
     }
@@ -71,7 +85,7 @@ class Event extends Model
 
         if ($this->getCondition()) {
             $args = $event->getArguments() ?: [];
-            if (!\Core\Object::satisfy($args, $this->getCondition())) {
+            if ($this->getCondition() && !$this->getCondition()->satisfy($args)) {
                 return false;
             }
         }
@@ -141,6 +155,22 @@ class Event extends Model
     public function getCalls()
     {
         return $this->calls;
+    }
+
+    /**
+     * @param array $serviceCalls
+     */
+    public function setServiceCalls(array $serviceCalls)
+    {
+        $this->serviceCalls = $serviceCalls;
+    }
+
+    /**
+     * @return array
+     */
+    public function getServiceCalls()
+    {
+        return $this->serviceCalls;
     }
 
     /**

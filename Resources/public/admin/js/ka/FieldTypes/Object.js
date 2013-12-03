@@ -287,7 +287,7 @@ ka.FieldTypes.Object = new Class({
             if (this.options.designMode) {
                 return;
             }
-            ka.wm.openWindow('admin/backend/chooser', null, -1, chooserParams, true);
+            ka.wm.openWindow('kryncmsbundle/backend/chooser', null, -1, chooserParams, true);
         }.bind(this))
         .inject(rightTd);
 
@@ -398,7 +398,7 @@ ka.FieldTypes.Object = new Class({
             if (this.options.designMode) {
                 return;
             }
-            ka.wm.open('admin/backend/chooser', chooserParams, -1, true);
+            ka.wm.open('kryncmsbundle/backend/chooser', chooserParams, -1, true);
 
         }.bind(this));
 

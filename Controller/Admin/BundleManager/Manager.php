@@ -14,14 +14,16 @@ use Composer\Package\Version\VersionParser;
 use Composer\Repository\CompositeRepository;
 use Composer\Repository\PlatformRepository;
 use Composer\Repository\RepositoryInterface;
-use Core\Exceptions\BundleNotFoundException;
-use Core\Exceptions\FileNotWritableException;
-use Core\Exceptions\InvalidArgumentException;
-use Core\Exceptions\PackageNotFoundException;
-use Core\Kryn;
-use Core\SystemFile;
+use Kryn\CmsBundle\Exceptions\BundleNotFoundException;
+use Kryn\CmsBundle\Exceptions\FileNotWritableException;
+use Kryn\CmsBundle\Exceptions\InvalidArgumentException;
+use Kryn\CmsBundle\Exceptions\PackageNotFoundException;
+use Kryn\CmsBundle\Admin\AppKernelModifier;
+use Kryn\CmsBundle\Controller;
+use Symfony\Component\DependencyInjection\ContainerAwareInterface;
+use Symfony\Component\HttpKernel\Bundle\BundleInterface;
 
-class Manager
+class Manager extends Controller
 {
     /**
      * @var BufferIO
@@ -54,63 +56,69 @@ class Manager
      * Deactivates a bundle in the system config.
      *
      * @param string $bundle
-     * @param bool   $reloadConfig
+     * @param bool $reloadConfig
      * @return int
      */
     public function deactivate($bundle, $reloadConfig = false)
     {
         Manager::prepareName($bundle);
 
-        Kryn::getSystemConfig()->removeBundle($bundle);
+        $bundle = $this->getKrynCore()->getBundle($bundle);
 
-        if ($reloadConfig) {
-            Kryn::loadModuleConfigs();
+        if ($bundle) {
+            $appModifier = new AppKernelModifier();
+            $appModifier->removeBundle(get_class($bundle));
+            $appModifier->save();
+
+            return true;
         }
-        \Admin\Utils::clearModuleCache($bundle);
 
-        return Kryn::getSystemConfig()->save();
+        return false;
     }
 
     public function createBundle($package, $namespace, $directoryStructure = false)
     {
         if (!preg_match('/^([a-zA-Z0-9_-]+)\\/([a-zA-Z0-9_\\.-]+)$/', $package)) {
-            throw new InvalidArgumentException('`package` is not a correct composer name.');
+            throw new \InvalidArgumentException('`package` is not a correct composer name.');
         }
         if (!preg_match('/^(([a-zA-Z0-9_-]+)\\\\)*([a-zA-Z0-9_-]*)Bundle/', $namespace)) {
-            throw new InvalidArgumentException('`package` is not a correct composer name.');
+            throw new \InvalidArgumentException('`package` is not a correct composer name.');
         }
 
         $directoryStructure = filter_var($directoryStructure, FILTER_VALIDATE_BOOLEAN);
 
         $classDir = './src/' . str_replace('\\', '/', $namespace);
-        mkdirr($classDir);
+        mkdir($classDir, 0777, true);
 
         $bundleClassName = str_replace('\\Bundle\\', '\\', $namespace);
         $bundleClassName = str_replace('\\', '', $namespace);
         $classFile = $classDir . '/' . $bundleClassName . '.php';
         $composerFile = $classDir . '/composer.json';
 
-        $classPhp = sprintf('<?php
+        $fs = $this->getKrynCore()->getFileSystem();
 
-namespace %s;
+        $classPhp = sprintf(
+            '<?php
 
-use \Core\Bundle;
+            namespace %s;
 
-class %s extends Bundle {
+            use Symfony\Component\HttpKernel\Bundle\Bundle;
 
-}
-',
+            class %s extends Bundle {
+
+            }
+            ',
             $namespace,
             $bundleClassName
         );
 
-        SystemFile::setContent($classFile, $classPhp);
+        $fs->write($classFile, $classPhp);
 
         $composer = array(
             'repositories' => array(
                 array(
                     'type' => 'composer',
-                    'url' =>  'http:\/\/packages.kryn.org\/'
+                    'url' => 'http:\/\/packages.kryn.org\/'
                 )
             ),
             'name' => $package,
@@ -122,17 +130,17 @@ class %s extends Bundle {
             )
         );
 
-        SystemFile::setContent($composerFile, json_format($composer));
+        $fs->write($composerFile, json_encode($composer, JSON_PRETTY_PRINT));
 
         if ($directoryStructure) {
-            SystemFile::createFolder($classDir . '/Controller');
-            SystemFile::createFolder($classDir . '/Resources');
-            SystemFile::createFolder($classDir . '/Resources/views');
-            SystemFile::createFolder($classDir . '/Resources/screenshots');
-            SystemFile::createFolder($classDir . '/Resources/doc');
-            SystemFile::createFolder($classDir . '/Resources/doc/images');
-            SystemFile::createFolder($classDir . '/Resources/public');
-            SystemFile::createFolder($classDir . '/Resources/config');
+            $fs->mkdir($classDir . '/Controller');
+            $fs->mkdir($classDir . '/Resources');
+            $fs->mkdir($classDir . '/Resources/views');
+            $fs->mkdir($classDir . '/Resources/screenshots');
+            $fs->mkdir($classDir . '/Resources/doc');
+            $fs->mkdir($classDir . '/Resources/doc/images');
+            $fs->mkdir($classDir . '/Resources/public');
+            $fs->mkdir($classDir . '/Resources/config');
 
             $krynXml = "<config>
   <bundle>
@@ -148,7 +156,7 @@ $line
 This is the bundle $bundleClassName.
 ";
 
-            SystemFile::createFile($classDir . '/Resources/doc/index.md', $docuIndex);
+            $fs->write($classDir . '/Resources/doc/index.md', $docuIndex);
 
         }
 
@@ -166,14 +174,14 @@ This is the bundle $bundleClassName.
     {
         Manager::prepareName($bundle);
 
-        Kryn::getSystemConfig()->addBundle($bundle);
+        $appModifier = new AppKernelModifier();
+        if ($appModifier->addBundle($bundle)) {
+            $appModifier->save();
 
-        if ($reloadConfig) {
-            Kryn::loadModuleConfigs();
+            return true;
         }
-        \Admin\Utils::clearModuleCache($bundle);
 
-        return Kryn::getSystemConfig()->save();
+        return false;
     }
 
     public function getInfo($bundle)
@@ -182,13 +190,15 @@ This is the bundle $bundleClassName.
 
         $info = $bundle->getComposer();
         $info['_installed'] = $bundle->getInstalledInfo();
+
         return $info;
     }
 
-    public static function getInstalledInfo($name)
+    public function getInstalledInfo($name)
     {
-        if (SystemFile::exists('composer.lock')) {
-            $composerLock = SystemFile::getContent('composer.lock');
+        $fs = $this->getKrynCore()->getFileSystem();
+        if ($fs->has('composer.lock')) {
+            $composerLock = $fs->read('composer.lock');
             if ($composerLock) {
                 $composerLock = json_decode($composerLock, true);
 
@@ -207,14 +217,16 @@ This is the bundle $bundleClassName.
     {
         $packages = [];
         $bundles = [];
-        if (SystemFile::exists('composer.json')) {
-            $composer = SystemFile::getContent('composer.json');
+        $fs = $this->getKrynCore()->getFileSystem();
+
+        if ($fs->has('composer.json')) {
+            $composer = $fs->read('composer.json');
             if ($composer) {
                 $composer = json_decode($composer, true);
 
                 $installedVersions = [];
-                if (SystemFile::exists('composer.lock')) {
-                    $locker = SystemFile::getContent('composer.lock');
+                if ($fs->has('composer.lock')) {
+                    $locker = $fs->read('composer.lock');
                     $locker = json_decode($locker, true);
                     if ($locker) {
                         foreach ($locker['packages'] as $package) {
@@ -223,8 +235,10 @@ This is the bundle $bundleClassName.
                             if ('dev-master' === $version) {
                                 if ($package['source']) {
                                     $ref = substr($package['source']['reference'], 0, 7);
-                                } else if ($package['dist']) {
-                                    $ref = substr($package['source']['reference'], 0, 7);
+                                } else {
+                                    if ($package['dist']) {
+                                        $ref = substr($package['source']['reference'], 0, 7);
+                                    }
                                 }
                             }
                             if ($ref) {
@@ -242,6 +256,9 @@ This is the bundle $bundleClassName.
                 $packages = [];
 
                 foreach ((array)$composer['require'] as $name => $version) {
+                    if ('php' == $name) {
+                        continue;
+                    }
                     $package = [
                         'name' => $name,
                         'version' => $version,
@@ -253,15 +270,21 @@ This is the bundle $bundleClassName.
         }
 
         $bundleClasses = array_merge(
-            static::getBundlesFromPath('vendor'),
-            static::getBundlesFromPath('src')
+            $this->getBundlesFromPath('vendor'),
+            $this->getBundlesFromPath('src')
         );
 
         if ($bundleClasses) {
             foreach ($bundleClasses as $bundle) {
-                $bundleObj = new $bundle;
-                $path = $bundleObj->getPath();
-                if (0 === strpos($path, 'vendor/')) {
+                if (!class_exists($bundle)) {
+                    continue;
+                }
+
+                $reflection = new \ReflectionClass($bundle);
+                $current = realpath($this->getKrynCore()->getKernel()->getRootDir() . '/../');
+                $path = substr(dirname($reflection->getFileName()), strlen($current) + 1);
+
+                if (false !== strpos($path, 'vendor/')) {
                     $expl = explode('/', $path);
                     $package = $expl[1] . '/' . $expl[2];
                 } else {
@@ -270,7 +293,7 @@ This is the bundle $bundleClassName.
                 $bundleInfo = [
                     'class' => $bundle,
                     'package' => $package,
-                    'active' => Kryn::isActiveBundle($bundle)
+                    'active' => $this->getKrynCore()->isActiveBundle($bundle)
                 ];
                 $bundles[] = $bundleInfo;
             }
@@ -289,7 +312,7 @@ This is the bundle $bundleClassName.
     public function getBundlesFromPath($path)
     {
         $bundles = [];
-        if (SystemFile::exists($path)) {
+        if ($this->getKrynCore()->getFileSystem()->has($path)) {
 
             $finder = new \Symfony\Component\Finder\Finder();
             $finder
@@ -297,7 +320,7 @@ This is the bundle $bundleClassName.
                 ->name('*Bundle.php')
                 ->notPath('/Tests/')
                 ->notPath('/Test/')
-                ->in($path);
+                ->in($this->getKernel()->getRootDir() . '/../' . $path);
 
             /** @var \Symfony\Component\Finder\SplFileInfo $file */
             foreach ($finder as $file) {
@@ -305,15 +328,22 @@ This is the bundle $bundleClassName.
                 $file = $file->getRealPath();
                 $content = file_get_contents($file);
                 preg_match('/^\s*\t*class ([a-z0-9_]+)/mi', $content, $className);
-                if (isset($className[1]) && $className[1]){
+                if (isset($className[1]) && $className[1]) {
                     preg_match('/\s*\t*namespace ([a-zA-Z0-9_\\\\]+)/', $content, $namespace);
-                    $class = (count($namespace) > 1 ? $namespace[1] . '\\' : '' ) . $className[1];
+                    $class = (isset($namespace[1]) ? $namespace[1] . '\\' : '') . $className[1];
 
                     if ('Bundle' === $className[1]) {
                         continue;
                     }
 
-                    $bundles[] = $class;
+                    if (class_exists($class)) {
+
+                        $reflection = new \ReflectionClass($class);
+                        $interfaces = $reflection->getInterfaceNames();
+                        if (in_array('Symfony\Component\HttpKernel\Bundle\BundleInterface', $interfaces)) {
+                            $bundles[] = $class;
+                        }
+                    }
                 }
             }
         }
@@ -332,24 +362,33 @@ This is the bundle $bundleClassName.
         if ($lversion == $sversion) {
             return '=';
         } // Same version
-        else if ($lversion < $sversion) {
-            return '<';
-        } // Local older
         else {
-            return '>';
+            if ($lversion < $sversion) {
+                return '<';
+            } // Local older
+            else {
+                return '>';
+            }
         } // Local newer
     }
 
     public function getLocal()
     {
         $finder = new \Symfony\Component\Finder\Finder();
+        $root = $this->getKrynCore()->getKernel()->getRootDir();
+
         $finder
             ->files()
             ->name('*Bundle.php')
             ->notPath('/Tests/')
-            ->notPath('/Test/')
-            ->in('vendor')
-            ->in('src');
+            ->notPath('/Test/');
+
+        if (file_exists($root . '/../vendor')) {
+            $finder->in($root . '/../vendor');
+        }
+        if (file_exists($root . '/../src')) {
+            $finder->in($root . '/../src');
+        }
 
         return $this->getBundles($finder);
     }
@@ -364,7 +403,7 @@ This is the bundle $bundleClassName.
             $content = file_get_contents($file);
             preg_match('/^\s*\t*class ([a-z0-9_]+)/mi', $content, $className);
             if (isset($className[1]) && $className[1]) {
-                preg_match('/\s*\t*namespace ([a-zA-Z0-9_\\\\]+)/', $content, $namespace);
+                preg_match('/\s*\t*namespace\s*\t*([a-zA-Z0-9_\\\\]+)/i', $content, $namespace);
                 $class = (count($namespace) > 1 ? $namespace[1] . '\\' : '') . $className[1];
 
                 if ('Bundle' === $className[1] || false !== strpos($class, '\\Test\\') ||
@@ -378,24 +417,22 @@ This is the bundle $bundleClassName.
         }
         $bundles = array_unique($bundles);
 
+        $res = [];
         foreach ($bundles as $bundleClass) {
-            $bundle = new $bundleClass();
-            if (!($bundle instanceof \Core\Bundle)) {
+
+            if (!class_exists($bundleClass)) {
                 continue;
             }
+            $name = basename(str_replace('\\', '//', $bundleClass));
 
-            if ($composer = $bundle->getComposer()) {
-                $composer['_path'] = $bundle->getPath();
-                $composer['_installed'] = $bundle->getInstalledInfo();
-                $res[$bundle->getClassName()] = $composer;
-                if (null === $res[$bundle->getClassName()]['activated']) {
-                    $res[$bundle->getClassName()]['activated'] = array_search(
-                        $bundle->getClassName(),
-                        Kryn::$config['bundles']
-                    ) !== false ? true : false;
-                }
+            if ($composer = $this->getKrynCore()->getUtils()->getComposerArray($bundleClass)) {
+                $composer['_path'] = $this->getKrynCore()->getBundleDir($bundleClass);
+                $composer['_installed'] = $this->getInstalledInfo($composer['name']);
+                $composer['activated'] = $this->getKrynCore()->isActiveBundle($name);
+                $res[$bundleClass] = $composer;
             }
         }
+
         return $res;
     }
 
@@ -453,22 +490,22 @@ This is the bundle $bundleClassName.
      * and updates the propel ORM, if the bundle has a model.xml.
      *
      * @param  string $bundle
-     * @param  bool   $ormUpdate
+     * @param  bool $ormUpdate
      *
      * @return bool
      */
     public function install($bundle, $ormUpdate = false)
     {
         Manager::prepareName($bundle);
+        $fs = $this->getKrynCore()->getFileSystem();
 
-        $hasPropelModels = SystemFile::exists(Kryn::getBundleDir($bundle) . 'Resources/config/models.xml');
-        $this->fireScript($bundle, 'install');
+        $hasPropelModels = $fs->has($this->getKrynCore()->getBundleDir($bundle) . 'Resources/config/models.xml');
+        $this->firePackageManager($bundle, 'install');
 
         //fire update propel orm
         if ($ormUpdate && $hasPropelModels) {
             //update propel
-            \Core\PropelHelper::updateSchema();
-            \Core\PropelHelper::cleanup();
+            $this->getKrynCore()->getEventDispatcher()->dispatch('core/bundle/schema-update', $bundle);
         }
 
         $this->activate($bundle, true);
@@ -485,7 +522,7 @@ This is the bundle $bundleClassName.
      */
     public function installDatabase($name)
     {
-        $this->fireScript($name, 'install.database');
+        $this->firePackageManager($name, 'install.database');
 
         return true;
     }
@@ -500,45 +537,38 @@ This is the bundle $bundleClassName.
      *
      * @return bool
      *
-     * @throws \Core\Exceptions\BundleNotFoundException
+     * @throws BundleNotFoundException
      */
     public function uninstall($bundle, $removeFiles = true, $ormUpdate = false)
     {
         Manager::prepareName($bundle);
+        $fs = $this->getKrynCore()->getFileSystem();
 
-        $bundleObject = \Core\Kryn::getBundle($bundle, false);
-        if (!$bundleObject) {
-            throw new BundleNotFoundException(tf('Bundle `%s` not found.', $bundle));
+        $path = $this->getKrynCore()->getBundleDir($bundle);
+        if (!$path) {
+            throw new \Kryn\CmsBundle\Exceptions\BundleNotFoundException();
         }
 
-        $hasPropelModels = SystemFile::exists(\Core\Kryn::resolvePath($bundle, 'Resources/config') . 'model.xml');
+        $hasPropelModels = $fs->has($path . 'Resources/config/model.xml');
 
-        \Core\Event::fire('admin/module/manager/uninstall/pre', $bundle);
-
-        $this->fireScript($bundle, 'uninstall');
-
-        \Core\Event::fire('admin/module/manager/uninstall/post', $bundle);
+        $this->firePackageManager($bundle, 'uninstall');
 
         $this->deactivate($bundle, true);
 
         //fire update propel orm
         if ($ormUpdate && $hasPropelModels) {
-            //remove propel classes in temp
-            \Core\TempFile::remove('propel-classes/' . $bundleObject->getRootNamespace());
-
             //update propel
             if ($ormUpdate) {
-                \Core\PropelHelper::updateSchema();
-                \Core\PropelHelper::cleanup();
+                $this->getKrynCore()->getEventDispatcher()->dispatch('core/bundle/schema-update', $bundle);
             }
         }
 
         //remove files
         if (filter_var($removeFiles, FILTER_VALIDATE_BOOLEAN)) {
-            delDir($bundleObject->getPath());
-            if (0 === strpos($bundleObject->getPath(), $this->getComposerVendorDir())) {
-                $path = explode('/', $bundleObject->getPath());
-                $composerName = $path[1].'/'.$path[2];
+            $fs->delete($path);
+            if (0 === strpos($path, $this->getComposerVendorDir())) {
+                $path = explode('/', $path);
+                $composerName = $path[1] . '/' . $path[2];
                 $this->uninstallComposer($composerName);
             }
         }
@@ -575,7 +605,9 @@ This is the bundle $bundleClassName.
                         $this->searchAndUninstallBundles($this->getComposerVendorDir() . $pathToDelete);
                         delDir($this->getComposerVendorDir() . $pathToDelete);
                         if (file_exists($pathToDelete)) {
-                            Kryn::getLogger()->addWarning(sprintf('[UninstallComposer] Can not delete folder `%s`.', $pathToDelete));
+                            Kryn::getLogger()->addWarning(
+                                sprintf('[UninstallComposer] Can not delete folder `%s`.', $pathToDelete)
+                            );
                         }
                     }
                     $this->updateAutoloader();
@@ -584,11 +616,16 @@ This is the bundle $bundleClassName.
                 }
             }
         }
+
         return false;
     }
 
-    protected function getPackage(RepositoryInterface $installedRepo, RepositoryInterface $repos, $name, $version = null)
-    {
+    protected function getPackage(
+        RepositoryInterface $installedRepo,
+        RepositoryInterface $repos,
+        $name,
+        $version = null
+    ) {
         $name = strtolower($name);
         $constraint = null;
         if ($version) {
@@ -659,11 +696,18 @@ This is the bundle $bundleClassName.
         $platformRepo = new PlatformRepository();
         $localRepo = $composer->getRepositoryManager()->getLocalRepository();
         $installedRepo = new CompositeRepository(array($localRepo, $platformRepo));
-        $repos = new CompositeRepository(array_merge(array($installedRepo), $composer->getRepositoryManager()->getRepositories()));
+        $repos = new CompositeRepository(array_merge(
+            array($installedRepo),
+            $composer->getRepositoryManager()->getRepositories()
+        ));
         list($package, $versions) = $this->getPackage($installedRepo, $repos, $name, $version);
 
         if (!$package) {
-            throw new PackageNotFoundException(sprintf('Can not find package `%s` with version `%s`.', $name, $version));
+            throw new PackageNotFoundException(sprintf(
+                'Can not find package `%s` with version `%s`.',
+                $name,
+                $version
+            ));
         }
 
         if (SystemFile::exists('composer.json') && is_string($name)) {
@@ -694,8 +738,7 @@ This is the bundle $bundleClassName.
             ->setPreferDist(true)
             ->setDevMode(true)
             ->setUpdate(true)
-            ->setUpdateWhitelist([$name]);
-        ;
+            ->setUpdateWhitelist([$name]);;
 
         if (filter_var($withBundles, FILTER_VALIDATE_BOOLEAN)) {
             $this->searchAndInstallBundles($this->getComposerVendorDir() . $name);
@@ -746,7 +789,7 @@ This is the bundle $bundleClassName.
     }
 
     /**
-     * @throws \Core\Exceptions\FileNotWritableException
+     * @throws \Kryn\CmsBundle\Exceptions\FileNotWritableException
      */
     public function updateAutoloader()
     {
@@ -776,52 +819,47 @@ This is the bundle $bundleClassName.
     /**
      * Fires the script in module/$module/package/$script.php and its events.
      *
-     * @ events admin/module/manager/<$script>/pre
-     * @ events admin/module/manager/<$script>/failed
-     * @ events admin/module/manager/<$script>
-     *
-     * @param  string $module
+     * @param  string $bundle
      * @param  string $script
      *
-     * @throws \SecurityException
-     * @throws \Exception
+     * @throws BundleNotFoundException
      * @return bool
      */
-    public function fireScript($module, $script)
+    public function firePackageManager($bundleName, $script)
     {
-        \Core\Event::fire('admin/module/manager/' . $script . '/pre', $module);
+        $bundle = $this->getKrynCore()->getBundle($bundleName);
+        if ($bundle) {
+            $namespace = $bundle->getNamespace();
+        } else if (class_exists($bundleName)) {
+            $reflection = new \ReflectionClass($bundleName);
+            $namespace = $reflection->getNamespaceName();
+        } else {
+            throw new BundleNotFoundException(sprintf('Bundle `%s` not found.', $bundleName));
+        }
 
-        $file = $this->getScriptFile($module, $script);
 
-        if (file_exists($file)) {
+        $packageManagerClass = $namespace . '\\PackageManger';
 
-            $content = file_get_contents($file);
-            if (strpos($content, 'KRYN_MANAGER') === false) {
-                throw new \SecurityException('!It is not safe, if your script can be external executed!');
+        if (class_exists($packageManagerClass)) {
+            $packageManager = new $packageManagerClass($this->getKrynCore());
+            if ($packageManager instanceof ContainerAwareInterface) {
+                $packageManager->setContainer($this->getKrynCore()->getKernel()->getContainer());
             }
 
-            try {
-                include($file);
-            } catch (\Exception $ex) {
-                //\Core\Event::fire('admin/module/manager/' . $script . '/failed', $arg = array($module, $ex));
-                throw $ex;
+            if (method_exists($packageManager, $script)) {
+                $packageManager->$script();
+            } else {
+                $this->getKrynCore()->getLogger()->debug(
+                    sprintf('PackageManager of Bundle `%s` does not have the method `%s`', $bundle, $script)
+                );
             }
-
-            \Core\Event::fire('admin/module/manager/' . $script, $module);
+        } else {
+            $this->getKrynCore()->getLogger()->debug(
+                sprintf('PackageManager class `%s` of Bundle `%s` does not exist', $packageManagerClass, $bundleName)
+            );
         }
 
         return true;
     }
 
-
-    private function getScriptFile($module, $name)
-    {
-        self::prepareName($module);
-
-        try {
-            return \Core\Kryn::getBundleDir($module) . 'Resources/package/' . $name . '.php';
-        } catch (\Core\Exceptions\ModuleDirNotFoundException $e) {
-        }
-
-    }
 }

@@ -53,7 +53,7 @@ ka.FieldTypes.Codemirror = new Class({
         }
         this.editor = new CodeMirror(this.editorPanel, options);
 
-        CodeMirror.modeURL = _pathAdmin + '../bundles/core/codemirror/mode/%N/%N.js';
+        CodeMirror.modeURL = _path + 'bundles/kryncms/codemirror/mode/%N/%N.js';
         this.editor.setOption("mode", options.mode);
         CodeMirror.autoLoadMode(this.editor, options.mode);
 
@@ -77,7 +77,6 @@ ka.FieldTypes.Codemirror = new Class({
     },
 
     setValue: function (pValue) {
-
         this.editor.setValue(pValue ? pValue : "");
     },
 

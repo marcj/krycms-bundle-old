@@ -2874,7 +2874,7 @@ ka.Files = new Class({
                     if (file.type == 'dir') {
                         this.loadPath(file.path);
                     } else {
-                        ka.wm.openWindow('admin/file/edit', null, null, {file: file});
+                        ka.wm.openWindow('kryncmsbundle/file/edit', null, null, {file: file});
                     }
                 }.bind(this));
 

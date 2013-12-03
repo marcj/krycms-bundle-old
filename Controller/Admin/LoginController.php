@@ -70,26 +70,14 @@ class LoginController extends PluginController
     public function addMainResources($options = array())
     {
         $response = $this->getKrynCore()->getPageResponse();
-
-        $baseUrl = $this->getRequest()->getBaseUrl();
-        $path = substr($this->getRequest()->getRequestUri(), strlen($baseUrl) + 1);
-
         $options['noJs'] = isset($options['noJs']) ? $options['noJs'] : false;
 
-
-        //do we need to add app_dev.php/ or something?
-        $prefix = substr(
-            $this->getKrynCore()->getRequest()->getBaseUrl(),
-            strlen($this->getKrynCore()->getRequest()->getBasePath())
-        );
-        if (false !== $prefix) {
-            $path = substr($prefix, 1) . '/' . $path;
-        }
+        $prefix = $this->getKrynCore()->getSystemConfig()->getAdminUrl();
 
         $response->addJs(
             '
-        window._path = window._baseUrl = ' . json_encode(dirname($baseUrl). '/') . '
-        window._pathAdmin = ' . json_encode($path . '/')
+        window._path = window._baseUrl = ' . json_encode($this->getRequest()->getBasePath() . '/') . '
+        window._pathAdmin = ' . json_encode($this->getRequest()->getBaseUrl() . $prefix)
         );
 
         if ($this->getKrynCore()->getKernel()->isDebug()) {
@@ -105,9 +93,9 @@ class LoginController extends PluginController
                 }
             }
         } else {
-            $response->addCssFile($prefix . 'admin/backend/style');
+            $response->addCssFile(substr($prefix, 1) . 'admin/backend/style');
             if (!$options['noJs']) {
-                $response->addJsFile($prefix . 'admin/backend/script');
+                $response->addJsFile(substr($prefix, 1) . 'admin/backend/script');
             }
 
             foreach ($this->getKrynCore()->getConfigs() as $bundleConfig) {

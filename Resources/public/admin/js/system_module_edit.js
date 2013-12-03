@@ -1,4 +1,4 @@
-var admin_system_module_edit = new Class({
+var kryncmsbundle_system_module_edit = new Class({
 
     initialize: function(pWin) {
         this.win = pWin;
@@ -560,7 +560,7 @@ var admin_system_module_edit = new Class({
 
         new ka.Button(t('Edit window'))
             .addEvent('click', function() {
-                ka.wm.open('admin/system/module/editWindow', {bundle: this.mod, className: pClassName});
+                ka.wm.open('kryncmsbundle/system/module/editWindow', {bundle: this.mod, className: pClassName});
             }.bind(this))
             .inject(td);
 
@@ -1690,7 +1690,7 @@ var admin_system_module_edit = new Class({
                 html: '&#xe00f;'
             }).addEvent('click',
                 function() {
-                    ka.wm.open('admin/files/edit', {file: {path: '/' + file.value}});
+                    ka.wm.open('kryncmsbundle/files/edit', {file: {path: '/' + file.value}});
                 }).inject(li);
             new Element('a', {
                 style: "cursor: pointer; font-family: 'icomoon'; padding: 0px 2px;",
@@ -1859,7 +1859,7 @@ var admin_system_module_edit = new Class({
 
         this.langTranslateBtn = new ka.Button(t('Translate')).inject(right);
         this.langTranslateBtn.addEvent('click', function() {
-            ka.wm.open('admin/system/languages/edit', {lang: this.languageLanguageSelect.getValue(), bundle: this.mod});
+            ka.wm.open('kryncmsbundle/system/languages/edit', {lang: this.languageLanguageSelect.getValue(), bundle: this.mod});
         }.bind(this));
         this.langTranslateBtn.deactivate();
 

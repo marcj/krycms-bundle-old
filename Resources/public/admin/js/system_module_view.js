@@ -1,4 +1,4 @@
-var admin_system_module_view = new Class({
+var kryncmsbundle_system_module_view = new Class({
 
     initialize: function (pWindow) {
         this.win = pWindow;
@@ -245,7 +245,7 @@ var admin_system_module_view = new Class({
 //            if (pItem.installed) {
 //                new ka.Button(_('Database update')).addEvent('click',
 //                    function () {
-//                        ka.wm.open('admin/system/module/dbInit', {name: pItem.name});
+//                        ka.wm.open('kryncmsbundle/system/module/dbInit', {name: pItem.name});
 //                    }).inject(td);
 //            }
 //

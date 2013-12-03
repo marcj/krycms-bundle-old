@@ -1,4 +1,4 @@
-var admin_system_module_dbInit = new Class({
+var kryncmsbundle_system_module_dbInit = new Class({
 
     initialize: function (pWin) {
         this.win = pWin;

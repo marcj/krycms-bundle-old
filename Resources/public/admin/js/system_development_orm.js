@@ -1,4 +1,4 @@
-var admin_system_development_orm = new Class({
+var kryncmsbundle_system_development_orm = new Class({
 
 
     initialize: function (pWin) {

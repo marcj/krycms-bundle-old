@@ -1,4 +1,4 @@
-var admin_pages = new Class({
+var kryncmsbundle_pages = new Class({
 
     initialize: function (pWin) {
         this.win = pWin;

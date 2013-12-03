@@ -174,7 +174,7 @@ class Objects
         }
 
         if (strpos($objectKey, '%')) {
-            $objectKey = $this->getKrynCore()->urlDecode($objectKey);
+            $objectKey = Tools::urlDecode($objectKey);
         }
 
         if (!$objectKey) {
@@ -261,7 +261,7 @@ class Objects
         $temp = explode(':', $objectKey);
         $config = $this->getKrynCore()->getConfig($temp[0]);
 
-        return $config ? $config->getName() : null;
+        return $config ? $config->getBundleName() : null;
     }
 
     /**
@@ -429,12 +429,12 @@ class Objects
         $withFieldNames = !is_numeric(key($pk));
 
         if (count($pks) == 1 && is_array($pk)) {
-            return $this->getKrynCore()->getUtils()->urlEncode($pk[$withFieldNames ? $pks[0] : 0]);
+            return Tools::urlEncode($pk[$withFieldNames ? $pks[0] : 0]);
         } else {
             $c = 0;
             $urlId = array();
             foreach ($pks as $pk2) {
-                $urlId[] = $this->getKrynCore()->getUtils()->urlEncode($pk[$withFieldNames ? $pk2 : $c]);
+                $urlId[] = Tools::urlEncode($pk[$withFieldNames ? $pk2 : $c]);
                 $c++;
             }
 
@@ -474,10 +474,10 @@ class Objects
         $url = 'object://' . $objectKey . '/';
         if (is_array($primaryValues)) {
             foreach ($primaryValues as $key => $val) {
-                $url .= $this->getKrynCore()->urlEncode($val) . ',';
+                $url .= Tools::urlEncode($val) . ',';
             }
         } else {
-            return $url . $this->getKrynCore()->urlEncode($primaryValues);
+            return $url . Tools::urlEncode($primaryValues);
         }
 
         return substr($url, 0, -1);

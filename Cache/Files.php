@@ -65,7 +65,8 @@ class Files extends AbstractCache
     {
         $dirs = str_split(md5($key), 4);
 
-        return $this->path . $this->prefix . implode('/', $dirs)  .'/'. urlencode($key) . ($this->useJson ? '.json' : '.php');
+        //implode('/', $dirs)
+        return $this->path . $this->prefix . '/'. urlencode($key) . ($this->useJson ? '.json' : '.php');
     }
 
     /**

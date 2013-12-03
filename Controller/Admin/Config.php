@@ -2,14 +2,13 @@
 
 namespace Kryn\CmsBundle\Controller\Admin;
 
-use Core\Kryn;
-use Core\Models\Base\LanguageQuery;
-use Core\SystemFile;
+use Kryn\CmsBundle\Controller;
+use Kryn\CmsBundle\Model\LanguageQuery;
 use Propel\Runtime\Map\TableMap;
 
-class Config
+class Config extends Controller
 {
-    public static function getLabels()
+    public function getLabels()
     {
         $res['langs'] = LanguageQuery::create()
             ->orderByTitle()
@@ -21,9 +20,9 @@ class Config
         return $res;
     }
 
-    public static function getConfig()
+    public function getConfig()
     {
-        return Kryn::getSystemConfig()->toArray(true);
+        return $this->getKrynCore()->getSystemConfig()->toArray(true);
     }
 
     public static function saveConfig()

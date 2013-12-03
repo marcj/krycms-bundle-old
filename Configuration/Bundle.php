@@ -133,6 +133,8 @@ class Bundle extends Model
      */
     public function getComposerPath()
     {
+
+
         return $this->getBundleClass()->getPath() . 'composer.json';
     }
 
@@ -290,7 +292,7 @@ class Bundle extends Model
     public function getBundleClass()
     {
         if (!$this->bundleClass) {
-            $this->bundleClass = $this->getKrynCore()->getKernel()->getBundle($this->getBundleName());
+            $this->bundleClass = $this->getKrynCore()->getBundle($this->getBundleName());
         }
         return $this->bundleClass;
     }
@@ -312,7 +314,7 @@ class Bundle extends Model
      */
     public function getName()
     {
-        return $this->getBundleClass()->getName(true);
+        return $this->getKrynCore()->getShortBundleName($this->getBundleClass()->getName());
     }
 
     /**
@@ -612,7 +614,8 @@ class Bundle extends Model
     public function getObject($id)
     {
         if (null !== $this->objects) {
-            return $this->objects[Objects::normalizeObjectKey($id)];
+            $id = Objects::normalizeObjectKey($id);
+            return isset($this->objects[$id]) ? $this->objects[$id] : null;
         }
     }
 

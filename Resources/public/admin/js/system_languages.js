@@ -1,4 +1,4 @@
-var admin_system_languages = new Class({
+var kryncmsbundle_system_languages = new Class({
 
     initialize: function (pWin) {
         this.win = pWin;
@@ -85,7 +85,7 @@ var admin_system_languages = new Class({
 
         this.translateBtn[pExtensionId] = new ka.Button(t('Translate')).inject(right);
         this.translateBtn[pExtensionId].addEvent('click', function () {
-            ka.wm.open('admin/system/languages/edit', {lang: this.languageSelect.getValue(), bundle: pExtensionId});
+            ka.wm.open('kryncmsbundle/system/languages/edit', {lang: this.languageSelect.getValue(), bundle: pExtensionId});
         }.bind(this));
         this.translateBtn[pExtensionId].deactivate();
 

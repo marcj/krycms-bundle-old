@@ -982,13 +982,9 @@ ka.Window = new Class({
 
         var noCache = (new Date()).getTime();
 
-        if (this.getModule() == 'admin') {
-            this.customCssAsset = new Asset.css(_path + 'bundles/kryncms/admin/css/' + javascript + '.css?noCache=' + noCache);
-        } else {
-            this.customCssAsset =
-                new Asset.css(_path + 'bundles/' + this.getModule() + '/admin/css/' + javascript + '.css?noCache=' +
-                    noCache);
-        }
+        this.customCssAsset =
+            new Asset.css(_path + 'bundles/' + this.getModule().replace(/bundle$/, '') + '/admin/css/' + javascript + '.css?noCache=' +
+                noCache);
 
         this.customId = parseInt(Math.random() * 100) + parseInt(Math.random() * 100);
 

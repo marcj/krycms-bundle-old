@@ -321,14 +321,14 @@ class Object extends Model
 
                 $bundle = $this->getKrynCore()->getConfig($bundleName);
                 if ($bundle && $object = $bundle->getObject($objectName)) {
-                    $objectName = $this->getBundle()->getName() . ':' . $this->getId();
+                    $objectName = $this->getBundle()->getBundleName() . ':' . $this->getId();
                     $virtualField = new Field(array(
                         'id' => $fieldName,
                         'virtual' => true,
                         'label' => 'Auto Object Relation (' . $objectName . ')',
                         'object' => $objectName,
                         'objectRelation' => \Kryn\CmsBundle\ORM\ORMAbstract::ONE_TO_MANY
-                    ));
+                    ), $this->getKrynCore());
 
                     $object->addVirtualField($virtualField);
                 }

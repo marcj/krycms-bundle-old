@@ -34,7 +34,7 @@
             <assets>@KrynCmsBundle/admin/js/ka/ui/*.js</assets>
 
             <assets>@KrynCmsBundle/admin/js/extras/*.js</assets>
-            <asset compression="false">@KrynCmsBundle/tinymce/tinymce.dev.js</asset>
+            <asset compression="false">@KrynCmsBundle/tinymce/tinymce.min.js</asset>
 
             <asset>@KrynCmsBundle/admin/icons/style.css</asset>
             <asset>@KrynCmsBundle/codemirror/lib/codemirror.js</asset>

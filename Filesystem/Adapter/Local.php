@@ -188,12 +188,12 @@ class Local extends AbstractAdapter
         $path2 = $this->getFullPath($path);
 
         if (!file_exists(dirname($path2))) {
-            $this->createFolder(dirname($path));
+            $this->mkdir(dirname($path));
         }
 
         if (!file_exists($path2)) {
             if (!is_writable(dirname($path2))) {
-                throw new \FileNotWritableException(sprintf(
+                throw new FileNotWritableException(sprintf(
                     'Can not create the file %s in %s, since the folder is not writable.',
                     $path2,
                     dirname($path2)
@@ -216,35 +216,28 @@ class Local extends AbstractAdapter
      * @param  string $path The full absolute path
      *
      * @return bool
-     * @throws \FileOperationPermittedException
-     * @throws \FileIOException
+     * @throws FileOperationPermittedException
      */
-    private function _createFolder($path)
+    private function _mkdir($path)
     {
-        is_dir(dirname($path)) or $this->_createFolder(dirname($path));
+        is_dir($path) or mkdir($path, $this->dirMode, true);
 
-        if (!is_dir($path)) {
-            if (!@mkdir($path)) {
-                throw new \FileIOException(sprintf('Can not create folder %s.', $path));
-            }
-
-            if ($this->groupName) {
-                if (!@chgrp($path, $this->groupName)) {
-                    throw new \FileOperationPermittedException(sprintf(
-                        'Operation to chgrp the folder %s to %s is permitted.',
-                        $path,
-                        $this->groupName
-                    ));
-                }
-            }
-
-            if (!chmod($path, $this->dirMode)) {
-                throw new \FileOperationPermittedException(sprintf(
-                    'Operation to chmod the folder %s to %o is permitted.',
+        if ($this->groupName) {
+            if (!@chgrp($path, $this->groupName)) {
+                throw new FileOperationPermittedException(sprintf(
+                    'Operation to chgrp the folder %s to %s is permitted.',
                     $path,
-                    $this->dirMode
+                    $this->groupName
                 ));
             }
+        }
+
+        if (!chmod($path, $this->dirMode)) {
+            throw new FileOperationPermittedException(sprintf(
+                'Operation to chmod the folder %s to %o is permitted.',
+                $path,
+                $this->dirMode
+            ));
         }
 
         return is_dir($path);
@@ -253,10 +246,10 @@ class Local extends AbstractAdapter
     /**
      * {@inheritDoc}
      */
-    public function createFolder($path)
+    public function mkdir($path)
     {
-        if (!file_exists($path2 = $this->getFullPath($path))) {
-            return $this->_createFolder($path2);
+        if (!file_exists($path = $this->getFullPath($path))) {
+            return $this->_mkdir($path);
         }
 
         return true;
@@ -265,18 +258,18 @@ class Local extends AbstractAdapter
     /**
      * {@inheritDoc}
      */
-    public function write($path, $content)
+    public function write($path, $content = '')
     {
         $path = $this->getFullPath($path);
 
         $fileCreated = false;
 
-        if (!file_exists($path)) {
-            $fileCreated = $this->createFile($path);
-        } else {
-            if (!is_writable($path)) {
-                throw new FileNotWritableException(sprintf('File %s is not writable.', $path));
-            }
+        if (is_dir(dirname($path))) {
+            $this->mkdir(dirname($path));
+        }
+
+        if (file_exists($path) && !is_writable($path)) {
+            throw new FileNotWritableException(sprintf('File %s is not writable.', $path));
         }
 
         $res = file_put_contents($path, $content);
@@ -420,9 +413,44 @@ class Local extends AbstractAdapter
         if (!file_exists($this->getRoot() . $pathSource)) {
             return false;
         }
-        copyr($this->getRoot() . $pathSource, $this->getRoot() . $pathTarget);
+        $this->copyr($this->getRoot() . $pathSource, $this->getRoot() . $pathTarget);
 
         return file_exists($this->getRoot() . $pathTarget);
+    }
+
+    public function copyr($source, $dest, $overwrite = true)
+    {
+        if (is_file($source)) {
+            if ($overwrite || !is_file($dest)) {
+                if (!@copy($source, $dest)) {
+                    throw new FileNotWritableException(sprintf('Can not copy `%s` to `%s`. Permission denied.', $source, $dest));
+                }
+            }
+
+            return;
+        }
+
+        if (!is_dir($dest)) {
+            mkdir($dest, 0777, true);
+        } elseif (is_link($source)) {
+            $link_dest = readlink($source);
+
+            @symlink($link_dest, $dest);
+            return;
+        }
+
+        $dir = dir($source);
+        if ($dir) {
+            while (false !== $entry = $dir->read()) {
+                if ($entry == '.' || $entry == '..') {
+                    continue;
+                }
+                if ($dest !== "$source/$entry") {
+                    $this->copyr("$source/$entry", "$dest/$entry");
+                }
+            }
+            $dir->close();
+        }
     }
 
     /**
@@ -449,7 +477,7 @@ class Local extends AbstractAdapter
         $path = $this->getRoot() . $path;
 
         if (!file_exists($path)) {
-            return false;
+            return null;
         }
 
         return file_get_contents($path);
@@ -497,9 +525,33 @@ class Local extends AbstractAdapter
         $path2 = $this->getRoot() . $path;
 
         if (is_dir($path2)) {
-            return delDir($path2);
+            return $this->delDir($path2);
         } elseif (is_file($path2)) {
             return unlink($path2);
+        }
+    }
+
+    public function delDir($dirName)
+    {
+        if (empty($dirName)) {
+            return;
+        }
+        if (file_exists($dirName)) {
+            $dir = dir($dirName);
+            if ($dir) {
+                while ($file = $dir->read()) {
+                    if ($file != '.' && $file != '..') {
+                        if (is_dir($dirName . '/' . $file)) {
+                            $this->delDir($dirName . '/' . $file);
+                        } else {
+                            @unlink($dirName . '/' . $file);
+                        }
+                    }
+                }
+            }
+            return @rmdir($dirName . '/' . $file);
+        } else {
+            return true;
         }
     }
 

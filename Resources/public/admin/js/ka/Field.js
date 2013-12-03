@@ -214,7 +214,7 @@ ka.Field = new Class({
                     }).addEvent('mouseout',function() {
                         this.setStyle('opacity', 0.7);
                     }).addEvent('click', function() {
-                        ka.wm.open('admin/help', {id: this.options.help});
+                        ka.wm.open('kryncmsbundle/help', {id: this.options.help});
                     }.bind(this)).inject(this.titleText);
             }
 

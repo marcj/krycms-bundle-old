@@ -127,7 +127,7 @@ class PropelHelper
     {
         $fs = $this->getKrynCore()->getCacheFileSystem();
         if ($fs->has('propel')) {
-            $fs->deleteDir('propel');
+            $fs->delete('propel');
         }
     }
 
@@ -220,7 +220,7 @@ class PropelHelper
         $result = '';
 
         if ($fs->has('propel-classes')) {
-            $fs->deleteDir('propel-classes');
+            $fs->delete('propel-classes');
         }
 
         $fs->rename('propel/build/classes', 'propel-classes');
@@ -333,7 +333,7 @@ class PropelHelper
         $path = $this->getKrynCore()->getKernel()->getCacheDir();
 
         try {
-            $fs->createDir('propel');
+            $fs->mkdir('propel');
         } catch (\Exception $e) {
             throw new \Exception(sprintf('Can not create propel folder `%s`.', $path . '/propel'), 0, $e);
         }
@@ -372,8 +372,8 @@ class PropelHelper
     </propel>
 </config>';
 
-        $fs->put('propel/runtime-conf.xml', $xml);
-        $fs->put('propel/buildtime-conf.xml', $xml);
+        $fs->write('propel/runtime-conf.xml', $xml);
+        $fs->write('propel/buildtime-conf.xml', $xml);
 
         $input = new ArrayInput(array(
             '--input-dir' => $path . '/propel/',
@@ -388,7 +388,7 @@ class PropelHelper
         $output = new StreamOutput(fopen('php://memory', 'rw'));
         $command->run($input, $output);
 
-        $fs->createDir('propel-classes');
+        $fs->mkdir('propel-classes');
 
         if ($fs->has('propel-config.php')) {
             $fs->delete('propel-config.php');
@@ -620,7 +620,7 @@ propel.packageObjectModel = true
 propel.behavior.workspace.class = lib.WorkspaceBehavior
 ';
 
-        return $fs->put('propel/build.properties', $properties);
+        return $fs->write('propel/build.properties', $properties);
 
     }
 

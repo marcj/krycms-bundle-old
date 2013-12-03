@@ -146,7 +146,7 @@ class Backend extends Controller
 
         if ($loadKeys == false || in_array('modules', $loadKeys)) {
             foreach ($this->getKrynCore()->getConfigs() as $config) {
-                $res['bundles'][] = $config->getName();
+                $res['bundles'][] = $config->getBundleName();
             }
         }
 
@@ -252,9 +252,10 @@ class Backend extends Controller
             ini_set("zlib.output_compression", 1);
         }
 
-        $oFile = 'web/cache/admin.style-compiled.css';
+        $oFile = $this->getKrynCore()->getKernel()->getRootDir(). '/../web/cache/admin.style-compiled.css';
         $md5String = '';
 
+        $files = [];
         foreach ($this->getKrynCore()->getConfigs() as $bundleConfig) {
             foreach ($bundleConfig->getAdminAssetsPaths(false, '.*\.css', true, true) as $assetPath) {
                 $path = $this->getKrynCore()->resolvePath($assetPath, 'Resources/public');
@@ -278,7 +279,7 @@ class Backend extends Controller
         }
 
         if (!$fileUpToDate) {
-            $content = $this->getKrynCore()->getUtils()->compressCss($files, $this->getKrynCore()->getSystemConfig()->getAdminUrl() . '/admin/backend/');
+            $content = $this->getKrynCore()->getUtils()->compressCss($files, substr($this->getKrynCore()->getSystemConfig()->getAdminUrl(), 1) . 'admin/backend/');
             $content = $md5Line . $content;
             file_put_contents($oFile, $content);
         }
@@ -289,7 +290,9 @@ class Backend extends Controller
 
     public function loadJs($printSourceMap = false)
     {
-        chdir('web/');
+//        $root = getcwd();
+//        $web = $this->getKrynCore()->getKernel()->getRootDir().'/../web';
+//        chdir($web);
         $oFile = 'cache/admin.script-compiled.js';
 
         $files = array();
@@ -298,7 +301,7 @@ class Backend extends Controller
         $newestMTime = 0;
 
 
-        chdir('../');
+//        chdir($root);
         foreach ($this->getKrynCore()->getConfigs() as $bundleConfig) {
             foreach ($bundleConfig->getAdminAssetsPaths(false, '.*\.js', true, true) as $assetPath) {
                 $path = $this->getKrynCore()->resolvePath($assetPath, 'Resources/public');
@@ -311,7 +314,7 @@ class Backend extends Controller
                 }
             }
         }
-        chdir('web/');
+//        chdir($web);
 
         $ifModifiedSince = $this->getKrynCore()->getRequest()->headers->get('If-Modified-Since');
         if (isset($ifModifiedSince) && (strtotime($ifModifiedSince) == $newestMTime)) {
@@ -396,7 +399,7 @@ class Backend extends Controller
             foreach ($assets as $assetPath) {
                 echo "/* $assetPath */\n\n";
                 $path = $this->getKrynCore()->resolvePath($assetPath, 'Resources/public');
-                echo file_get_contents(PATH . $path);
+                echo file_get_contents($path);
             }
             exit;
         }
@@ -409,12 +412,11 @@ class Backend extends Controller
 
         foreach ($this->getKrynCore()->getConfigs() as $bundleName => $bundleConfig) {
             foreach ($bundleConfig->getAllEntryPoints() as $subEntryPoint) {
-                $path = strtolower($bundleConfig->getName()) . '/' . $subEntryPoint->getFullPath(true);
+                $path = strtolower($bundleConfig->getBundleName()) . '/' . $subEntryPoint->getFullPath(true);
 
                 if (substr_count($path, '/') <= 3) {
                     if ($subEntryPoint->isLink()) {
-                        //todo, check permissions
-                        if ($this->getKrynCore()->getACL()->check('core:EntryPoint', '/' . $path)) {
+                        if ($this->getKrynCore()->getACL()->check('kryncmsbundle:entryPoint', '/' . $path)) {
                             $entryPoints[$path] = array(
                                 'label' => $subEntryPoint->getLabel(),
                                 'icon' => $subEntryPoint->getIcon(),
