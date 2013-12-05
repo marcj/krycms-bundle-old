@@ -15,7 +15,7 @@
             "email": "marc@kryn.org"
         }
     ],
-    "target-dir": "Kryn/Cmsbundle",
+    "target-dir": "Kryn/CmsBundle",
     "autoload": {
         "psr-0": {
             "Kryn\\CmsBundle": ""
@@ -36,7 +36,9 @@
         "frenkynet/flysystem": "*",
         "sybio/image-workshop": "*",
         "michelf/php-markdown": "1.3",
-        "composer\/composer": "*"
+        "composer\/composer": "*",
+        "kryncms\/demotheme-bundle": "*",
+        "kryncms\/publication-bundle": "*"
     },
 
     "require-dev": {
