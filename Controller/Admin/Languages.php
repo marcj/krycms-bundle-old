@@ -28,14 +28,16 @@ class Languages extends Controller
     public function saveLanguage($bundle, $langs, $lang = null)
     {
         Manager::prepareName($bundle);
-        return \Core\Lang::saveLanguage($bundle, $lang, $langs);
+        $utils = $this->getTranslator()->getUtils();
+        return $utils->saveLanguage($bundle, $lang, $langs);
     }
 
     public function getExtractedLanguage($bundle)
     {
         Manager::prepareName($bundle);
 
-        return \Core\Lang::extractLanguage($bundle);
+        $utils = $this->getTranslator()->getUtils();
+        return $utils->extractLanguage($bundle);
     }
 
     public function getOverviewExtract($bundle, $lang)
