@@ -163,7 +163,7 @@ class Local extends AbstractAdapter
      */
     public function setRoot($root)
     {
-        $this->root = $root;
+        $this->root = realpath($root);
     }
 
     /**
@@ -220,7 +220,14 @@ class Local extends AbstractAdapter
      */
     private function _mkdir($path)
     {
-        is_dir($path) or mkdir($path, $this->dirMode, true);
+        if (!is_dir($path)) {
+            if (!@mkdir($path, $this->dirMode, true) ){
+                throw new FileOperationPermittedException(sprintf(
+                    'mkdir(%s): Permission denied.',
+                    $path
+                ));
+            }
+        }
 
         if ($this->groupName) {
             if (!@chgrp($path, $this->groupName)) {
@@ -260,12 +267,13 @@ class Local extends AbstractAdapter
      */
     public function write($path, $content = '')
     {
+        $oriPath = $path;
         $path = $this->getFullPath($path);
 
         $fileCreated = false;
 
         if (is_dir(dirname($path))) {
-            $this->mkdir(dirname($path));
+            $this->mkdir(dirname($oriPath));
         }
 
         if (file_exists($path) && !is_writable($path)) {
@@ -527,7 +535,13 @@ class Local extends AbstractAdapter
         if (is_dir($path2)) {
             return $this->delDir($path2);
         } elseif (is_file($path2)) {
-            return unlink($path2);
+            if (!@unlink($path2)) {
+                throw new FileOperationPermittedException(sprintf(
+                    'unlink(%s): Permission denied.',
+                    $path2
+                ));
+            }
+            return true;
         }
     }
 
@@ -538,13 +552,19 @@ class Local extends AbstractAdapter
         }
         if (file_exists($dirName)) {
             $dir = dir($dirName);
+            $file = '';
             if ($dir) {
                 while ($file = $dir->read()) {
                     if ($file != '.' && $file != '..') {
                         if (is_dir($dirName . '/' . $file)) {
                             $this->delDir($dirName . '/' . $file);
                         } else {
-                            @unlink($dirName . '/' . $file);
+                            if (!@unlink($dirName . '/' . $file)){
+                                throw new FileOperationPermittedException(sprintf(
+                                    'unlink(%s): Permission denied.',
+                                    $dirName . '/' . $file
+                                ));
+                            }
                         }
                     }
                 }

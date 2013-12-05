@@ -2,13 +2,27 @@
 
 namespace Kryn\CmsBundle\Controller\Admin;
 
-class Languages
+use Kryn\CmsBundle\Controller;
+use Kryn\CmsBundle\Controller\Admin\BundleManager\Manager;
+
+class Languages extends Controller
 {
 
     public function getLanguage($bundle, $lang = null)
     {
         Manager::prepareName($bundle);
-        return \Core\Lang::getLanguage($bundle, $lang);
+        $utils = $this->getTranslator()->getUtils();
+
+        $file = $this->getKrynCore()->getBundleDir($bundle) . "Resources/translations/$lang.po";
+        $res = $utils->parsePo($file);
+
+        $pluralForm = $utils->getPluralForm($lang);
+        preg_match('/^nplurals=([0-9]+);/', $pluralForm, $match);
+
+        $res['pluralCount'] = intval($match[1]);
+        $res['pluralForm'] = $pluralForm;
+
+        return $res;
     }
 
     public function saveLanguage($bundle, $langs, $lang = null)
@@ -30,14 +44,15 @@ class Languages
             return array();
         }
 
-        $extract = \Core\Lang::extractLanguage($bundle);
-        $translated = \Core\Lang::getLanguage($bundle, $lang);
+        $utils = $this->getTranslator()->getUtils();
+        $extract = $utils->extractLanguage($bundle);
+        $translated = $this->getLanguage($bundle, $lang);
 
         $p100 = count($extract);
         $cTranslated = 0;
 
         foreach ($extract as $id => $translation) {
-            if ($translated['translations'][$id] && $translated['translations'][$id] != '') {
+            if (isset($translated['translations'][$id]) && $translated['translations'][$id] != '') {
                 $cTranslated++;
             }
         }
@@ -46,7 +61,6 @@ class Languages
             'count' => $p100,
             'countTranslated' => $cTranslated
         );
-
     }
 
     public function getAllLanguages($lang = 'en')
@@ -56,13 +70,15 @@ class Languages
         }
 
         $res = array();
-        foreach (kryn::$configs as $key => $mod) {
+        $utils = $this->getTranslator()->getUtils();
+
+        foreach ($this->getKrynCore()->getConfigs() as $key => $mod) {
 
             $res[$key]['config'] = $mod;
-            $res[$key]['lang'] = \Core\Lang::extractLanguage($key);
+            $res[$key]['lang'] = $utils->extractLanguage($key);
 
             if (count($res[$key]['lang']) > 0) {
-                $translate = \Core\Lang::getLanguage($key, $lang);
+                $translate = $this->getLanguage($key, $lang);
                 foreach ($res[$key]['lang'] as $key => &$lang2) {
                     if ($translate[$key] != '') {
                         $lang2 = $translate[$key];

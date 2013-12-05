@@ -36,7 +36,7 @@ class Editor extends ContainerAware
      */
     public function getConfig($bundle)
     {
-        if ($this->getKrynCore()->getBundle($bundle)) {
+        if ($this->getKrynCore()->getBundleDir($bundle)) {
             $config = $this->getKrynCore()->getUtils()->getComposerArray($bundle);
             $config['_path'] = $this->getKrynCore()->getBundleDir($bundle);
             return $config;
@@ -52,6 +52,7 @@ class Editor extends ContainerAware
     public function getBasic($bundle)
     {
         $config = $this->getKrynCore()->getConfig($bundle);
+        if (!$config) return null;
 
         $result['streams'] = $config->propertyToArray('streams');
         $result['listeners'] = $config->propertyToArray('listeners');
@@ -86,6 +87,7 @@ class Editor extends ContainerAware
     public function saveBasic($bundle, $events = null, $listeners = null, $adminAssets = null, $falDrivers = null)
     {
         $config = $this->getKrynCore()->getConfig($bundle);
+        if (!$config) return null;
 
         $config->propertyFromArray('events', $events);
         $config->propertyFromArray('listeners', $listeners);
@@ -115,8 +117,13 @@ class Editor extends ContainerAware
      */
     public function getWindows($bundle)
     {
+        if (!$this->getKrynCore()->getBundleDir($bundle)) return [];
+
+        $root = $this->getKrynCore()->getKernel()->getRootDir() . '/../';
         $finder = Finder::create()
-            ->in($this->getKrynCore()->getBundleDir($bundle))
+            ->in($root . $this->getKrynCore()->getBundleDir($bundle))
+            ->notPath('/Tests/')
+            ->notPath('/Test/')
             ->name('*.php');
 
         $windows = array();
@@ -160,6 +167,7 @@ class Editor extends ContainerAware
     public function getPlugins($bundle)
     {
         $config = $this->getKrynCore()->getConfig($bundle);
+        if (!$config) return null;
 
         return $config->getPluginsArray();
     }
@@ -173,6 +181,7 @@ class Editor extends ContainerAware
     public function getThemes($bundle)
     {
         $config = $this->getKrynCore()->getConfig($bundle);
+        if (!$config) return null;
 
         return $config->getThemesArray();
     }
@@ -187,6 +196,7 @@ class Editor extends ContainerAware
     public function saveThemes($bundle, $themes = null)
     {
         $config = $this->getKrynCore()->getConfig($bundle);
+        if (!$config) return null;
 
         if (is_string($themes)) {
             $themes = json_decode($themes, 1);
@@ -223,6 +233,7 @@ class Editor extends ContainerAware
     public function savePlugins($bundle, $plugins = null)
     {
         $config = $this->getKrynCore()->getConfig($bundle);
+        if (!$config) return null;
 
         if (is_string($plugins)) {
             $plugins = json_decode($plugins, 1);
@@ -242,6 +253,7 @@ class Editor extends ContainerAware
     public function getObjects($bundle)
     {
         $config = $this->getKrynCore()->getConfig($bundle);
+        if (!$config) return null;
 
         return $config->getObjectsArray();
     }
@@ -256,6 +268,7 @@ class Editor extends ContainerAware
     public function saveObjects($bundle, $objects = null)
     {
         $config = $this->getKrynCore()->getConfig($bundle);
+        if (!$config) return null;
 
         if (is_string($objects)) {
             $objects = json_decode($objects, 1);
@@ -315,6 +328,7 @@ class Editor extends ContainerAware
     public function setModelFromObjects($bundle)
     {
         $config = $this->getKrynCore()->getConfig($bundle);
+        if (!$config) return null;
 
         $path = $this->getKrynCore()->getBundleDir($bundle) . 'Resources/config/models.xml';
         if (!file_exists($path) && !touch($path)) {
@@ -354,6 +368,7 @@ class Editor extends ContainerAware
     public function getEntryPoints($bundle)
     {
         $config = $this->getKrynCore()->getConfig($bundle);
+        if (!$config) return null;
 
         $entryPoints = $config->getEntryPointsArray();
         return $entryPoints;
@@ -369,6 +384,7 @@ class Editor extends ContainerAware
     public function saveEntryPoints($bundle, $entryPoints = null)
     {
         $config = $this->getKrynCore()->getConfig($bundle);
+        if (!$config) return null;
 
         $config->propertyFromArray('entryPoints', $entryPoints);
 

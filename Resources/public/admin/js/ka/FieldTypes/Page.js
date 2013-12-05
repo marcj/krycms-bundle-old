@@ -7,7 +7,7 @@ ka.FieldTypes.Page = new Class({
     },
 
     initialize: function (pFieldInstance, pOptions) {
-        pOptions.objects = ['core:node'];
+        pOptions.objects = ['KrynCmsBundle:node'];
 
         this.parent(pFieldInstance, pOptions);
     }

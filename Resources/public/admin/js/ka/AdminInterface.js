@@ -1060,7 +1060,7 @@ ka.AdminInterface = new Class({
 
             Object.each(res.data, function(val, key) {
                 ka.settings[key] = val;
-            })
+            });
 
             ka.settings['images'] = ['jpg', 'jpeg', 'bmp', 'png', 'gif', 'psd'];
 
@@ -1079,6 +1079,11 @@ ka.AdminInterface = new Class({
             if (!this.options.frontPage && ka.settings.system && ka.settings.system.systemTitle) {
                 document.title = ka.settings.system.systemTitle + t(' | Kryn.cms Administration');
             }
+
+            ka.settings.configsAlias = {};
+            Object.each(ka.settings.configs, function(config, key){
+                ka.settings.configsAlias[key.toLowerCase().replace(/bundle$/, '')] = config;
+            });
 
             if (cb) {
                 cb(res.data);

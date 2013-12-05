@@ -283,8 +283,8 @@ abstract class ClientAbstract
      */
     protected function internalLogin($login, $password)
     {
-        $clientConfig = new Client();
-        $storage = new SessionStorage();
+        $clientConfig = new Client(null, $this->getKrynCore());
+        $storage = new SessionStorage(null, $this->getKrynCore());
         $storage->setClass('Kryn\CmsBundle\Client\StoreDatabase');
         $clientConfig->setSessionStorage($storage);
 

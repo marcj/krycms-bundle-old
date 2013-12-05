@@ -9,7 +9,7 @@ ka.LabelTypes['Object'] = new Class({
         options: {
             object: {
                 label: 'Object key',
-                desc: 'Example: Core:Node.',
+                desc: 'Example: KrynCmsBundle:Node.',
                 type: 'objectKey',
                 required: true
             },

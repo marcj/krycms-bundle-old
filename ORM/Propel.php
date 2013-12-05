@@ -6,6 +6,7 @@ use Kryn\CmsBundle\Configuration\Condition;
 use Kryn\CmsBundle\Configuration\ConditionSubSelect;
 use Kryn\CmsBundle\Configuration\Object as ConfigObject;
 use Kryn\CmsBundle\Objects;
+use Kryn\CmsBundle\Tools;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
 use Propel\Runtime\Collection\ObjectCollection;
@@ -401,7 +402,7 @@ class Propel extends ORMAbstract
                     $query->{'join' . $name}($name);
                     //$query->with($name);
 
-                    if ($relationFields[$name]) {
+                    if (isset($relationFields[$name])) {
                         foreach ($relationFields[$name] as $col) {
                             $query->withColumn($name . "." . $col, '"' . $name . "." . $col . '"');
                         }
@@ -427,7 +428,6 @@ class Propel extends ORMAbstract
      */
     public function populateRow($clazz, $row, $selects, $relations, $relationFields, $permissionCheck = false)
     {
-        /** @var \Publication\Models\News $item */
         $item = new $clazz();
         $item->fromArray($row);
 
@@ -443,7 +443,7 @@ class Propel extends ORMAbstract
                 if ($relation->getType() != RelationMap::MANY_TO_MANY && $relation->getType() != RelationMap::ONE_TO_MANY
                 ) {
 
-                    if (is_array($relationFields[$name])) {
+                    if (isset($relationFields[$name]) && is_array($relationFields[$name])) {
 
                         $foreignClazz = $relation->getForeignTable()->getClassName();
                         $foreignObj = new $foreignClazz();
@@ -850,7 +850,7 @@ class Propel extends ORMAbstract
             $fieldName = lcfirst($fieldName);
             $setted[] = $fieldName;
 
-            $fieldValue = $values[$fieldName];
+            $fieldValue = @$values[$fieldName];
 
             if ($field['primaryKey']) {
                 continue;
@@ -867,11 +867,11 @@ class Propel extends ORMAbstract
             if ($field['type'] == 'object' || $this->tableMap->hasRelation($fieldName)) {
                 if ($field['objectRelation'] == ORMAbstract::MANY_TO_MANY || $field['objectRelation'] == ORMAbstract::ONE_TO_MANY) {
 
-                    $name = $pluralizer->getPluralForm(underscore2Camelcase($fieldName));
+                    $name = $pluralizer->getPluralForm(Tools::underscore2Camelcase($fieldName));
                     $setItems = 'set' . $name;
                     $getItems = 'get' . $name;
                     $clearItems = 'clear' . $name;
-                    $addItem = 'add' . underscore2Camelcase($fieldName);
+                    $addItem = 'add' . Tools::underscore2Camelcase($fieldName);
 
                     if ($fieldValue) {
                         $foreignQuery = $this->getQueryClass($field['object']);

@@ -74,13 +74,13 @@ ka.ContentTypes.Plugin = new Class({
         var plugin = this.value.plugin;
         var options = this.value.options;
 
-        if (ka.settings.configs[bundle] && ka.settings.configs[bundle].plugins &&
-            ka.settings.configs[bundle].plugins[plugin]) {
-            var pluginConfig = ka.settings.configs[bundle].plugins[plugin];
+        if (ka.getConfig(bundle) &&ka.getConfig(bundle).plugins &&
+            ka.getConfig(bundle).plugins[plugin]) {
+            var pluginConfig = ka.getConfig(bundle).plugins[plugin];
 
             new Element('div', {
                 'class': 'ka-content-inner-title',
-                text: ka.settings.configs[bundle].label || ka.settings.configs[bundle].name
+                text: ka.getConfig(bundle).label || ka.getConfig(bundle).name
             }).inject(this.inner);
 
             new Element('div', {
@@ -89,9 +89,9 @@ ka.ContentTypes.Plugin = new Class({
             }).inject(this.inner);
 
         } else {
-            if (!ka.settings.configs[bundle]) {
+            if (!ka.getConfig(bundle)) {
                 this.inner.set('text', tf('Bundle `%s` not found', bundle));
-            } else if (!ka.settings.configs[bundle].plugins || ka.settings.configs[bundle].plugins[plugin]) {
+            } else if (!ka.getConfig(bundle).plugins || ka.getConfig(bundle).plugins[plugin]) {
                 this.inner.set('text', tf('Plugin `%s` in bundle `%s` not found', plugin, bundle));
             }
         }

@@ -200,7 +200,7 @@ ka.ContentTypes.Image = new Class({
             file: {
                 label: 'Image',
                 type: 'object',
-                object: 'core:file',
+                object: 'kryncmsbundle:file',
                 width: 'auto',
                 browserOptions: {
                     selectionOnlyFiles: true

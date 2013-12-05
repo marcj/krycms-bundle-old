@@ -280,7 +280,7 @@
       <object id="View">
         <label>Template View</label>
         <desc>Template views</desc>
-        <class>\Admin\Models\ObjectView</class>
+        <class>Kryn\CmsBundle\ORM\ObjectView</class>
         <labelField>name</labelField>
         <dataModel>custom</dataModel>
         <nested>true</nested>

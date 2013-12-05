@@ -451,7 +451,8 @@ class SystemConfig extends Model {
     }
 
     /**
-     * @return string
+     *
+     * @return string with starting and trailing slash
      */
     public function getAdminUrl()
     {

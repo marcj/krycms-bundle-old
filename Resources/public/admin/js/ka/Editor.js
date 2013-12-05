@@ -188,7 +188,7 @@ ka.Editor = new Class({
     },
 
     getUrl: function() {
-        return _pathAdmin + 'admin/object/Core:Node/' + this.options.node.id + '?_method=patch';
+        return _pathAdmin + 'admin/object/kryncmsbundle:Node/' + this.options.node.id + '?_method=patch';
     },
 
     save: function() {

@@ -17,14 +17,14 @@
       </event>
     </events>
     <listeners>
-      <event key="core/object/modify" subject="core:domain">
+      <event key="core/object/modify" subject="KrynCmsBundle:domain">
         <clearCache>core/domains.created</clearCache>
         <clearCache>core/domains</clearCache>
       </event>
-      <event key="core/object/modify" subject="core:content">
+      <event key="core/object/modify" subject="KrynCmsBundle:content">
         <clearCache>core/contents</clearCache>
       </event>
-      <event key="core/object/modify" subject="core:node">
+      <event key="core/object/modify" subject="KrynCmsBundle:node">
         <clearCache>core/contents</clearCache>
         <clearCache>core/navigation</clearCache>
       </event>

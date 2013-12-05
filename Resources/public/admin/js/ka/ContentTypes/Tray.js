@@ -39,7 +39,7 @@ ka.ContentTypes.Tray = new Class({
                 this.inner.set('text', t('Please choose a tray node.'));
             } else {
                 this.inner.set('text', 'Loading ...');
-                ka.getObjectLabel('core:node/' + this.value.node, function(label, item) {
+                ka.getObjectLabel('kryncmsbundle:node/' + this.value.node, function(label, item) {
                     if (false === label) {
                         this.inner.set('text', t('Tray not found.'));
                     } else {

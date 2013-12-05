@@ -316,7 +316,7 @@ class File extends Controller
 
         foreach ($files as $key => $file) {
             $file = $file->toArray();
-            if (!$this->getKrynCore()->getACL()->checkListExact('core:file', array('id' => $file['id']))) continue;
+            if (!$this->getKrynCore()->getACL()->checkListExact('KrynCmsBundle:file', array('id' => $file['id']))) continue;
 
             if (isset($blacklistedFiles[$file['path']]) | (!$showHiddenFiles && substr($file['name'], 0, 1) == '.')) {
                 continue;

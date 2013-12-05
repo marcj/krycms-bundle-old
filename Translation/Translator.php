@@ -137,116 +137,27 @@ if (!function_exists('gettext_plural_fn_$lang')) {
 
     public function getLanguage($file)
     {
-        $res = array('header' => array(), 'translations' => array(), 'file' => $file);
-        if (!file_exists($file)) {
-            return $res;
-        }
-
-        $lastPluralId = $lastId = $lastWasPlural = $inHeader = $nextIsThisContext = null;
-
-        $fh = fopen($file, 'r');
-
-        while (($buffer = fgets($fh)) !== false) {
-            if (preg_match('/^msgctxt "(((\\\\.)|[^"])*)"/', $buffer, $match)) {
-                $lastWasPlural = false;
-                $nextIsThisContext = $match[1];
-            }
-
-            if (preg_match('/^msgid "(((\\\\.)|[^"])*)"/', $buffer, $match)) {
-                $lastWasPlural = false;
-                if ($match[1] == '') {
-                    $inHeader = true;
-                } else {
-                    $inHeader = false;
-                    $lastId = $match[1];
-                    if ($nextIsThisContext) {
-                        $lastId = $nextIsThisContext . "\004" . $lastId;
-                        $nextIsThisContext = false;
-                    }
-
-                }
-            }
-
-            if (preg_match('/^msgstr "(((\\\\.)|[^"])*)"/', $buffer, $match)) {
-                if ($inHeader == false) {
-                    $lastWasPlural = false;
-                    $res['translations'][static::evalString($lastId)] = static::evalString($match[1]);
-                }
-            }
-
-            if (preg_match('/^msgid_plural "(((\\\\.)|[^"])*)"/', $buffer, $match)) {
-                if ($inHeader == false) {
-                    $lastWasPlural = true;
-                    $res['plurals'][static::evalString($lastId)] = static::evalString($match[1]);
-                }
-            }
-
-            if (preg_match('/^msgstr\[([0-9]+)\] "(((\\\\.)|[^"])*)"/', $buffer, $match)) {
-                if ($inHeader == false) {
-                    $lastPluralId = intval($match[1]);
-                    $res['translations'][static::evalString($lastId)][$lastPluralId] = static::evalString($match[2]);
-                }
-            }
-
-            if (preg_match('/^"(((\\\\.)|[^"])*)"/', $buffer, $match)) {
-                if ($inHeader == true) {
-                    $fp = strpos($match[1], ': ');
-                    $res['header'][substr($match[1], 0, $fp)] = str_replace('\n', '', substr($match[1], $fp + 2));
-                } else {
-                    if (is_array($res['translations'][$lastId])) {
-                        $res['translations'][static::evalString($lastId)][$lastPluralId] .= static::evalString($match[1]);
-                    } else {
-                        if ($lastWasPlural) {
-                            $res['plurals'][static::evalString($lastId)] .= static::evalString($match[1]);
-                        } else {
-                            $res['translations'][static::evalString($lastId)] .= static::evalString($match[1]);
-                        }
-                    }
-                }
-            }
-
-        }
-
-        return $res;
-    }
-
-    public static function evalString($p)
-    {
-        return stripcslashes($p);
+        return $this->getUtils()->parsePo($file);
     }
 
     public function getPluralForm($lang, $onlyAlgorithm = false)
     {
-        //csv based on (c) http://translate.sourceforge.net/wiki/l10n/pluralforms
-        $file = $this->krynCore->resolvePath('@KrynCmsBundle/Resources/package/gettext-plural-forms.csv');
-        if (!file_exists($file)) {
-            return false;
-        }
+        $this->getUtils()->getPluralForm($lang, $onlyAlgorithm);
+    }
 
-        $fh = fopen($file, 'r');
-        if (!$fh) {
-            return false;
-        }
-        $result = '';
-        while (($buffer = fgetcsv($fh, 1000)) !== false) {
-            if ($buffer[0] == $lang) {
-                fclose($fh);
-
-                $result = $buffer[2];
-                break;
-            }
-        }
-
-        if ($onlyAlgorithm) {
-            $pos = strpos($result, 'plural=');
-            return substr($result, $pos + 7);
-        } else {
-            return $result;
-        }
+    /**
+     * @return Utils
+     */
+    public function getUtils()
+    {
+        $utils = new Utils();
+        $utils->setContainer($this->krynCore->getKernel()->getContainer());
+        return $utils;
     }
 
     public function t($id, $plural = null, $count = 0, $context = null)
     {
+        $oriId = $id;
         $id = ($context == '') ? $id : $context . "\004" . $id;
 
         if (isset($this->messages[$id])) {
@@ -266,7 +177,7 @@ if (!function_exists('gettext_plural_fn_$lang')) {
                 return $this->messages[$id];
             }
         } else {
-            return $id;
+            return $context ? $oriId : $id;
         }
     }
 

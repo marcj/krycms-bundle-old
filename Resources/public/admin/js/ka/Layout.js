@@ -71,7 +71,7 @@ ka.Layout = new Class({
 
         /**
          * Connects the width of two cells together, so that when the left ones gets resized
-         * it adjust the width to the equal width of the other cell as well.
+         * it adjusts the width to the equal width of the other/partner-cell as well.
          *
          * Structure
          * [

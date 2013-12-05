@@ -61,7 +61,7 @@ class Navigation
         }
 
         if (!file_exists($viewPath)) {
-            throw new \Exception(sprintf('File `%s` not found.', $viewPath));
+            throw new \Exception(sprintf('View `%s` not found.', $view));
         } else {
             $mtime = filemtime($viewPath);
         }

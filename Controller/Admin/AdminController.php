@@ -17,6 +17,7 @@ use Kryn\CmsBundle\Configuration\EntryPoint;
 use Kryn\CmsBundle\Core;
 use Kryn\CmsBundle\Exceptions\AccessDeniedException;
 use Kryn\CmsBundle\Exceptions\ObjectNotFoundException;
+use Kryn\CmsBundle\Model\Content;
 use Kryn\CmsBundle\Model\NodeQuery;
 use Propel\Runtime\Map\TableMap;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -51,10 +52,17 @@ class AdminController extends Controller
         }
 
         if (!$this->getKrynCore()->getAdminClient()->getUser()) {
-            throw new AccessDeniedException('Access denied.');
+            if (!$this->getKrynCore()->getRequest()->request->get('_suppress_status_code')) {
+               header('HTTP/1.0 403 Forbidden');
+            }
+            die(json_encode([
+                    'status' => 403,
+                    'error' => 'AccessDeniedException',
+                    'message' => 'Access denied. No access or login first.'
+                ], JSON_PRETTY_PRINT));
         }
 
-        #$access = Permission::check('core:EntryPoint', $url);
+        #$access = Permission::check('KrynCmsBundle:EntryPoint', $url);
         if (!true) {
             #throw new AccessDeniedException(tf('Access denied.'));
         }
@@ -106,11 +114,11 @@ class AdminController extends Controller
             $url = '/' . $url;
         }
 
-        if ('/' !== substr($url, -1)) {
-            $url .= '/'; //substr($url, 0, -1);
-        }
+//        if ('/' !== substr($url, -1)) {
+//            $url .= '/'; //substr($url, 0, -1);
+//        }
 
-        $url = substr($url, strlen($this->getKrynCore()->getSystemConfig()->getAdminUrl()) - 1);
+        $url = substr($url, strlen($this->getKrynCore()->getSystemConfig()->getAdminUrl()) - 1) ?: '/';
 
         $getArgv = function ($id) use ($url) {
             $exploded = explode('/', $url);
@@ -417,12 +425,18 @@ class AdminController extends Controller
 
     public function getContentTemplate($template, $type = 'text')
     {
+        $contentObject = new Content();
+        $contentObject->setType($type);
+        $contentObject->setTemplate($template);
+        $contentObject->setContent('');
+
         $data = [
             'html' => '<div class="ka-content-container"></div>',
+            'content' => $contentObject,
             'type' => $type
         ];
 
-        return $this->getKrynCore()->getInstance()->renderView($template, $data);
+        return $this->renderView($template, $data);
     }
 
     public function getContentPreview($template, $type = 'text', $content)
@@ -432,7 +446,8 @@ class AdminController extends Controller
         $contentObject->setTemplate($template);
         $contentObject->setContent($content);
 
-        return Render::renderContent($contentObject);
+        $render = $this->getKrynCore()->getContentRender();
+        return $render->renderContent($contentObject);
     }
 
 //    public static function handleKEditor()
@@ -482,7 +497,7 @@ class AdminController extends Controller
                     'userId' => $this->getKrynCore()->getAdminClient()->getUserId(),
                     'username' => $this->getKrynCore()->getAdminClient()->getUser()->getUsername(),
                     'lastLogin' => $lastLogin,
-                    'access' => $this->getKrynCore()->getACL()->check('core:entryPoint', '/admin'),
+                    'access' => $this->getKrynCore()->getACL()->check('KrynCmsBundle:entryPoint', '/admin'),
                     'firstName' => $this->getKrynCore()->getAdminClient()->getUser()->getFirstName(),
                     'lastName' => $this->getKrynCore()->getAdminClient()->getUser()->getLastName()
                 );

@@ -1,0 +1,4 @@
+kryn_cms:
+    resource: "@KrynCmsBundle/Resources/config/routing.yml"
+    prefix:   /
+

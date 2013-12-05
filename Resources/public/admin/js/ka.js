@@ -368,7 +368,7 @@ ka.getClass = function (pClassPath) {
 ka.urlEncode = function (pValue) {
 
     if (typeOf(pValue) == 'string') {
-        return encodeURIComponent(pValue.replace(/\//g, '%252F')); //fix apache default setting
+        return encodeURIComponent(pValue).replace(/\%2F/g, '%252F'); //fix apache default setting
     } else if (typeOf(pValue) == 'array') {
         var result = '';
         Array.each(pValue, function (item) {
@@ -946,6 +946,13 @@ ka.getDomain = function (pRsn) {
 
 ka.loadSettings = function (keyLimitation, cb) {
     ka.adminInterface.loadSettings(keyLimitation, cb);
+}
+
+ka.getConfig = function(bundleName) {
+    return ka.settings.configs[bundleName]
+        || ka.settings.configs[bundleName.toLowerCase()]
+        || ka.settings.configsAlias[bundleName]
+        || ka.settings.configsAlias[bundleName.toLowerCase()];
 }
 
 ka.loadMenu = function () {

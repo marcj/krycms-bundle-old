@@ -9,6 +9,8 @@ use Kryn\CmsBundle\Configuration\Field;
 use Kryn\CmsBundle\Configuration\Model;
 use Kryn\CmsBundle\Core;
 use Kryn\CmsBundle\Exceptions\ObjectNotFoundException;
+use Kryn\CmsBundle\Form\Form;
+use Kryn\CmsBundle\Tools;
 use Symfony\Component\HttpFoundation\Request;
 
 class ObjectCrud implements ObjectCrudInterface
@@ -1068,7 +1070,7 @@ class ObjectCrud implements ObjectCrudInterface
                     $condition[] = 'and';
                 }
 
-                $k = camelcase2Underscore(substr($k, 1));
+                $k = Tools::camelcase2Underscore(substr($k, 1));
 
                 if (strpos($v, '*') !== false) {
                     $condition[] = array($k, 'LIKE', str_replace('*', '%', $v));
@@ -1522,7 +1524,7 @@ class ObjectCrud implements ObjectCrudInterface
         $data = [];
 
         foreach ($allData as $k => $v){
-            if ($item[$k] != $allData[$k]) {
+            if (@$item[$k] != @$allData[$k]) {
                 $data[$k] = $v;
             }
         }
@@ -1572,13 +1574,13 @@ class ObjectCrud implements ObjectCrudInterface
             $fields2[] = $langField;
         }
 
-        $form = new \Core\Form\Form($fields2);
+        $form = new Form($fields2);
 
         foreach ($fields2 as $field) {
             $key = lcfirst($field->getId());
-            $value = ($_POST[$key] ? : $_GET[$key]);
+            $value = (@$_POST[$key] ? : @$_GET[$key]);
             if (null == $value && $data) {
-                $value = $data[$key];
+                $value = @$data[$key];
             }
 
             if ($field['customValue'] && method_exists($this, $method = $field['customValue'])) {

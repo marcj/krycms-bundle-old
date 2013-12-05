@@ -209,7 +209,7 @@ class Backend extends Controller
 
             $langs = [];
             foreach ($tlangs as $lang) {
-                $langs[$lang['code']] = $tlangs;
+                $langs[$lang['code']] = $lang;
             }
             #$langs = dbToKeyIndex($tlangs, 'code');
             $res['langs'] = $langs;

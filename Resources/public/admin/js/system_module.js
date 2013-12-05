@@ -544,7 +544,7 @@ var kryncmsbundle_system_module = new Class({
 
             var actions = new Element('div');
             var bActions = new Element('div');
-            if (!['KrynCmsBundle'].contains(key)) {
+            if (!['Kryn\CmsBundle\KrynCmsBundle'].contains(key)) {
                 if (item.activated) {
                     var deactivate = new ka.Button(_('Deactivate'))
 
@@ -600,7 +600,7 @@ var kryncmsbundle_system_module = new Class({
                 'class': item.activated ? 'icon-checkmark-6' : 'icon-cancel-6',
                 'styles': {color: item.activated ? 'green' : 'red'}
             });
-            var value = [title + ' <span style="color: gray;">(' + key + ')</span>',
+            var value = [key + ' <span style="color: gray;">(' + title + ')</span>',
                 activeIcon,
                 item._installed.version ? item._installed.version : (item.version ? item.version : t('VCS')),
                 bActions,

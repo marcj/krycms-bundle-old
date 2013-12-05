@@ -9,8 +9,7 @@ class AdminControllerControllerTest extends WebTestCase
     public function testIndex()
     {
         $client = static::createClient();
-
-        $crawler = $client->request('GET', 'kryn');
+        $crawler = $client->request('GET', '/kryn');
     }
 
 }

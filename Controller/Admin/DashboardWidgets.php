@@ -121,7 +121,7 @@ class DashboardWidgets extends Controller
             'cache' => 0
         );
         foreach ($result as $key => &$value) {
-            if ($lastLatency[$key]) {
+            if (isset($lastLatency[$key])) {
                 $value = round((array_sum($lastLatency[$key]) / count($lastLatency[$key])) * 1000);
             }
         }
@@ -139,7 +139,7 @@ class DashboardWidgets extends Controller
             'cache' => 0
         );
         foreach ($result as $key => &$value) {
-            $value = $lastLatency[$key] ? : array();
+            $value = isset($lastLatency[$key]) ? $lastLatency[$key] : array();
         }
         $response['KrynCmsBundle/latencies'] = $result;
     }

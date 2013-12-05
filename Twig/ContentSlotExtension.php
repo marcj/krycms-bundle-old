@@ -44,9 +44,6 @@ class ContentSlotExtension extends \Twig_Extension
     {
         $params['id'] = $id;
         $params['name'] = $name;
-        if ($this->getKrynCore()->isAdmin()) {
-            return '<div class="ka-slot" params="' . htmlspecialchars(json_encode($params)) . '"></div>';
-        }
 
         $render = $this->getKrynCore()->getContentRender();
         return $render->renderSlot(PageController::getCurrentRenderPage(), $id, $params);

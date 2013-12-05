@@ -637,7 +637,7 @@ class ACL
     ) {
 
         $objectKey = Objects::normalizeObjectKey($objectKey);
-        if (($targetId === null && $targetType === null) && $this->getKrynCore()->getAdminClient() && $this->getKrynCore()->getAdminClient()->hasSession()) {
+        if (($targetId === null && $targetType === null) && $this->getKrynCore()->isAdmin() && $this->getKrynCore()->getAdminClient()->hasSession()) {
             $targetId = $this->getKrynCore()->getAdminClient()->getUserId();
             $targetType = ACL::USER;
 

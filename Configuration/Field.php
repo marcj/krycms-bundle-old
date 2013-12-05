@@ -2,6 +2,7 @@
 
 namespace Kryn\CmsBundle\Configuration;
 
+use Kryn\CmsBundle\Form\Form;
 use Kryn\CmsBundle\Tools;
 
 class Field extends Model
@@ -127,7 +128,7 @@ class Field extends Model
     private $parentField;
 
     /**
-     * @var \Core\Form\Form;
+     * @var Form;
      */
     private $form;
 
@@ -749,6 +750,7 @@ class Field extends Model
         }
 
         if ($this->getNeedValue()) {
+            $againstField = null;
             if ($againstFieldName = $this->getAgainstField()) {
                 if ($this->getForm()) {
                     $againstField = $this->getForm()->getField($againstFieldName);
@@ -815,7 +817,7 @@ class Field extends Model
     }
 
     /**
-     * @param \Core\Form\Form $form
+     * @param Form $form
      */
     public function setForm($form)
     {
@@ -823,7 +825,7 @@ class Field extends Model
     }
 
     /**
-     * @return \Core\Form\Form
+     * @return Form
      */
     public function getForm()
     {

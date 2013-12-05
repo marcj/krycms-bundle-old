@@ -133,4 +133,39 @@ class LoginController extends PluginController
         $response->setResourceCompression(false);
     }
 
+
+    public function handleKEditor()
+    {
+        $this->addMainResources(['noJs' => true]);
+        $this->addSessionScripts();
+        $page = $this->getKrynCore()->getCurrentPage();
+
+        $response = $this->getPageResponse();
+        $response->addJsFile('@KrynCmsBundle/admin/mootools-core-1.4.5-fixed-memory-leak.js');
+        $response->addJsFile('@KrynCmsBundle/admin/mootools-more.js');
+
+        //$response->addJs('ka = parent.ka;');
+
+        $response->setResourceCompression(false);
+        $response->setDomainHandling(false);
+
+        $nodeArray['id'] = $page->getId();
+        $nodeArray['title'] = $page->getTitle();
+        $nodeArray['domainId'] = $page->getDomainId();
+
+        $options = [
+            'id' => @$_GET['_kryn_editor_id'],
+            'node' => $nodeArray
+        ];
+
+        if (is_array(@$_GET['_kryn_editor_options'])) {
+            $options = array_merge($options, $_GET['_kryn_editor_options']);
+            $options['standalone'] = filter_var($options['standalone'], FILTER_VALIDATE_BOOLEAN);
+        }
+        $response->addJs(
+            'window.editor = new parent.ka.Editor(' . json_encode($options) . ', document.documentElement);',
+            'bottom'
+        );
+    }
+
 }

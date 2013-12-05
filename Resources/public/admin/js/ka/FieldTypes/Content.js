@@ -123,7 +123,7 @@ ka.FieldTypes.Content = new Class({
 
         if (this.options.standalone) {
             this.domainSelection = new ka.Select(this.headerLayout.getCell(1, 1), {
-                object: 'core:domain',
+                object: 'kryncmsbundle:domain',
                 onChange: function(item) {
                     this.loadEditor(this.domainSelection.getValue());
                 }.bind(this)
@@ -290,7 +290,7 @@ ka.FieldTypes.Content = new Class({
     },
 
     getUrl: function () {
-        return _pathAdmin + 'admin/object/Core:Node/' + this.editor.options.node.id + '?_method=patch';
+        return _pathAdmin + 'admin/object/kryncmsbundle:Node/' + this.editor.options.node.id + '?_method=patch';
     },
 
     selectElement: function(element) {
@@ -305,6 +305,11 @@ ka.FieldTypes.Content = new Class({
         this.inspectorContainer.setStyle('color');
         this.inspectorContainer.setStyle('text-align');
 
+        if (content.value) {
+            this.inspectorTitle.set('text', tf('Inspector (%s)', content.value.type));
+        } else {
+            this.inspectorTitle.set('text', t('Inspector'));
+        }
         content.setSelected(true);
 
         this.lastContent = content;

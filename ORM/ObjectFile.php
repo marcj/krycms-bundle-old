@@ -281,7 +281,7 @@ class ObjectFile extends Propel
                 continue;
             }
 
-            if ($condition && $condition->hasRules() && !$condition->satisfy($file, 'core:file')) {
+            if ($condition && $condition->hasRules() && !$condition->satisfy($file, 'KrynCmsBundle:file')) {
                 continue;
             }
 

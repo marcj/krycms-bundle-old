@@ -9,6 +9,7 @@ use Kryn\CmsBundle\Configuration\Model;
 use Kryn\CmsBundle\Configuration\SystemConfig;
 use Kryn\CmsBundle\Exceptions\BundleNotFoundException;
 use Kryn\CmsBundle\Exceptions\NotInAdministrationAreaException;
+use Kryn\CmsBundle\Model\Domain;
 use Kryn\CmsBundle\Model\Node;
 use Kryn\CmsBundle\Propel\PropelHelper;
 use Symfony\Component\EventDispatcher\GenericEvent;
@@ -305,10 +306,6 @@ class Core extends Controller
         $systemClientConfig = $this->getSystemConfig()->getClient(true);
         $defaultClientClass = $systemClientConfig->getClass();
 
-        if (!$this->isAdmin()) {
-            throw new NotInAdministrationAreaException('Not in the administration area.');
-        }
-
         if (null === $this->adminClient) {
             $this->client = $this->adminClient = new $defaultClientClass($this, $systemClientConfig);
             $this->adminClient->start();
@@ -323,6 +320,10 @@ class Core extends Controller
      */
     public function getClient()
     {
+        if ($this->client) {
+            return $this->client;
+        }
+
         $systemClientConfig = $this->getSystemConfig()->getClient(true);
         $defaultClientClass = $systemClientConfig->getClass();
 
@@ -445,7 +446,7 @@ class Core extends Controller
     }
 
     /**
-     * @return Model\Node
+     * @return Node
      */
     public function getCurrentPage()
     {
@@ -453,7 +454,7 @@ class Core extends Controller
     }
 
     /**
-     * @return Model\Domain
+     * @return Domain
      */
     public function getCurrentDomain()
     {
@@ -461,7 +462,7 @@ class Core extends Controller
     }
 
     /**
-     * @param Model\Node $currentPage
+     * @param Node $currentPage
      */
     public function setCurrentPage($currentPage)
     {
@@ -469,7 +470,7 @@ class Core extends Controller
     }
 
     /**
-     * @param Model\Domain $currentDomain
+     * @param Domain $currentDomain
      */
     public function setCurrentDomain($currentDomain)
     {
@@ -482,7 +483,7 @@ class Core extends Controller
     public function getRequest()
     {
         if (null === $this->request) {
-            $this->request = $this->container->get('request'); //Request::createFromGlobals();
+            $this->request = $this->container->get('request');
         }
 
         return $this->request;
@@ -615,6 +616,8 @@ class Core extends Controller
                 $path = dirname($reflection->getFileName());
             }
         }
+        $current = realpath($this->getKernel()->getRootDir() . '/../');
+        $path = substr($path, strlen($current) + 1);
         if ($path) {
             if ('/' !== substr($path, -1)) {
                 $path .= '/';
@@ -695,13 +698,15 @@ class Core extends Controller
     /**
      * @param string $path
      * @param string $suffix
+     * @param bool $relativePath
      * @return string
      * @throws Exceptions\BundleNotFoundException
      */
-    public function resolvePath($path, $suffix = '')
+    public function resolvePath($path, $suffix = '', $relativePath = false)
     {
         $path = preg_replace('/:+/', '/', $path);
         preg_match('/\@?([a-zA-Z0-9\-_\.\\\\]+)/', $path, $matches);
+
         $root = realpath($this->getKernel()->getRootDir(). '/../');
         if ($matches && isset($matches[1])) {
             try {
@@ -728,11 +733,16 @@ class Core extends Controller
                 $bundlePath .= '/';
             }
 
-            return $bundlePath . $suffix . $path;
+            $path = $bundlePath . $suffix . $path;
         } else {
-            return $root . $path;
+            $path = $root . $path;
         }
 
+        if ($relativePath) {
+            return substr($path, strlen($root) + 1);
+        }
+
+        return $path;
     }
 
     /**

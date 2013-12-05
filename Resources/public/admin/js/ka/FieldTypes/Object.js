@@ -7,7 +7,7 @@ ka.FieldTypes.Object = new Class({
         options: {
             object: {
                 label: 'Object key',
-                desc: 'Example: Core:Node.',
+                desc: 'Example: kryncmsbundle:Node.',
                 type: 'objectKey',
                 required: true
             },
@@ -26,7 +26,7 @@ ka.FieldTypes.Object = new Class({
         modelOptions: {
             object: {
                 label: 'Object key',
-                desc: 'Example: Core:Node.',
+                desc: 'Example: kryncmsbundle:Node.',
                 type: 'objectKey',
                 required: true
             },
@@ -292,6 +292,7 @@ ka.FieldTypes.Object = new Class({
         .inject(rightTd);
 
         this.setValue = function (pVal, pInternal) {
+            console.log('setValue', pVal);
             if (typeOf(pVal) == 'null' || pVal === false || pVal === '' || !ka.getCroppedObjectId(pVal)) {
                 this.objectId = '';
                 this.input.value = '';
@@ -306,6 +307,7 @@ ka.FieldTypes.Object = new Class({
                 this.objectId = 'object://' + ka.normalizeObjectKey(this.options.objects[0]) + '/' + ka.urlEncode(pVal);
             }
 
+            console.log('getObjectLabel', this.objectId);
             ka.getObjectLabel(this.objectId, function (pLabel) {
                 if (pLabel === false) {
                     this.input.removeClass('ka-Input-text-disabled');

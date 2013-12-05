@@ -1256,8 +1256,6 @@ ka.WindowCombine = new Class({
             objectKey = this.classProperties['object'];
         }
 
-        console.log('loadItem', pItem, objectKey);
-
         this.needSelection = false;
 
         var pk = ka.getObjectPk(objectKey, pItem);

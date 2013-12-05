@@ -29,7 +29,7 @@ ka.FieldTypes.View = new Class({
 
     initialize: function (pFieldInstance, pOptions) {
 
-        pOptions.object = 'core:view';
+        pOptions.object = 'KrynCmsBundle:view';
 
         if (!pOptions.directory) {
             throw 'Option `directory` is empty in ka.Field `view`.';

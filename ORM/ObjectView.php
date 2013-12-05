@@ -1,12 +1,10 @@
 <?php
 
-namespace Admin\Models;
+namespace Kryn\CmsBundle\ORM;
 
-use Core\Config\Condition;
-use Core\Kryn;
-use Core\SystemFile;
+use Kryn\CmsBundle\Configuration\Condition;
 
-class ObjectView extends \Core\ORM\Propel
+class ObjectView extends Propel
 {
     /**
      * {@inheritDoc}
@@ -15,8 +13,9 @@ class ObjectView extends \Core\ORM\Propel
     {
         $path = $pk['path'];
 
-        $file = Kryn::resolvePath($path, 'Resources/views/');
-        $fileObj = SystemFile::getFile($file);
+        $file = $this->getKrynCore()->resolvePath($path, 'Resources/views/');
+        $fs = $this->getKrynCore()->getFileSystem();
+        $fileObj = $fs->getFile($file);
 
         return $fileObj->toArray();
     }
@@ -24,7 +23,7 @@ class ObjectView extends \Core\ORM\Propel
     /**
      * {@inheritDoc}
      */
-    public function getItems(\Core\Config\Condition $condition = null, $options = null)
+    public function getItems(Condition $condition = null, $options = null)
     {
     }
 
@@ -115,27 +114,28 @@ class ObjectView extends \Core\ORM\Propel
         if (!$path) {
 
             $result = array();
-            foreach (\Core\Kryn::getBundles() as $extension) {
-                $directory = Kryn::resolvePath('@' . $extension, 'Resources/views');
-                $file = SystemFile::getFile($directory);
+            $bundles = array_keys($this->getKrynCore()->getBundles());
+            foreach ($bundles as $bundleName) {
+                $directory = $this->getKrynCore()->resolvePath('@' . $bundleName, 'Resources/views');
+                $file = $this->getKrynCore()->getFilesystem()->getFile($directory);
                 if (!$file) {
                     continue;
                 }
-                $file['name'] = $extension;
-                $file['path'] = '@' . $extension;
+                $file['name'] = $bundleName;
+                $file['path'] = $bundleName;
                 if ($offset && $offset > $c) {
                     continue;
                 }
                 if ($limit && $limit < $c) {
                     continue;
                 }
-                if ($condition && !\Core\Object::satisfy($file, $condition)) {
+                if ($condition && !$condition->satisfy($file)) {
                     continue;
                 }
                 $c++;
 
                 if ($depth > 0) {
-                    $children = self::getBranch(array('path' => $extension), $condition, $depth - 1);
+                    $children = self::getBranch(array('path' => $bundleName), $condition, $depth - 1);
                     $file['_childrenCount'] = count($children);
                     if ($depth > 1 && $file['type'] == 'dir') {
                         $file['_children'] = $children;
@@ -143,13 +143,14 @@ class ObjectView extends \Core\ORM\Propel
                 }
             }
         } else {
-            $bundle = Kryn::getBundle($path);
+//            preg_match('/\@+([a-zA-Z0-9\-_\\\\]+)/', $path, $matches);
+//            $bundleName = $matches[1];
 
-            $directory = Kryn::resolvePath($path, 'Resources/views');
-            $files = SystemFile::getFiles($directory);
+            $directory = $this->getKrynCore()->resolvePath($path, 'Resources/views', true);
+            $files = $this->getKrynCore()->getFilesystem()->getFiles($directory);
 
             foreach ($files as $file) {
-                if ($condition && $condition->hasRules() && !$condition->satisfy($file, 'core:file')) {
+                if ($condition && $condition->hasRules() && !$condition->satisfy($file, 'KrynCmsBundle:file')) {
                     continue;
                 }
 
@@ -165,7 +166,7 @@ class ObjectView extends \Core\ORM\Propel
 
                 $item = array(
                     'name' => $item['name'],
-                    'path' => '@' . $bundle->getName() . substr($item['path'], strlen($directory))
+                    'path' => $this->buildPath($path . '/' . substr($item['path'], strlen($directory)))
                 );
 
                 if ($file->isDir()) {
@@ -184,6 +185,18 @@ class ObjectView extends \Core\ORM\Propel
         }
 
         return $result;
+    }
+
+    public function buildPath($path)
+    {
+        if ('@' === substr($path, 0, 1)) {
+            $path = substr($path, 1);
+        }
+
+        $path = str_replace('//', '/', $path);
+        $path = preg_replace('/\/|:/', ':', $path, 2);
+
+        return $path;
     }
 
 }

@@ -76,6 +76,10 @@ class ContentRender
      */
     public function renderSlot($nodeId, $slotId = 1, $params = array())
     {
+        if ($this->getKrynCore()->isEditMode()) {
+            return '<div class="ka-slot" params="' . htmlspecialchars(json_encode($params)) . '"></div>';
+        }
+
         $contents =& $this->getSlotContents($nodeId, $slotId);
         return $this->renderContents($contents, $params);
     }

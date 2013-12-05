@@ -251,7 +251,7 @@ class Objects
     /**
      * Cuts of the object name of the object key.
      *
-     * core:node => Core.
+     * KrynCmsBundle:node => Core.
      *
      * @param $objectKey
      * @return null|string
@@ -267,7 +267,7 @@ class Objects
     /**
      * Returns the namespace of the bundle of the object key.
      *
-     * core:node => Core.
+     * KrynCmsBundle:node => Core.
      * bundleWithNameSpace:myObject => Bundle\With\Namespace.
      *
      * @param  string $objectKey
@@ -536,7 +536,7 @@ class Objects
         $pk2s = $obj->getPrimaryKeys();
         $deleteFieldValues = null;
 
-        if (!$options['fields']) {
+        if (!@$options['fields']) {
             if ($selection = $obj->definition->getDefaultSelection()) {
                 $options['fields'] = $selection;
             } else {

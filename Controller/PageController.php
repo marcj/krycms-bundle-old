@@ -2,6 +2,7 @@
 
 namespace Kryn\CmsBundle\Controller;
 
+use Kryn\CmsBundle\Controller\Admin\LoginController;
 use Kryn\CmsBundle\Model\ContentQuery;
 use Kryn\CmsBundle\PluginController;
 use Kryn\CmsBundle\Model\Node;
@@ -74,6 +75,12 @@ class PageController extends PluginController
 
                 return new RedirectResponse($to, 301);
             }
+        }
+
+        if ($this->getKrynCore()->isEditMode()) {
+            $loginController = new LoginController();
+            $loginController->setContainer($this->container);
+            $loginController->handleKEditor();
         }
 
         $pageResponse = $this->getKrynCore()->getPageResponse();

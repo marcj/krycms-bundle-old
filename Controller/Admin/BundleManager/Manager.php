@@ -425,9 +425,17 @@ This is the bundle $bundleClassName.
             }
             $name = basename(str_replace('\\', '//', $bundleClass));
 
-            if ($composer = $this->getKrynCore()->getUtils()->getComposerArray($bundleClass)) {
+            $reflection = new \ReflectionClass($bundleClass);
+            $interfaces = $reflection->getInterfaceNames();
+            if (in_array('Symfony\Component\HttpKernel\Bundle\BundleInterface', $interfaces)) {
+
+                $composer = $this->getKrynCore()->getUtils()->getComposerArray($bundleClass) ?: [];
                 $composer['_path'] = $this->getKrynCore()->getBundleDir($bundleClass);
-                $composer['_installed'] = $this->getInstalledInfo($composer['name']);
+                if (isset($composer['name'])) {
+                    $composer['_installed'] = $this->getInstalledInfo($composer['name']);
+                } else {
+                    $composer['_installed'] = [];
+                }
                 $composer['activated'] = $this->getKrynCore()->isActiveBundle($name);
                 $res[$bundleClass] = $composer;
             }

@@ -190,7 +190,13 @@ class Bundle extends Model
 
     public function getPropertyFilePath($property)
     {
-        return $this->imported[$property] ?: $this->getBundleClass()->getPath() . 'Resources/config/' . (static::$propertyToFile[$property] ?: 'kryn.xml');
+        if (!$this->imported[$property]) {
+            $path = $this->getBundleClass()->getPath() . 'Resources/config/' . (static::$propertyToFile[$property] ?: 'kryn.xml');
+            $root = realpath($this->getKrynCore()->getKernel()->getRootDir().'/../');
+            return substr($path, strlen($root) + 1);
+        } else {
+            return $this->imported[$property];
+        }
     }
 
     /**
@@ -215,6 +221,7 @@ class Bundle extends Model
 
         $xpath = new \DOMXPath($doc);
 
+        $element = null;
         $elements = $xpath->query('/config/bundle/' . $property);
         if (0 < $elements->length) {
             $element = $elements->item(0);
@@ -252,14 +259,15 @@ class Bundle extends Model
   <bundle/>
 </config>';
 
+        $fs = $this->getKrynCore()->getFilesystem();
         if ($xml == $emptyXml) {
-            if (SystemFile::exists($xmlFile)) {
-                return SystemFile::remove($xmlFile);
+            if ($fs->has($xmlFile)) {
+                return $fs->delete($xmlFile);
             } else {
                 return true;
             }
         } else {
-            return SystemFile::setContent($xmlFile, $xml);
+            return $fs->write($xmlFile, $xml);
         }
     }
 
@@ -325,6 +333,9 @@ class Bundle extends Model
     {
         if ('bundle' === $node->nodeName) {
             $imported = $this->importNode($node);
+
+            $root = realpath($this->getKrynCore()->getKernel()->getRootDir().'/../');
+            $file = substr($file, strlen($root) + 1);
 
             foreach ($imported as $property) {
                 $this->imported[$property] = $file;
