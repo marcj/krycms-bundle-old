@@ -18,7 +18,7 @@
     "target-dir": "Kryn/CmsBundle",
     "autoload": {
         "psr-0": {
-            "Kryn": ""
+            "Kryn\\CmsBundle": "Kryn/CmsBundle"
         }
     },
     "minimum-stability": "dev",
