@@ -4,7 +4,7 @@ php:
   - 5.4
   - 5.5
 
-#env:
+env:
   - DB_TYPE=mysql DB_USER=root
 #  - DB_TYPE=pgsql DB_USER=postgres DB_NAME=postgres
 #  - DB_TYPE=sqlite DB_SERVER=test.sq3
