@@ -51,7 +51,7 @@ class PluginTest extends KernelAwareTestCase
     </field>
     <field id="detailPage" type="object">
       <label>Detail page</label>
-      <object>Core\Node</object>
+      <object>KrynCmsBundle:Node</object>
     </field>
   </options>
 </plugin>';
@@ -139,7 +139,7 @@ class PluginTest extends KernelAwareTestCase
         $field3->setId('detailPage');
         $field3->setType('object');
         $field3->setLabel('Detail page');
-        $field3->setObject('Core\Node');
+        $field3->setObject('KrynCmsBundle:Node');
 
         $plugin->addOption($field1);
         $plugin->addOption($field2);
@@ -192,7 +192,7 @@ class PluginTest extends KernelAwareTestCase
                     'id' => 'detailPage',
                     'label' => 'Detail page',
                     'type' => 'object',
-                    'object' => 'Core\\Node',
+                    'object' => 'KrynCmsBundle:Node',
                 ),
             ),
         );

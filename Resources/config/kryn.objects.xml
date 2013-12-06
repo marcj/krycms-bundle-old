@@ -179,7 +179,7 @@
           </field>
           <field id="startnodeId" type="object">
             <label>Startpage</label>
-            <object>Core\Node</object>
+            <object>KrynCmsBundle:Node</object>
             <objectRelation>1ToN</objectRelation>
             <objectRelationName>startnode</objectRelationName>
             <required>true</required>
@@ -261,7 +261,7 @@
           </field>
           <field id="nodeId" type="object">
             <label>Node</label>
-            <object>Core\Node</object>
+            <object>KrynCmsBundle:Node</object>
             <objectRelation>nTo1</objectRelation>
             <objectLabel>title</objectLabel>
             <objectRelationName>Node</objectRelationName>

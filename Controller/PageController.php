@@ -127,7 +127,7 @@ class PageController extends PluginController
 //    }
 
 //    /**
-//     * Returns the public url for the Core\Node object.
+//     * Returns the public url for the KrynCmsBundle:Node object.
 //     *
 //     * @param  string $objectKey
 //     * @param  string $objectPk
