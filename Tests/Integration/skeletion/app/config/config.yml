@@ -65,13 +65,13 @@ twig:
 #    password:  %mailer_password%
 #    spool:     { type: memory }
 
-propel:
-    logging: true
-
-    dbal:
-        driver:               mysql
-        user:                 root
-        password:             null
-        dsn:                  mysql:host=localhost;dbname=symfony;charset=UTF8
-        options:              {}
-        attributes:           {}
+#propel:
+#    logging: true
+#
+#    dbal:
+#        driver:               mysql
+#        user:                 root
+#        password:             null
+#        dsn:                  mysql:host=localhost;dbname=symfony;charset=UTF8
+#        options:              {}
+#        attributes:           {}

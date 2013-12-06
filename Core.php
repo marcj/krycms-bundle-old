@@ -96,24 +96,7 @@ class Core extends Controller
     {
         $this->container = $container;
 
-        /*
-         * Propel orm initialisation.
-         */
-        $this->propelHelper = new PropelHelper($this);
-
-        if (!$this->propelHelper->loadConfig()) {
-            $this->propelHelper->init();
-            $this->propelHelper->loadConfig();
-        }
-
-        $this->prepareWebSymlinks();
-
         Configuration\Model::$serialisationKrynCore = $this;
-
-//        if ($domainClientConfig->isAutoStart()) {
-//            $this->getClient()->start();
-//        }
-
     }
 
     /**

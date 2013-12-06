@@ -108,15 +108,8 @@ class FileUtilityTest extends KernelAwareTestCase
         $this->assertFileNotExists($realPath . $dir);
         $this->assertFalse($fs->has($dir));
 
-    }
-
-    public function tearDown()
-    {
-        $classes = array($this->getKrynCore()->getCache(), $this->getKrynCore()->getFileSystem(), $this->getKrynCore()->getWebFileSystem());
-        foreach ($classes as $fs) {
-            $fs->delete('test_utility_folder');
-            $fs->delete('test_utility_folder2');
-        }
+        $fs->delete('test_utility_folder');
+        $fs->delete('test_utility_folder2');
     }
 
 }

@@ -4,6 +4,7 @@ namespace Kryn\CmsBundle;
 
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Kryn\CmsBundle\DependencyInjection\ContentTypesCompilerPass;
+use Kryn\CmsBundle\Propel\PropelHelper;
 use Symfony\Component\ClassLoader\UniversalClassLoader;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
@@ -21,17 +22,25 @@ class KrynCmsBundle extends Bundle
         $container->addCompilerPass(new ContentTypesCompilerPass());
     }
 
-    public function loadBundles($kernel, &$bundles)
-    {
-        $core = $kernel->getContainer()->get('kryn.core');
-    }
-
     public function boot()
     {
         parent::boot();
         $this->additionalLoader = new UniversalClassLoader();
         $this->additionalLoader->registerNamespaceFallback($this->container->get('kernel')->getCacheDir().'/propel-classes/');
         $this->additionalLoader->register();
+
+        $krynCore = $this->container->get('kryn.cms');
+
+        /*
+         * Propel orm initialisation.
+         */
+        $propelHelper = new PropelHelper($krynCore);
+
+        if (!$propelHelper->loadConfig()) {
+            $propelHelper->init();
+        }
+
+        $krynCore->prepareWebSymlinks();
     }
 
     /**

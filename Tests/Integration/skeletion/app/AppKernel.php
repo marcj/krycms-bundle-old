@@ -14,7 +14,7 @@ class AppKernel extends Kernel
             new Symfony\Bundle\MonologBundle\MonologBundle(),
 //            new Symfony\Bundle\SwiftmailerBundle\SwiftmailerBundle(),
             new Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle(),
-            new Propel\PropelBundle\PropelBundle(),
+//            new Propel\PropelBundle\PropelBundle(),
             new Kryn\CmsBundle\KrynCmsBundle(),
             new Kryn\DemoTheme\KrynDemoThemeBundle(),
             new Kryn\Publication\KrynPublicationBundle(),

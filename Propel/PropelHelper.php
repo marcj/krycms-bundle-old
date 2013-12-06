@@ -9,6 +9,8 @@ use Kryn\CmsBundle\Exceptions\FileNotWritableException;
 use Propel\Generator\Command\ConfigConvertXmlCommand;
 use Propel\Generator\Command\MigrationDiffCommand;
 use Propel\Generator\Command\ModelBuildCommand;
+use Propel\Runtime\Connection\ConnectionManagerMasterSlave;
+use Propel\Runtime\Connection\ConnectionManagerSingle;
 use Propel\Runtime\Propel;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputOption;
@@ -69,7 +71,7 @@ class PropelHelper
         try {
             $result = $this->fullGenerator();
         } catch (\Exception $e) {
-//            self::cleanup();
+            self::cleanup();
             throw new \Exception('Propel initialization Error.', 0, $e);
         }
 
@@ -269,12 +271,7 @@ class PropelHelper
 
     }
 
-    /**
-     * @param Connection $connection
-     *
-     * @return string
-     */
-    public function getConnectionXml(Connection $connection)
+    public function getDsn(Connection $connection)
     {
         $type = strtolower($connection->getType());
         $dsn = $type;
@@ -289,6 +286,18 @@ class PropelHelper
             $dsn .= ':host=' . $connection->getServer();
             $dsn .= ';dbname=' . $connection->getName();
         }
+
+        return $dsn;
+    }
+
+    /**
+     * @param Connection $connection
+     *
+     * @return string
+     */
+    public function getConnectionXml(Connection $connection)
+    {
+        $dsn = $this->getDsn($connection);
 
         $user = htmlspecialchars($connection->getUsername(), ENT_XML1);
         $password = htmlspecialchars($connection->getPassword(), ENT_XML1);
@@ -375,44 +384,58 @@ class PropelHelper
         $fs->write('propel/runtime-conf.xml', $xml);
         $fs->write('propel/buildtime-conf.xml', $xml);
 
-        $input = new ArrayInput(array(
-            '--input-dir' => $path . '/propel/',
-            '--output-dir' => $path . '/propel/',
-            '--verbose' => 'vvv'
-        ));
-        $command = new ConfigConvertXmlCommand();
-        $command->getDefinition()->addOption(
-            new InputOption('--verbose', '-v|vv|vvv', InputOption::VALUE_NONE, '') //because migrationDiffCommand access this option
-        );
-
-        $output = new StreamOutput(fopen('php://memory', 'rw'));
-        $command->run($input, $output);
-
-        $fs->mkdir('propel-classes');
-
-        if ($fs->has('propel-config.php')) {
-            $fs->delete('propel-config.php');
-        }
-
-        $fs->rename('propel/config.php', 'propel-config.php');
-
-//        include($path . '/propel-config.php');
-
         return true;
     }
 
 
     public function loadConfig()
     {
-        $config  = $this->getKrynCore()->getKernel()->getCacheDir() . '/propel-config.php';
-        $classes = $this->getKrynCore()->getKernel()->getCacheDir() . '/propel-classes/';
-        if (file_exists($config) && file_exists($classes)) {
-//        if (file_exists($classes)) {
-            include($config);
-            return true;
+        $serviceContainer = Propel::getServiceContainer();
+        $database = $this->getKrynCore()->getSystemConfig()->getDatabase();
+
+        if ($database->hasSlaveConnection()) {
+            $manager = new ConnectionManagerMasterSlave();
+
+            $config = $this->getManagerConfig($database->getMainConnection());
+            $manager->setWriteConfiguration($config);
+
+            $slaves = [];
+            foreach ($database->getConnections() as $connection) {
+                if ($connection->isSlave()) {
+                    $slaves[] = $this->getManagerConfig($connection);
+                }
+            }
+            $manager->setReadConfiguration($slaves);
+        } else {
+            $manager = new ConnectionManagerSingle();
+            $config = $this->getManagerConfig($database->getMainConnection());
+            $manager->setConfiguration($config);
         }
 
+        $manager->setName('default');
+
+        $serviceContainer->setAdapterClass('default', $database->getMainConnection()->getType());
+        $serviceContainer->setConnectionManager('default', $manager);
+        $serviceContainer->setDefaultDatasource('default');
+
+        $classes = $this->getKrynCore()->getKernel()->getCacheDir() . '/propel-classes/';
+        if (file_exists($classes)) {
+            return true;
+        }
         return false;
+    }
+
+    public function getManagerConfig(Connection $connection)
+    {
+        $config = [];
+        $config['dsn'] = $this->getDsn($connection);
+        $config['user'] = (string)$connection->getUsername();
+        $config['password'] = (string)$connection->getPassword();
+
+        $config['options']['ATTR_PERSISTENT'] = (boolean)$connection->getPersistent();
+        $config['settings']['charset'] = $connection->getCharset();
+
+        return $config;
     }
 
     /**

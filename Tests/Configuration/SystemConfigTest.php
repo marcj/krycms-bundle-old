@@ -59,6 +59,7 @@ class SystemConfigTest extends KernelAwareTestCase
         type: mysql|pgsql|sqlite (the pdo driver name)
         persistent: true|false (if the connection should be persistent)
         slave: true|false (if the connection is a slave or not (readonly or not))
+        charset: \'utf8\'
       -->
       <connection>
         <!--The schema/database name-->

@@ -63,6 +63,21 @@ class Database extends Model
     }
 
     /**
+     * @return bool
+     */
+    public function hasSlaveConnection()
+    {
+        if ($this->connections) {
+            foreach ($this->connections as $connection) {
+                if ($connection->isSlave()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
      * @param string $prefix
      */
     public function setPrefix($prefix)

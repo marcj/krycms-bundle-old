@@ -6,7 +6,7 @@ class Connection extends Model
 {
     protected $rootName = 'connection';
 
-    protected $attributes = ['type', 'persistent', 'slave'];
+    protected $attributes = ['type', 'persistent', 'slave', 'charset'];
 
     protected $docBlocks = [
         'server' => 'Can be a IP or a hostname. For SQLite enter here the path to the file.',
@@ -17,6 +17,7 @@ class Connection extends Model
         type: mysql|pgsql|sqlite (the pdo driver name)
         persistent: true|false (if the connection should be persistent)
         slave: true|false (if the connection is a slave or not (readonly or not))
+        charset: \'utf8\'
       ';
 
     /**
@@ -28,6 +29,11 @@ class Connection extends Model
      * @var bool
      */
     protected $persistent = false;
+
+    /**
+     * @var string
+     */
+    protected $charset = 'utf8';
 
     /**
      * @var string
@@ -123,6 +129,22 @@ class Connection extends Model
     public function getUsername()
     {
         return $this->username;
+    }
+
+    /**
+     * @param string $charset
+     */
+    public function setCharset($charset)
+    {
+        $this->charset = $charset;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCharset()
+    {
+        return $this->charset;
     }
 
     /**
