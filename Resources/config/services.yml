@@ -14,6 +14,7 @@ parameters:
 
      kryn.pluginResponse.listener.class: Kryn\CmsBundle\EventListener\PluginResponseListener
      kryn.frontendRoutes.listener.class: Kryn\CmsBundle\EventListener\FrontendRouteListener
+     kryn.latencyMonitor.subscriber.class: Kryn\CmsBundle\EventListener\LatencyMonitorSubscriber
 
      kryn.page.response.class: Kryn\CmsBundle\PageResponse
 
@@ -115,6 +116,12 @@ services:
         arguments: ["@kryn.cms"]
         tags:
             - { name: kernel.event_listener, event: kernel.request, priority: 33 }
+
+     kryn.latencyMonitor.subscriber:
+        class: %kryn.latencyMonitor.subscriber.class%
+        arguments: ["@kryn.cms"]
+        tags:
+            - { name: kernel.event_subscriber }
 
      kryn.translator:
         class: %kryn.translator.class%

@@ -177,7 +177,7 @@ abstract class ORMAbstract
 
         if (count($this->primaryKeys) > count($result)) {
             foreach ($this->primaryKeys as $pk2) {
-                if (!$result[$pk2]) {
+                if (!@$result[$pk2]) {
                     $result[$pk2] = null;
                 }
             }
@@ -244,7 +244,7 @@ abstract class ORMAbstract
 
             if (count($this->primaryKeys) > count($item)) {
                 foreach ($this->primaryKeys as $pk2) {
-                    if (!$item[$pk2]) {
+                    if (!@$item[$pk2]) {
                         $item[$pk2] = null;
                     }
                 }

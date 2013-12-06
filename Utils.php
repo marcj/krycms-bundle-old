@@ -100,7 +100,7 @@ class Utils
     public function getDomain($domainId = null)
     {
         if (!$domainId) {
-            return self::$domain;
+            return $this->getKrynCore()->getCurrentDomain();
         }
 
         if ($domainSerialized = $this->getKrynCore()->getDistributedCache('core/object-domain/' . $domainId)) {

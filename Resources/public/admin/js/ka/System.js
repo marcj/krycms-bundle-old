@@ -14,16 +14,16 @@ ka.System = new Class({
             text: t('System')
         }).inject(this.container);
 
-        this.addSection('kryncmsbundle');
+        this.addSection('KrynCmsBundle');
         Object.each(ka.settings.configs, function(config, key) {
-            if ('kryncmsbundle' !== key) {
+            if ('KrynCmsBundle' !== key) {
                 this.addSection(key);
             }
         }, this);
     },
 
     addSection: function(bundleName) {
-        var config = ka.settings.configs[bundleName];
+        var config = ka.getConfig(bundleName);
         var container, subContainer;
 
         if (config.entryPoints) {
@@ -34,12 +34,12 @@ ka.System = new Class({
                     'class': 'ka-system-cat'
                 }).inject(this.container);
 
-                if ('admin' !== bundleName) {
+//                if ('KrynCmsBundle' !== bundleName) {
                     new Element('h2', {
                         'class': 'light',
                         text: config.label || config.name
                     }).inject(container);
-                }
+//                }
 
                 Object.each(systemEntryPoints, function(entryPoint) {
                     if (!entryPoint.type) {

@@ -16,6 +16,7 @@ use Kryn\CmsBundle\Admin\ObjectCrud;
 use Kryn\CmsBundle\Configuration\EntryPoint;
 use Kryn\CmsBundle\Core;
 use Kryn\CmsBundle\Exceptions\AccessDeniedException;
+use Kryn\CmsBundle\Exceptions\ClassNotFoundException;
 use Kryn\CmsBundle\Exceptions\ObjectNotFoundException;
 use Kryn\CmsBundle\Model\Content;
 use Kryn\CmsBundle\Model\NodeQuery;
@@ -23,6 +24,7 @@ use Propel\Runtime\Map\TableMap;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\DependencyInjection\ContainerAware;
+use Symfony\Component\HttpFoundation\Response;
 
 class AdminController extends Controller
 {
@@ -52,14 +54,11 @@ class AdminController extends Controller
         }
 
         if (!$this->getKrynCore()->getAdminClient()->getUser()) {
-            if (!$this->getKrynCore()->getRequest()->request->get('_suppress_status_code')) {
-               header('HTTP/1.0 403 Forbidden');
-            }
-            die(json_encode([
+            return $response = new Response(json_encode([
                     'status' => 403,
                     'error' => 'AccessDeniedException',
                     'message' => 'Access denied. No access or login first.'
-                ], JSON_PRETTY_PRINT));
+                ], JSON_PRETTY_PRINT), 403);
         }
 
         #$access = Permission::check('KrynCmsBundle:EntryPoint', $url);
@@ -114,6 +113,9 @@ class AdminController extends Controller
             $url = '/' . $url;
         }
 
+        $response = $this->getKrynCore()->getPageResponse();
+        $request  = $this->getKrynCore()->getRequest();
+
 //        if ('/' !== substr($url, -1)) {
 //            $url .= '/'; //substr($url, 0, -1);
 //        }
@@ -134,7 +136,9 @@ class AdminController extends Controller
         }
 
         //checkAccess
-        $this->checkAccess($url);
+        if ($checkAccessResponse = $this->checkAccess($url)) {
+            return $checkAccessResponse;
+        }
         $entryPoint = $this->getUtils()->getEntryPoint($url);
 
         if ($entryPoint) {
@@ -145,34 +149,39 @@ class AdminController extends Controller
                 $epc = new ObjectCrudController('/' . $getArgv(1) . '/' . $entryPoint->getFullPath());
                 $epc->setKrynCore($this->getKrynCore());
                 $epc->setRequest($this->getKrynCore()->getRequest());
-                $epc->getClient()->setUrl($url);
                 $epc->setExceptionHandler($exceptionHandler);
                 $epc->setDebugMode($debugMode);
                 $epc->setEntryPoint($entryPoint);
-                die($epc->run());
+                $symfonyClient = new SymfonyClient($epc);
+                $symfonyClient->setResponse($response);
+                $symfonyClient->setRequest($request);
+                $epc->setClient($symfonyClient);
+                $epc->getClient()->setUrl($url);
+                return $epc->run();
             } elseif ($entryPoint->getType() == 'store') {
-
-                $clazz = $entryPoint['class'];
-                if (!$clazz) {
-                    throw new \ClassNotFoundException(sprintf(
-                        'The property `class` is not defined in entry point `%s`',
-                        $entryPoint['_url']
-                    ));
-                }
-                if (!class_exists($clazz)) {
-                    throw new \ClassNotFoundException(sprintf(
-                        'The class `%s` does not exist in entry point `%s`',
-                        $clazz,
-                        $entryPoint['_url']
-                    ));
-                }
-
-                $obj = new $clazz($entryPoint['_url']);
-                $obj->setEntryPoint($entryPoint);
-                die($obj->run());
-
+//                $clazz = $entryPoint['class'];
+//                if (!$clazz) {
+//                    throw new ClassNotFoundException(sprintf(
+//                        'The property `class` is not defined in entry point `%s`',
+//                        $entryPoint['_url']
+//                    ));
+//                }
+//                if (!class_exists($clazz)) {
+//                    throw new ClassNotFoundException(sprintf(
+//                        'The class `%s` does not exist in entry point `%s`',
+//                        $clazz,
+//                        $entryPoint['_url']
+//                    ));
+//                }
+//
+//                $obj = new $clazz($entryPoint['_url']);
+//                $obj->setEntryPoint($entryPoint);
+//                return $obj->run();
             }
         }
+
+        $_GET = $this->getRequest()->query->all();
+        $_POST = $this->getRequest()->request->all();
 
         if ($this->getKrynCore()->isActiveBundle($getArgv(2)) && $getArgv(2) != 'admin') {
 
@@ -183,17 +192,25 @@ class AdminController extends Controller
 
             if (get_parent_class($clazz) == 'RestService\Server') {
                 $obj = new $clazz($this->getKrynCore()->getAdminPrefix() . '/' . $getArgv(2));
-                $obj->getClient()->setUrl(substr($this->getKrynCore()->getRequest()->getPathInfo(), 1));
                 $obj->setExceptionHandler($exceptionHandler);
+                $symfonyClient = new SymfonyClient($obj);
+                $symfonyClient->setResponse($response);
+                $symfonyClient->setRequest($request);
+                $obj->setClient($symfonyClient);
+                $obj->getClient()->setUrl(substr($this->getKrynCore()->getRequest()->getPathInfo(), 1));
                 $obj->setDebugMode($debugMode);
             } else {
                 $obj = new $clazz();
             }
 
-            die($obj->run());
+            $response = $obj->run();
+            if ($response instanceof Response) {
+                return $response;
+            } else {
+                die($response);
+            }
 
         } else {
-
             if ($getArgv(2) == 'object') {
 
                 $entryPoint = new EntryPoint(null, $this->getKrynCore());
@@ -216,6 +233,10 @@ class AdminController extends Controller
                 $object->initialize();
 
                 $epc = new ObjectCrudController('/' . $entryPoint->getFullPath());
+                $symfonyClient = new SymfonyClient($epc);
+                $symfonyClient->setResponse($response);
+                $symfonyClient->setRequest($request);
+                $epc->setClient($symfonyClient);
                 $epc->setObj($object);
                 $epc->setKrynCore($this->getKrynCore());
                 $epc->setRequest($this->getKrynCore()->getRequest());
@@ -223,14 +244,20 @@ class AdminController extends Controller
                 $epc->setExceptionHandler($exceptionHandler);
                 $epc->setDebugMode($debugMode);
 
-                die($epc->run($entryPoint));
+                return $epc->run($entryPoint);
             }
 
             $krynCore = $this->getKrynCore();
 
-            \RestService\Server::create('/admin', $this)
+            $server = \RestService\Server::create('/admin', $this);
+            $symfonyClient = new SymfonyClient($server);
+            $symfonyClient->setResponse($response);
+            $symfonyClient->setRequest($request);
+            $symfonyClient->setUrl($url);
 
-                ->getClient()->setUrl($url)->getController()
+            return
+                $server
+                ->setClient($symfonyClient)
                 ->setControllerFactory(
                     function ($className, $server) use ($krynCore) {
                         $controller = new $className($server);
@@ -418,8 +445,6 @@ class AdminController extends Controller
                     ->addPostRoute('upload/prepare', 'prepareUpload')
                 ->done()
                 ->run();
-            exit;
-
         }
     }
 
@@ -439,12 +464,18 @@ class AdminController extends Controller
         return $this->renderView($template, $data);
     }
 
-    public function getContentPreview($template, $type = 'text', $content)
+    public function getContentPreview($template, $type = 'text', $content, $nodeId, $domainId)
     {
         $contentObject = new Content();
         $contentObject->setType($type);
         $contentObject->setTemplate($template);
         $contentObject->setContent($content);
+
+        $domain = $this->getKrynCore()->getUtils()->getDomain($domainId);
+        $this->getKrynCore()->setCurrentDomain($domain);
+
+        $page = $this->getKrynCore()->getUtils()->getPage($nodeId);
+        $this->getKrynCore()->setCurrentPage($page);
 
         $render = $this->getKrynCore()->getContentRender();
         return $render->renderContent($contentObject);

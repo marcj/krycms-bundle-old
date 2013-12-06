@@ -16,7 +16,7 @@
         <label>Pages</label>
       </entryPoint>
       <entryPoint path="nodes" type="combine" icon="#icon-tree" link="true" multi="true">
-        <class>Kryn\CmsBundle\Controller\Admin\Windows\NodeCrud</class>
+        <class>Kryn\CmsBundle\Controller\Admin\Windows\NodeCrudController</class>
         <label>Nodes</label>
         <children>
           <entryPoint path="add" type="custom" multi="true">
@@ -26,7 +26,7 @@
             <label>Add domains</label>
           </entryPoint>
           <entryPoint path="root" type="combine">
-            <class>Kryn\CmsBundle\Controller\Admin\Windows\DomainCrud</class>
+            <class>Kryn\CmsBundle\Controller\Admin\Windows\DomainCrudController</class>
             <label>Domain</label>
           </entryPoint>
         </children>

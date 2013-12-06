@@ -2,6 +2,7 @@ parameters:
      kryn.content.types.class: Kryn\CmsBundle\ContentTypes\ContentTypes
      kryn.content.types.text.class: Kryn\CmsBundle\ContentTypes\TypeText
      kryn.content.types.plugin.class: Kryn\CmsBundle\ContentTypes\TypePlugin
+     kryn.content.types.markdown.class: Kryn\CmsBundle\ContentTypes\TypeMarkdown
 
 services:
      kryn.content.types:
@@ -17,3 +18,9 @@ services:
          arguments: ["@kryn.cms"]
          tags:
              - { name: kryn.content.type, alias: plugin }
+
+     kryn.content.types.markdown:
+         class: %kryn.content.types.markdown.class%
+         arguments: ["@kryn.cms"]
+         tags:
+             - { name: kryn.content.type, alias: markdown }

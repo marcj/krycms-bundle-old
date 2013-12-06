@@ -36,14 +36,6 @@ ka.ContentTypes.Plugin = new Class({
      */
     normalizeValue: function (pValue) {
         if (typeOf(pValue) == 'object') {
-            var bundle = pValue.bundle || pValue.module || '';
-
-            bundle = bundle.toLowerCase();
-            if ('bundle' === bundle.substr(-6)) {
-                bundle = bundle.substr(0, bundle.length - 6);
-            }
-
-            pValue.bundle = bundle;
             return pValue;
         }
 

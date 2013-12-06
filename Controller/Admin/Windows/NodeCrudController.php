@@ -4,7 +4,7 @@ namespace Kryn\CmsBundle\Controller\Admin\Windows;
 
 use Kryn\CmsBundle\Admin\ObjectCrud;
 
-class NodeCrud extends ObjectCrud
+class NodeCrudController extends ObjectCrud
 {
     public $fields = array(
         '__General__' => array(
@@ -243,6 +243,7 @@ class NodeCrud extends ObjectCrud
             'width' => '50',
         ),
     );
+
 
     public $addMultiple = true;
 

@@ -133,8 +133,6 @@ class Bundle extends Model
      */
     public function getComposerPath()
     {
-
-
         return $this->getBundleClass()->getPath() . 'composer.json';
     }
 
@@ -185,14 +183,17 @@ class Bundle extends Model
         if ((!file_exists($path) && !is_writable(dirname($path))) || (file_exists($path) && !is_writable($path))) {
             throw new \FileNotWritableException(tf('The file `%s` is not writable.', $path));
         }
+
         return SystemFile::setContent($path, $xml);
     }
 
     public function getPropertyFilePath($property)
     {
         if (!$this->imported[$property]) {
-            $path = $this->getBundleClass()->getPath() . 'Resources/config/' . (static::$propertyToFile[$property] ?: 'kryn.xml');
-            $root = realpath($this->getKrynCore()->getKernel()->getRootDir().'/../');
+            $path = $this->getBundleClass()->getPath(
+                ) . 'Resources/config/' . (static::$propertyToFile[$property] ? : 'kryn.xml');
+            $root = realpath($this->getKrynCore()->getKernel()->getRootDir() . '/../');
+
             return substr($path, strlen($root) + 1);
         } else {
             return $this->imported[$property];
@@ -210,8 +211,8 @@ class Bundle extends Model
         $doc = new \DOMDocument();
         $doc->formatOutput = true;
         $doc->preserveWhiteSpace = false;
-        if (file_exists($xmlFile)) {
-            $doc->load($xmlFile);
+        if (file_exists($path = $this->getKrynCore()->getKernel()->getRootDir() . '/../' . $xmlFile)) {
+            $doc->load($path);
         } else {
             $configElement = $doc->createElement('config');
             $doc->appendChild($configElement);
@@ -244,6 +245,7 @@ class Bundle extends Model
         $xml = $doc->saveXML();
         $xml = substr($xml, strlen('<?xml version="1.0"?>') + 1);
         $xml = trim($xml);
+
         return $xml;
     }
 
@@ -251,7 +253,8 @@ class Bundle extends Model
      * @param $property
      * @return bool
      */
-    public function saveFileBased($property) {
+    public function saveFileBased($property)
+    {
         $xml = $this->exportFileBased($property);
         $xmlFile = $this->getPropertyFilePath($property);
 
@@ -283,7 +286,7 @@ class Bundle extends Model
     /**
      * Returns the bundle name with the 'Bundle' suffix.
      *
-     * Example: `CoreBundle`.
+     * Example: `KrynCmsBundle`.
      *
      * @return string
      */
@@ -302,7 +305,13 @@ class Bundle extends Model
         if (!$this->bundleClass) {
             $this->bundleClass = $this->getKrynCore()->getBundle($this->getBundleName());
         }
+
         return $this->bundleClass;
+    }
+
+    public function getPath()
+    {
+        return $this->getBundleClass()->getPath();
     }
 
     /**
@@ -325,6 +334,11 @@ class Bundle extends Model
         return $this->getKrynCore()->getShortBundleName($this->getBundleClass()->getName());
     }
 
+    public function getNamespace()
+    {
+        return $this->getBundleClass()->getNamespace();
+    }
+
     /**
      * @param \DOMNode $node
      * @param string $file
@@ -334,7 +348,7 @@ class Bundle extends Model
         if ('bundle' === $node->nodeName) {
             $imported = $this->importNode($node);
 
-            $root = realpath($this->getKrynCore()->getKernel()->getRootDir().'/../');
+            $root = realpath($this->getKrynCore()->getKernel()->getRootDir() . '/../');
             $file = substr($file, strlen($root) + 1);
 
             foreach ($imported as $property) {
@@ -361,6 +375,7 @@ class Bundle extends Model
             foreach ($this->plugins as $plugin) {
                 $plugins[$plugin->getId()] = $plugin->toArray();
             }
+
             return $plugins;
         }
     }
@@ -375,6 +390,7 @@ class Bundle extends Model
             foreach ($this->themes as $theme) {
                 $themes[$theme->getId()] = $theme->toArray();
             }
+
             return $themes;
         }
     }
@@ -445,6 +461,7 @@ class Bundle extends Model
                     }
                 }
             }
+
             return $result;
         }
     }
@@ -459,9 +476,9 @@ class Bundle extends Model
 
     /**
      *
-     * @param bool $localPath   Return the real local accessible path or the defined.
-     * @param string $filter      a filter value
-     * @param bool $regex       if you pass a own regex as $filter set this to true
+     * @param bool $localPath Return the real local accessible path or the defined.
+     * @param string $filter a filter value
+     * @param bool $regex if you pass a own regex as $filter set this to true
      * @param bool $compression if true or false it returns only assets with this compression value. null returns all
      *
      * @return string[]
@@ -476,15 +493,18 @@ class Bundle extends Model
                     continue;
                 }
                 $files[] = $asset->$method();
-            } else if ($asset instanceof Assets) {
-                foreach ($asset as $subAsset) {
-                    if (null !== $compression && $compression !== $subAsset->getCompression()) {
-                        continue;
+            } else {
+                if ($asset instanceof Assets) {
+                    foreach ($asset as $subAsset) {
+                        if (null !== $compression && $compression !== $subAsset->getCompression()) {
+                            continue;
+                        }
+                        $files[] = $subAsset->$method();
                     }
-                    $files[] = $subAsset->$method();
                 }
             }
         }
+
         return array_unique($files);
     }
 
@@ -530,6 +550,7 @@ class Bundle extends Model
             foreach ($this->entryPoints as $entryPoint) {
                 $entryPoints[$entryPoint->getPath()] = $entryPoint->toArray();
             }
+
             return $entryPoints;
         }
     }
@@ -601,6 +622,7 @@ class Bundle extends Model
             foreach ($this->objects as $object) {
                 $objects[strtolower($object->getId())] = $object->toArray();
             }
+
             return $objects;
         }
     }
@@ -626,6 +648,7 @@ class Bundle extends Model
     {
         if (null !== $this->objects) {
             $id = Objects::normalizeObjectKey($id);
+
             return isset($this->objects[$id]) ? $this->objects[$id] : null;
         }
     }

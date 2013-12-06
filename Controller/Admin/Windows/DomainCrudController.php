@@ -4,7 +4,7 @@ namespace Kryn\CmsBundle\Controller\Admin\Windows;
 
 use Kryn\CmsBundle\Admin\ObjectCrud;
 
-class DomainCrud extends ObjectCrud
+class DomainCrudController extends ObjectCrud
 {
     public $fields = array(
         '__General__' => array(

@@ -84,9 +84,9 @@ class ConditionSubSelect extends Condition
     {
         $tableName = $this->tableNameSelect;
         if ($objectKey) {
-            $def = \Core\Object::getDefinition($objectKey);
+            $def = $this->getKrynCore()->getObjects()->getDefinition($objectKey);
             if ($def) {
-                $tableName = Kryn::getSystemConfig()->getDatabase()->getPrefix() . $def->getTable();
+                $tableName = $this->getKrynCore()->getSystemConfig()->getDatabase()->getPrefix() . $def->getTable();
             }
         }
 

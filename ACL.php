@@ -292,18 +292,18 @@ class ACL
 
         $denyList = array();
 
-        $conditionObject = new Condition();
+        $conditionObject = new Condition(null, $this->getKrynCore());
 
         foreach ($rules as $rule) {
 
             if ($rule['constraint_type'] == '1') {
                 //todo $rule['constraint_code'] can be a (urlencoded) composite pk
                 //todo constraint_code is always urlencoded;
-                $condition = Condition::create(array($primaryKey, '=', $this->getKrynCore()->urlDecode($rule['constraint_code'])));
+                $condition = Condition::create(array($primaryKey, '=', $this->getKrynCore()->urlDecode($rule['constraint_code'])), $this->getKrynCore());
             }
 
             if ($rule['constraint_type'] == '2') {
-                $condition = Condition::create($rule['constraint_code']);
+                $condition = Condition::create($rule['constraint_code'], $this->getKrynCore());
             }
 
             if ($rule['constraint_type'] == '0') {

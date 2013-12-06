@@ -4,13 +4,12 @@ namespace Kryn\CmsBundle;
 
 trait ContainerHelperTrait
 {
-
     /**
      * @return Core
      */
     public function getKrynCore()
     {
-        return $this->get('kryn.cms');
+        return $this->container->get('kryn.cms');
     }
 
     /**

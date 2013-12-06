@@ -19,6 +19,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Output\Output;
 use Propel\Generator\Config\XmlToArrayConverter;
 use Propel\Generator\Config\ArrayToPhpConverter;
+use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 
 class DemoDataCommand extends AbstractCommand
 {
@@ -53,13 +54,16 @@ class DemoDataCommand extends AbstractCommand
         $packageManager = new $mainPackageManager();
         $packageManager->setDomain($input->getArgument('hostname'));
         $packageManager->setPath($input->getArgument('path'));
-
+        $packageManager->setContainer( $this->getApplication()->getKernel()->getContainer());
         $packageManager->installDemoData($krynCore);
 
         foreach ($krynCore->getKernel()->getBundles() as $bundle) {
             $class = $bundle->getNamespace() . '\\PackageManager';
             if ($class !== $mainPackageManager && class_exists($class)) {
                 $packageManager = new $class;
+                if ($packageManager instanceof ContainerAwareInterface) {
+                    $packageManager->setContainer( $this->getApplication()->getKernel()->getContainer());
+                }
                 if (method_exists($packageManager, 'installDemoData')) {
                     $packageManager->installDemoData($krynCore);
                 }

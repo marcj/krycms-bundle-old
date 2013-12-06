@@ -1,22 +1,21 @@
 <config>
-  <bundle>
-    <theme id="CoreDefaults">
-      <label>Kryn.cms Demo Theme</label>
-      <content>
-        <label>Default</label>
-        <file>@KrynDemoTheme/content_default.tpl</file>
-      </content>
-    </theme>
-    <themes>
-      <theme id="coreLayouts">
-        <label>Core layouts</label>
-        <contents>
-          <content>
-            <label>Default</label>
-            <file>@CoreBundle/content_default.tpl</file>
-          </content>
-        </contents>
-      </theme>
-    </themes>
-  </bundle>
+    <bundle>
+        <themes>
+            <theme id="coreLayouts">
+                <label>Core layouts</label>
+                <contents>
+                    <content>
+                        <label>Default</label>
+                        <file>KrynCmsBundle:Default:content.html.twig</file>
+                    </content>
+                </contents>
+                <navigations>
+                    <navigation>
+                        <label>Default</label>
+                        <file>KrynCmsBundle:Default:navigation.html.twig</file>
+                    </navigation>
+                </navigations>
+            </theme>
+        </themes>
+    </bundle>
 </config>

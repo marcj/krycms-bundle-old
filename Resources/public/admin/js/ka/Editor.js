@@ -60,6 +60,14 @@ ka.Editor = new Class({
         return this.options.node;
     },
 
+    getNodeId: function() {
+        return this.options.node.id;
+    },
+
+    getDomainId: function() {
+        return this.options.node.domainId;
+    },
+
     onOver: function(pEvent, pElement) {
         if (this.lastHoveredContentInstance) {
             this.lastHoveredContentInstance.onOut();

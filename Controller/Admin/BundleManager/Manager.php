@@ -35,11 +35,6 @@ class Manager extends Controller
      */
     private $composer;
 
-    public function __construct()
-    {
-        define('KRYN_MANAGER', true);
-    }
-
     /**
      * Filters any special char out of the name.
      *
@@ -262,7 +257,7 @@ This is the bundle $bundleClassName.
                     $package = [
                         'name' => $name,
                         'version' => $version,
-                        'installed' => $installedVersions[strtolower($name)]
+                        'installed' => @$installedVersions[strtolower($name)]
                     ];
                     $packages[] = $package;
                 }

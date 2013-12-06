@@ -75,10 +75,6 @@ class WebFilesystem extends Filesystem
             $firstFolder = '/';
         }
 
-        if (isset($this->adapterInstances[$firstFolder])) {
-            return $this->adapterInstances[$firstFolder];
-        }
-
         if ('/' !== $firstFolder) {
             //todo
             $mounts = $this->getKrynCore()->getSystemConfig()->getMountPoints(true);
@@ -92,6 +88,10 @@ class WebFilesystem extends Filesystem
             } else {
                 $firstFolder = '/';
             }
+        }
+
+        if (isset($this->adapterInstances[$firstFolder])) {
+            return $this->adapterInstances[$firstFolder];
         }
 
         $adapter = $this->newAdapter($adapterClass, $firstFolder, $params);
@@ -222,7 +222,7 @@ class WebFilesystem extends Filesystem
                 //we need to move a folder from one file layer to another.
                 $file = $oldFs->getFile($this->normalizePath($oldFile));
 
-                if ($file['type'] == 'file') {
+                if ($file->getType() == 'file') {
                     $content = $oldFs->read($this->normalizePath($oldFile));
                     $newFs->write($this->normalizePath($newPath), $content);
                 } else {
@@ -241,11 +241,13 @@ class WebFilesystem extends Filesystem
                     $oldFs->delete($this->normalizePath($oldFile));
                     if ($this) {
                         $file->setPath($this->normalizePath($newPath));
+                        $file = $this->wrap($file);
                         $file->save();
                     }
                 }
             }
             if ('move' === $action) {
+                $file = $this->wrap($file);
                 $file->setPath($this->normalizePath($newPath));
                 $file->save();
             }

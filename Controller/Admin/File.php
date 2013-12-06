@@ -4,6 +4,7 @@ namespace Kryn\CmsBundle\Controller\Admin;
 
 use Kryn\CmsBundle\Controller;
 use Kryn\CmsBundle\Exceptions\AccessDeniedException;
+use Kryn\CmsBundle\Exceptions\FileNotFoundException;
 use Kryn\CmsBundle\Exceptions\FileUploadException;
 use Kryn\CmsBundle\File\FileSize;
 use Kryn\CmsBundle\Model\Base\FileQuery;
@@ -36,7 +37,7 @@ class File extends Controller
     public function createFile($path, $content = '')
     {
         $this->checkAccess($path);
-        return $this->getKrynCore()->getWebFileSystem()->put($path, $content);
+        return $this->getKrynCore()->getWebFileSystem()->write($path, $content);
     }
 
     public function moveFile($path, $target, $overwrite = false)
@@ -85,7 +86,7 @@ class File extends Controller
     public function createFolder($path)
     {
         $this->checkAccess(dirname($path));
-        return $this->getKrynCore()->getWebFileSystem()->createFolder($path);
+        return $this->getKrynCore()->getWebFileSystem()->mkdir($path);
     }
 
     /**
@@ -95,8 +96,8 @@ class File extends Controller
      * @param $fields
      * @param $method
      *
-     * @throws \FileIOException
-     * @throws \AccessDeniedException
+     * @throws FileNotFoundException
+     * @throws AccessDeniedException
      */
     public function checkAccess($path, $fields = null, $method = null)
     {
@@ -104,12 +105,12 @@ class File extends Controller
 
         try {
             $file = $this->getKrynCore()->getWebFileSystem()->getFile($path);
-        } catch (\FileNotExistException $e) {
+        } catch (FileNotFoundException $e) {
             while ('/' !== $path) {
                 try {
                     $path = dirname($path);
                     $file = $this->getKrynCore()->getWebFileSystem()->getFile($path);
-                } catch (\FileNotExistException $e) {
+                } catch (FileNotFoundException $e) {
                 }
             }
         }
@@ -117,7 +118,7 @@ class File extends Controller
         $method = $method ? 'check' . ucfirst($method) . 'Exact' : 'checkUpdateExact';
 
         if ($file && !$this->getKrynCore()->getACL()->$method('Core\\File', array('id' => $file->getId()), $fields)) {
-            throw new \AccessDeniedException(sprintf('No access to file `%s`', $path));
+            throw new AccessDeniedException(sprintf('No access to file `%s`', $path));
         }
     }
 

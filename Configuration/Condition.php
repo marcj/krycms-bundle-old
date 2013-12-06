@@ -2,6 +2,7 @@
 
 namespace Kryn\CmsBundle\Configuration;
 
+use Kryn\CmsBundle\Exceptions\ObjectFieldNotFoundException;
 use Kryn\CmsBundle\Tools;
 
 
@@ -44,6 +45,7 @@ class  Condition extends Model
         $value = [];
 
         foreach ($element->childNodes as $node) {
+            if (!isset($node->tagName)) continue;
             if ('rule' === $node->tagName) {
                 $value[] = array(
                     $node->getAttribute('key'),
@@ -280,10 +282,10 @@ class  Condition extends Model
             }
         }
 
-        $fieldName = $condition[0];
+        $columnName = $fieldName = $condition[0];
         if (false !== ($pos = strpos($fieldName, '.'))) {
             $tableName = substr($fieldName, 0, $pos);
-            $fieldName = substr($fieldName, $pos + 1);
+            $columnName = $fieldName = substr($fieldName, $pos + 1);
         }
 
         if ($def) {
@@ -442,9 +444,10 @@ class  Condition extends Model
      *
      * @return Condition
      */
-    public static function create($condition = null)
+    public static function create($condition = null, \Kryn\CmsBundle\Core $krynCore = null)
     {
         $obj = new static;
+        $obj->setKrynCore($krynCore);
         $obj->from($condition);
         return $obj;
     }
@@ -525,7 +528,7 @@ class  Condition extends Model
         if (is_numeric($field)) {
             $ovalue = $field;
         } else {
-            $ovalue = $objectItem[$field];
+            $ovalue = @$objectItem[$field];
             if (null === $ovalue && $objectKey && $definition = $this->getKrynCore()->getObjects()->getDefinition($objectKey)) {
                 $tableName = substr($field, 0, strpos($field, '.'));
                 $fieldName = substr($field, strpos($field, '.') + 1);

@@ -89,7 +89,7 @@ class ObjectCrudController extends Server
 
             try {
                 $this->send($obj->handle($this->entryPoint));
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 $this->sendError(
                     'AdminStoreException',
                     array('exception' => $e->getMessage(), 'entryPoint' => $this->entryPoint->toArray())
@@ -126,7 +126,7 @@ class ObjectCrudController extends Server
                 ->addOptionsRoute('', 'getInfo');
 
             //run parent
-            parent::run();
+            return parent::run();
         }
     }
 

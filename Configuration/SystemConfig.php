@@ -44,7 +44,7 @@ class SystemConfig extends Model {
     /**
      * @var string
      */
-    protected $adminUrl = 'kryn';
+    protected $adminUrl = '/kryn/';
 
     /**
      * @var string
@@ -72,11 +72,6 @@ class SystemConfig extends Model {
     protected $passwordHashKey;
 
     /**
-     * @var string
-     */
-    protected $debug = false;
-
-    /**
      * @var string[]
      */
     protected $bundles;
@@ -102,7 +97,7 @@ class SystemConfig extends Model {
     protected $logs;
 
     /**
-     * @var SystemConfigClient
+     * @var Client
      */
     protected $client;
 
@@ -247,7 +242,7 @@ class SystemConfig extends Model {
     public function getClient($orCreate = false)
     {
         if ($orCreate && null === $this->client) {
-            $this->client = new Client();
+            $this->client = new Client(null, $this->getKrynCore());
         }
         return $this->client;
     }
@@ -268,7 +263,7 @@ class SystemConfig extends Model {
     public function getErrors($orCreate = false)
     {
         if ($orCreate && null === $this->errors) {
-            $this->errors = new Errors();
+            $this->errors = new Errors(null, $this->getKrynCore());
         }
         return $this->errors;
     }
@@ -289,7 +284,7 @@ class SystemConfig extends Model {
     public function getFile($orCreate = false)
     {
         if ($orCreate && null === $this->file) {
-            $this->file = new FilePermission();
+            $this->file = new FilePermission(null, $this->getKrynCore());
         }
         return $this->file;
     }
@@ -364,7 +359,7 @@ class SystemConfig extends Model {
     public function getDatabase($orCreate = false)
     {
         if ($orCreate && null === $this->database) {
-            $this->database = new Database();
+            $this->database = new Database(null, $this->getKrynCore());
         }
         return $this->database;
     }
@@ -384,31 +379,6 @@ class SystemConfig extends Model {
     {
         return $this->passwordHashKey;
     }
-
-    /**
-     * @param boolean $debug
-     */
-    public function setDebug($debug)
-    {
-        $this->debug = $this->bool($debug);
-    }
-
-    /**
-     * @return string
-     */
-    public function getDebug()
-    {
-        return $this->debug;
-    }
-
-    /**
-     * @return boolean
-     */
-    public function isDebug()
-    {
-        return true == $this->debug;
-    }
-
 
     /**
      * @param string $tempDir
@@ -497,7 +467,7 @@ class SystemConfig extends Model {
     public function getLogs($orCreate = false)
     {
         if (!$this->logs && $orCreate) {
-            $this->logs = new Logs();
+            $this->logs = new Logs(null, $this->getKrynCore());
         }
         return $this->logs;
     }

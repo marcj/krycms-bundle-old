@@ -4,6 +4,7 @@ namespace Kryn\CmsBundle;
 
 use Kryn\CmsBundle\Exceptions\BundleNotFoundException;
 use Kryn\CmsBundle\Model\Content;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Kryn\CmsBundle\Controller\PageController;
 
@@ -275,6 +276,14 @@ class PageResponse extends Response
         $this->getStopwatch()->stop("Render PageResponse");
     }
 
+    public function prepare(Request $request)
+    {
+        parent::prepare($this->getKrynCore()->getRequest());
+        if (!$this->getContent()) {
+            $this->renderContent();
+        }
+    }
+
     /**
      * Builds the HTML skeleton, sends all HTTP headers and the HTTP body.
      *
@@ -284,11 +293,6 @@ class PageResponse extends Response
      */
     public function send()
     {
-        if (!$this->getContent()) {
-            $this->renderContent();
-        }
-
-        $this->prepare($this->getKrynCore()->getRequest());
         $this->setCharset('utf-8');
         $this->getKrynCore()->getEventDispatcher()->dispatch('core/page-response-send-pre');
 
@@ -321,28 +325,6 @@ class PageResponse extends Response
                 'jsTagsBottom' => $this->getScriptTags('bottom')
             ]
         );
-
-//        $doctypeTemplate = $this->getDocType();
-//        var_dump($templating);
-//        exit;
-//
-//        $html = sprintf(
-//            "%s
-//            %s
-//            <head>
-//            %s
-//            </head>
-//            <body>
-//            %s
-//            %s
-//            </body>
-//            </html>",
-//            $docType,
-//            $htmlOpener,
-//            $header,
-//            $body,
-//            $beforeBodyClose
-//        );
 
         $html = preg_replace(
             '/href="#([^"]*)"/',
@@ -389,12 +371,12 @@ class PageResponse extends Response
         $propertyPath = '';
 
         $layout = $layoutPath = $page->getLayout();
-        if (false !== ($pos = strpos($layoutPath, '/'))) {
+        if (false !== ($pos = strpos($layoutPath, ':'))) {
             $layout = substr($layoutPath, 0, $pos);
-            $layoutPath = substr($layoutPath, $pos);
+            $layoutPath = substr($layoutPath, $pos + 1);
         }
         $layoutSplitted = explode('.', $layout);
-        $bundleName = substr($layoutSplitted[0], 1);
+        $bundleName = $layoutSplitted[0];
 
         try {
             $layoutBundle = $this->getKrynCore()->getKernel()->getBundle($bundleName);

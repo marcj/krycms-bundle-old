@@ -58,6 +58,7 @@ var kryncmsbundle_system_development_fields = new Class({
                 this.apply();
             }.bind(this))
             .inject(this.bottom);
+
         new ka.Button('Apply FieldForm')
             .setButtonStyle('blue')
             .addEvent('click', function(){
@@ -65,7 +66,45 @@ var kryncmsbundle_system_development_fields = new Class({
             }.bind(this))
             .inject(this.bottom);
 
+        new ka.Button('GetValue')
+            .setButtonStyle('blue')
+            .addEvent('click', function(){
+                this.showValue(this.getValue());
+            }.bind(this))
+            .inject(this.bottom);
+
+        new ka.Button('SetValue')
+            .setButtonStyle('blue')
+            .addEvent('click', function(){
+                var value = prompt('Value');
+                this.setValue(value);
+            }.bind(this))
+            .inject(this.bottom);
+
         this.code.setValue(val);
+    },
+
+    getValue: function() {
+        if (this.field) {
+            return this.field.getValue();
+        }
+    },
+
+    setValue: function(value) {
+        if (this.field) {
+            return this.field.setValue(value);
+        }
+    },
+
+    showValue: function(value) {
+        if (!this.lastValueViewer) {
+            this.lastValueViewer = new Element('pre', {
+                'class': 'selectable',
+                style: 'margin: 15px; background-color: white; padding: 5px;'
+            }).inject(this.container);
+        }
+
+        this.lastValueViewer.set('text', JSON.stringify(value));
     },
 
     apply: function(form) {
@@ -84,11 +123,12 @@ var kryncmsbundle_system_development_fields = new Class({
                 window.localStorage.setItem('kryncmsbundle_system_dev_fields', code);
             }
 
+            delete this.lastValueViewer;
             this.container.empty();
             if (form) {
-                new ka.FieldForm(this.container, value);
+                this.field = new ka.FieldForm(this.container, value);
             } else {
-                new ka.Field(value, this.container);
+                this.field = new ka.Field(value, this.container);
             }
         }.bind(this);
 

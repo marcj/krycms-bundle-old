@@ -101,10 +101,13 @@ class Configs implements \IteratorAggregate
     public function getXmlConfigsForBundle($bundleName)
     {
         $configs = array();
+        $rename = [];
         foreach ($this->getConfigFiles($bundleName) as $file) {
             if (file_exists($file)) {
                 $doc = new \DOMDocument();
                 $doc->load($file);
+
+                $rename[strtolower($bundleName)] = $bundleName;
 
                 $bundles = $doc->getElementsByTagName('bundle');
                 foreach ($bundles as $bundle) {
@@ -118,6 +121,13 @@ class Configs implements \IteratorAggregate
 
                     $configs[strtolower($bundleName)][$priority][$file] = $bundle;
                 }
+            }
+        }
+
+        foreach ($configs as $key => $val) {
+            if (isset($rename[$key]) && $rename[$key] !== $key) {
+                $configs[$rename[$key]] = $val;
+                unset($configs[$key]);
             }
         }
 
@@ -194,7 +204,7 @@ class Configs implements \IteratorAggregate
         foreach ($this->configElements as $config) {
             $value = $config->toArray();
             $value['composer'] = $config->getComposer() ? : [];
-            $result[strtolower($config->getBundleName())] = $value;
+            $result[$config->getBundleName()] = $value;
         }
 
         return $result;

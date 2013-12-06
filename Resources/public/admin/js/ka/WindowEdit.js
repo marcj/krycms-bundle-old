@@ -278,7 +278,7 @@ ka.WindowEdit = new Class({
 
         Object.each(this.classProperties.previewPlugins, function (item, pluginId) {
 
-            var title = ka.settings.configs[this.getModule()].plugins[pluginId][0];
+            var title = ka.getConfig(this.getModule()).plugins[pluginId][0];
 
             new Element('div', {
                 html: title,

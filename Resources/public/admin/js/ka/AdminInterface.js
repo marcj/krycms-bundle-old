@@ -175,10 +175,10 @@ ka.AdminInterface = new Class({
                         'class': 'ka-menu-dialog-cat'
                     }).inject(parentContainer);
 
-                    if (ka.settings.configs[currentBundleName]) {
+                    if (ka.getConfig(currentBundleName)) {
                         new Element('h2', {
                             'class': 'light',
-                            text: ka.settings.configs[currentBundleName].label || ka.settings.configs[currentBundleName].name
+                            text: ka.getConfig(currentBundleName).label || ka.getConfig(currentBundleName).name
                         }).inject(currentContainer);
                     }
                 }
@@ -1082,7 +1082,8 @@ ka.AdminInterface = new Class({
 
             ka.settings.configsAlias = {};
             Object.each(ka.settings.configs, function(config, key){
-                ka.settings.configsAlias[key.toLowerCase().replace(/bundle$/, '')] = config;
+                ka.settings.configsAlias[key.toLowerCase()] = ka.settings.configs[key];
+                ka.settings.configsAlias[key.toLowerCase().replace(/bundle$/, '')] = ka.settings.configs[key];
             });
 
             if (cb) {
@@ -1358,7 +1359,7 @@ ka.AdminInterface = new Class({
     },
 
 //    addAdminHeadline: function(pExtKey) {
-//        var config = ka.settings.configs[pExtKey];
+//        var config = ka.getConfig(pExtKey);
 //        if (config) {
 //
 //            new Element('div', {
@@ -1425,10 +1426,10 @@ ka.AdminInterface = new Class({
             var splitter = new Element('div', {
                 'class': 'ka-main-menu-splitter'
             }).inject(this.mainLinks);
-            if (ka.settings.configs[module]) {
+            if (ka.getConfig(module)) {
                 new Element('h2', {
                     'class': 'ka-main-menu-title',
-                    text: ka.settings.configs[module].label || ka.settings.configs[module].name
+                    text: ka.getConfig(module).label || ka.getConfig(module).name
                 }).inject(this.mainLinks);
             }
         }

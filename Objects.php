@@ -382,7 +382,7 @@ class Objects
         $pks = $this->getPrimaryList($objectKey);
         $result = array();
         foreach ($pks as $pk) {
-            if ($item[$pk] !== null) {
+            if (@$item[$pk] !== null) {
                 $result[$pk] = $item[$pk];
             }
         }
@@ -815,7 +815,7 @@ class Objects
 
         $obj = $this->getClass($objectKey);
 
-        if ($options['permissionCheck']) {
+        if (@$options['permissionCheck']) {
 
             foreach ($values as $fieldName => $value) {
 
@@ -1156,7 +1156,7 @@ class Objects
             throw new \Exception('No scope defined.');
         }
 
-        if (!$options['fields']) {
+        if (!@$options['fields']) {
 
             $fields = array();
             if ($rootField = $definition->getNestedRootObjectLabelField()) {
@@ -1182,7 +1182,7 @@ class Objects
             $conditionObject->mergeAnd($limit);
         }
 
-        if ($options['permissionCheck'] && $aclCondition = $this->getKrynCore()->getACL()->getListingCondition($objectKey)) {
+        if (@$options['permissionCheck'] && $aclCondition = $this->getKrynCore()->getACL()->getListingCondition($objectKey)) {
             $conditionObject->mergeAndBegin($aclCondition);
         }
 

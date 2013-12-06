@@ -250,18 +250,17 @@ class ContentRender
         $title = sprintf('Content %d [%s]', $content->getId(), $type);
         $this->stopwatch->start($title, 'Kryn');
 
-        try {
-            $typeRenderer = $this->getTypeRenderer($type);
-            $typeRenderer->setContent($content);
-            $typeRenderer->setParameters($parameters);
-        } catch(\Exception $e) {
+        $typeRenderer = $this->getTypeRenderer($type);
+        if (!$typeRenderer) {
             $this->stopwatch->stop($title);
             throw new TypeNotFoundException(sprintf(
                 'Type renderer for `%s` not found. [%s]',
                 $content->getType(),
                 json_encode($content)
-            ), 0, $e);
+            ));
         }
+        $typeRenderer->setContent($content);
+        $typeRenderer->setParameters($parameters);
 
         $html = $typeRenderer->render();
 

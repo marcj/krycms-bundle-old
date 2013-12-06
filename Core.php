@@ -5,6 +5,7 @@ namespace Kryn\CmsBundle;
 use Flysystem\Filesystem;
 use Kryn\CmsBundle\Client\ClientAbstract;
 use Kryn\CmsBundle\Configuration\Client;
+use Kryn\CmsBundle\Configuration\Event;
 use Kryn\CmsBundle\Configuration\Model;
 use Kryn\CmsBundle\Configuration\SystemConfig;
 use Kryn\CmsBundle\Exceptions\BundleNotFoundException;
@@ -14,6 +15,7 @@ use Kryn\CmsBundle\Model\Node;
 use Kryn\CmsBundle\Propel\PropelHelper;
 use Symfony\Component\EventDispatcher\GenericEvent;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 class Core extends Controller
 {
@@ -29,9 +31,14 @@ class Core extends Controller
     protected $container;
 
     /**
+     * @var RequestStack
+     */
+    protected $requestStack;
+
+    /**
      * @var Request
      */
-    protected $request;
+    protected $lastRequest;
 
     /**
      * @var PropelHelper
@@ -78,6 +85,11 @@ class Core extends Controller
     protected $currentPage;
 
     /**
+     * @var array
+     */
+    protected $attachedEvents = [];
+
+    /**
      * @param $container
      */
     function __construct($container)
@@ -95,6 +107,8 @@ class Core extends Controller
         }
 
         $this->prepareWebSymlinks();
+
+        Configuration\Model::$serialisationKrynCore = $this;
 
 //        if ($domainClientConfig->isAutoStart()) {
 //            $this->getClient()->start();
@@ -202,7 +216,7 @@ class Core extends Controller
      */
     public function isDebugMode()
     {
-        return $this->getSystemConfig()->getDebug();
+        return $this->getKernel()->isDebug();
     }
 
     /**
@@ -340,53 +354,6 @@ class Core extends Controller
     }
 
     /**
-     * Load SystemConfig to $this->systemConfig
-     */
-    protected function loadSy22323stemConfig()
-    {
-        $fastestCacheClass = Cache\AbstractCache::getFastestCacheClass();
-
-        $configArray = [];
-        $this->systemConfig = new SystemConfig($configArray);
-
-        return;
-//        $configFile = PATH . 'app/config/config.xml';
-//
-//        if (file_exists($configFile)) {
-//            if ('\Core\Cache\Files' === $fastestCacheClass->getClass()) {
-//                $systemConfigCached = @file_get_contents('app/config/config.cache.php');
-//            } else {
-//                $systemConfigCached = static::getFastCache('core/config');
-//            }
-//            $systemConfigHash = md5($fastestCacheClass->getClass() . filemtime($configFile));
-//
-//            if ($systemConfigCached) {
-//                $systemConfigCached = unserialize($systemConfigCached);
-//                if (is_array($systemConfigCached) && $systemConfigCached['md5'] == $systemConfigHash) {
-//                    self::$config = $systemConfigCached['data'];
-//                }
-//            }
-//
-//            if (!self::$config) {
-//                static::$config = new SystemConfig(file_get_contents($configFile));
-//                $cached = serialize(
-//                    [
-//                        'md5' => $systemConfigHash,
-//                        'data' => self::$config
-//                    ]
-//                );
-//                if ('\Core\Cache\Files' === $fastestCacheClass->getClass()) {
-//                    @file_put_contents('app/config/config.cache.php', $cached);
-//                } else {
-//                    self::setFastCache('core/config', $cached);
-//                }
-//            }
-//        } else {
-//            static::$config = new SystemConfig();
-//        }
-    }
-
-    /**
      * @return SystemConfig
      */
     public function getSystemConfig()
@@ -439,6 +406,7 @@ class Core extends Controller
                 $database = $this->container->get('kryn.configuration.database');
                 $this->systemConfig->setDatabase($database);
             }
+
         }
 
         return $this->systemConfig;
@@ -482,11 +450,19 @@ class Core extends Controller
      */
     public function getRequest()
     {
-        if (null === $this->request) {
-            $this->request = $this->container->get('request');
+        if (null === $this->requestStack) {
+            $this->requestStack = $this->container->get('request_stack');
         }
 
-        return $this->request;
+        $request = $this->requestStack->getCurrentRequest();
+
+        if (!$request) {
+            $request = $this->lastRequest;
+        } else {
+            $this->lastRequest = $request;
+        }
+
+        return $request;
     }
 
     /**
@@ -823,6 +799,7 @@ class Core extends Controller
             if ($events = $bundleConfig->getListeners()) {
                 foreach ($events as $event) {
 
+                    $this->attachEvent($event);
                     $fn = function (GenericEvent $genericEvent) use ($event) {
                         if ($event->isCallable($genericEvent)) {
                             $event->call($genericEvent);
@@ -833,6 +810,39 @@ class Core extends Controller
             }
         }
         $this->getStopwatch()->stop('Load Bundle Configs');
+    }
+
+    public function attachEvent(Event $event)
+    {
+        $fn = function (GenericEvent $genericEvent) use ($event) {
+            if ($event->isCallable($genericEvent)) {
+                $event->call($genericEvent);
+            }
+        };
+
+        $this->getEventDispatcher()->addListener($event->getKey(), $fn);
+        $this->attachedEvents[] = [
+            'key' => $event->getKey(),
+            'event' => $event,
+            'callback' => $fn
+        ];
+    }
+
+    public function detachEvents()
+    {
+        foreach ($this->attachedEvents as $eventInfo) {
+            $this->getEventDispatcher()->removeListener($eventInfo['key'], $eventInfo['callback']);
+        }
+
+        $this->attachedEvents = [];
+    }
+
+    /**
+     * @return array
+     */
+    public function getAttachedEvents()
+    {
+        return $this->attachedEvents;
     }
 
     /**

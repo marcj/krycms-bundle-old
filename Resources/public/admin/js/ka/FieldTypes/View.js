@@ -8,7 +8,7 @@ ka.FieldTypes.View = new Class({
             directory: {
                 label: 'Path to directory',
                 type: 'text',
-                desc: 'Example: @CoreBundle/folder1/'
+                desc: 'Example: @KrynCmsBundle/folder1/'
             },
             fullPath: {
                 label: 'Full path',

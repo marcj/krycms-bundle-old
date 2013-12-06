@@ -2,6 +2,7 @@
 
 namespace Kryn\CmsBundle\Controller\Admin\BundleManager;
 
+use Kryn\CmsBundle\ContainerHelperTrait;
 use Kryn\CmsBundle\Exceptions\BuildException;
 use Kryn\CmsBundle\Configuration\Asset;
 use Kryn\CmsBundle\Configuration\Assets;
@@ -14,19 +15,14 @@ use Kryn\CmsBundle\Configuration\Object;
 use Kryn\CmsBundle\Configuration\Plugin;
 use Kryn\CmsBundle\Configuration\Theme;
 use Kryn\CmsBundle\Exceptions\BundleNotFoundException;
+use Kryn\CmsBundle\Exceptions\ClassNotFoundException;
+use Kryn\CmsBundle\Exceptions\FileAlreadyExistException;
 use Symfony\Component\DependencyInjection\ContainerAware;
 use Symfony\Component\Finder\Finder;
 
 class Editor extends ContainerAware
 {
-    /**
-     * @return Core
-     */
-    public function getKrynCore()
-    {
-        return $this->container->get('kryn.cms');
-    }
-
+    use ContainerHelperTrait;
 
     /**
      * Returns the composer config.
@@ -128,28 +124,38 @@ class Editor extends ContainerAware
 
         $windows = array();
 
-        foreach ($finder as $class) {
-            $content = file_get_contents($class->getPathname());
+        $bundles = $this->getKrynCore()->getBundles();
+        foreach ($bundles as $bundle) {
+            $path = $bundle->getPath() . '/Controller/';
 
-            if (preg_match(
-                '/class[\s\t]+([a-zA-Z0-9_]+)[\s\t]/',
-                $content,
-                $matches
-            )) {
-                $clazz = $matches[1];
-                preg_match('/namespace ([a-zA-Z0-9_\\\\]*)/', $content, $namespace);
-                $namespace = $namespace[1];
-                if ($namespace) {
-                    $clazz = $namespace . '\\' . $clazz;
-                }
+            if (!file_exists($path)) continue;
 
-                $clazz = '\\' . $clazz;
+            $finder = Finder::create()
+                ->in($path)
+                ->name('*Controller.php');
 
-                if (class_exists($clazz)) {
-                    $reflection = new \ReflectionClass($clazz);
-                    $instances = $reflection->getInterfaceNames();
-                    if (in_array('Kryn\CmsBundle\Admin\ObjectCrudInterface', $instances)) {
-                        $windows[$class->getPathname()] = $clazz;
+            foreach ($finder as $class) {
+                $content = file_get_contents($class->getPathname());
+
+                if (preg_match(
+                    '/class[\s\t]+([a-zA-Z0-9_]+)[\s\t]/',
+                    $content,
+                    $matches
+                )) {
+                    $clazz = $matches[1];
+                    preg_match('/namespace ([a-zA-Z0-9_\\\\]*)/', $content, $namespace);
+                    if (isset($namespace[1]) && $namespace[1]) {
+                        $clazz = $namespace[1] . '\\' . $clazz;
+
+                        $clazz = '\\' . $clazz;
+
+                        if (class_exists($clazz)) {
+                            $reflection = new \ReflectionClass($clazz);
+                            $instances = $reflection->getInterfaceNames();
+                            if (in_array('Kryn\CmsBundle\Admin\ObjectCrudInterface', $instances)) {
+                                $windows[$class->getPathname()] = $clazz;
+                            }
+                        }
                     }
                 }
             }
@@ -401,7 +407,7 @@ class Editor extends ContainerAware
      * @param array $methods
      * @return bool
      */
-    public function saveWindowDefinition($class, $list = null, $add = null, $general = null, $methods = null)
+    public function saveWindowDefinition($class, $list = null, $add = null, $general = null, $methods = null, $fields = null)
     {
         if (substr($class, 0, 1) != '\\') {
             $class = '\\' . $class;
@@ -414,7 +420,7 @@ class Editor extends ContainerAware
         $lSlash = strrpos($class, '\\');
         $class2Name = $lSlash !== -1 ? substr($class, $lSlash + 1) : $class;
 
-        $parentClass = '\Admin\ObjectCrud';
+        $parentClass = '\Kryn\CmsBundle\Admin\ObjectCrud';
 
         $namespace = substr(substr($class, 1), 0, $lSlash);
         if (substr($namespace, -1) == '\\') {
@@ -425,7 +431,7 @@ class Editor extends ContainerAware
 
         $sourcecode .= 'class ' . $class2Name . ' extends ' . $parentClass . " {\n\n";
 
-        if (count($fields = getArgv('fields')) > 0) {
+        if (count($fields) > 0) {
             $this->addVar($sourcecode, 'fields', $fields);
         }
 
@@ -461,7 +467,8 @@ class Editor extends ContainerAware
 
         $sourcecode = str_replace("\r", '', $sourcecode);
 
-        return SystemFile::setContent($path, $sourcecode);
+        $fs = $this->getKrynCore()->getFileSystem();
+        return $fs->write($path, $sourcecode);
     }
 
     public function addMethod(&$sourceCode, $source)
@@ -498,20 +505,21 @@ class Editor extends ContainerAware
         return $value;
     }
 
-    public function getWindowDefinition($class)
+    public function getWindowDefinition($class, $parentClass = null)
     {
         if (substr($class, 0, 1) != '\\') {
             $class = '\\' . $class;
         }
 
         if (!class_exists($class)) {
-            throw new \ClassNotFoundException(tf('Class %s not found.', $class));
+            throw new ClassNotFoundException(sprintf('Class %s not found.', $class));
         }
 
         $reflection = new \ReflectionClass($class);
-        $path = substr($reflection->getFileName(), strlen(PATH));
+        $root = realpath($this->getKrynCore()->getKernel()->getRootDir().'/../');
+        $path = substr($reflection->getFileName(), strlen($root) + 1);
 
-        $content = explode("\n", SystemFile::getContent($path));
+        $content = explode("\n", file_get_contents($reflection->getFileName()));
 
         $class2Reflection = new \ReflectionClass($class);
         $actualPath = $class2Reflection->getFileName();
@@ -525,8 +533,8 @@ class Editor extends ContainerAware
             )
         );
 
-        $obj = new $class(null, true);
-        foreach ($obj as $k => $v) {
+        $properties = $class2Reflection->getDefaultProperties();
+        foreach ($properties as $k => $v) {
             $res['properties'][$k] = $v;
         }
 
@@ -554,24 +562,38 @@ class Editor extends ContainerAware
             }
         }
 
-        if (getArgv('parentClass')) {
-            $parentClass = getArgv('parentClass', 2);
-        }
-
-
-        if ($res['properties']['fields']) {
-            foreach ($res['properties']['fields'] as &$field) {
+        if (@$res['properties']['fields']) {
+            foreach ($res['properties']['fields'] as $key => &$field) {
                 if ($field instanceof Model) {
                     $field = $field->toArray();
                 }
+                $this->normalizeField($field, $key, $res);
             }
         }
 
-        self::extractParentClassInformation($parentClass, $res['parentMethods']);
+        $this->extractParentClassInformation($parentClass, $res['parentMethods']);
 
         unset($res['properties']['_fields']);
 
         return $res;
+    }
+
+    public function normalizeField(&$field, $key, $res)
+    {
+        if ('predefined' === $field['type']) {
+            if (!@$field['object']) {
+                $field['object'] = @$res['properties']['object'];
+            }
+            if (!@$field['field']) {
+                $field['field'] = $key;
+            }
+        }
+
+        if (@$field['children'] && is_array($field['children'])) {
+            foreach ($field['children'] as $skey => &$sfield) {
+                $this->normalizeField($sfield, $skey, $res);
+            }
+        }
     }
 
     /**
@@ -582,23 +604,24 @@ class Editor extends ContainerAware
      * @param $parentClass
      * @param $methods
      *
-     * @throws \ClassNotFoundException
+     * @throws ClassNotFoundException
      */
-    public static function extractParentClassInformation($parentClass, &$methods)
+    public function extractParentClassInformation($parentClass, &$methods)
     {
         if (!class_exists($parentClass)) {
-            throw new \ClassNotFoundException();
+            throw new ClassNotFoundException();
         }
 
         $reflection = new \ReflectionClass($parentClass);
-        $parentPath = substr($reflection->getFileName(), strlen(PATH));
+        $root = realpath($this->getKrynCore()->getKernel()->getRootDir().'/../');
+        $parentPath = substr($reflection->getFileName(), strlen($root) + 1);
 
-        $parentContent = explode("\n", SystemFile::getContent($parentPath));
+        $parentContent = explode("\n", file_get_contents($reflection->getFileName()));
         $parentReflection = new \ReflectionClass($parentClass);
 
         $methods2 = $parentReflection->getMethods();
         foreach ($methods2 as $method) {
-            if ($methods[$method->name]) {
+            if (isset($methods[$method->name])) {
                 continue;
             }
 
@@ -639,7 +662,7 @@ class Editor extends ContainerAware
      * @param bool $force
      *
      * @return bool
-     * @throws \FileAlreadyExistException
+     * @throws FileAlreadyExistException
      */
     public function newWindow($class, $module, $force = false)
     {
@@ -649,25 +672,25 @@ class Editor extends ContainerAware
 
         if (class_exists($class) && !$force) {
             $reflection = new \ReflectionClass($class);
-            throw new \FileAlreadyExistException(tf('Class already exist in %s', $reflection->getFileName()));
+            throw new FileAlreadyExistException(sprintf('Class already exist in %s', $reflection->getFileName()));
         }
 
         $actualPath = str_replace('\\', '/', substr($class, 1)) . '.php';
-        $actualPath = \Core\Kryn::getBundleDir($module) . $actualPath;
+        $actualPath = $this->getKrynCore()->getBundleDir($module) . $actualPath;
 
         if (file_exists($actualPath) && !$force) {
-            throw new \FileAlreadyExistException(tf('File already exist, %s', $actualPath));
+            throw new FileAlreadyExistException(sprintf('File already exist, %s', $actualPath));
         }
 
         $sourcecode = "<?php\n\n";
-        $bundle = Kryn::getBundle($module);
+        $bundle = $this->getKrynCore()->getBundle($module);
 
         $lSlash = strrpos($class, '\\');
         $class2Name = $lSlash !== -1 ? substr($class, $lSlash + 1) : $class;
 
-        $parentClass = '\Admin\ObjectCrud';
+        $parentClass = '\Kryn\CmsBundle\Admin\ObjectCrud';
 
-        $namespace = ucfirst($bundle->getRootNamespace()) . substr($class, 0, $lSlash);
+        $namespace = ucfirst($bundle->getNamespace()) . substr($class, 0, $lSlash);
         if (substr($namespace, -1) == '\\') {
             $namespace = substr($namespace, 0, -1);
         }
@@ -678,9 +701,8 @@ class Editor extends ContainerAware
 
         $sourcecode .= "}\n";
 
-        error_log($actualPath);
-
-        return SystemFile::setContent($actualPath, $sourcecode);
+        $fs = $this->getKrynCore()->getFileSystem();
+        return $fs->write($actualPath, $sourcecode);
     }
 
 }

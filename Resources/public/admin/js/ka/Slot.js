@@ -340,7 +340,7 @@ ka.Slot = new Class({
         }
 
         if (!pContent.template) {
-            pContent.template = '@CoreBundle/content_default.tpl';
+            pContent.template = 'KrynCmsBundle:Default:content.html.twig';
         }
 
         var content = new ka.Content(pContent, this.slot, pDrop);

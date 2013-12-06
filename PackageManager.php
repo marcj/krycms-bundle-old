@@ -131,7 +131,7 @@ class PackageManager extends ContainerAware {
                 ->update(array('Id' => 1));
         }
 
-        $defaultLayout = '@KrynDemoThemeBundle.krynDemoTheme/layout_default.html.twig';
+        $defaultLayout = 'KrynDemoThemeBundle.krynDemoTheme:Layout:default.html.twig';
         $defaultContentTemplate = 'KrynCmsBundle:Default:content.html.twig';
         $Nodes = array(
 

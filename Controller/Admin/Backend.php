@@ -412,7 +412,7 @@ class Backend extends Controller
 
         foreach ($this->getKrynCore()->getConfigs() as $bundleName => $bundleConfig) {
             foreach ($bundleConfig->getAllEntryPoints() as $subEntryPoint) {
-                $path = strtolower($bundleConfig->getBundleName()) . '/' . $subEntryPoint->getFullPath(true);
+                $path = $bundleConfig->getBundleName() . '/' . $subEntryPoint->getFullPath(true);
 
                 if (substr_count($path, '/') <= 3) {
                     if ($subEntryPoint->isLink()) {

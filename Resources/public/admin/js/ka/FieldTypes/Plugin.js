@@ -64,12 +64,12 @@ ka.FieldTypes.Plugin = new Class({
             var bundle = this.fieldForm.getValue('bundle');
             var plugin = this.fieldForm.getValue('plugin[' + bundle + ']');
 
-            if (!ka.settings.configs[bundle]) {
+            if (!ka.getConfig(bundle)) {
                 delete this.pluginPropertyForm;
                 return;
             }
 
-            var def = this.normalizePlugin(ka.settings.configs[bundle].plugins[plugin]);
+            var def = this.normalizePlugin(ka.getConfig(bundle).plugins[plugin]);
 
             if (def && def.options) {
                 this.pluginPropertyForm = new ka.FieldForm(this.pluginPropertyContainer, def.options);

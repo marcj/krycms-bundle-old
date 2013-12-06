@@ -272,7 +272,7 @@ class Local extends AbstractAdapter
 
         $fileCreated = false;
 
-        if (is_dir(dirname($path))) {
+        if (!is_dir(dirname($path))) {
             $this->mkdir(dirname($oriPath));
         }
 

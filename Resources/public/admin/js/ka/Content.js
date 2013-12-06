@@ -23,6 +23,9 @@ ka.Content = new Class({
         return this.main.getParent('.ka-slot').kaSlotInstance;
     },
 
+    /**
+     * @returns {ka.Editor}
+     */
     getEditor: function() {
         return this.getSlot().getEditor();
     },
@@ -186,7 +189,9 @@ ka.Content = new Class({
                 this.main.set('html', pResponse.data);
                 progressWatch.done();
             }.bind(this)}).post({
-                content: this.value.content
+                content: this.value.content,
+                nodeId: this.getEditor().getNodeId(),
+                domainId: this.getEditor().getDomainId()
             });
     },
 
@@ -284,6 +289,7 @@ ka.Content = new Class({
             return this.updateUI();
         }.bind(this));
 
+        console.log(this.value.template);
         this.template.setValue(this.value.template || null);
 
         this.inspectorContainer = new Element('div', {

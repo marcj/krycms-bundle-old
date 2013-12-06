@@ -17,7 +17,6 @@
   <!--This is a key generated through the installation process. You should not change it!
     The system needs this key to decrypt the passwords in the users database.-->
   <passwordHashKey></passwordHashKey>
-  <debug>true</debug>
   <!--
     A list of installed bundles. Enter here the PHP FQDN (Will be resolved through PSR-0 and then loaded)
 
@@ -43,7 +42,7 @@
         <!--Can be a IP or a hostname. For SQLite enter here the path to the file.-->
         <server>127.0.0.1</server>
         <!--The schema/database name-->
-        <name>symfony</name>
+        <name>test</name>
         <username>root</username>
         <password></password>
       </connection>

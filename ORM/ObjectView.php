@@ -13,7 +13,7 @@ class ObjectView extends Propel
     {
         $path = $pk['path'];
 
-        $file = $this->getKrynCore()->resolvePath($path, 'Resources/views/');
+        $file = $this->getKrynCore()->resolvePath($path, 'Resources/views/', true);
         $fs = $this->getKrynCore()->getFileSystem();
         $fileObj = $fs->getFile($file);
 
@@ -116,7 +116,7 @@ class ObjectView extends Propel
             $result = array();
             $bundles = array_keys($this->getKrynCore()->getBundles());
             foreach ($bundles as $bundleName) {
-                $directory = $this->getKrynCore()->resolvePath('@' . $bundleName, 'Resources/views');
+                $directory = $this->getKrynCore()->resolvePath('@' . $bundleName, 'Resources/views', true);
                 $file = $this->getKrynCore()->getFilesystem()->getFile($directory);
                 if (!$file) {
                     continue;

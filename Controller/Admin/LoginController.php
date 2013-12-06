@@ -10,6 +10,10 @@ class LoginController extends PluginController
 {
     public function showLogin()
     {
+        if ($this->container->has('profiler')) {
+            $this->container->get('profiler')->disable();
+        }
+
         $this->addMainResources();
         $this->addLanguageResources();
         $this->addSessionScripts();

@@ -843,8 +843,8 @@ ka.Window = new Class({
             }
         }
 
-        var title = ka.settings.configs[ this.getModule() ]['label'] ||
-            ka.settings.configs[ this.getModule() ]['name'];
+        var title = ka.getConfig( this.getModule() )['label'] ||
+            ka.getConfig( this.getModule() )['name'];
 
         if (title != 'Kryn.cms') {
             new Element('span', {
@@ -983,7 +983,7 @@ ka.Window = new Class({
         var noCache = (new Date()).getTime();
 
         this.customCssAsset =
-            new Asset.css(_path + 'bundles/' + this.getModule().replace(/bundle$/, '') + '/admin/css/' + javascript + '.css?noCache=' +
+            new Asset.css(_path + 'bundles/' + this.getModule().toLowerCase().replace(/bundle$/, '') + '/admin/css/' + javascript + '.css?noCache=' +
                 noCache);
 
         this.customId = parseInt(Math.random() * 100) + parseInt(Math.random() * 100);
@@ -998,7 +998,12 @@ ka.Window = new Class({
         window['contentLoaded_' + this.customId] = function () {
             this.content.empty();
             var clazz = this.getEntryPoint().replace(/\//g, '_');
-            if (!window[clazz]) {
+            var clazzLC = this.getEntryPoint().replace(/\//g, '_').toLowerCase();
+            if (window[clazz]) {
+
+            } else if (window[clazzLC]) {
+                clazz = clazzLC;
+            } else {
                 this.alert(tf('Javascript class `%s` not found.', clazz));
                 return;
             }

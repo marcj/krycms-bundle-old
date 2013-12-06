@@ -54,8 +54,8 @@ class Propel extends ORMAbstract
      */
     public function getNestedSubCondition(Condition $condition)
     {
-        $result = new Condition();
-        $sub = new ConditionSubSelect();
+        $result = new Condition(null, $this->getKrynCore());
+        $sub = new ConditionSubSelect(null, $this->getKrynCore());
         $sub->select('lft');
         $sub->setTableName('parent');
         $sub->addSelfJoin('parent', '%table%.lft BETWEEN parent.lft+1 AND parent.rgt-1');
@@ -548,6 +548,7 @@ class Propel extends ORMAbstract
 
         $clazz = $this->getPhpName();
 
+        $result = [];
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
             $result[] = $this->populateRow(
                 $clazz,
@@ -612,7 +613,7 @@ class Propel extends ORMAbstract
             $selects,
             $relations,
             $relationFields,
-            $options['permissionCheck']
+            @$options['permissionCheck']
         );
     }
 
@@ -774,6 +775,7 @@ class Propel extends ORMAbstract
 
         if ($this->definition->isNested()) {
 
+            $root = false;
             $query = $this->getQueryClass();
             if ($targetPk) {
                 $branch = $query->findPk($this->getPropelPk($targetPk));

@@ -26,7 +26,7 @@ class ContentTypes {
      */
     public function getType($type)
     {
-        return $this->types[$type];
+        return @$this->types[$type] ?: @$this->types[strtolower($type)];
     }
 
 }

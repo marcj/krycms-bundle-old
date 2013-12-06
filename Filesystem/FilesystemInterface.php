@@ -33,4 +33,10 @@ interface FilesystemInterface {
      */
     public function getFile($path);
 
+    /**
+     * @param string $path
+     * @return integer
+     */
+    public function getCount($path);
+
 }

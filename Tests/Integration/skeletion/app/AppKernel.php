@@ -18,14 +18,9 @@ class AppKernel extends Kernel
             new Kryn\CmsBundle\KrynCmsBundle(),
             new Kryn\DemoTheme\KrynDemoThemeBundle(),
             new Kryn\Publication\KrynPublicationBundle(),
+            new Tests\FileImport\TestsFileImportBundle(),
+            new Test\TestBundle()
         );
-
-        if (in_array($this->getEnvironment(), array('dev', 'test'))) {
-            $bundles[] = new Acme\DemoBundle\AcmeDemoBundle();
-            $bundles[] = new Symfony\Bundle\WebProfilerBundle\WebProfilerBundle();
-            $bundles[] = new Sensio\Bundle\DistributionBundle\SensioDistributionBundle();
-            $bundles[] = new Sensio\Bundle\GeneratorBundle\SensioGeneratorBundle();
-        }
 
         return $bundles;
     }

@@ -192,11 +192,10 @@ abstract class AbstractCache implements CacheInterface
      * @param string $key
      * @param bool $withoutValidationCheck
      *
-     * @return ref to data
+     * @return string to data
      */
     public function &get($key, $withoutValidationCheck = false)
     {
-
         if (!isset($this->cache[$key])) {
             $time = microtime(true);
             $this->cache[$key] = $this->doGet($key);
@@ -210,15 +209,16 @@ abstract class AbstractCache implements CacheInterface
 
         if ($this->withInvalidationChecks && !$withoutValidationCheck) {
 
-            if ($withoutValidationCheck == true) {
-                if (!$this->cache[$key]['value'] || !$this->cache[$key]['time']
-                    || $this->cache[$key]['timeout'] < microtime(true)
-                ) {
-                    return null;
-                }
-
-                return $this->cache[$key]['value'];
-            }
+//            if ($withoutValidationCheck == true) {
+//                if (!$this->cache[$key]['value'] || !$this->cache[$key]['time']
+//                    || $this->cache[$key]['timeout'] < microtime(true)
+//                ) {
+//                    $null = null;
+//                    return $null;
+//                }
+//
+//                return $this->cache[$key]['value'];
+//            }
 
             //valid cache
             //search if a parent has been flagged as invalid
@@ -230,8 +230,9 @@ abstract class AbstractCache implements CacheInterface
                     foreach ($parents as $parent) {
                         $code .= $parent;
                         $invalidateTime = $this->getInvalidate($code);
-                        if ($invalidateTime && $invalidateTime > $this->cache[$key]['time']) {
-                            return null;
+                        if ($invalidateTime && $invalidateTime >= $this->cache[$key]['time']) {
+                            $null = null;
+                            return $null;
                         }
                         $code .= '/';
                     }
@@ -243,7 +244,8 @@ abstract class AbstractCache implements CacheInterface
             if (is_array($this->cache[$key])) {
                 return $this->cache[$key]['value'];
             } else {
-                return null;
+                $null = null;
+                return $null;
             }
         } else {
             return $this->cache[$key];
@@ -260,7 +262,7 @@ abstract class AbstractCache implements CacheInterface
      */
     public function getInvalidate($key)
     {
-        return $this->get('invalidate-' . $key, true);
+        return doubleval($this->get('invalidate-' . $key, true));
     }
 
     /**
@@ -274,7 +276,7 @@ abstract class AbstractCache implements CacheInterface
         $this->cache['invalidate-' . $key] = $time;
 
         $time2 = microtime(true);
-        $result = $this->doSet('invalidate-' . $key, $time, 99999999, true);
+        $result = $this->doSet('invalidate-' . $key, $time);
         //todo, use eventDispatcher \Core\Utils::$latency['cache'][] = microtime(true) - $time2;
         return $result;
     }

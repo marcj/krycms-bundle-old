@@ -978,7 +978,7 @@ class ObjectCrud implements ObjectCrudInterface
             }
         }
 
-        return $items;
+        return $items ?: null;
     }
 
     /**
@@ -1380,15 +1380,13 @@ class ObjectCrud implements ObjectCrudInterface
         $fields = $this->getAddMultipleFields();
 
         $position = $this->getRequest()->request->get('_position');
-
-        if (!is_array($_REQUEST['_items'])) {
-            $_REQUEST['_items'] = [];
+        $items = $this->getRequest()->request->get('_items');
+        if (!$items) {
+            $items = $this->getRequest()->query->get('_items');
         }
 
-        $items = $_REQUEST['_items'];
-
         if ($position == 'first' || $position == 'next') {
-            $items = array_reverse($_REQUEST['_items']);
+            $items = array_reverse($items);
         }
 
         foreach ($items as $item) {

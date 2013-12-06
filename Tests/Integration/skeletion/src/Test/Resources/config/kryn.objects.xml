@@ -1,0 +1,109 @@
+<config>
+  <bundle>
+    <objects>
+      <object id="Test">
+        <table>test_test</table>
+        <labelField>name</labelField>
+        <nested>false</nested>
+        <dataModel>propel</dataModel>
+        <multiLanguage>true</multiLanguage>
+        <domainDepended>false</domainDepended>
+        <treeFixedIcon>false</treeFixedIcon>
+        <browserColumns>
+          <field id="name">
+            <type>text</type>
+          </field>
+        </browserColumns>
+        <fields>
+          <field id="id" primaryKey="true" autoIncrement="true">
+            <type>number</type>
+          </field>
+          <field id="name">
+            <type>text</type>
+          </field>
+          <field id="description">
+            <type>text</type>
+          </field>
+          <field id="lang">
+            <type>lang</type>
+          </field>
+        </fields>
+        <label>name</label>
+      </object>
+      <object id="Item2">
+        <table>test_item2</table>
+        <labelField>title</labelField>
+        <nested>false</nested>
+        <dataModel>propel</dataModel>
+        <multiLanguage>false</multiLanguage>
+        <domainDepended>false</domainDepended>
+        <treeFixedIcon>false</treeFixedIcon>
+        <fields>
+          <field id="id" primaryKey="true" autoIncrement="true">
+            <type>number</type>
+          </field>
+          <field id="id2" primaryKey="true">
+            <type>number</type>
+          </field>
+          <field id="title">
+            <type>text</type>
+          </field>
+          <field id="category">
+            <object>Test\ItemCategory</object>
+            <objectRelation>nToM</objectRelation>
+            <type>object</type>
+          </field>
+        </fields>
+        <label>title</label>
+      </object>
+      <object id="Item">
+        <label>title</label>
+        <table>test_item</table>
+        <labelField>title</labelField>
+        <nested>false</nested>
+        <dataModel>propel</dataModel>
+        <multiLanguage>false</multiLanguage>
+        <workspace>true</workspace>
+        <domainDepended>false</domainDepended>
+        <treeFixedIcon>false</treeFixedIcon>
+        <fields>
+          <field id="id" primaryKey="true" autoIncrement="true">
+            <type>number</type>
+          </field>
+          <field id="title">
+            <type>text</type>
+          </field>
+          <field id="category">
+            <type>object</type>
+            <object>Test\ItemCategory</object>
+            <objectRelation>nToM</objectRelation>
+          </field>
+          <field id="oneCategory">
+            <type>object</type>
+            <object>Test\ItemCategory</object>
+            <objectRelation>nTo1</objectRelation>
+          </field>
+        </fields>
+      </object>
+      <object id="ItemCategory">
+        <label>ItemCategory</label>
+        <table>test_item_category</table>
+        <labelField>name</labelField>
+        <nested>false</nested>
+        <dataModel>propel</dataModel>
+        <multiLanguage>false</multiLanguage>
+        <workspace>true</workspace>
+        <domainDepended>false</domainDepended>
+        <treeFixedIcon>false</treeFixedIcon>
+        <fields>
+          <field id="id" primaryKey="true" autoIncrement="true">
+            <type>number</type>
+          </field>
+          <field id="name">
+            <type>text</type>
+          </field>
+        </fields>
+      </object>
+    </objects>
+  </bundle>
+</config>

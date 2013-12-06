@@ -8,7 +8,7 @@ use Propel\Runtime\ActiveQuery\Criteria;
 use Kryn\CmsBundle\File\FileInfoInterface;
 use Propel\Runtime\Map\TableMap;
 
-class File extends BaseFile
+class File extends BaseFile implements FileInfoInterface
 {
     use FileInfoTrait;
 

@@ -157,7 +157,7 @@ class Model implements \ArrayAccess
      * @param \DOMElement|array|string $values
      * @param Core                     $krynCore
      */
-    public function __construct($values = null, Core $krynCore)
+    public function __construct($values = null, Core $krynCore = null)
     {
         $this->initialize($values, $krynCore);
     }
@@ -167,6 +167,10 @@ class Model implements \ArrayAccess
         if (null === $this->rootName) {
             $array = explode('\\', get_called_class());
             $this->rootName = lcfirst(array_pop($array));
+        }
+
+        if (!$krynCore) {
+            $krynCore = static::$serialisationKrynCore;
         }
 
         if ($krynCore) {
@@ -370,7 +374,7 @@ class Model implements \ArrayAccess
             $setter = 'set' . ucfirst($nodeName);
             if (is_callable(array($this, $setter))) {
                 $this->$setter($value);
-            } else if (!$this->$nodeName) {
+            } else if (!isset($this->$nodeName)) {
                 $this->additionalAttributes[$nodeName] = $value;
             }
 
@@ -719,7 +723,7 @@ class Model implements \ArrayAccess
         } else if (is_scalar($value) || null === $value) {
             $value = is_bool($value) ? $value?'true':'false' : (string)$value;
             if ($arrayType) {
-                $element = $doc->createElement($this->arrayIndexNames[$arrayType] ?: 'item');
+                $element = $doc->createElement(@$this->arrayIndexNames[$arrayType] ?: 'item');
                 if (!is_integer($key)) {
                     $element->setAttribute('key', (string)$key);
                 }
@@ -773,7 +777,7 @@ class Model implements \ArrayAccess
         $result = array();
 
         $reflection = new \ReflectionClass($this);
-        $blacklist = array('config', 'element');
+        $blacklist = array('config', 'element', 'krynCore');
 
         foreach ($reflection->getProperties() as $property) {
             $k = $property->getName();

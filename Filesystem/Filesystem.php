@@ -13,7 +13,7 @@ use Propel\Runtime\Map\TableMap;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\Finder\Finder;
 
-class Filesystem
+class Filesystem implements FilesystemInterface
 {
 
     /**
@@ -205,11 +205,27 @@ class Filesystem
      * @param string $content
      * @return boolean
      */
-    public function write($path, $content)
+    public function write($path, $content = '')
     {
         $fs = $this->getAdapter($path);
 
         return $fs->write($this->normalizePath($path), $content);
+    }
+
+    /**
+     * Returns the file count inside $folderPath
+     *
+     * @static
+     *
+     * @param  string $folderPath
+     *
+     * @return mixed
+     */
+    public function getCount($folderPath)
+    {
+        $fs = $this->getAdapter($folderPath);
+
+        return $fs->getCount(static::normalizePath($folderPath));
     }
 
     /**

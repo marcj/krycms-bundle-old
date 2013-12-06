@@ -238,7 +238,7 @@ ka.entrypoint = {
 
         var path = [], config, notFound = false, item;
 
-        config = ka.settings.configs[extension];
+        config = ka.getConfig(extension);
 
         if (!config) {
             throw 'Config not found for module ' + extension;
@@ -949,6 +949,7 @@ ka.loadSettings = function (keyLimitation, cb) {
 }
 
 ka.getConfig = function(bundleName) {
+    if (!bundleName) return;
     return ka.settings.configs[bundleName]
         || ka.settings.configs[bundleName.toLowerCase()]
         || ka.settings.configsAlias[bundleName]
@@ -1281,8 +1282,8 @@ ka.getObjectDefinition = function (pObjectKey) {
     var module = ("" + pObjectKey.split(':')[0]).toLowerCase();
     var name = pObjectKey.split(':')[1].toLowerCase();
 
-    if (ka.settings.configs[module] && ka.settings.configs[module]['objects'][name]) {
-        var config = ka.settings.configs[module]['objects'][name];
+    if (ka.getConfig(module) && ka.getConfig(module)['objects'][name]) {
+        var config = ka.getConfig(module)['objects'][name];
         config._key = pObjectKey;
         return config;
     }

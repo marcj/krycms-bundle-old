@@ -16,6 +16,7 @@ use Kryn\CmsBundle\Model\Session;
 use Kryn\CmsBundle\Model\User;
 use Kryn\CmsBundle\Model\UserGroup;
 use Kryn\CmsBundle\Model\UserQuery;
+use Symfony\Component\HttpFoundation\Cookie;
 
 /**
  * Client class.
@@ -198,14 +199,14 @@ abstract class ClientAbstract
         $this->getSession()->setRefreshed($this->session->getRefreshed() + 1);
         $this->getSession()->setPage(substr($this->getKrynCore()->getRequest()->getRequestUri(), 0, 255));
 
-        setCookie(
+        $cookie = new Cookie(
             $this->getTokenId(),
             $this->getToken(),
             time() + $this->config['timeout'],
             $this->config['cookiePath'],
             $this->config['cookieDomain']
         );
-
+        $this->getKrynCore()->getPageResponse()->headers->setCookie($cookie);
     }
 
     /**
@@ -213,6 +214,7 @@ abstract class ClientAbstract
      */
     public function handleClientLoginLogout()
     {
+        //todo
         if (getArgv($this->config['loginTrigger'])) {
 
             $login = getArgv('username');
@@ -464,15 +466,14 @@ abstract class ClientAbstract
 
                 $this->setToken($session->getId());
 
-                if (php_sapi_name() !== 'cli') {
-                    setCookie(
-                        $this->tokenId,
-                        $this->token,
-                        time() + $this->config['timeout'],
-                        $this->config['cookiePath'],
-                        $this->config['cookieDomain']
-                    );
-                }
+                $cookie = new Cookie(
+                    $this->tokenId,
+                    $this->token,
+                    time() + $this->config['timeout'],
+                    $this->config['cookiePath'],
+                    $this->config['cookieDomain']
+                );
+                $this->getKrynCore()->getPageResponse()->headers->setCookie($cookie);
 
 //                \Core\Utils::$latency['session'][] = microtime(true) - $time;
                 return $session;
@@ -514,12 +515,12 @@ abstract class ClientAbstract
         $session = new Session();
         $session->setId($id)
             ->setTime(time())
-            ->setPage($this->getKrynCore()->getRequest()->getRequestUri())
+            ->setPage($this->getKrynCore()->getRequest() ? $this->getKrynCore()->getRequest()->getRequestUri() : '')
             ->setRefreshed(0)
-            ->setUseragent($_SERVER['HTTP_USER_AGENT']);
+            ->setUseragent(@$_SERVER['HTTP_USER_AGENT']);
 
         //in some countries it's not allowed to store the IP per default
-        if (!isset($this->config['noIPStorage'])) {
+        if (!isset($this->config['noIPStorage']) && $this->getKrynCore()->getRequest()) {
             $session->setIp($this->getKrynCore()->getRequest()->getClientIp());
         }
 
@@ -679,6 +680,10 @@ abstract class ClientAbstract
      */
     public function getClientToken()
     {
+        if ($this->getKrynCore()->getRequest() && $value = $this->getKrynCore()->getRequest()->cookies->get($this->tokenId)) {
+            return $value;
+        }
+
         if (isset($_COOKIE[$this->tokenId])) {
             return $_COOKIE[$this->tokenId];
         }

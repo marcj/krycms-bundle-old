@@ -90,8 +90,8 @@ ka.Field = new Class({
                 throw 'Object `%s` not found'.sprintf(this.field.object);
             }
 
-            if (!(field = definition.fields[this.field.field.lcfirst()])) {
-                throw 'Field `%s` in object `%s` not found'.sprintf(this.field.field, this.field.object);
+            if (!(field = definition.fields[pDefinition.field.lcfirst()])) {
+                throw 'Field `%s` in object `%s` not found'.sprintf(pDefinition.field, this.field.object);
             }
 
             delete this.field.type;
