@@ -38,7 +38,6 @@
         "kryncms\/demotheme-bundle": ">=0.0.1",
         "kryncms\/publication-bundle": ">=0.0.1"
     },
-
     "require-dev": {
         "phpunit\/phpunit": "3.7.*"
     }

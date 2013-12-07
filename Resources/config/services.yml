@@ -65,6 +65,7 @@ services:
          class: %kryn.configuration.database.class%
          calls:
             - [addConnection, ["@kryn.configuration.database.connection.main"]]
+            - [setPrefix, ["%database_table_prefix%"]]
 
      kryn.configuration.database.connection.main:
          class: %kryn.configuration.database.connection.main.class%
