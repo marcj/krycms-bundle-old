@@ -1004,9 +1004,7 @@ class Propel extends ORMAbstract
 
         $stmt = $this->getStm($query, $condition);
 
-        $row = dbFetch($stmt);
-
-        dbFree($stmt);
+        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
 
         return current($row) + 0;
 
@@ -1136,7 +1134,7 @@ class Propel extends ORMAbstract
             throw new \Exception('Entry it not in a tree. ' . var_export($pk, true));
         }
 
-        list($fields, $relations, $relationFields) = $this->getFields($options['fields']);
+        list($fields, $relations, $relationFields) = $this->getFields(@$options['fields']);
         $selects = array_keys($fields);
 
         $selects[] = 'Lft';
@@ -1167,7 +1165,7 @@ class Propel extends ORMAbstract
         }
         $item = false;
 
-        while ($row = dbFetch($stmt)) {
+        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
 
             //propels nested set requires a own root item, we do not return this
             if (false === $item) {
@@ -1220,7 +1218,7 @@ class Propel extends ORMAbstract
         $stmt = $this->getStm($query);
         $clazz = $this->getPhpName();
 
-        $row = dbFetch($stmt);
+        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
         $item = $this->populateRow($clazz, $row, $selects, $relations, $relationFields, $options['permissionCheck']);
 
         return $item;
