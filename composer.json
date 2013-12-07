@@ -35,8 +35,8 @@
         "sybio/image-workshop": ">=2",
         "michelf/php-markdown": ">=1.3",
         "composer\/composer": "*",
-        "kryncms\/demotheme-bundle": ">=0.0.1",
-        "kryncms\/publication-bundle": ">=0.0.1"
+        "kryncms\/demotheme-bundle": "*",
+        "kryncms\/publication-bundle": "*"
     },
     "require-dev": {
         "phpunit\/phpunit": "3.7.*"
