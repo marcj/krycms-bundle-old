@@ -288,6 +288,7 @@ This is the bundle $bundleClassName.
                 $bundleInfo = [
                     'class' => $bundle,
                     'package' => $package,
+                    'path' => $reflection->getFileName(),
                     'active' => $this->getKrynCore()->isActiveBundle($bundle)
                 ];
                 $bundles[] = $bundleInfo;
@@ -315,6 +316,7 @@ This is the bundle $bundleClassName.
                 ->name('*Bundle.php')
                 ->notPath('/Tests/')
                 ->notPath('/Test/')
+                ->notPath('Kryn/CmsBundle/vendor')
                 ->in($this->getKernel()->getRootDir() . '/../' . $path);
 
             /** @var \Symfony\Component\Finder\SplFileInfo $file */
@@ -376,6 +378,7 @@ This is the bundle $bundleClassName.
             ->files()
             ->name('*Bundle.php')
             ->notPath('/Tests/')
+            ->notPath('Kryn/CmsBundle/vendor')
             ->notPath('/Test/');
 
         if (file_exists($root . '/../vendor')) {
