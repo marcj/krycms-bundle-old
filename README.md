@@ -1,7 +1,7 @@
 Kryn.cms - A full-featured CMS bundle for the Symfony framework
 ========
 
-A enterprise and high-speed open-source Content-Management-System (CMS) based on the Symfony framework with a full RESTful API,
+An enterprise and high-speed open-source Content-Management-System (CMS) based on the Symfony framework with a full RESTful API,
 a user friendly administration interface and rapid application development (RAD) framework using Composer, Propel and
 other rock-solid libraries.
 
