@@ -1,6 +1,6 @@
 {
     "name": "kryncms\/kryncms-bundle",
-    "description": "A open-source enterprise Content-Management-System CMS and Content-Management-Framework CMF based on Propel and Symfony components.",
+    "description": "An enterprise open-source Content-Management-System CMS as Symfony Bundle.",
     "keywords": [
         "CMS",
         "PHP CMS",
