@@ -30,6 +30,8 @@ parameters:
 
      kryn.configuration.database.connection.main.class: Kryn\CmsBundle\Configuration\Connection
 
+     database_table_prefix: kryn_
+
 services:
      kryn.cms:
          class: %kryn.core.class%
