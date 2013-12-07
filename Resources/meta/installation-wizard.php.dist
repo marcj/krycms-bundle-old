@@ -299,7 +299,7 @@ function checkConfig()
 
     $configFile = realpath($kernel->getRootDir().'/..') .'/app/config/config.kryn.xml';
     if ((file_exists($configFile) && !is_writable($configFile))
-        || !file_exists($configFile) && !is_writable($configFile)
+        || !file_exists($configFile) && !is_writable(dirname($configFile))
     ) {
         $res['res'] = false;
         $res['error'] = $configFile. ' is not writable.';
@@ -364,7 +364,7 @@ function checkConfig()
         $filePermission->setGroupOwner(@$_REQUEST['fileGroupName']);
 
         $root = realpath($kernel->getRootDir().'/..');
-        if (!$krynCore->getSystemConfig()->save($root . '/app/config/config.xml', true)) {
+        if (!$krynCore->getSystemConfig()->save($root . '/app/config/config.kryn.xml', true)) {
             $res['error'] = 'Can not open file app/config/config.xml - please change the permissions.';
             $res['res'] = false;
         }
@@ -563,6 +563,8 @@ function step5_5()
 
 function step5Init()
 {
+    global $krynCore;
+
     $subStep = @$_GET['substep'] + 0;
 
     if ($subStep == 0 && @$_REQUEST['modules']) {
@@ -572,6 +574,16 @@ function step5Init()
             $appModifier->addBundle($bundleClass);
         }
         $appModifier->save();
+    }
+
+    if ($subStep == 0) {
+        $fs = $krynCore->getCacheFileSystem();
+        if ($fs->has('propel-classes')) {
+            $fs->delete('propel-classes');
+        }
+        if ($fs->has('propel')) {
+            $fs->delete('propel');
+        }
     }
 
     if ($subStep > 0) {
