@@ -186,63 +186,6 @@ class SystemConfigTest extends KernelAwareTestCase
         $this->assertEquals($xml, $reverse->toXml());
     }
 
-    public function testSystemConfigErrors()
-    {
-        $xml = '<config>
-  <!--error handling-->
-  <errors>
-    <!--If the system should print error messages to the client. DEACTIVATE THIS IN PRODUCTIVE SYSTEMS!-->
-    <display>true</display>
-    <!--If the system should print error message from the RESTful JSON API to the client. DEACTIVATE THIS IN PRODUCTIVE SYSTEMS!-->
-    <displayRest>true</displayRest>
-    <!--
-    If the system should print a prettified stackTrace with codeHighlighting in the error message.
-    This included the stackTrace in the RESTful JSON API (displayRest).
-    -->
-    <stackTrace>true</stackTrace>
-  </errors>
-</config>';
-
-        $config = new SystemConfig();
-        $errors = new Errors();
-        $config->setErrors($errors);
-        $errors->setDisplay(true);
-        $errors->setDisplayRest(true);
-        $errors->setRestDebug(true);
-
-        $this->assertEquals($xml, $config->toXml());
-
-        $reverse = new SystemConfig($xml);
-        $this->assertTrue($config->getErrors()->getDisplay());
-        $this->assertTrue($config->getErrors()->getDisplayRest());
-        $this->assertTrue($config->getErrors()->getRestDebug());
-        $this->assertFalse($config->getErrors()->getLog());
-        $this->assertEquals($xml, $reverse->toXml());
-    }
-
-    public function testSystemConfigBundles()
-    {
-        $xml = '<config>
-  <!--
-    A list of installed bundles. Enter here the PHP FQDN (Will be resolved through PSR-0 and then loaded)
-
-    Example:
-        <bundle>Publication\PublicationBundle</bundle>
-    -->
-  <bundles>
-    <bundle>Publication\PublicationBundle</bundle>
-    <bundle>KrynDemoThemeBundle</bundle>
-  </bundles>
-</config>';
-        $config = new SystemConfig();
-        $config->setBundles(array('Publication\PublicationBundle', 'KrynDemoThemeBundle'));
-        $this->assertEquals($xml, $config->toXml());
-
-        $reverse = new SystemConfig($xml);
-        $this->assertEquals(array('Publication\PublicationBundle', 'KrynDemoThemeBundle'), $reverse->getBundles());
-        $this->assertEquals($xml, $reverse->toXml());
-    }
-
     public function testSystemConfigClient()
     {
 
@@ -316,22 +259,14 @@ class SystemConfigTest extends KernelAwareTestCase
         $client->setOption('emailLogin', true);
 
         $sessionStorage = new SessionStorage();
-        $sessionStorage->setClass('database');
+        $sessionStorage->setClass('Kryn\CmsBundle\Client\StoreDatabase');
         $client->setSessionStorage($sessionStorage);
-
-        $errors = new Errors();
-        $errors->setDisplay(true);
-        $errors->setLog(true);
-        $errors->setDisplayRest(true);
-        $errors->setRestDebug(true);
 
         $config->setSystemTitle('Fresh Installation');
         $config->setTimezone('Europe/Berlin');
-        $config->setBundles(array('Publication\PublicationBundle', 'KrynDemoThemeBundle'));
 
         $config->setDatabase($database);
         $config->setFile($file);
-        $config->setErrors($errors);
         $config->setCache($cache);
         $config->setClient($client);
 
@@ -359,16 +294,9 @@ class SystemConfigTest extends KernelAwareTestCase
         $this->assertEquals('Kryn\CmsBundle\Client\KrynUsers', $reverse->getClient()->getClass());
         $this->assertEquals('true', $reverse->getClient()->getOption('emailLogin'));
 
-        $this->assertEquals('database', $reverse->getClient()->getSessionStorage()->getClass());
-
-        $this->assertTrue($reverse->getErrors()->getDisplay());
-        $this->assertTrue($reverse->getErrors()->getLog());
-        $this->assertTrue($reverse->getErrors()->getDisplayRest());
-        $this->assertTrue($reverse->getErrors()->getRestDebug());
-
+        $this->assertEquals('Kryn\CmsBundle\Client\StoreDatabase', $reverse->getClient()->getSessionStorage()->getClass());
         $this->assertEquals('Fresh Installation', $reverse->getSystemTitle());
         $this->assertEquals('Europe/Berlin', $reverse->getTimezone());
-        $this->assertEquals(array('Publication\PublicationBundle', 'KrynDemoThemeBundle'), $reverse->getBundles());
     }
 
 }

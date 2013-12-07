@@ -112,8 +112,6 @@ class Core extends Controller
             if (!@mkdir($bundles)) {
                 die(sprintf('Can not create `%s` directory. Please check permissions.', getcwd() . '/' . $bundles));
             }
-
-            chmod('vendor/google/closure-compiler/compiler.jar', 0644);
         }
 
         foreach ($this->getBundles() as $bundle) {

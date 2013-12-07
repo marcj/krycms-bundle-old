@@ -48,15 +48,6 @@
     <class>Kryn\CmsBundle\Cache\Files</class>
     <options/>
   </cache>
-  <!--error handling-->
-  <errors>
-    <!--If the system should log messages.-->
-    <log>true</log>
-    <!--
-    This includes file name, line number and backstrace in the RESTful JSON API on errors/exceptions.
-    -->
-    <restDebug>true</restDebug>
-  </errors>
   <!--Log handling. ClientInfo and stackTrace start with level >= ERROR (400) or level=Debug(100).
         deactivate: Deactivates the internal log handler. Does not affect the additional log handler.
         stackTrace: If the system should include the php stackTrace to each log entry. DEACTIVATE THIS IN PRODUCTIVE SYSTEMS!
@@ -82,7 +73,7 @@
         class: The full classname of the storage. MUST have `Core\Cache\CacheInterface` as interface.
         Define `database` for the database storage.
     -->
-    <sessionStorage class="database">
+    <sessionStorage class="Kryn\CmsBundle\Client\StoreDatabase">
       <options></options>
     </sessionStorage>
   </client>

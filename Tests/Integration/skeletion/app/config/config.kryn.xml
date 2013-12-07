@@ -1,12 +1,12 @@
 <config>
   <!--A installation id. If you have several kryn instances you should define a unique one. Gets defines through the installer.-->
-  <id>67e7</id>
+  <id></id>
   <!--The system title of this installation.-->
-  <systemTitle>Fresh installation</systemTitle>
+  <systemTitle>Fresh Installation</systemTitle>
   <!--Defines under which url the backend is. Default is http://<domain>/kryn. where `kryn` is the `adminUrl`.-->
-  <adminUrl>kryn</adminUrl>
-  <!--A directory path where the system stores temp files. Relative to web root. E.g `app/cache/` or `/tmp/`.-->
-  <tempDir>app/cache</tempDir>
+  <adminUrl>/kryn/</adminUrl>
+  <!--Comma separated list of supported languages. (systemwide)-->
+  <languages>en</languages>
   <!--Is displayed as the administrator's email in error messages etc.-->
   <email></email>
   <!--
@@ -17,17 +17,6 @@
   <!--This is a key generated through the installation process. You should not change it!
     The system needs this key to decrypt the passwords in the users database.-->
   <passwordHashKey></passwordHashKey>
-  <!--
-    A list of installed bundles. Enter here the PHP FQDN (Will be resolved through PSR-0 and then loaded)
-
-    Example:
-        <bundle>Publication\PublicationBundle</bundle>
-    -->
-  <bundles>
-    <bundle>KrynDemoThemeBundle</bundle>
-    <bundle>Publication\PublicationBundle</bundle>
-    <bundle>Test\TestBundle</bundle>
-  </bundles>
   <database>
     <!--All tables will be prefixed with this string. Best practise is to suffix it with a underscore.
     Examples: dev_, domain_ or prod_-->
@@ -37,10 +26,12 @@
         type: mysql|pgsql|sqlite (the pdo driver name)
         persistent: true|false (if the connection should be persistent)
         slave: true|false (if the connection is a slave or not (readonly or not))
+        charset: 'utf8'
       -->
-      <connection type="mysql" persistent="false" slave="false">
+      <connection type="mysql" persistent="false" charset="utf8" slave="false">
         <!--Can be a IP or a hostname. For SQLite enter here the path to the file.-->
         <server>127.0.0.1</server>
+        <port></port>
         <!--The schema/database name-->
         <name>test</name>
         <username>root</username>
@@ -57,20 +48,15 @@
     <class>Kryn\CmsBundle\Cache\Files</class>
     <options/>
   </cache>
-  <!--error handling-->
-  <errors>
-    <!--If the system should print error messages to the client. DEACTIVATE THIS IN PRODUCTIVE SYSTEMS!-->
-    <display>true</display>
-    <!--If the system should log messages.-->
-    <log>true</log>
-    <!--If the system should print error message from the RESTful JSON API to the client. DEACTIVATE THIS IN PRODUCTIVE SYSTEMS!-->
-    <displayRest>true</displayRest>
-    <!--
-    If the system should print a prettified stackTrace with codeHighlighting in the error message.
-    This included the stackTrace in the RESTful JSON API (displayRest).
+  <!--Log handling. ClientInfo and stackTrace start with level >= ERROR (400) or level=Debug(100).
+        deactivate: Deactivates the internal log handler. Does not affect the additional log handler.
+        stackTrace: If the system should include the php stackTrace to each log entry. DEACTIVATE THIS IN PRODUCTIVE SYSTEMS!
+        performance: If the system should include the memory usage, duration for each log entry. Is only for Debug(100) logs handled. DEACTIVATE THIS IN PRODUCTIVE SYSTEMS!
+        events: If the system should log all fired events. DEACTIVATE THIS IN PRODUCTIVE SYSTEMS!
     -->
-    <stackTrace>true</stackTrace>
-  </errors>
+  <logs deactivate="false" clientInfo="false" performance="false" events="false">
+    <stackTrace>false</stackTrace>
+  </logs>
   <!--The client session/authorisation/authentication handling.
   Attributes: (default)
     autoStart: true|false (false) If the systems starts always a session for each request and therefore sends for each
@@ -78,10 +64,17 @@
   -->
   <client autoStart="false">
     <class>Kryn\CmsBundle\Client\KrynUsers</class>
-    <options/>
-    <!--A class that handles the actual data storage.-->
-    <sessionStorage>
-      <options/>
+    <options>
+      <option key="emailLogin">true</option>
+    </options>
+    <!--
+        A class that handles the actual data storage.
+
+        class: The full classname of the storage. MUST have `Core\Cache\CacheInterface` as interface.
+        Define `database` for the database storage.
+    -->
+    <sessionStorage class="Kryn\CmsBundle\Client\StoreDatabase">
+      <options></options>
     </sessionStorage>
   </client>
   <mountPoints/>
@@ -94,6 +87,6 @@
     -->
   <file groupPermission="rw" everyonePermission="r" disableModeChange="false">
     <!--The group owner name-->
-    <groupOwner></groupOwner>
+    <groupOwner>www-data</groupOwner>
   </file>
 </config>

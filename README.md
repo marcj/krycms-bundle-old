@@ -17,7 +17,7 @@ This describes the customized installation, usually used by developers.
 
 A end-user zip package can be downloaded at http://kryn.org when we've released the first alpha version
 
-Read the [installation documentation](https://raw.github.com/kryncms/KrynCmsBundle/blob/master/Resources/doc/installation.md).
+Read the [installation documentation](https://github.com/kryncms/KrynCmsBundle/blob/master/Resources/doc/installation.md).
 
 Requirements
 ------------

@@ -7,8 +7,6 @@
   <adminUrl>/kryn/</adminUrl>
   <!--Comma separated list of supported languages. (systemwide)-->
   <languages>en</languages>
-  <!--A directory path where the system stores temp files. Relative to web root. E.g `app/cache/` or `/tmp/`.-->
-  <tempDir>app/cache</tempDir>
   <!--Is displayed as the administrator's email in error messages etc.-->
   <email></email>
   <!--
@@ -19,16 +17,6 @@
   <!--This is a key generated through the installation process. You should not change it!
     The system needs this key to decrypt the passwords in the users database.-->
   <passwordHashKey></passwordHashKey>
-  <!--
-    A list of installed bundles. Enter here the PHP FQDN (Will be resolved through PSR-0 and then loaded)
-
-    Example:
-        <bundle>Publication\PublicationBundle</bundle>
-    -->
-  <bundles>
-    <bundle>Publication\PublicationBundle</bundle>
-    <bundle>KrynDemoThemeBundle</bundle>
-  </bundles>
   <database>
     <!--All tables will be prefixed with this string. Best practise is to suffix it with a underscore.
     Examples: dev_, domain_ or prod_-->
@@ -60,20 +48,6 @@
     <class>Kryn\CmsBundle\Cache\Files</class>
     <options/>
   </cache>
-  <!--error handling-->
-  <errors>
-    <!--If the system should print error messages to the client. DEACTIVATE THIS IN PRODUCTIVE SYSTEMS!-->
-    <display>true</display>
-    <!--If the system should log messages.-->
-    <log>true</log>
-    <!--If the system should print error message from the RESTful JSON API to the client. DEACTIVATE THIS IN PRODUCTIVE SYSTEMS!-->
-    <displayRest>true</displayRest>
-    <!--
-    If the system should print a prettified stackTrace with codeHighlighting in the error message.
-    This included the stackTrace in the RESTful JSON API (displayRest).
-    -->
-    <stackTrace>true</stackTrace>
-  </errors>
   <!--Log handling. ClientInfo and stackTrace start with level >= ERROR (400) or level=Debug(100).
         deactivate: Deactivates the internal log handler. Does not affect the additional log handler.
         stackTrace: If the system should include the php stackTrace to each log entry. DEACTIVATE THIS IN PRODUCTIVE SYSTEMS!
@@ -99,7 +73,7 @@
         class: The full classname of the storage. MUST have `Core\Cache\CacheInterface` as interface.
         Define `database` for the database storage.
     -->
-    <sessionStorage class="database">
+    <sessionStorage class="Kryn\CmsBundle\Client\StoreDatabase">
       <options></options>
     </sessionStorage>
   </client>
