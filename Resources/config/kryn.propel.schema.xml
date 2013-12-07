@@ -153,12 +153,12 @@
     <table name="system_log" phpName="Log" idMethod="native">
         <column name="id" type="INTEGER" primaryKey="true" autoIncrement="true" required="true"/>
         <column name="request_id" type="VARCHAR" size="64" required="false"/>
-        <column name="username" type="VARCHAR" size="64" required="false"/>
+        <!--<column name="username" type="VARCHAR" size="64" required="false"/>-->
         <column name="date" type="DOUBLE" required="false"/>
         <column name="level" type="VARCHAR" required="false"/>
-        <column name="context" type="VARCHAR" required="false"/>
-        <column name="stack_trace" type="LONGVARCHAR" required="false"/>
-        <column name="performance" type="VARCHAR" required="false"/>
+        <!--<column name="context" type="VARCHAR" required="false"/>-->
+        <!--<column name="stack_trace" type="LONGVARCHAR" required="false"/>-->
+        <!--<column name="performance" type="VARCHAR" required="false"/>-->
         <column name="message" type="LONGVARCHAR" required="false"/>
         <foreign-key foreignTable="system_log_request">
             <reference foreign="id" local="request_id"/>
@@ -171,13 +171,10 @@
         <column name="id" type="VARCHAR" size="64" primaryKey="true"/>
         <column name="date" type="DOUBLE" required="false"/>
         <column name="username" type="VARCHAR" size="64" required="false"/>
+        <column name="path" type="VARCHAR" size="255" required="false"/>
         <column name="ip" type="VARCHAR" size="32" required="false"/>
-        <column name="request_information" type="BLOB" required="false"/>
-        <column name="response_information" type="BLOB" required="false"/>
-        <column name="exceptions" type="BLOB" required="false"/>
-        <column name="queries" type="BLOB" required="false"/>
-        <column name="cookies" type="LONGVARCHAR" required="false"/>
-        <column name="orm" type="LONGVARCHAR" required="false"/>
+        <column name="counts" type="LONGVARCHAR" required="false"/>
+        <column name="profile_token" type="VARCHAR" size="32" required="false"/>
         <vendor type="mysql">
             <parameter name="Charset" value="utf8"/>
         </vendor>

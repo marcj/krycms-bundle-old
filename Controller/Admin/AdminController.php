@@ -92,9 +92,10 @@ class AdminController extends Controller
     }
 
     /**
-     * @Route("/{url}", requirements={"url" = ".+"})
+     * @Route("{url}", requirements={"url" = ".*"})
+     * @Route("")
      */
-    public function mainAction($url)
+    public function mainAction($url = '/')
     {
         @header('Expires:');
 
@@ -120,7 +121,11 @@ class AdminController extends Controller
 //            $url .= '/'; //substr($url, 0, -1);
 //        }
 
-        $url = substr($url, strlen($this->getKrynCore()->getSystemConfig()->getAdminUrl()) - 1) ?: '/';
+        if ($adminUrl = $this->getKrynCore()->getSystemConfig()->getAdminUrl()) {
+            if (0 === strpos($url, $adminUrl)) {
+                $url = substr($url, strlen($adminUrl) - 1) ?: '/';
+            }
+        }
 
         $getArgv = function ($id) use ($url) {
             $exploded = explode('/', $url);
@@ -158,25 +163,6 @@ class AdminController extends Controller
                 $epc->setClient($symfonyClient);
                 $epc->getClient()->setUrl($url);
                 return $epc->run();
-            } elseif ($entryPoint->getType() == 'store') {
-//                $clazz = $entryPoint['class'];
-//                if (!$clazz) {
-//                    throw new ClassNotFoundException(sprintf(
-//                        'The property `class` is not defined in entry point `%s`',
-//                        $entryPoint['_url']
-//                    ));
-//                }
-//                if (!class_exists($clazz)) {
-//                    throw new ClassNotFoundException(sprintf(
-//                        'The class `%s` does not exist in entry point `%s`',
-//                        $clazz,
-//                        $entryPoint['_url']
-//                    ));
-//                }
-//
-//                $obj = new $clazz($entryPoint['_url']);
-//                $obj->setEntryPoint($entryPoint);
-//                return $obj->run();
             }
         }
 
@@ -329,9 +315,7 @@ class AdminController extends Controller
                 ->done()
 
                 //admin/system
-                ->addSubController('system', 'Kryn\CmsBundle\Controller\Admin\System')
-
-                    ->addGetRoute('', 'getSystemInformation')
+                ->addSubController('system')
 
                     ->addSubController('config', 'Kryn\CmsBundle\Controller\Admin\Config')
                         ->addGetRoute('', 'getConfig')
@@ -375,8 +359,8 @@ class AdminController extends Controller
 
                     //admin/system/orm
                     ->addSubController('tools', 'Kryn\CmsBundle\Controller\Admin\Tools')
-                        ->addGetRoute('request', 'getRequest')
                         ->addGetRoute('logs', 'getLogs')
+                        ->addGetRoute('requests', 'getLogRequests')
                         ->addDeleteRoute('logs', 'clearLogs')
                     ->done()
 

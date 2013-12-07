@@ -69,5 +69,7 @@ class DemoDataCommand extends AbstractCommand
                 }
             }
         }
+
+        $this->getKrynCore()->invalidateCache('/');
     }
 }

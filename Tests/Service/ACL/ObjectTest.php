@@ -122,6 +122,7 @@ class ObjectTest extends KernelAwareTestCase
 
 
         $subNode->delete();
+        $subNode2->delete();
         $rule->delete();
         $rule2->delete();
         $this->getACL()->setCaching(true);

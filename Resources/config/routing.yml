@@ -3,5 +3,6 @@ kryn_cms_admin_login:
     type:     annotation
 
 kryn_cms_admin:
+    prefix: /kryn
     resource: "@KrynCmsBundle/Controller/Admin/AdminController.php"
     type:     annotation

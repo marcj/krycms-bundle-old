@@ -102,6 +102,11 @@ class Logs extends Model
         return $this->deactivate;
     }
 
+    public function isActive()
+    {
+        return !$this->deactivate;
+    }
+
     /**
      * @param boolean $events
      */

@@ -46,5 +46,7 @@ class BuildCommand extends AbstractCommand
         $propelHelper = new PropelHelper($this->getKrynCore());
 
         echo $propelHelper->generateClasses();
+
+        $propelHelper->cleanup();
     }
 }

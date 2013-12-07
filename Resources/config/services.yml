@@ -14,9 +14,11 @@ parameters:
 
      kryn.pluginResponse.listener.class: Kryn\CmsBundle\EventListener\PluginResponseListener
      kryn.frontendRoutes.listener.class: Kryn\CmsBundle\EventListener\FrontendRouteListener
+     kryn.debugger.subscriber.class: Kryn\CmsBundle\EventListener\DebuggerSubscriber
      kryn.latencyMonitor.subscriber.class: Kryn\CmsBundle\EventListener\LatencyMonitorSubscriber
 
      kryn.page.response.class: Kryn\CmsBundle\PageResponse
+     kryn.logger.handler.class: Kryn\CmsBundle\Logger\KrynHandler
 
      kryn.filesystem.local.class: Kryn\CmsBundle\Filesystem\Filesystem
      kryn.filesystem.cache.class: Kryn\CmsBundle\Filesystem\Filesystem
@@ -123,6 +125,12 @@ services:
         tags:
             - { name: kernel.event_subscriber }
 
+     kryn.debugger.subscriber:
+        class: %kryn.debugger.subscriber.class%
+        arguments: ["@kryn.cms", "@kryn.logger.handler"]
+        tags:
+            - { name: kernel.event_subscriber }
+
      kryn.translator:
         class: %kryn.translator.class%
         arguments: ["@kryn.cms"]
@@ -134,3 +142,7 @@ services:
      kryn.acl:
         class: %kryn.acl.class%
         arguments: ["@kryn.cms", "@kryn.objects"]
+
+     kryn.logger.handler:
+        class: %kryn.logger.handler.class%
+        arguments: ["@kryn.cms"]

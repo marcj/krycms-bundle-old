@@ -29,6 +29,7 @@ class KrynCmsBundle extends Bundle
         $this->additionalLoader->registerNamespaceFallback($this->container->get('kernel')->getCacheDir().'/propel-classes/');
         $this->additionalLoader->register();
 
+        /** @var $krynCore Core */
         $krynCore = $this->container->get('kryn.cms');
 
         /*
@@ -41,6 +42,12 @@ class KrynCmsBundle extends Bundle
         }
 
         $krynCore->prepareWebSymlinks();
+
+        if ($krynCore->getSystemConfig()->getLogs(true)->isActive()) {
+            /** @var $logger \Symfony\Bridge\Monolog\Logger */
+            $logger = $this->container->get('logger');
+            $logger->pushHandler($this->container->get('kryn.logger.handler'));
+        }
     }
 
     /**
