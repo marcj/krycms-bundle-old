@@ -5,6 +5,7 @@ A enterprise and high-speed open-source Content-Management-System (CMS) based on
 a user friendly administration interface and rapid application development (RAD) framework using Composer, Propel and
 other rock-solid libraries.
 
+We're in development. This means, there are still a _lot_ of issues in this product (not even an Alpha) and it's not everything implemented yet.
 
 [![Build Status](https://travis-ci.org/kryncms/KrynCmsBundle.png?branch=master)](https://travis-ci.org/kryncms/KrynCmsBundle)
 
