@@ -81,6 +81,9 @@ It overwrites only options that you provide.
         $path = realpath($this->getApplication()->getKernel()->getRootDir().'/..') . '/app/config/config.kryn.xml';
         $systemConfig->save($path);
 
+        $cache = realpath($this->getApplication()->getKernel()->getRootDir().'/..') . '/app/config/config.kryn.xml.cache.php';
+        @unlink($cache);
+
         $output->writeln(sprintf('File `%s` updated.', $path));
     }
 }

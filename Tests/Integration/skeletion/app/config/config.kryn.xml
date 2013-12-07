@@ -2,7 +2,7 @@
   <!--A installation id. If you have several kryn instances you should define a unique one. Gets defines through the installer.-->
   <id></id>
   <!--The system title of this installation.-->
-  <systemTitle>Fresh Installation</systemTitle>
+  <systemTitle></systemTitle>
   <!--Defines under which url the backend is. Default is http://<domain>/kryn. where `kryn` is the `adminUrl`.-->
   <adminUrl>/kryn/</adminUrl>
   <!--Comma separated list of supported languages. (systemwide)-->
@@ -13,7 +13,7 @@
     IMPORTANT: Set this to your php timezone.
     see: http://www.php.net/manual/en/timezones.php
     -->
-  <timezone>Europe/Berlin</timezone>
+  <timezone></timezone>
   <!--This is a key generated through the installation process. You should not change it!
     The system needs this key to decrypt the passwords in the users database.-->
   <passwordHashKey></passwordHashKey>
@@ -45,7 +45,7 @@
   -->
   <cache>
     <!--The full classname of the storage. MUST have `Core\Cache\CacheInterface` as interface.-->
-    <class>Kryn\CmsBundle\Cache\Files</class>
+    <class>\Kryn\CmsBundle\Cache\Files</class>
     <options/>
   </cache>
   <!--Log handling. ClientInfo and stackTrace start with level >= ERROR (400) or level=Debug(100).
@@ -63,10 +63,8 @@
                                 visitor/request a cookie (if none is delivered).
   -->
   <client autoStart="false">
-    <class>Kryn\CmsBundle\Client\KrynUsers</class>
-    <options>
-      <option key="emailLogin">true</option>
-    </options>
+    <class>\Kryn\CmsBundle\Client\KrynUsers</class>
+    <options/>
     <!--
         A class that handles the actual data storage.
 
@@ -87,6 +85,6 @@
     -->
   <file groupPermission="rw" everyonePermission="r" disableModeChange="false">
     <!--The group owner name-->
-    <groupOwner>www-data</groupOwner>
+    <groupOwner></groupOwner>
   </file>
 </config>

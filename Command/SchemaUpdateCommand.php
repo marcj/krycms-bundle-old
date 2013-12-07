@@ -44,9 +44,7 @@ class SchemaUpdateCommand extends AbstractCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $propelHelper = new PropelHelper($this->getKrynCore());
-
-        echo $propelHelper->updateSchema()."\n";
-
         $propelHelper->cleanup();
+        echo $propelHelper->updateSchema()."\n";
     }
 }

@@ -17,6 +17,3 @@ AnnotationRegistry::registerLoader(array($autoload, 'loadClass'));
 
 $autoload->add('', realpath(__DIR__ . '/../../../'));
 $autoload->add('', realpath(__DIR__ . '/Integration/skeletion/src/'));
-
-$autoload->add('', realpath(__DIR__ . '/Integration/skeletion/app/cache/dev/propel-classes/'));
-$autoload->add('', realpath(__DIR__ . '/Integration/skeletion/app/cache/test/propel-classes/'));

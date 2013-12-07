@@ -44,9 +44,8 @@ class BuildCommand extends AbstractCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $propelHelper = new PropelHelper($this->getKrynCore());
-
+        $propelHelper->cleanup();
         echo $propelHelper->generateClasses();
 
-        $propelHelper->cleanup();
     }
 }
