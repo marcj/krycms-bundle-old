@@ -67,7 +67,7 @@ PHPUnit
 - Preparing the database and models:
 
 ```bash
-  Tests/Integration/skeletion/app/console kryncms:configuration --
+  Tests/Integration/skeletion/app/console kryncms:configuration --help
   Tests/Integration/skeletion/app/console kryncms:models:build
   Tests/Integration/skeletion/app/console kryncms:schema:update
   Tests/Integration/skeletion/app/console kryncms:install:demo localhost /
