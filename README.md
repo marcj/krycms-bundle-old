@@ -50,13 +50,13 @@ Features
 Screenshot
 ----------
 
-![Administration Dashboard](https://raw.github.com/kryncms/KrynCmsBundle/master/documentation/images/admin-dashboard.png)
-![Administration Frontend Edit](https://raw.github.com/kryncms/KrynCmsBundle/master/documentation/images/admin-frontend-edit.png)
-![Administration File manager](https://raw.github.com/kryncms/KrynCmsBundle/master/documentation/images/admin-files-context-image.png)
-![Administration CRUD Framework Window List](https://raw.github.com/kryncms/KrynCmsBundle/master/documentation/images/admin-list.png)
-![Administration CRUD Framework Window](https://raw.github.com/kryncms/KrynCmsBundle/master/documentation/images/admin-users.png)
+![Administration Dashboard](https://raw.github.com/kryncms/KrynCmsBundle/master/Resources/doc/images/admin-dashboard.png)
+![Administration Frontend Edit](https://raw.github.com/kryncms/KrynCmsBundle/master/Resources/doc/images/admin-frontend-edit.png)
+![Administration File manager](https://raw.github.com/kryncms/KrynCmsBundle/master/Resources/doc/images/admin-files-context-image.png)
+![Administration CRUD Framework Window List](https://raw.github.com/kryncms/KrynCmsBundle/master/Resources/doc/images/admin-list.png)
+![Administration CRUD Framework Window](https://raw.github.com/kryncms/KrynCmsBundle/master/Resources/doc/images/admin-users.png)
 
-[More Screenshots](https://github.com/kryncms/KrynCmsBundle/blob/master/documentation/screenshots.markdown)
+[More Screenshots](https://github.com/kryncms/KrynCmsBundle/blob/master/Resources/doc/screenshots.markdown)
 
 More information:
 https://www.facebook.com/kryncms
