@@ -45,7 +45,7 @@
   -->
   <cache>
     <!--The full classname of the storage. MUST have `Core\Cache\CacheInterface` as interface.-->
-    <class>\Kryn\CmsBundle\Cache\Files</class>
+    <class>Kryn\CmsBundle\Cache\Files</class>
     <options/>
   </cache>
   <!--Log handling. ClientInfo and stackTrace start with level >= ERROR (400) or level=Debug(100).
@@ -63,8 +63,10 @@
                                 visitor/request a cookie (if none is delivered).
   -->
   <client autoStart="false">
-    <class>\Kryn\CmsBundle\Client\KrynUsers</class>
-    <options/>
+    <class>Kryn\CmsBundle\Client\KrynUsers</class>
+    <options>
+      <option key="emailLogin">true</option>
+    </options>
     <!--
         A class that handles the actual data storage.
 
@@ -72,7 +74,7 @@
         Define `database` for the database storage.
     -->
     <sessionStorage class="Kryn\CmsBundle\Client\StoreDatabase">
-      <options></options>
+      <options/>
     </sessionStorage>
   </client>
   <mountPoints/>
