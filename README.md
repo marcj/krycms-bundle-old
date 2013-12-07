@@ -6,7 +6,8 @@ a user friendly administration interface and rapid application development (RAD)
 other rock-solid libraries.
 
 
-[![Build Status Travis](https://travis-ci.org/kryncms/kryn.cms.png?branch=master)](https://travis-ci.org/kryncms/Kryn.cms)
+[![Build Status](https://travis-ci.org/kryncms/KrynCmsBundle.png?branch=master)](https://travis-ci.org/kryncms/KrynCmsBundle)
+
 
 Installation
 ------------
