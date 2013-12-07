@@ -330,7 +330,7 @@ class Utils
         $data = array(
             'output' => $output
         );
-        if ($this->getKrynCore()->getSystemConfig()->getErrors()->getStackTrace()) {
+        if ($this->getKrynCore()->getSystemConfig()->getErrors()->getRestDebug()) {
             $exceptions = array();
             self::extractException($exception, $exceptions);
             $data['exceptions'] = $exceptions;

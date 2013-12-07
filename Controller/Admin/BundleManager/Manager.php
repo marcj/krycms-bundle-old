@@ -165,28 +165,20 @@ This is the bundle $bundleClassName.
      * @param bool $reloadConfig
      * @return bool|int
      */
-    public function activate($bundle, $reloadConfig = false)
+    public function activate($bundleClass, $reloadConfig = false)
     {
-        Manager::prepareName($bundle);
+        Manager::prepareName($bundleClass);
 
         $appModifier = new AppKernelModifier();
-        if ($appModifier->addBundle($bundle)) {
-            $appModifier->save();
+        if (class_exists($bundleClass)) {
+            if ($appModifier->addBundle($bundleClass)) {
+                $appModifier->save();
 
-            return true;
+                return true;
+            }
         }
 
         return false;
-    }
-
-    public function getInfo($bundle)
-    {
-        $bundle = Kryn::getBundle($bundle);
-
-        $info = $bundle->getComposer();
-        $info['_installed'] = $bundle->getInstalledInfo();
-
-        return $info;
     }
 
     public function getInstalledInfo($name)
@@ -435,6 +427,7 @@ This is the bundle $bundleClassName.
                     $composer['_installed'] = [];
                 }
                 $composer['activated'] = $this->getKrynCore()->isActiveBundle($name);
+                $composer['krynBundle'] = $this->getKrynCore()->isKrynBundle($name);
                 $res[$bundleClass] = $composer;
             }
         }
@@ -515,6 +508,8 @@ This is the bundle $bundleClassName.
         }
 
         $this->activate($bundle, true);
+
+        $this->firePackageManager($bundle, 'install');
 
         return true;
     }

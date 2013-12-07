@@ -110,7 +110,7 @@ class Core extends Controller
         $bundles = 'web/bundles/';
         if (!is_dir($bundles)) {
             if (!@mkdir($bundles)) {
-                die(sprintf('Can not create `%s` directory. Please check permissions.', getcwd().'/'.$bundles));
+                die(sprintf('Can not create `%s` directory. Please check permissions.', getcwd() . '/' . $bundles));
             }
 
             chmod('vendor/google/closure-compiler/compiler.jar', 0644);
@@ -177,7 +177,7 @@ class Core extends Controller
      *
      * Default is $time is `mark all caches as invalid which are older than CURRENT`.
      *
-     * @param  string  $key
+     * @param  string $key
      * @param  integer $time Unix timestamp. Default is microtime(true). Uses float for ms.
      *
      * @return boolean
@@ -185,13 +185,14 @@ class Core extends Controller
     public function invalidateCache($key, $time = null)
     {
         if ($this->isDebugMode()) {
-            $time = $time ?: microtime(true);
-            $micro = sprintf("%06d",($time - floor($time)) * 1000000);
+            $time = $time ? : microtime(true);
+            $micro = sprintf("%06d", ($time - floor($time)) * 1000000);
             $this->getLogger()->addDebug(
-                sprintf('Invalidate `%s` (from %s)', $key, date('F j, Y, H:i:s.'.$micro, $time)));
+                sprintf('Invalidate `%s` (from %s)', $key, date('F j, Y, H:i:s.' . $micro, $time))
+            );
         }
 
-        return $this->getCache()->invalidate($key, $time ?: microtime(true));
+        return $this->getCache()->invalidate($key, $time ? : microtime(true));
     }
 
     /**
@@ -264,8 +265,8 @@ class Core extends Controller
      * stores extra values at the value, which makes getCache() returning something invalid.
      *
      * @param string $key
-     * @param mixed  $value    Only simple data types. Serialize your value if you have objects/arrays.
-     * @param int    $lifeTime
+     * @param mixed $value Only simple data types. Serialize your value if you have objects/arrays.
+     * @param int $lifeTime
      *
      * @return boolean
      * @static
@@ -331,7 +332,7 @@ class Core extends Controller
             $domainClientConfig = new Client($domainClientConfigXml);
         }
 
-        $domainClientClass = $domainClientConfig->getClass() ?: $defaultClientClass;
+        $domainClientClass = $domainClientConfig->getClass() ? : $defaultClientClass;
 
         return $this->client = new $domainClientClass($this, $domainClientConfig);
     }
@@ -339,7 +340,7 @@ class Core extends Controller
     /**
      * @return SystemConfig
      */
-    public function getSystemConfig()
+    public function getSystemConfig($withCache = true)
     {
         if (null === $this->systemConfig) {
             //$fastestCacheClass = Cache\AbstractCache::getFastestCacheClass();
@@ -347,7 +348,8 @@ class Core extends Controller
 //            $cacheKey = 'core/config/' . $this->getKernel()->getEnvironment();
 
             $configFile = $this->getKernel()->getRootDir() . '/config/config.kryn.xml';
-            $configEnvFile = $this->getKernel()->getRootDir() . '/config/config.kryn_' . $this->getKernel()->getEnvironment() . '.xml';
+            $configEnvFile = $this->getKernel()->getRootDir() . '/config/config.kryn_' . $this->getKernel(
+                )->getEnvironment() . '.xml';
             if (file_exists($configEnvFile)) {
                 $configFile = $configEnvFile;
             }
@@ -367,9 +369,9 @@ class Core extends Controller
 //            $systemConfigCached = $systemConfigCached ? unserialize($systemConfigCached) : ['md5' => 0, 'data' => false];
             Model::$serialisationKrynCore = null;
 
-            if ($systemConfigCached && $cachedSum === $systemConfigHash) {
+            if ($withCache && $systemConfigCached && $cachedSum === $systemConfigHash) {
                 Model::$serialisationKrynCore = $this;
-                $this->systemConfig  = @unserialize($systemConfigCached);
+                $this->systemConfig = @unserialize($systemConfigCached);
                 Model::$serialisationKrynCore = null;
             }
 
@@ -382,7 +384,7 @@ class Core extends Controller
 //                        'data' => $this->systemConfig
 //                    ]);
 //                $fastCache->set($cacheKey, $cached);
-                file_put_contents($cacheFile, $systemConfigHash."\n".serialize($this->systemConfig));
+                file_put_contents($cacheFile, $systemConfigHash . "\n" . serialize($this->systemConfig));
             }
 
             if (!$this->systemConfig->getDatabase()) {
@@ -481,6 +483,7 @@ class Core extends Controller
     public function getTemplating()
     {
         $this->container->get('twig')->addGlobal('baseUrl', $this->getRequest()->getBaseUrl() . '/');
+
         return $this->container->get('templating');
     }
 
@@ -538,8 +541,9 @@ class Core extends Controller
     {
         $bundles = [];
         foreach ($this->getKernel()->getBundles() as $bundleName => $bundle) {
-            $bundles[] = $bundle;
+            $bundles[$bundleName] = $bundle;
         }
+
         return $bundles;
     }
 
@@ -581,6 +585,7 @@ class Core extends Controller
             if ('/' !== substr($path, -1)) {
                 $path .= '/';
             }
+
             return $path;
         }
     }
@@ -594,6 +599,24 @@ class Core extends Controller
     public function isActiveBundle($bundleName)
     {
         return null !== $this->getBundle($bundleName);
+    }
+
+    /**
+     * @param string $bundleName
+     * @return bool
+     */
+    public function isKrynBundle($bundleName)
+    {
+        $root = realpath($this->getKernel()->getRootDir().'/..').'/';
+        $path = $root . $this->getBundleDir($bundleName) . 'Resources/config/';
+        if (file_exists($path . 'kryn.xml')) {
+            return true;
+        }
+
+
+        $files = glob($path . 'kryn.*.xml');
+
+        return count($files) > 0;
     }
 
     /**
@@ -612,7 +635,9 @@ class Core extends Controller
             $nodeOrId = $this->getCurrentPage();
         }
 
-        $domainId = $nodeOrId instanceof Node ? $nodeOrId->getDomainId() : $this->getUtils()->getDomainOfPage($nodeOrId + 0);
+        $domainId = $nodeOrId instanceof Node ? $nodeOrId->getDomainId() : $this->getUtils()->getDomainOfPage(
+            $nodeOrId + 0
+        );
         $currentDomain = $this->getCurrentDomain();
 
         $urls =& $this->getUtils()->getCachedPageToUrl($domainId);
@@ -666,7 +691,7 @@ class Core extends Controller
         $path = preg_replace('/:+/', '/', $path);
         preg_match('/\@?([a-zA-Z0-9\-_\.\\\\]+)/', $path, $matches);
 
-        $root = realpath($this->getKernel()->getRootDir(). '/../');
+        $root = realpath($this->getKernel()->getRootDir() . '/../');
         if ($matches && isset($matches[1])) {
             try {
                 $bundle = $this->getKernel()->getBundle($matches[1]);
@@ -735,6 +760,7 @@ class Core extends Controller
 
             return $targetDir . substr($path, strlen($matches[0]));
         }
+
         return $path;
     }
 

@@ -37,8 +37,8 @@ class DemoDataCommand extends AbstractCommand
         $this
             ->setName('kryncms:install:demo')
             ->setDescription('Installs demo data.')
-            ->addArgument('hostname', InputArgument::REQUIRED, 'The hostname of the domain we should add. Example: 127.0.0.1')
-            ->addArgument('path', InputArgument::REQUIRED, 'The path of the domain we should add. Example: /kryn-1.0/ or just /')
+            ->addArgument('hostname', null, 'The hostname of the domain we should add. Example: 127.0.0.1')
+            ->addArgument('path', null, 'The path of the domain we should add. Example: /kryn-1.0/ or just /')
         ;
     }
 
@@ -54,7 +54,7 @@ class DemoDataCommand extends AbstractCommand
         $packageManager = new $mainPackageManager();
         $packageManager->setDomain($input->getArgument('hostname'));
         $packageManager->setPath($input->getArgument('path'));
-        $packageManager->setContainer( $this->getApplication()->getKernel()->getContainer());
+        $packageManager->setContainer($this->getContainer());
         $packageManager->installDemoData($krynCore);
 
         foreach ($krynCore->getKernel()->getBundles() as $bundle) {
@@ -62,7 +62,7 @@ class DemoDataCommand extends AbstractCommand
             if ($class !== $mainPackageManager && class_exists($class)) {
                 $packageManager = new $class;
                 if ($packageManager instanceof ContainerAwareInterface) {
-                    $packageManager->setContainer( $this->getApplication()->getKernel()->getContainer());
+                    $packageManager->setContainer($this->getContainer());
                 }
                 if (method_exists($packageManager, 'installDemoData')) {
                     $packageManager->installDemoData($krynCore);

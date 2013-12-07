@@ -11,7 +11,7 @@
 namespace Kryn\CmsBundle\Command;
 
 use Propel\Generator\Config\GeneratorConfig;
-use Symfony\Component\Console\Command\Command;
+use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Finder\Finder;
@@ -19,7 +19,7 @@ use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 use Propel\Generator\Exception\RuntimeException;
 
-abstract class AbstractCommand extends Command
+abstract class AbstractCommand extends ContainerAwareCommand
 {
     const DEFAULT_INPUT_DIRECTORY   = '.';
     const DEFAULT_PLATFORM          = 'MysqlPlatform';
@@ -38,6 +38,6 @@ abstract class AbstractCommand extends Command
      */
     protected function getKrynCore()
     {
-        return $this->getApplication()->getKernel()->getContainer()->get('kryn.cms');
+        return $this->getContainer()->get('kryn.cms');
     }
 }

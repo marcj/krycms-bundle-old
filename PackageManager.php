@@ -80,12 +80,14 @@ class PackageManager extends ContainerAware {
         \Kryn\CmsBundle\Model\AppLockQuery::create()->deleteAll();
 
         $domainName = $this->getDomain();
-        if (isset($_GET['domain'])) {
-            $domainName = $_GET['domain'];
-        } else if (isset($_SERVER['HTTP_HOST'])) {
-            $domainName = $_SERVER['HTTP_HOST'];
-        } else if (isset($_SERVER['SERVER_NAME'])) {
-            $domainName = $_SERVER['SERVER_NAME'];
+        if (!$domainName) {
+            if (isset($_GET['domain'])) {
+                $domainName = $_GET['domain'];
+            } else if (isset($_SERVER['HTTP_HOST'])) {
+                $domainName = $_SERVER['HTTP_HOST'];
+            } else if (isset($_SERVER['SERVER_NAME'])) {
+                $domainName = $_SERVER['SERVER_NAME'];
+            }
         }
 
         $domainName = explode(':', $domainName)[0];
@@ -93,15 +95,18 @@ class PackageManager extends ContainerAware {
         $domain = new Domain();
         $domain->setDomain($domainName);
 
-        if (isset($_SERVER['REQUEST_URI'])) {
-            $path = dirname($_SERVER['REQUEST_URI']);
-            if (substr($path, 0, -1) != '/') {
-                $path .= '/';
+        $path = $this->getPath();
+        if ($path) {
+            if (isset($_SERVER['REQUEST_URI'])) {
+                $path = dirname($_SERVER['REQUEST_URI']);
+                if (substr($path, 0, -1) != '/') {
+                    $path .= '/';
+                }
+                $path = str_replace("//", "/", $path);
+                $path = str_replace('\\', '', $path);
+            } else if (isset($_GET['path'])) {
+                $path = $_GET['path'];
             }
-            $path = str_replace("//", "/", $path);
-            $path = str_replace('\\', '', $path);
-        } else {
-            $path = isset($_GET['path']) ? $_GET['path'] : $this->getPath();
         }
 
         $domain->setPath($path);

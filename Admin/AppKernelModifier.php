@@ -117,6 +117,8 @@ class AppKernelModifier
 
     public function save()
     {
+        if (!$this->addBundles && $this->removeBundles) return;
+
         $appKernelPath = new \ReflectionClass('AppKernel');
         $file = $appKernelPath->getFileName();
         $this->script = file_get_contents($file);

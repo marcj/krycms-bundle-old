@@ -165,15 +165,15 @@ var kryncmsbundle_system_development_logs = new Class({
         this.logsRequestCtrlPrevious.setStyle('opacity', 1);
         this.logsRequestCtrlNext.setStyle('opacity', 1);
 
-        if (this.logsCurrentPage == 1) {
+        if (this.logRequestsCurrentPage == 1) {
             this.logsRequestCtrlPrevious.setStyle('opacity', 0.3);
         }
 
-        if (this.logsCurrentPage == this.logsMaxPages) {
+        if (this.logRequestsCurrentPage == this.logRequestsMaxPages) {
             this.logsRequestCtrlNext.setStyle('opacity', 0.3);
         }
 
-        this.logsRequestCtrlText.set('text', this.logsCurrentPage);
+        this.logsRequestCtrlText.set('text', this.logRequestsCurrentPage+'/'+this.logRequestsMaxPages);
     },
 
     reloadLogsItems: function(pAgain) {
@@ -198,7 +198,7 @@ var kryncmsbundle_system_development_logs = new Class({
 
                 var data = response.data;
                 this.logRequestsCurrentPage = pPage;
-                this.logsMaxPages = data.maxPages;
+                this.logRequestsMaxPages = data.maxPages;
                 this.renderLogRequestCtrls();
 
                 this.renderLogRequestItems(data.items);

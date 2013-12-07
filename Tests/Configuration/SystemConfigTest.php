@@ -208,14 +208,14 @@ class SystemConfigTest extends KernelAwareTestCase
         $config->setErrors($errors);
         $errors->setDisplay(true);
         $errors->setDisplayRest(true);
-        $errors->setStackTrace(true);
+        $errors->setRestDebug(true);
 
         $this->assertEquals($xml, $config->toXml());
 
         $reverse = new SystemConfig($xml);
         $this->assertTrue($config->getErrors()->getDisplay());
         $this->assertTrue($config->getErrors()->getDisplayRest());
-        $this->assertTrue($config->getErrors()->getStackTrace());
+        $this->assertTrue($config->getErrors()->getRestDebug());
         $this->assertFalse($config->getErrors()->getLog());
         $this->assertEquals($xml, $reverse->toXml());
     }
@@ -323,7 +323,7 @@ class SystemConfigTest extends KernelAwareTestCase
         $errors->setDisplay(true);
         $errors->setLog(true);
         $errors->setDisplayRest(true);
-        $errors->setStackTrace(true);
+        $errors->setRestDebug(true);
 
         $config->setSystemTitle('Fresh Installation');
         $config->setTimezone('Europe/Berlin');
@@ -364,7 +364,7 @@ class SystemConfigTest extends KernelAwareTestCase
         $this->assertTrue($reverse->getErrors()->getDisplay());
         $this->assertTrue($reverse->getErrors()->getLog());
         $this->assertTrue($reverse->getErrors()->getDisplayRest());
-        $this->assertTrue($reverse->getErrors()->getStackTrace());
+        $this->assertTrue($reverse->getErrors()->getRestDebug());
 
         $this->assertEquals('Fresh Installation', $reverse->getSystemTitle());
         $this->assertEquals('Europe/Berlin', $reverse->getTimezone());

@@ -13,22 +13,11 @@ class SystemConfig extends Model {
     ',
         'systemTitle' => 'The system title of this installation.',
         'languages' => 'Comma separated list of supported languages. (systemwide)',
-        'bundles' => '
-    A list of installed bundles. Enter here the PHP FQDN (Will be resolved through PSR-0 and then loaded)
-
-    Example:
-        <bundle>Publication\PublicationBundle</bundle>
-    ',
         'adminUrl' => 'Defines under which url the backend is. Default is http://<domain>/kryn. where `kryn` is the `adminUrl`.',
         'email' => 'Is displayed as the administrator\'s email in error messages etc.',
-        'tempDir' => 'A directory path where the system stores temp files. Relative to web root. E.g `app/cache/` or `/tmp/`.',
         'id' => 'A installation id. If you have several kryn instances you should define a unique one. Gets defines through the installer.',
         'passwordHashKey' => 'This is a key generated through the installation process. You should not change it!
     The system needs this key to decrypt the passwords in the users database.'
-    ];
-
-    protected $arrayIndexNames = [
-        'bundles' => 'bundle'
     ];
 
     /**
@@ -54,11 +43,6 @@ class SystemConfig extends Model {
     /**
      * @var string
      */
-    protected $tempDir = 'app/cache';
-
-    /**
-     * @var string
-     */
     protected $email;
 
     /**
@@ -71,10 +55,6 @@ class SystemConfig extends Model {
      */
     protected $passwordHashKey;
 
-    /**
-     * @var string[]
-     */
-    protected $bundles;
 
     /**
      * @var Database
@@ -85,11 +65,6 @@ class SystemConfig extends Model {
      * @var Cache
      */
     protected $cache;
-
-    /**
-     * @var Errors
-     */
-    protected $errors;
 
     /**
      * @var Logs
@@ -115,78 +90,9 @@ class SystemConfig extends Model {
     /**
      * {@inheritDocs}
      */
-    public function save($path = 'app/config/config.xml', $withDefaults = true)
+    public function save($path, $withDefaults = true)
     {
         return parent::save($path, $withDefaults);
-    }
-
-    /**
-     * @param string[] $bundles
-     */
-    public function setBundles(array $bundles = null)
-    {
-        $this->bundles = $bundles;
-    }
-
-    /**
-     * @return string[]
-     */
-    public function getBundles()
-    {
-        return $this->bundles;
-    }
-
-    /**
-     * @param string $bundleName
-     */
-    public function removeBundle($bundleName)
-    {
-        if (null !== $this->bundles) {
-            $idx = array_search($bundleName, $this->bundles);
-            if (false !== $idx) {
-                unset($this->bundles[$idx]);
-            }
-        }
-    }
-
-    public function isSystemBundle($bundleName)
-    {
-        $bundleName = strtolower($bundleName);
-        return in_array($bundleName, [
-            'core',
-            'corebundle',
-            'core\corebundle',
-            'admin',
-            'adminbundle',
-            'admin\adminbundle',
-            'users',
-            'usersbundle',
-            'users\usersbundle'
-        ]);
-
-    }
-
-    /**
-     * @param string $bundleName
-     */
-    public function addBundle($bundleName)
-    {
-        if (!$this->isSystemBundle($bundleName) && !in_array($bundleName, $this->bundles)) {
-            $this->bundles[] = $bundleName;
-        }
-    }
-
-    public function getBundlesConfigsHash()
-    {
-        if (null !== $this->bundles) {
-            $hash = '';
-            foreach ($this->bundles as $bundleName) {
-                $bundle = Kryn::getBundle($bundleName);
-                if ($bundle) {
-                    $files = $bundle->getConfigFiles();
-                }
-            }
-        }
     }
 
     /**
@@ -245,27 +151,6 @@ class SystemConfig extends Model {
             $this->client = new Client(null, $this->getKrynCore());
         }
         return $this->client;
-    }
-
-    /**
-     * @param Errors $errors
-     */
-    public function setErrors(Errors $errors = null)
-    {
-        $this->errors = $errors;
-    }
-
-    /**
-     * @param bool $orCreate creates the value of not exists.
-     *
-     * @return Errors
-     */
-    public function getErrors($orCreate = false)
-    {
-        if ($orCreate && null === $this->errors) {
-            $this->errors = new Errors(null, $this->getKrynCore());
-        }
-        return $this->errors;
     }
 
     /**
@@ -378,22 +263,6 @@ class SystemConfig extends Model {
     public function getPasswordHashKey()
     {
         return $this->passwordHashKey;
-    }
-
-    /**
-     * @param string $tempDir
-     */
-    public function setTempDir($tempDir)
-    {
-        $this->tempDir = $tempDir;
-    }
-
-    /**
-     * @return string
-     */
-    public function getTempDir()
-    {
-        return $this->tempDir;
     }
 
     /**

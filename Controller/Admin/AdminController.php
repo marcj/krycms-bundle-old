@@ -99,10 +99,9 @@ class AdminController extends Controller
     {
         @header('Expires:');
 
-        $exceptionHandler = null;
+        $exceptionHandler = array($this, 'exceptionHandler');
         $debugMode = false;
-        if ($this->getKrynCore()->getSystemConfig()->getErrors()->getDisplayRest()) {
-            $exceptionHandler = array($this, 'exceptionHandler');
+        if ($this->getKrynCore()->getKernel()->isDebug()) {
             $debugMode = true;
         }
 

@@ -2,6 +2,7 @@
 
 namespace Kryn\CmsBundle\Configuration;
 
+use Kryn\CmsBundle\Exceptions\FileNotWritableException;
 use Kryn\CmsBundle\Objects;
 use Symfony\Component\HttpKernel\Bundle\BundleInterface;
 
@@ -39,7 +40,7 @@ class Bundle extends Model
     protected $themes;
 
     /**
-     * @var Object[]
+     * @var \Kryn\CmsBundle\Configuration\Object[]
      */
     protected $objects;
 
@@ -171,7 +172,7 @@ class Bundle extends Model
      *
      * @return bool
      *
-     * @throws \FileNotWritableException
+     * @throws FileNotWritableException
      */
     public function saveConfig($path, $withDefaults = false)
     {
@@ -181,10 +182,10 @@ class Bundle extends Model
         $doc->loadXML("<config>$xml</config>");
         $xml = trim(substr($doc->saveXML(), strlen('<?xml version="1.0"?>') + 1));
         if ((!file_exists($path) && !is_writable(dirname($path))) || (file_exists($path) && !is_writable($path))) {
-            throw new \FileNotWritableException(tf('The file `%s` is not writable.', $path));
+            throw new FileNotWritableException(sprintf('The file `%s` is not writable.', $path));
         }
 
-        return SystemFile::setContent($path, $xml);
+        return file_put_contents($path, $xml);
     }
 
     public function getPropertyFilePath($property)
@@ -605,7 +606,7 @@ class Bundle extends Model
     }
 
     /**
-     * @return Object[]
+     * @return \Kryn\CmsBundle\Configuration\Object[]
      */
     public function getObjects()
     {
