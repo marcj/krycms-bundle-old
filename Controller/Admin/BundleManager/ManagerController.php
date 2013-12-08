@@ -14,6 +14,7 @@ use Composer\Package\Version\VersionParser;
 use Composer\Repository\CompositeRepository;
 use Composer\Repository\PlatformRepository;
 use Composer\Repository\RepositoryInterface;
+use FOS\RestBundle\Request\ParamFetcher;
 use Kryn\CmsBundle\Exceptions\BundleNotFoundException;
 use Kryn\CmsBundle\Exceptions\FileNotWritableException;
 use Kryn\CmsBundle\Exceptions\InvalidArgumentException;
@@ -22,8 +23,9 @@ use Kryn\CmsBundle\Admin\AppKernelModifier;
 use Kryn\CmsBundle\Controller;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\HttpKernel\Bundle\BundleInterface;
+use FOS\RestBundle\Controller\Annotations as Rest;
 
-class Manager extends Controller
+class ManagerController extends Controller
 {
     /**
      * @var BufferIO
@@ -35,28 +37,25 @@ class Manager extends Controller
      */
     private $composer;
 
-    /**
-     * Filters any special char out of the name.
-     *
-     * @static
-     *
-     * @param $name Reference
-     */
-    public static function prepareName(&$name)
-    {
-        $name = preg_replace('/[^a-zA-Z0-9-_\\\\]/', '', $name);
-    }
+    protected $versionParser;
 
     /**
-     * Deactivates a bundle in the system config.
+     * Deactivates a bundle in the AppKernel.
      *
-     * @param string $bundle
-     * @param bool $reloadConfig
-     * @return int
+     * @Rest\QueryParam(name="bundle", requirements=".+", strict=true, description="The bundle name")
+     *
+     * @Rest\View()
+     * @Rest\Post("/system/bundle/manager/deactivate")
+     *
+     * @param ParamFetcher $paramFetcher
+     *
+     * @return boolean
      */
-    public function deactivate($bundle, $reloadConfig = false)
+    public function deactivateAction(ParamFetcher $paramFetcher)
     {
-        Manager::prepareName($bundle);
+        $bundle = $paramFetcher->get('bundle');
+
+        ManagerController::prepareName($bundle);
 
         $bundle = $this->getKrynCore()->getBundle($bundle);
 
@@ -71,13 +70,32 @@ class Manager extends Controller
         return false;
     }
 
-    public function createBundle($package, $namespace, $directoryStructure = false)
+    /**
+     * Creates a Symfony bundle.
+     *
+     * @Rest\QueryParam(name="package", requirements=".+", strict=true, description="The composer package name")
+     * @Rest\QueryParam(name="namespace", requirements=".+", description="The PHP namespace")
+     * @Rest\QueryParam(name="directoryStructure", requirements=".+", default="false", description="If some directory structures should be created")
+     *
+     * @Rest\View()
+     * @Rest\Put("/system/bundle/manager")
+     *
+     * @param ParamFetcher $paramFetcher
+     *
+     * @throws InvalidArgumentException
+     * @return bool
+     */
+    public function createBundleAction(ParamFetcher $paramFetcher)
     {
+        $package = $paramFetcher->get('package');
+        $namespace = $paramFetcher->get('namespace');
+        $directoryStructure = filter_var($paramFetcher->get('directoryStructure'), FILTER_VALIDATE_BOOLEAN);
+
         if (!preg_match('/^([a-zA-Z0-9_-]+)\\/([a-zA-Z0-9_\\.-]+)$/', $package)) {
-            throw new \InvalidArgumentException('`package` is not a correct composer name.');
+            throw new InvalidArgumentException('`package` is not a correct composer name.');
         }
         if (!preg_match('/^(([a-zA-Z0-9_-]+)\\\\)*([a-zA-Z0-9_-]*)Bundle/', $namespace)) {
-            throw new \InvalidArgumentException('`package` is not a correct composer name.');
+            throw new InvalidArgumentException('`package` is not a correct composer name.');
         }
 
         $directoryStructure = filter_var($directoryStructure, FILTER_VALIDATE_BOOLEAN);
@@ -142,7 +160,7 @@ class Manager extends Controller
     <label>$bundleClassName</label>
   </bundle>
 </config>";
-            SystemFile::createFile($classDir . '/Resources/config/kryn.xml', $krynXml);
+            $fs->write($classDir . '/Resources/config/kryn.xml', $krynXml);
 
             $line = str_repeat('=', strlen($bundleClassName));
             $docuIndex = "$bundleClassName
@@ -159,19 +177,25 @@ This is the bundle $bundleClassName.
     }
 
     /**
-     * Activates a bundle in the system config.
+     * Activates a bundle in the AppKernel.
      *
-     * @param $bundle
-     * @param bool $reloadConfig
-     * @return bool|int
+     * @Rest\QueryParam(name="bundle", requirements=".+", strict=true, description="The bundle name")
+     *
+     * @Rest\View()
+     * @Rest\Post("/system/bundle/manager/activate")
+     *
+     * @param ParamFetcher $paramFetcher
+     *
+     * @return boolean
      */
-    public function activate($bundleClass, $reloadConfig = false)
+    public function activateAction(ParamFetcher $paramFetcher)
     {
-        Manager::prepareName($bundleClass);
+        $bundle = $paramFetcher->get('bundle');
+        ManagerController::prepareName($bundle);
 
         $appModifier = new AppKernelModifier();
-        if (class_exists($bundleClass)) {
-            if ($appModifier->addBundle($bundleClass)) {
+        if (class_exists($bundle)) {
+            if ($appModifier->addBundle($bundle)) {
                 $appModifier->save();
 
                 return true;
@@ -181,8 +205,22 @@ This is the bundle $bundleClassName.
         return false;
     }
 
-    public function getInstalledInfo($name)
+    /**
+     * Returns composer information for given package.
+     *
+     * @Rest\QueryParam(name="name", requirements="[a-zA-Z0-9/]", strict=true, description="The composer package name")
+     *
+     * @Rest\View()
+     * @Rest\Get("/system/bundle/manager/info")
+     *
+     * @param ParamFetcher $paramFetcher
+     *
+     * @return array
+     */
+    public function getInstalledInfo(ParamFetcher $paramFetcher)
     {
+        $name = $paramFetcher->get('name');
+
         $fs = $this->getKrynCore()->getFileSystem();
         if ($fs->has('composer.lock')) {
             $composerLock = $fs->read('composer.lock');
@@ -200,7 +238,14 @@ This is the bundle $bundleClassName.
         return [];
     }
 
-    public function getInstalled()
+    /**
+     * @Rest\View()
+     *
+     * @Rest\Get("/system/bundle/manager/installed")
+     *
+     * @return array
+     */
+    public function getInstalledAction()
     {
         $packages = [];
         $bundles = [];
@@ -361,7 +406,14 @@ This is the bundle $bundleClassName.
         } // Local newer
     }
 
-    public function getLocal()
+    /**
+     * @Rest\View()
+     *
+     * @Rest\Get("/system/bundle/manager/local")
+     *
+     * @return array
+     */
+    public function getLocalAction()
     {
         $finder = new \Symfony\Component\Finder\Finder();
         $root = $this->getKrynCore()->getKernel()->getRootDir();
@@ -419,7 +471,7 @@ This is the bundle $bundleClassName.
             $interfaces = $reflection->getInterfaceNames();
             if (in_array('Symfony\Component\HttpKernel\Bundle\BundleInterface', $interfaces)) {
 
-                $composer = $this->getKrynCore()->getUtils()->getComposerArray($bundleClass) ?: [];
+                $composer = $this->getKrynCore()->getUtils()->getComposerArray($bundleClass) ? : [];
                 $composer['_path'] = $this->getKrynCore()->getBundleDir($bundleClass);
                 if (isset($composer['name'])) {
                     $composer['_installed'] = $this->getInstalledInfo($composer['name']);
@@ -435,31 +487,32 @@ This is the bundle $bundleClassName.
         return $res;
     }
 
+    /**
+     * @Rest\View()
+     *
+     * @Rest\Get("/system/bundle/manager/check-updates")
+     *
+     * @return array
+     */
     public function check4Updates()
     {
-        $res['found'] = false;
-
-        # add kryn-core
-
-        foreach (Kryn::$configs as $key => $config) {
-            $version = '0';
-            $name = $key;
-            //$version = wget(Kryn::$config['repoServer'] . "/?version=$name");
+        $res = [];
+        foreach ($this->getKernel()->getBundles() as $bundleName => $bundle) {
+            $composer = $this->getKrynCore()->getUtils()->getComposerArray($bundleName) ? : [];
+            $version = @$composer['version'];
             if ($version && $version != '' && self::versionCompareToServer(
-                    $config->getVersion(),
+                    $version,
                     $version['content']
                 ) == '<'
             ) {
-                $res['found'] = true;
                 $temp = array();
                 $temp['newVersion'] = $version;
-                $temp['name'] = $name;
-                $res['modules'][] = $temp;
+                $temp['bundle'] = $bundleName;
+                $res[] = $temp;
             }
         }
 
-        json($res);
-
+        return $res;
     }
 
     /**
@@ -493,9 +546,24 @@ This is the bundle $bundleClassName.
      *
      * @return bool
      */
-    public function install($bundle, $ormUpdate = false)
+
+    /**
+     * @Rest\QueryParam(name="bundle", requirements=".+", strict=true, description="The bundle name")
+     * @Rest\QueryParam(name="ormUpdate", requirements=".+", default="false", description="If the orm should be updated")
+     *
+     * @Rest\View()
+     * @Rest\Post("/system/bundle/manager/install")
+     *
+     * @param ParamFetcher $paramFetcher
+     *
+     * @return array
+     */
+    public function installAction(ParamFetcher $paramFetcher)
     {
-        Manager::prepareName($bundle);
+        $bundle = $paramFetcher->get('bundle');
+        $ormUpdate = filter_var($paramFetcher->get('ormUpdate'), FILTER_VALIDATE_BOOLEAN);
+
+        ManagerController::prepareName($bundle);
         $fs = $this->getKrynCore()->getFileSystem();
 
         $hasPropelModels = $fs->has($this->getKrynCore()->getBundleDir($bundle) . 'Resources/config/models.xml');
@@ -532,17 +600,25 @@ This is the bundle $bundleClassName.
      * Removes relevant data and object's data. Executes also the uninstall script.
      * Removes database values, some files etc.
      *
-     * @param $bundle
-     * @param bool $removeFiles
-     * @param bool $ormUpdate
+     * @Rest\QueryParam(name="bundle", requirements=".+", strict=true, description="The bundle name")
+     * @Rest\QueryParam(name="removeFiles", requirements=".+", default="true", description="If the orm should be updated")
+     * @Rest\QueryParam(name="ormUpdate", requirements=".+", default="false", description="If the orm should be updated")
      *
-     * @return bool
+     * @Rest\View()
+     * @Rest\Post("/system/bundle/manager/install")
+     *
+     * @param ParamFetcher $paramFetcher
      *
      * @throws BundleNotFoundException
+     * @return bool
      */
-    public function uninstall($bundle, $removeFiles = true, $ormUpdate = false)
+    public function uninstallAction(ParamFetcher $paramFetcher)
     {
-        Manager::prepareName($bundle);
+        $bundle = $paramFetcher->get('bundle');
+        $ormUpdate = filter_var($paramFetcher->get('ormUpdate'), FILTER_VALIDATE_BOOLEAN);
+        $removeFiles = filter_var($paramFetcher->get('removeFiles'), FILTER_VALIDATE_BOOLEAN);
+
+        ManagerController::prepareName($bundle);
         $fs = $this->getKrynCore()->getFileSystem();
 
         $path = $this->getKrynCore()->getBundleDir($bundle);
@@ -583,13 +659,26 @@ This is the bundle $bundleClassName.
     }
 
     /**
-     * @param string $name
-     * @return bool
+     * Uninstalls a composer package and deactivates its containing bundle.
+     *
+     * @Rest\QueryParam(name="name", requirements=".+", strict=true, description="The composer package name")
+     *
+     * @Rest\View()
+     * @Rest\Post("/system/bundle/manager/composer/uninstall")
+     *
+     * @param ParamFetcher $paramFetcher
+     *
+     * @return string
+     * @throws FileNotWritableException
+     * @throws PackageNotFoundException
      */
-    public function uninstallComposer($name)
+    public function uninstallComposerAction(ParamFetcher $paramFetcher)
     {
-        if (SystemFile::exists('composer.json') && is_string($name)) {
-            $composer = SystemFile::getContent('composer.json');
+        $name = $paramFetcher->get('name');
+
+        $fs = $this->getFileSystem();
+        if ($fs->has('composer.json') && is_string($name)) {
+            $composer = $fs->read('composer.json');
             if ($composer) {
                 $composer = json_decode($composer, true);
                 if (is_array($composer)) {
@@ -600,19 +689,20 @@ This is the bundle $bundleClassName.
                             $pathToDelete = $key;
                         }
                     }
-                    SystemFile::setContent('composer.json', json_format($composer));
+                    $fs->write('composer.json', json_encode($composer, JSON_PRETTY_PRINT));
 
                     if ($pathToDelete) {
                         $this->searchAndUninstallBundles($this->getComposerVendorDir() . $pathToDelete);
-                        delDir($this->getComposerVendorDir() . $pathToDelete);
+                        $fs->delete($this->getComposerVendorDir() . $pathToDelete);
                         if (file_exists($pathToDelete)) {
-                            Kryn::getLogger()->addWarning(
+                            $this->getLogger()->warning(
                                 sprintf('[UninstallComposer] Can not delete folder `%s`.', $pathToDelete)
                             );
                         }
+                    } else {
+                        throw new PackageNotFoundException(sprintf('Package `%s` not found.', $name));
                     }
                     $this->updateAutoloader();
-
                     return true;
                 }
             }
@@ -664,28 +754,28 @@ This is the bundle $bundleClassName.
         return array($matchedPackage, $versions);
     }
 
-//    public function getComposerPackages()
-//    {
-//        $composer = $this->getComposer();
-//
-//        $platformRepo = new PlatformRepository();
-//        $localRepo = $composer->getRepositoryManager()->getLocalRepository();
-//        $installedRepo = new CompositeRepository(array($localRepo, $platformRepo));
-//        $repos = new CompositeRepository(array_merge(array($installedRepo), $composer->getRepositoryManager()->getRepositories()));
-//
-//        /** @var \Composer\Repository\ComposerRepository $repo */
-//        $repo = $composer->getRepositoryManager()->getRepositories()[1];
-//        //return $repo->findPackage();
-//        var_dump($repo->getMinimalPackages());
-//        die();
-//        foreach ($repo->getPackages() as $package) {
-//            echo $package->getName();
-//        }
-//
-//    }
-
-    public function installComposer($name, $version, $withBundles = false)
+    /**
+     * Installs a composer package and (optional) activates its containing bundle.
+     *
+     * @Rest\QueryParam(name="name", requirements=".+", strict=true, description="The composer package name")
+     * @Rest\QueryParam(name="version", requirements=".+", strict=true, description="The version")
+     * @Rest\QueryParam(name="withBundles", requirements=".+", default="false", description="If the containing bundle should be activated")
+     *
+     * @Rest\View()
+     * @Rest\Post("/system/bundle/manager/composer/install")
+     *
+     * @param ParamFetcher $paramFetcher
+     *
+     * @return string
+     * @throws FileNotWritableException
+     * @throws PackageNotFoundException
+     */
+    public function installComposerAction(ParamFetcher $paramFetcher)
     {
+        $name = $paramFetcher->get('name');
+        $version = $paramFetcher->get('version');
+        $withBundles = filter_var($paramFetcher->get('withBundles'), FILTER_VALIDATE_BOOLEAN);
+
         if (!is_writeable($vendorDir = $this->getComposerVendorDir())) {
             throw new FileNotWritableException(sprintf('Directory `%s` is not writable.', $vendorDir));
         }
@@ -711,8 +801,10 @@ This is the bundle $bundleClassName.
             ));
         }
 
-        if (SystemFile::exists('composer.json') && is_string($name)) {
-            $composerJson = SystemFile::getContent('composer.json');
+        $fs = $this->getFileSystem();
+
+        if ($fs->has('composer.json') && is_string($name)) {
+            $composerJson = $fs->read('composer.json');
             if ($composerJson) {
                 $composerJson = json_decode($composerJson, true);
                 if (is_array($composerJson)) {
@@ -725,7 +817,7 @@ This is the bundle $bundleClassName.
                     }
                     if (!$found) {
                         $composerJson['require'][$name] = $version;
-                        SystemFile::setContent('composer.json', json_format($composerJson));
+                        $fs->write('composer.json', json_format($composerJson));
                     } else {
                         $name = $found;
                     }
@@ -831,11 +923,13 @@ This is the bundle $bundleClassName.
         $bundle = $this->getKrynCore()->getBundle($bundleName);
         if ($bundle) {
             $namespace = $bundle->getNamespace();
-        } else if (class_exists($bundleName)) {
-            $reflection = new \ReflectionClass($bundleName);
-            $namespace = $reflection->getNamespaceName();
         } else {
-            throw new BundleNotFoundException(sprintf('Bundle `%s` not found.', $bundleName));
+            if (class_exists($bundleName)) {
+                $reflection = new \ReflectionClass($bundleName);
+                $namespace = $reflection->getNamespaceName();
+            } else {
+                throw new BundleNotFoundException(sprintf('Bundle `%s` not found.', $bundleName));
+            }
         }
 
 
@@ -861,6 +955,18 @@ This is the bundle $bundleClassName.
         }
 
         return true;
+    }
+
+    /**
+     * Filters any special char out of the name.
+     *
+     * @static
+     *
+     * @param string $name Reference
+     */
+    public static function prepareName(&$name)
+    {
+        $name = preg_replace('/[^a-zA-Z0-9-_\\\\]/', '', $name);
     }
 
 }

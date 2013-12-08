@@ -142,7 +142,7 @@ if (!function_exists('gettext_plural_fn_$lang')) {
 
     public function getPluralForm($lang, $onlyAlgorithm = false)
     {
-        $this->getUtils()->getPluralForm($lang, $onlyAlgorithm);
+        return $this->getUtils()->getPluralForm($lang, $onlyAlgorithm);
     }
 
     /**

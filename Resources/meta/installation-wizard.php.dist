@@ -472,7 +472,7 @@ function step5_1()
 {
     global $krynCore, $kernel;
 
-    $bundleManager = new \Kryn\CmsBundle\Controller\Admin\BundleManager\Manager();
+    $bundleManager = new \Kryn\CmsBundle\Controller\Admin\BundleManager\ManagerController();
     $bundleManager->setContainer($kernel->getContainer());
     try {
 
@@ -750,7 +750,7 @@ function buildModInfo()
 {
     global $kernel, $krynCore;
 
-    $bundleManager = new \Kryn\CmsBundle\Controller\Admin\BundleManager\Manager();
+    $bundleManager = new \Kryn\CmsBundle\Controller\Admin\BundleManager\ManagerController();
     $bundleManager->setContainer($kernel->getContainer());
 
     $bundles = $bundleManager->getLocal();

@@ -1,0 +1,99 @@
+<?php
+
+namespace Kryn\CmsBundle\Controller\Admin;
+
+use FOS\RestBundle\Request\ParamFetcher;
+use Kryn\CmsBundle\Model\Base\LogQuery;
+use Kryn\CmsBundle\Model\LogRequestQuery;
+use Propel\Runtime\ActiveQuery\Criteria;
+use Propel\Runtime\Map\TableMap;
+use FOS\RestBundle\Controller\Annotations as Rest;
+
+class ToolsController
+{
+
+    /**
+     * Returns all stored log entries from the given request.
+     *
+     * @Rest\QueryParam(name="requestId", requirements=".+", strict=true, description="The request id")
+     * @Rest\QueryParam(name="level", requirements=".+",  default="all", description="Level to filter")
+     *
+     * @Rest\View()
+     * @Rest\Get("admin/system/tools/logs")
+     *
+     * @param ParamFetcher $paramFetcher
+     *
+     * @return array[items => array[]]
+     */
+    public function getLogs(ParamFetcher $paramFetcher)
+    {
+        $requestId = $paramFetcher->get('requestId');
+        $level = $paramFetcher->get('level');
+
+        $query = LogQuery::create()
+            ->filterByRequestId($requestId)
+            ->orderByDate(Criteria::DESC);
+
+        if ('all' !== $level) {
+            $query->filterByLevel($level);
+        }
+
+//        $count = ceil($query->count() / 50) ? : 0;
+//        $paginate = $query->paginate($page, 50);
+
+        $items = $query
+            ->find()
+            ->toArray(null, null, TableMap::TYPE_STUDLYPHPNAME);
+
+        return [
+            'items' => $items,
+//            'maxPages' => $count
+        ];
+    }
+
+    /**
+     * Returns all stored log requests.
+     *
+     * @Rest\QueryParam(name="page", requirements="[0-9]+",  default="1", description="page")
+     *
+     * @Rest\View()
+     * @Rest\Get("admin/system/tools/requests")
+     *
+     * @param ParamFetcher $paramFetcher
+     *
+     * @return array[items => array[], maxPages => int]
+     */
+    public function getLogRequests(ParamFetcher $paramFetcher)
+    {
+        $page = $paramFetcher->get('page');
+
+        $query = LogRequestQuery::create()
+            ->orderByDate(Criteria::DESC);
+
+        $count = ceil($query->count() / 50) ? : 0;
+        $paginate = $query->paginate($page, 50);
+
+        $items = $paginate
+            ->getResults()
+            ->toArray(null, null, TableMap::TYPE_STUDLYPHPNAME);
+
+        return [
+            'items' => $items,
+            'maxPages' => $count
+        ];
+    }
+
+    /**
+     * Deletes all stored log entries and log requests.
+     *
+     * @Rest\View()
+     * @Rest\Delete("admin/system/tools/requests")
+     *
+     * @return int count of deleted records
+     */
+    public function clearLogs()
+    {
+        return LogQuery::create()->deleteAll() + LogRequestQuery::create()->deleteAll();
+    }
+
+}

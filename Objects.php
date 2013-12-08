@@ -3,6 +3,7 @@
 namespace Kryn\CmsBundle;
 
 use Kryn\CmsBundle\Configuration\Condition;
+use Kryn\CmsBundle\Exceptions\InvalidArgumentException;
 use Kryn\CmsBundle\Exceptions\ObjectNotFoundException;
 use Kryn\CmsBundle\ORM\Propel;
 use Symfony\Component\EventDispatcher\GenericEvent;
@@ -219,6 +220,9 @@ class Objects
     {
         $objectKey = Objects::normalizeObjectKey($objectKey);
         $temp = explode(':', $objectKey);
+        if (2 !== count($temp)) {
+            throw new InvalidArgumentException(sprintf('Not a value object key `%s`', $objectKey));
+        }
         $module = $temp[0];
         $name = $temp[1];
 

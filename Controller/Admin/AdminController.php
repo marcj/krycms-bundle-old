@@ -12,6 +12,8 @@
 
 namespace Kryn\CmsBundle\Controller\Admin;
 
+use FOS\RestBundle\Controller\Annotations\Get;
+use FOS\RestBundle\Request\ParamFetcher;
 use Kryn\CmsBundle\Admin\ObjectCrud;
 use Kryn\CmsBundle\Configuration\EntryPoint;
 use Kryn\CmsBundle\Core;
@@ -25,6 +27,8 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\DependencyInjection\ContainerAware;
 use Symfony\Component\HttpFoundation\Response;
+use FOS\RestBundle\Controller\Annotations as Rest;
+use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 
 class AdminController extends Controller
 {
@@ -54,11 +58,14 @@ class AdminController extends Controller
         }
 
         if (!$this->getKrynCore()->getAdminClient()->getUser()) {
-            return $response = new Response(json_encode([
+            return $response = new Response(json_encode(
+                [
                     'status' => 403,
                     'error' => 'AccessDeniedException',
                     'message' => 'Access denied. No access or login first.'
-                ], JSON_PRETTY_PRINT), 403);
+                ],
+                JSON_PRETTY_PRINT
+            ), 403);
         }
 
         #$access = Permission::check('KrynCmsBundle:EntryPoint', $url);
@@ -92,8 +99,7 @@ class AdminController extends Controller
     }
 
     /**
-     * @Route("{url}", requirements={"url" = ".*"})
-     * @Route("")
+     * @Route("/123{url}", requirements={"url" = ".+"})
      */
     public function mainAction($url = '/')
     {
@@ -114,7 +120,7 @@ class AdminController extends Controller
         }
 
         $response = $this->getKrynCore()->getPageResponse();
-        $request  = $this->getKrynCore()->getRequest();
+        $request = $this->getKrynCore()->getRequest();
 
 //        if ('/' !== substr($url, -1)) {
 //            $url .= '/'; //substr($url, 0, -1);
@@ -122,7 +128,7 @@ class AdminController extends Controller
 
         if ($adminUrl = $this->getKrynCore()->getSystemConfig()->getAdminUrl()) {
             if (0 === strpos($url, $adminUrl)) {
-                $url = substr($url, strlen($adminUrl) - 1) ?: '/';
+                $url = substr($url, strlen($adminUrl) - 1) ? : '/';
             }
         }
 
@@ -131,13 +137,6 @@ class AdminController extends Controller
 
             return isset($exploded[$id]) ? $exploded[$id] : null;
         };
-
-        if ('/' === $url) {
-            $loginController = new LoginController();
-            $loginController->setContainer($this->container);
-
-            return $loginController->showLogin();
-        }
 
         //checkAccess
         if ($checkAccessResponse = $this->checkAccess($url)) {
@@ -161,6 +160,7 @@ class AdminController extends Controller
                 $symfonyClient->setRequest($request);
                 $epc->setClient($symfonyClient);
                 $epc->getClient()->setUrl($url);
+
                 return $epc->run();
             }
         }
@@ -231,208 +231,32 @@ class AdminController extends Controller
 
                 return $epc->run($entryPoint);
             }
-
-            $krynCore = $this->getKrynCore();
-
-            $server = \RestService\Server::create('/admin', $this);
-            $symfonyClient = new SymfonyClient($server);
-            $symfonyClient->setResponse($response);
-            $symfonyClient->setRequest($request);
-            $symfonyClient->setUrl($url);
-
-            return
-                $server
-                ->setClient($symfonyClient)
-                ->setControllerFactory(
-                    function ($className, $server) use ($krynCore) {
-                        $controller = new $className($server);
-                        if ($controller instanceof ContainerAware) {
-                            $controller->setContainer($krynCore->getKernel()->getContainer());
-                        }
-
-                        return $controller;
-                    }
-                )
-                ->setExceptionHandler($exceptionHandler)
-                ->setDebugMode($debugMode)
-
-                ->addGetRoute('login', 'loginUser')
-                ->addGetRoute('logged-in', 'loggedIn')
-                ->addGetRoute('logout', 'logoutUser')
-
-                ->addGetRoute('stream', 'getStream')
-
-                ->addSubController('ui', 'Kryn\CmsBundle\Controller\Admin\UIAssets')
-                    ->addGetRoute('languages', 'getPossibleLangs')
-                    ->addGetRoute('language-plural', 'getLanguagePluralForm')
-                    ->addGetRoute('language', 'getLanguage')
-                ->done()
-
-                //admin/backend
-                ->addSubController('backend', 'Kryn\CmsBundle\Controller\Admin\Backend')
-                    ->addGetRoute('script', 'loadJs')
-                    ->addGetRoute('script-map', 'loadJsMap')
-                    ->addGetRoute('style', 'loadCss')
-
-                    ->addGetRoute('settings', 'getSettings')
-
-                    ->addGetRoute('desktop', 'getDesktop')
-                    ->addPostRoute('desktop', 'saveDesktop')
-
-                    ->addGetRoute('widgets', 'getWidgets')
-                    ->addPostRoute('widgets', 'saveWidgets')
-
-                    ->addGetRoute('menus', 'getMenus')
-                    ->addGetRoute('custom-js', 'getCustomJs')
-                    ->addPostRoute('user-settings', 'saveUserSettings')
-
-                    ->addDeleteRoute('cache', 'clearCache')
-
-                    ->addGetRoute('search', 'getSearch')
-                    //->addPutRoute('content', 'saveContents')
-
-                ->done()
-
-                ->addGetRoute('content/template', 'getContentTemplate')
-                ->addPostRoute('content/preview', 'getContentPreview')
-
-                //->addGetRoute('editor', 'getKEditor')
-
-                ->addSubController('', 'Kryn\CmsBundle\Controller\Admin\Object\Controller')
-                    ->addGetRoute('objects', 'getItemsByUrl')
-                    ->addGetRoute('object', 'getItemPerUrl')
-                    ->addGetRoute('object-version', 'getVersionsPerUrl')
-
-                    /*
-                    ->addGetRoute('field-object/([a-zA-Z-_]+)/([^/]+)', 'getFieldItem')
-                    ->addGetRoute('field-object-count/([a-zA-Z-_]+)', 'getFieldItemsCount')
-                    ->addGetRoute('field-object/([a-zA-Z-_]+)', 'getFieldItems')
-                    */
-
-                    ->addGetRoute('object-browser/([a-zA-Z-_\.\\\\:]+)', 'getBrowserItems')
-                    ->addGetRoute('object-browser-count/([a-zA-Z-_\.\\\\:]+)', 'getBrowserItemsCount')
-                ->done()
-
-                //admin/system
-                ->addSubController('system')
-
-                    ->addSubController('config', 'Kryn\CmsBundle\Controller\Admin\Config')
-                        ->addGetRoute('', 'getConfig')
-                        ->addGetRoute('labels', 'getLabels')
-                        ->addPostRoute('', 'saveConfig')
-                    ->done()
-
-                    //admin/system/module/manager
-                    ->addSubController('module/manager', 'Kryn\CmsBundle\Controller\Admin\BundleManager\Manager')
-                        ->addGetRoute('install/pre', 'installPre')
-                        ->addGetRoute('install/extract', 'installExtract')
-                        ->addGetRoute('install/database', 'installDatabase')
-                        ->addGetRoute('install/post', 'installPost')
-                        ->addGetRoute('check-updates', 'check4updates')
-                        ->addGetRoute('local', 'getLocal')
-                        ->addGetRoute('installed', 'getInstalled')
-
-                        ->addPostRoute('install', 'install')
-                        ->addPostRoute('uninstall', 'uninstall')
-
-                        ->addPutRoute('', 'createBundle')
-
-                        ->addPostRoute('activate', 'activate')
-                        ->addPostRoute('deactivate', 'deactivate')
-
-                        ->addPostRoute('composer/install', 'installComposer')
-                        ->addPostRoute('composer/uninstall', 'uninstallComposer')
-
-                        //->addGetRoute('composer/packages', 'getComposerPackages')
-
-                        ->addGetRoute('info', 'getInfo')
-                    ->done()
-
-                    //admin/system/orm
-                    ->addSubController('orm', 'Kryn\CmsBundle\Controller\Admin\ORM')
-                        ->addGetRoute('environment', 'buildEnvironment')
-                        ->addGetRoute('models', 'writeModels')
-                        ->addGetRoute('update', 'updateScheme')
-                        ->addGetRoute('check', 'checkScheme')
-                    ->done()
-
-                    //admin/system/orm
-                    ->addSubController('tools', 'Kryn\CmsBundle\Controller\Admin\Tools')
-                        ->addGetRoute('logs', 'getLogs')
-                        ->addGetRoute('requests', 'getLogRequests')
-                        ->addDeleteRoute('logs', 'clearLogs')
-                    ->done()
-
-                    //admin/system/module/editor
-                    ->addSubController('module/editor', 'Kryn\CmsBundle\Controller\Admin\BundleManager\Editor')
-                        ->addGetRoute('config', 'getConfig')
-
-                        ->addGetRoute('basic', 'getBasic')
-                        ->addPostRoute('basic', 'saveBasic')
-
-                        ->addGetRoute('entry-points', 'getEntryPoints')
-                        ->addPostRoute('entry-points', 'saveEntryPoints')
-
-                        ->addGetRoute('windows', 'getWindows')
-                        ->addGetRoute('window', 'getWindowDefinition')
-                        ->addPostRoute('window', 'saveWindowDefinition')
-                        ->addPutRoute('window', 'newWindow')
-
-                        ->addGetRoute('objects', 'getObjects')
-                        ->addPostRoute('objects', 'saveObjects')
-
-                        ->addGetRoute('plugins', 'getPlugins')
-                        ->addPostRoute('plugins', 'savePlugins')
-
-                        ->addPostRoute('model/from-objects', 'setModelFromObjects')
-
-                        ->addPostRoute('model', 'saveModel')
-                        ->addGetRoute('model', 'getModel')
-
-                        ->addPostRoute('themes', 'saveThemes')
-                        ->addGetRoute('themes', 'getThemes')
-
-                        ->addPostRoute('docu', 'saveDocu')
-                        ->addGetRoute('docu', 'getDocu')
-
-                        ->addSubController('language', 'Kryn\CmsBundle\Controller\Admin\Languages')
-                            ->addGetRoute('overview', 'getOverviewExtract')
-                            ->addPostRoute('', 'saveLanguage')
-                            ->addGetRoute('', 'getLanguage')
-                            ->addGetRoute('extract', 'getExtractedLanguage')
-
-                        ->done()
-
-                        ->addPostRoute('general', 'saveGeneral')
-                        ->addPostRoute('entryPoints', 'saveEntryPoints')
-                    ->done()
-
-                ->done()
-
-                ->addSubController('file', 'Kryn\CmsBundle\Controller\Admin\File')
-                    ->addGetRoute('', 'getContent')
-                    ->addGetRoute('image', 'showImage')
-                    ->addgetRoute('content', 'viewFile')
-                    ->addPostRoute('content', 'setContent')
-
-                    ->addPostRoute('', 'createFile')
-                    ->addDeleteRoute('', 'deleteFile')
-                    ->addPostRoute('folder', 'createFolder')
-                    ->addGetRoute('search', 'search')
-
-                    ->addPostRoute('move', 'moveFile')
-                    ->addGetRoute('single', 'getFile')
-                    ->addGetRoute('preview', 'showPreview')
-                    ->addPostRoute('upload', 'doUpload')
-                    ->addPostRoute('paste', 'paste')
-                    ->addPostRoute('upload/prepare', 'prepareUpload')
-                ->done()
-                ->run();
         }
     }
 
-    public function getContentTemplate($template, $type = 'text')
+    /**
+     * @ApiDoc(
+     *  description="Returns a content template/view with placeholder for ka.Editor."
+     * )
+     *
+     * @Rest\QueryParam(name="template", requirements=".+", strict=true,
+     *      description="The template/view to be used for this content")
+     *
+     * @Rest\QueryParam(name="type", requirements=".+", strict=true, description="The content type")
+     *
+     * @Rest\View()
+     *
+     * @Rest\Get("/content/template")
+     *
+     * @param ParamFetcher $paramFetcher
+     *
+     * @return array
+     */
+    public function getContentTemplate(ParamFetcher $paramFetcher)
     {
+        $template = $paramFetcher->get('template');
+        $type = $paramFetcher->get('type');
+
         $contentObject = new Content();
         $contentObject->setType($type);
         $contentObject->setTemplate($template);
@@ -447,8 +271,39 @@ class AdminController extends Controller
         return $this->renderView($template, $data);
     }
 
-    public function getContentPreview($template, $type = 'text', $content, $nodeId, $domainId)
+    /**
+     * @ApiDoc(
+     *  description="Returns a renderer content element as preview for ka.Editor"
+     * )
+     *
+     * @Rest\QueryParam(name="template", requirements=".+", strict=true,
+     *      description="The template/view to be used for this content")
+     *
+     * @Rest\QueryParam(name="type", requirements=".+", strict=true, description="The content type")
+     *
+     * @Rest\QueryParam(name="nodeId", requirements="[0-9]+", strict=true,
+     *      description="The node id in which context this content should be rendered")
+     * @Rest\QueryParam(name="domainId", requirements="[0-9]+", strict=true,
+     *      description="The domain id in which context this content should be rendered")
+     *
+     * @Rest\RequestParam(name="content", requirements=".?", strict=true, description="The actual content")
+     *
+     * @Rest\View()
+     *
+     * @Rest\Get("/content/preview")
+     *
+     * @param ParamFetcher $paramFetcher
+     *
+     * @return array
+     */
+    public function getContentPreview(ParamFetcher $paramFetcher)
     {
+        $template = $paramFetcher->get('template');
+        $type = $paramFetcher->get('type');
+        $content = $paramFetcher->get('content');
+        $nodeId = $paramFetcher->get('nodeId');
+        $domainId = $paramFetcher->get('domainId');
+
         $contentObject = new Content();
         $contentObject->setType($type);
         $contentObject->setTemplate($template);
@@ -461,44 +316,40 @@ class AdminController extends Controller
         $this->getKrynCore()->setCurrentPage($page);
 
         $render = $this->getKrynCore()->getContentRender();
+
         return $render->renderContent($contentObject);
     }
 
-//    public static function handleKEditor()
-//    {
-//        self::addMainResources(['noJs' => true]);
-//        self::addSessionScripts();
-//        $response = $this->getKrynCore()->getResponse();
-//        $response->addJsFile('@CoreBundle/mootools-core.js');
-//        $response->addJsFile('@CoreBundle/mootools-more.js');
-//
-//        //$response->addJs('ka = parent.ka;');
-//
-//        $response->setResourceCompression(false);
-//        $response->setDomainHandling(false);
-//
-//        $nodeArray['id'] = $this->getKrynCore()->$page->getId();
-//        $nodeArray['title'] = $this->getKrynCore()->$page->getTitle();
-//        $nodeArray['domainId'] = $this->getKrynCore()->$page->getDomainId();
-//
-//        $options = [
-//            'id' => $_GET['_kryn_editor_id'],
-//            'node' => $nodeArray
-//        ];
-//
-//        if (is_array($_GET['_kryn_editor_options'])) {
-//            $options = array_merge($options, $_GET['_kryn_editor_options']);
-//            $options['standalone'] = filter_var($options['standalone'], FILTER_VALIDATE_BOOLEAN);
-//        }
-//        $response->addJs(
-//            'window.editor = new parent.ka.Editor(' . json_encode($options) . ', document.documentElement);',
-//            'bottom'
-//        );
-//    }
-
-
-    public function loginUser($username, $password)
+    /**
+     * @ApiDoc(
+     *  description="Logs in a user to the current session"
+     * )
+     *
+     * Result on success:
+     * {
+     *    token: "c7405b2be7da96b0db784f2dc8b2b974",
+     *    userId: 1,
+     *    username: "admin",
+     *    access: true, #administration access
+     *    firstName: "Admini",
+     *    lastName: "strator"
+     *}
+     *
+     * @Rest\QueryParam(name="username", requirements=".+", strict=true)
+     * @Rest\QueryParam(name="password", requirements=".+", strict=true)
+     *
+     * @Rest\View()
+     *
+     * @Rest\Get("/login")
+     *
+     * @param ParamFetcher $paramFetcher
+     *
+     * @return array|bool Returns false on failure or a array if successful.
+     */
+    public function loginUserAction(ParamFetcher $paramFetcher)
     {
+        $username = $paramFetcher->get('username');
+        $password = $paramFetcher->get('password');
         $status = $this->getKrynCore()->getAdminClient()->login($username, $password);
 
         if ($this->getKrynCore()->getAdminClient()->getUser()) {
@@ -518,93 +369,70 @@ class AdminController extends Controller
             }
         }
 
+        return false;
+    }
+
+    /**
+     * @ApiDoc(
+     *  description="Logs out a user from the current session"
+     * )
+     *
+     * @Rest\View()
+     *
+     * @Rest\Get("/logout")
+     *
+     * @return bool returns false if the user is not logged in or true when successfully logged out.
+     */
+    public function logoutUserAction()
+    {
+        if ($this->getKrynCore()->getAdminClient()->hasSession() && $this->getKrynCore()->getAdminClient()->getUser()) {
+            $this->getKrynCore()->getAdminClient()->logout();
+
+            return true;
+        }
 
         return false;
     }
 
+    /**
+     * @ApiDoc(
+     *  description="Returns the status of current user"
+     * )
+     *
+     * @Rest\View()
+     *
+     * @Rest\Get("/logged-in")
+     *
+     * @return bool
+     */
     public function loggedIn()
     {
         return $this->getKrynCore()->getAdminClient()->getUserId() > 0;
     }
 
-    public function logoutUser()
+    /**
+     * @ApiDoc(
+     *  description="Returns a stream value collection"
+     * )
+     *
+     * @Rest\QueryParam(name="streams", array=true, requirements=".+", strict=true, description="List of stream ids")
+     *
+     * @Rest\View()
+     *
+     * @Rest\Get("/stream")
+     *
+     * @param ParamFetcher $paramFetcher
+     *
+     * @throws \InvalidArgumentException
+     * @return array
+     */
+    public function getStreamAction(ParamFetcher $paramFetcher)
     {
-        $this->getKrynCore()->getAdminClient()->logout();
-
-        return true;
-    }
-
-    public function searchAdmin($query, $lang)
-    {
-        $res = array();
-        $lang = preg_replace('[^a-zA-Z0-9_-]', '', $lang);
-
-        //pages
-        $nodes = NodeQuery::create()->filterByTitle('%' . $query . '%', \Criteria::LIKE)->find();
-
-        if (count($nodes) > 0) {
-            foreach ($nodes as $node) {
-                $respages[] =
-                    array(
-                        $node->getTitle(),
-                        'admin/pages',
-                        array('id' => $node->getId(), 'lang' => $node->getDomain()->getLang())
-                    );
-            }
-            $res[t('Pages')] = $respages;
-        }
-
-        //help
-        $helps = array();
-        foreach ($this->getKrynCore()->getConfigs() as $key => $mod) {
-            $helpFile = PATH_MODULE . "$key/lang/help_$lang.json";
-            if (!file_exists($helpFile)) {
-                continue;
-            }
-            if (count($helps) > 10) {
-                continue;
-            }
-
-            $json = json_decode(file_get_contents($helpFile), 1);
-            if (is_array($json) && count($json) > 0) {
-                foreach ($json as $help) {
-
-                    if (count($helps) > 10) {
-                        continue;
-                    }
-                    $found = false;
-
-                    if (preg_match("/$query/i", $help['title'])) {
-                        $found = true;
-                    }
-
-                    if (preg_match("/$query/i", $help['tags'])) {
-                        $found = true;
-                    }
-
-                    if (preg_match("/$query/i", $help['help'])) {
-                        $found = true;
-                    }
-
-                    if ($found) {
-                        $helps[] = array($help['title'], 'admin/help', array('id' => $key . '/' . $help['id']));
-                    }
-                }
-            }
-        }
-        if (count($helps) > 0) {
-            $res[t('Help')] = $helps;
-        }
-
-        return $res;
-    }
-
-    public function getStream($__streams)
-    {
-        if (!is_array($__streams)) {
+        $streams = $paramFetcher->get('streams');
+        if (!is_array($streams)) {
             throw new \InvalidArgumentException('__streams has to be an array.');
         }
-        $__streams = array_map('strtolower', $__streams);
+        $__streams = array_map('strtolower', $streams);
 
         $response = array();
         foreach ($this->getKrynCore()->getConfigs() as $bundleConfig) {

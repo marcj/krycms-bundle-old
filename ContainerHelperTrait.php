@@ -15,6 +15,8 @@ trait ContainerHelperTrait
     }
 
     /**
+     * Returns a Filesystem interface for the root folder (where your composer.json is placed)
+     *
      * @return \Kryn\CmsBundle\Filesystem\FilesystemInterface
      */
     public function getFileSystem()
@@ -23,6 +25,8 @@ trait ContainerHelperTrait
     }
 
     /**
+     * Returns a Filesystem interface for the current cache directory.
+     *
      * @return \Kryn\CmsBundle\Filesystem\FilesystemInterface
      */
     public function getCacheFileSystem()
@@ -31,7 +35,9 @@ trait ContainerHelperTrait
     }
 
     /**
-     * @return \Kryn\CmsBundle\Filesystem\FilesystemInterface
+     * Returns a Filesystem interface with mount-capability for the /web directory.
+     *
+     * @return \Kryn\CmsBundle\Filesystem\WebFilesystem
      */
     public function getWebFileSystem()
     {

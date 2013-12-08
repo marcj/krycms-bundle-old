@@ -2,15 +2,22 @@
 
 namespace Kryn\CmsBundle\Controller\Admin;
 
+use FOS\RestBundle\Request\ParamFetcher;
 use Kryn\CmsBundle\Core;
 use Kryn\CmsBundle\Model\LanguageQuery;
 use Propel\Runtime\Map\TableMap;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
+use FOS\RestBundle\Controller\Annotations as Rest;
 
-class UIAssets extends Controller
+class UIAssetsController extends Controller
 {
+    /**
+     * @Rest\Get("ui/languages")
+     *
+     * @return string javascript
+     */
     public function getPossibleLangs()
     {
         $languages = LanguageQuery::create()
@@ -26,7 +33,7 @@ class UIAssets extends Controller
         }
 
         header('Content-Type: text/javascript');
-        print "window.ka = window.ka || {}; ka.possibleLangs = " . $json;
+        print "window.ka = window.ka || {}; ka.possibleLangs = " . $json.';';
         exit;
     }
 
@@ -38,8 +45,19 @@ class UIAssets extends Controller
         return $this->get('kryn.cms');
     }
 
-    public function getLanguagePluralForm($lang)
+    /**
+     * @Rest\QueryParam(name="lang", requirements="[a-z]{2,3}", strict=true, description="The language code")
+     *
+     * @Rest\Get("ui/language-plural")
+     *
+     * @param ParamFetcher $paramFetcher
+     *
+     * @return string javascript
+     */
+    public function getLanguagePluralForm(ParamFetcher $paramFetcher)
     {
+        $lang = $paramFetcher->get('lang');
+
         $lang = preg_replace('/[^a-z]/', '', $lang);
         $file = $this->getKrynCore()->getTranslator()->getPluralJsFunctionFile($lang); //just make sure the file has been created
         header('Content-Type: text/javascript');
@@ -48,9 +66,21 @@ class UIAssets extends Controller
         exit;
     }
 
-    public function getLanguage($lang, $javascript = false)
+    /**
+     * @Rest\QueryParam(name="lang", requirements="[a-z]{2,3}", strict=true, description="The language code")
+     * @Rest\QueryParam(name="javascript", requirements=".+", default=false, description="If it should be printed as javascript")
+     *
+     * @Rest\View()
+     * @Rest\Get("ui/language")
+     *
+     * @param ParamFetcher $paramFetcher
+     *
+     * @return array|string depends on javascript param
+     */
+    public function getLanguageAction(ParamFetcher $paramFetcher)
     {
-        $lang = substr($lang, 0, 4);
+        $lang = $paramFetcher->get('lang');
+        $javascript = filter_var($paramFetcher->get('javascript'), FILTER_VALIDATE_BOOLEAN);
 
         if (!$this->getKrynCore()->getTranslator()->isValidLanguage($lang)) {
             $lang = 'en';
@@ -59,14 +89,12 @@ class UIAssets extends Controller
         $this->getKrynCore()->getAdminClient()->getSession()->setLanguage($lang);
         $this->getKrynCore()->getAdminClient()->syncStore();
 
-//        Kryn::loadLanguage($lang);
-
         $messages = $this->getKrynCore()->getTranslator()->loadMessages($lang);
         $template = $this->getKrynCore()->getTemplating();
 
         if ($javascript) {
             header('Content-Type: text/javascript');
-            print "if( typeof(ka)=='undefined') window.ka = {}; ka.lang = " . json_encode($messages);
+            print "if( typeof(ka)=='undefined') window.ka = {}; ka.lang = " . json_encode($messages, JSON_PRETTY_PRINT);
             print "\nLocale.define('en-US', 'Date', " . $template->render(
                 'KrynCmsBundle:Default:javascript-locales.js.twig'
             ) . ");";
@@ -76,24 +104,5 @@ class UIAssets extends Controller
 
             return $messages;
         }
-    }
-
-    public static function collectFiles($array, &$files)
-    {
-        foreach ($array as $jsFile) {
-            if (strpos($jsFile, '*') !== -1) {
-                $folderFiles = find(PATH_WEB . $jsFile, false);
-                foreach ($folderFiles as $file) {
-                    if (!array_search($file, $files)) {
-                        $files[] = $file;
-                    }
-                }
-            } else {
-                if (file_exists($jsFile)) {
-                    $files[] = $jsFile;
-                }
-            }
-        }
-
     }
 }

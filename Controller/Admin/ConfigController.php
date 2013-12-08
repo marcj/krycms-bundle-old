@@ -6,8 +6,17 @@ use Kryn\CmsBundle\Controller;
 use Kryn\CmsBundle\Model\LanguageQuery;
 use Propel\Runtime\Map\TableMap;
 
-class Config extends Controller
+use FOS\RestBundle\Controller\Annotations as Rest;
+
+class ConfigController extends Controller
 {
+    /**
+     * @Rest\View()
+     *
+     * @Rest\Get("/system/config/labels")
+     *
+     * @return array['langs' => array[], 'timeozone' => string[]]
+     */
     public function getLabels()
     {
         $res['langs'] = LanguageQuery::create()
@@ -20,11 +29,25 @@ class Config extends Controller
         return $res;
     }
 
+    /**
+     * @Rest\View()
+     *
+     * @Rest\Get("/system/config")
+     *
+     * @return array
+     */
     public function getConfig()
     {
         return $this->getKrynCore()->getSystemConfig()->toArray(true);
     }
 
+    /**
+     * @Rest\View()
+     *
+     * @Rest\Put("/system/config")
+     *
+     * @return boolean
+     */
     public static function saveConfig()
     {
         //todo;

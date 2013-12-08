@@ -5,9 +5,15 @@ namespace Kryn\CmsBundle\Controller\Admin;
 use Kryn\CmsBundle\Model\NodeQuery;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Kryn\CmsBundle\PluginController;
+use FOS\RestBundle\Controller\Annotations as Rest;
 
 class LoginController extends PluginController
 {
+    /**
+     * @Route("")
+     *
+     * @return \Kryn\CmsBundle\PageResponse
+     */
     public function showLogin()
     {
         if ($this->container->has('profiler')) {

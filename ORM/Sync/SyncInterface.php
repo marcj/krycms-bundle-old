@@ -2,9 +2,9 @@
 
 namespace Kryn\CmsBundle\ORM\Sync;
 
-use Kryn\CmsBundle\Bundle;
 use Kryn\CmsBundle\Configuration\Object;
+use Symfony\Component\HttpKernel\Bundle\BundleInterface;
 
 interface SyncInterface {
-    public function syncObject(Bundle $bundle, Object $object);
+    public function syncObject(BundleInterface $bundle, Object $object);
 }

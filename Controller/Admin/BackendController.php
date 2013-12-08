@@ -2,6 +2,7 @@
 
 namespace Kryn\CmsBundle\Controller\Admin;
 
+use FOS\RestBundle\Request\ParamFetcher;
 use Kryn\CmsBundle\Admin\Utils;
 use Kryn\CmsBundle\Core;
 use Kryn\CmsBundle\Model\Base\GroupQuery;
@@ -9,9 +10,17 @@ use Kryn\CmsBundle\Model\LanguageQuery;
 use Kryn\CmsBundle\Properties;
 use Propel\Runtime\Map\TableMap;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use FOS\RestBundle\Controller\Annotations as Rest;
 
-class Backend extends Controller
+class BackendController extends Controller
 {
+    /**
+     * Clears the cache.
+     *
+     * @Rest\Delete("/backend/cache")
+     *
+     * @return bool
+     */
     public function clearCache()
     {
         $utils = new Utils($this->getKrynCore());
@@ -29,69 +38,48 @@ class Backend extends Controller
         return $this->get('kryn.cms');
     }
 
-    public function getDesktop()
+    /**
+     * @Rest\RequestParam(name="settings", array=true)
+     *
+     * @Rest\Post("/backend/user-settings")
+     *
+     * @param ParamFetcher $paramFetcher
+     *
+     * @return bool
+     */
+    public function saveUserSettings(ParamFetcher $paramFetcher)
     {
-        if ($desktop = $this->getKrynCore()->getAdminClient()->getUser()->getDesktop()) {
-            return $desktop->toArray();
-        } else {
-            return false;
-        }
-    }
+        $settings = $paramFetcher->get('settings');
 
-    public function saveDesktop($icons)
-    {
-        $properties = new Properties($icons);
-
-        $this->getKrynCore()->getAdminClient()->getUser()->setDesktop($properties);
-
-        return $this->getKrynCore()->getAdminClient()->getUser()->save() > 0;
-    }
-
-    public function getSearch($q, $lang = null)
-    {
-        $res = array();
-//        foreach ($this->getKrynCore()->$modules as &$mod) {
-//            if (method_exists($mod, 'searchAdmin')) {
-//                $res = array_merge($res, $mod->searchAdmin($q));
-//            }
-//        }
-
-        return $res;
-    }
-
-    public function getWidgets()
-    {
-        if ($widgets = $this->getKrynCore()->getAdminClient()->getUser()->getWidgets()) {
-            return $widgets->toArray();
-        } else {
-            return false;
-        }
-
-    }
-
-    public function saveWidgets($widgets)
-    {
-        $properties = new Properties($widgets);
-        $this->getKrynCore()->getAdminClient()->getUser()->setWidgets($properties);
-        $this->getKrynCore()->getAdminClient()->getUser()->save();
-
-        return true;
-    }
-
-    public function saveUserSettings($settings)
-    {
         $properties = new Properties($settings);
 
         if ($this->getKrynCore()->getAdminClient()->getUser()->getId() > 0) {
             $this->getKrynCore()->getAdminClient()->getUser()->setSettings($properties);
-            $this->getKrynCore()->getAdminClient()->getUser()->save();
+            return $this->getKrynCore()->getAdminClient()->getUser()->save();
         }
 
-        return true;
+        return false;
     }
 
-    public function getCustomJs($bundle, $code, $onLoad)
+    /**
+     * Prints the javascript file content of $bundle and $code.
+     *
+     * @Rest\QueryParam(name="bundle", requirements=".+", strict=true, description="The bundle name")
+     * @Rest\QueryParam(name="code", requirements=".+", strict=true, description="Slash separated entry point path")
+     * @Rest\QueryParam(name="onLoad", requirements=".+", strict=true, description="onLoad id")
+
+     * @Rest\Get("/backend/custom-js")
+     *
+     * @param ParamFetcher $paramFetcher
+     *
+     * @return string javascript
+     */
+    public function getCustomJs(ParamFetcher $paramFetcher)
     {
+        $bundle = $paramFetcher->get('bundle');
+        $code = $paramFetcher->get('code');
+        $onLoad = $paramFetcher->get('onLoad');
+
         $module = preg_replace('[^a-zA-Z0-9_-]', '', $bundle);
         $code = preg_replace('[^a-zA-Z0-9_-]', '', $code);
         $onLoad = preg_replace('[^a-zA-Z0-9_-]', '', $onLoad);
@@ -117,7 +105,6 @@ class Backend extends Controller
      * Returns a huge array with settings.
      *
      * items:
-     *
      *  modules
      *  configs
      *  layouts
@@ -131,12 +118,19 @@ class Backend extends Controller
      *
      *  Example: settings?keys[]=modules&keys[]=layouts
      *
-     * @param  array $keys Limits the result.
+     * @Rest\QueryParam(name="keys", array=true, requirements=".+", description="List of config keys to filter"))
+     *
+     * @Rest\View()
+     * @Rest\Get("/backend/settings")
+     *
+     * @param ParamFetcher $paramFetcher
      *
      * @return array
      */
-    public function getSettings($keys = array())
+    public function getSettings(ParamFetcher $paramFetcher)
     {
+        $keys = $paramFetcher->get('keys');
+
         $loadKeys = $keys;
         if (!$loadKeys) {
             $loadKeys = false;
@@ -170,7 +164,7 @@ class Backend extends Controller
         if ($loadKeys == false || in_array('upload_max_filesize', $loadKeys)) {
             $v = ini_get('upload_max_filesize');
             $v2 = ini_get('post_max_size');
-            $b = $this->return_bytes(($v < $v2) ? $v : $v2);
+            $b = $this->toBytes(($v < $v2) ? $v : $v2);
             $res['upload_max_filesize'] = $b;
         }
 
@@ -218,7 +212,7 @@ class Backend extends Controller
         return $res;
     }
 
-    public function return_bytes($val)
+    protected function toBytes($val)
     {
         $val = trim($val);
         $last = strtolower($val[strlen($val) - 1]);
@@ -235,11 +229,21 @@ class Backend extends Controller
         return $val;
     }
 
+    /**
+     * @Rest\Get("/backend/script-map")
+     */
     public function loadJsMap()
     {
         $this->loadJs(true);
     }
 
+    /**
+     * Prints all CSS files combined.
+     *
+     * @Rest\Get("/backend/css")
+     *
+     * @return string CCS
+     */
     public function loadCss()
     {
         header('Content-Type: text/css');
@@ -288,11 +292,20 @@ class Backend extends Controller
         exit;
     }
 
-    public function loadJs($printSourceMap = false)
+    /**
+     * Prints all JavaScript files combined.
+     *
+     * @Rest\QueryParam(name="printSourceMap", requirements=".+", description="If the sourceMap should printed")
+     *
+     * @Rest\Get("/backend/script")
+     *
+     * @param ParamFetcher $paramFetcher
+     *
+     * @return string javascript
+     */
+    public function loadJs(ParamFetcher $paramFetcher)
     {
-//        $root = getcwd();
-//        $web = $this->getKrynCore()->getKernel()->getRootDir().'/../web';
-//        chdir($web);
+        $printSourceMap = filter_var($paramFetcher->get('printSourceMap'), FILTER_VALIDATE_BOOLEAN);
         $oFile = 'cache/admin.script-compiled.js';
 
         $files = array();
@@ -301,7 +314,6 @@ class Backend extends Controller
         $newestMTime = 0;
 
 
-//        chdir($root);
         foreach ($this->getKrynCore()->getConfigs() as $bundleConfig) {
             foreach ($bundleConfig->getAdminAssetsPaths(false, '.*\.js', true, true) as $assetPath) {
                 $path = $this->getKrynCore()->resolvePath($assetPath, 'Resources/public');
@@ -406,7 +418,15 @@ class Backend extends Controller
 
     }
 
-    public function getMenus()
+    /**
+     * Returns all available menu/entryPoint items for the main navigation bar in the administration.
+     *
+     * @Rest\View()
+     * @Rest\Get("/backend/menus")
+     *
+     * @return array
+     */
+    public function getMenusAction()
     {
         $entryPoints = array();
 
@@ -435,7 +455,7 @@ class Backend extends Controller
         return $entryPoints;
     }
 
-    public function getChildMenus($code, $value)
+    protected function getChildMenus($code, $value)
     {
         $links = array();
         foreach ($value['children'] as $key => $value2) {

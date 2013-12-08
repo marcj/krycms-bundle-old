@@ -469,9 +469,24 @@ class PropelHelper
 
         $this->loadConfig();
         $con = Propel::getWriteConnection('default');
+        $tablePrefix = $this->getKrynCore()->getSystemConfig()->getDatabase()->getPrefix();
         $con->beginTransaction();
         try {
             foreach ($sql as $query) {
+                if ($tablePrefix && 0 === strpos($query, 'DROP')) {
+                    preg_match('/DROP ([^\s]*) /', $query, $match);
+                    if (isset($match[1]) && $match[1]) {
+                        $tableName = preg_replace('/[^a-zA-Z0-9_]\.\$/', '', $match[1]);
+                        if (false !== $pos = strpos($tableName, '.')) {
+                            $tableName = substr($tableName, $pos + 1);
+                        }
+
+                        if (0 === strpos($tableName, $tablePrefix)) {
+                            //tablePrefix is in this table name at the beginning, so jump over
+                            continue;
+                        }
+                    }
+                }
                 $con->exec($query);
             }
         } catch (\PDOException $e) {

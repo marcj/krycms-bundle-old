@@ -751,7 +751,7 @@ ka.Files = new Class({
             if (!name) {
                 return;
             }
-            new Request.JSON({url: _pathAdmin + 'admin/file/folder', onComplete: function(res) {
+            new Request.JSON({url: _pathAdmin + 'admin/file/dir', onComplete: function(res) {
                 this.reload();
             }.bind(this)}).post({path: this.currentFile.path + '/' + name});
         }.bind(this));

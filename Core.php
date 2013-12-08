@@ -563,7 +563,7 @@ class Core extends Controller
 
     /**
      * @param string $bundleName full className or bundleName or short bundleName
-     * @return string with leading /
+     * @return string with leading / relative to root folder
      */
     public function getBundleDir($bundleName)
     {

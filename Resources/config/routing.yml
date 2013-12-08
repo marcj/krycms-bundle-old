@@ -1,8 +1,8 @@
-kryn_cms_admin_login:
-    resource: "@KrynCmsBundle/Controller/Admin/LoginController.php"
-    type:     annotation
-
 kryn_cms_admin:
     prefix: /kryn
-    resource: "@KrynCmsBundle/Controller/Admin/AdminController.php"
+    resource: "@KrynCmsBundle/Controller/Admin/"
     type:     annotation
+
+kryn_cms_admin_doc:
+    resource: "@NelmioApiDocBundle/Resources/config/routing.yml"
+    prefix:   /kryn/doc

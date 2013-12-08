@@ -22,9 +22,9 @@ class Utils extends Controller
         }
         $result = '';
         while (($buffer = fgetcsv($fh, 1000)) !== false) {
+
             if ($buffer[0] == $lang) {
                 fclose($fh);
-
                 $result = $buffer[2];
                 break;
             }
@@ -32,6 +32,7 @@ class Utils extends Controller
 
         if ($onlyAlgorithm) {
             $pos = strpos($result, 'plural=');
+
             return substr($result, $pos + 7);
         } else {
             return $result;

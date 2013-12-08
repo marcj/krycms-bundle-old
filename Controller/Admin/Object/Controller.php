@@ -2,12 +2,14 @@
 
 namespace Kryn\CmsBundle\Controller\Admin\Object;
 
+use FOS\RestBundle\Request\ParamFetcher;
 use Kryn\CmsBundle\Admin\ObjectCrud;
 use Kryn\CmsBundle\Controller as KrynController;
 use Kryn\CmsBundle\Exceptions\ClassNotFoundException;
 use Kryn\CmsBundle\Exceptions\ObjectMisconfiguration;
 use Kryn\CmsBundle\Exceptions\ObjectNotFoundException;
 use Kryn\CmsBundle\Tools;
+use FOS\RestBundle\Controller\Annotations as Rest;
 
 /**
  * Controller
@@ -17,16 +19,24 @@ use Kryn\CmsBundle\Tools;
 class Controller extends KrynController
 {
     /**
-     * General object items output. /admin/object?uri=...
+     * General object items output.
      *
-     * @param  string                   $url
-     * @param  string                   $fields
+     * @Rest\QueryParam(name="url", requirements=".+", strict=true, description="The object url")
+     * @Rest\QueryParam(name="fields", requirements=".+", description="Comma separated list of field names")
+     *
+     * @Rest\View()
+     * @Rest\Get("/object")
+     *
+     * @param ParamFetcher $paramFetcher
      *
      * @return array|bool
      * @throws ObjectNotFoundException
      */
-    public function getItemPerUrl($url, $fields = null)
+    public function getItemPerUrlAction(ParamFetcher $paramFetcher)
     {
+        $url = $paramFetcher->get('url');
+        $fields = $paramFetcher->get('fields');
+
         list($objectKey, $object_id) = $this->getObjects()->parseUrl($url);
 
         $definition = $this->getObjects()->getDefinition($objectKey);
@@ -37,51 +47,31 @@ class Controller extends KrynController
     }
 
     /**
-     * Object items output for user interface field.  /admin/backend/field-object?uri=...
+     * General object items output.
      *
-     * @param  string                   $pUrl
-     * @param  string                   $fields
+     * @Rest\QueryParam(name="url", requirements=".+", strict=true, description="The object url")
+     * @Rest\QueryParam(name="fields", requirements=".+", description="Comma separated list of field names")
+     * @Rest\QueryParam(name="returnKey", requirements=".+", description="If the result should be indexed by the pk")
+     * @Rest\QueryParam(name="returnKeyAsRequested", requirements=".+", description="If the result should be indexed by the pk as requested")
      *
-     * @return array|bool
-     * @throws ObjectNotFoundException
-     * @throws ClassNotFoundException
-     */
-    public function getFieldItem($objectKey, $pk, $fields = null)
-    {
-        $definition = $this->getObjects()->getDefinition($objectKey);
-        if (!$definition) {
-            throw new ObjectNotFoundException(sprintf('Object %s does not exists.', $objectKey));
-        }
-
-        if ($definition['chooserFieldDataModel'] != 'custom') {
-            return $this->getObjects()->get($objectKey, $pk);
-        } else {
-
-            $class = $definition['chooserFieldDataModelClass'];
-            if (!class_exists($class)) {
-                throw new ClassNotFoundException(sprintf('Class %s can not be found.', $class));
-            }
-            $dataModel = new $class($objectKey);
-
-            return $dataModel->getItem($pk, array('fields' => $fields, 'permissionCheck' => true));
-        }
-    }
-
-    /**
-     * General object items output. /admin/objects?uri=...
+     * @Rest\View()
+     * @Rest\Get("/objects")
      *
-     * @param  string                   $url
-     * @param  string                   $fields
-     * @param  bool                     $returnKey             Returns the list as a hash with the primary key as index. key=implode(',',urlencode($keys))
-     * @param  bool                     $returnKeyAsRequested  . Returns the list as a hash with the requested id as key.
+     * @param ParamFetcher $paramFetcher
      *
      * @return array
      * @throws \Exception
      * @throws ClassNotFoundException
      * @throws ObjectNotFoundException
      */
-    public function getItemsByUrl($url, $fields = null, $returnKey = true, $returnKeyAsRequested = false)
+    public function getItemsByUrlAction(ParamFetcher $paramFetcher)
     {
+
+        $url = $paramFetcher->get('url');
+        $fields = $paramFetcher->get('fields');
+        $returnKey =filter_var($paramFetcher->get('returnKey'), FILTER_VALIDATE_BOOLEAN);
+        $returnKeyAsRequested = filter_var($paramFetcher->get('returnKeyAsRequested'), FILTER_VALIDATE_BOOLEAN);
+
         list($objectKey, $objectIds, $params) = $this->getObjects()->parseUrl($url);
         //check if we got an id
         if ($objectIds[0] === '') {
@@ -156,65 +146,70 @@ class Controller extends KrynController
     }
 
     /**
-     * Object items output for user interface field. /admin/backend/field-objects?uri=...
+     * General object items output for the object browser.
      *
+     * @Rest\QueryParam(name="returnHash", requirements=".+", description="If the result should be indexed by the pk")
      *
-     * This method does check against object property 'chooserFieldDataModelClass'. If set, we use
-     * this class to get the items.
+     * @Rest\QueryParam(name="limit", requirements="[0-9]+", description="Limits the result")
+     * @Rest\QueryParam(name="offset", requirements="[0-9]+", description="Offsets the result")
+     * @Rest\QueryParam(name="order", array=true, requirements=".+", description="Order the result")
+     * @Rest\QueryParam(name="filter", array=true, requirements=".+", description="Filter the result")
+     *
+     * @Rest\View()
+     * @Rest\Get("/object-browser/{objectKey}", requirements={"objectKey" = "[a-zA-Z0-9-_\.\\\\:]+"})
      *
      * @param string $objectKey
-     * @param string $fields
-     * @param bool   $returnHash Returns the list as a hash with the primary key as index.
-     * @param int    $limit
-     * @param int    $offset
-     * @param array  $order
-     * @param mixed  $_
+     * @param ParamFetcher $paramFetcher
      *
      * @return array
      * @throws \Exception
      * @throws ClassNotFoundException
      * @throws ObjectNotFoundException
      */
-    public function getFieldItems(
-        $objectKey,
-        $fields = null,
-        $returnHash = true,
-        $limit = null,
-        $offset = null,
-        $order = null,
-        $_ = null
-    ) {
+    public function getBrowserItemsAction($objectKey, ParamFetcher $paramFetcher)
+    {
+
+        $returnHash = $paramFetcher->get('returnHash');
+        $limit = $paramFetcher->get('limit');
+        $offset = $paramFetcher->get('offset');
+        $order = $paramFetcher->get('order');
+        $filter = $paramFetcher->get('filter') ?: [];
 
         $definition = $this->getObjects()->getDefinition($objectKey);
         if (!$definition) {
             throw new ObjectNotFoundException(sprintf('Object %s can not be found.', $objectKey));
         }
 
+        if (!$definition['browserColumns']) {
+            throw new ObjectMisconfiguration(sprintf('Object %s does not have browser columns.', $objectKey));
+        }
+
+        $fields2 = array_keys($definition['browserColumns']);
+
         $options = array(
             'permissionCheck' => true,
-            'fields' => $fields,
+            'fields' => $fields2,
             'limit' => $limit,
             'offset' => $offset,
             'order' => $order
         );
 
-        $condition = ObjectCrud::buildFilter($_);
+        $condition = ObjectCrud::buildFilter($filter);
 
-        if ($definition['fieldDataModel'] == 'custom') {
+        if ($definition['browserDataModel'] == 'custom') {
 
-            $class = $definition['fieldDataModelClass'];
+            $class = $definition['browserDataModelClass'];
             if (!class_exists($class)) {
                 throw new ClassNotFoundException(sprintf('The class %s can not be found.', $class));
             }
 
+            /** @var $dataModel \Kryn\CmsBundle\ORM\ORMAbstract */
             $dataModel = new $class($objectKey);
 
             $items = $dataModel->getItems($condition, $options);
 
         } else {
-
             $items = $this->getObjects()->getList($objectKey, $condition, $options);
-
         }
 
         if ($returnHash) {
@@ -246,103 +241,25 @@ class Controller extends KrynController
     }
 
     /**
-     * Object items output for user interface chooser window/browser. /admin/backend/browser-objects/<objectKey>
+     * General object items output for the object browser.
      *
-     * This method does check against object property 'browserDataModel'. If custom, we use
-     * this class to get the items.
+     * @Rest\QueryParam(name="filter", array=true, requirements=".+", description="Filter the result")
+     *
+     * @Rest\View()
+     * @Rest\Get("/object-browser-count/{objectKey}", requirements={"objectKey" = "[a-zA-Z0-9-_\.\\\\:]+"})
      *
      * @param string $objectKey
-     * @param string $fields
-     * @param bool   $returnHash Returns the list as a hash with the primary key as index.
-     *
-     * @param int    $limit
-     * @param int    $offset
-     * @param array  $order
-     * @param mixed  $_
+     * @param ParamFetcher $paramFetcher
      *
      * @return array
-     * @throws ObjectNotFoundException
+     * @throws \Exception
      * @throws ClassNotFoundException
-     * @throws ObjectMisconfiguration
+     * @throws ObjectNotFoundException
      */
-    public function getBrowserItems(
-        $objectKey,
-        $fields = null,
-        $returnHash = false,
-        $limit = null,
-        $offset = null,
-        $order = null,
-        $_ = null
-    ) {
-
-        $definition = $this->getObjects()->getDefinition($objectKey);
-        if (!$definition) {
-            throw new ObjectNotFoundException(sprintf('Object %s can not be found.', $objectKey));
-        }
-
-        if (!$definition['browserColumns']) {
-            throw new ObjectMisconfiguration(sprintf('Object %s does not have browser columns.', $objectKey));
-        }
-
-        $fields2 = array_keys($definition['browserColumns']);
-
-        $options = array(
-            'permissionCheck' => true,
-            'fields' => $fields2,
-            'limit' => $limit,
-            'offset' => $offset,
-            'order' => $order
-        );
-
-        $condition = ObjectCrud::buildFilter($_);
-
-        if ($definition['browserDataModel'] == 'custom') {
-
-            $class = $definition['browserDataModelClass'];
-            if (!class_exists($class)) {
-                throw new ClassNotFoundException(sprintf('The class %s can not be found.', $class));
-            }
-
-            $dataModel = new $class($objectKey);
-
-            $items = $dataModel->getItems($condition, $options);
-
-        } else {
-
-            $items = $this->getObjects()->getList($objectKey, $condition, $options);
-
-        }
-
-        if ($returnHash) {
-            $primaryKeys = $this->getObjects()->getPrimaries($objectKey);
-
-            $c = count($primaryKeys);
-            $firstPK = key($primaryKeys);
-
-            $res = array();
-            if (is_array($items)) {
-                foreach ($items as &$item) {
-
-                    if ($c > 1) {
-                        $keys = array();
-                        foreach ($primaryKeys as $key => &$field) {
-                            $keys[] = Tools::urlEncode($item[$key]);
-                        }
-                        $res[implode(',', $keys)] = $item;
-                    } else {
-                        $res[$item[$firstPK]] = $item;
-                    }
-                }
-            }
-
-            return $res;
-        } else {
-            return $items;
-        }
-    }
-
-    public function getBrowserItemsCount($objectKey, $_ = null)
+    public function getBrowserItemsCountAction($objectKey, ParamFetcher $paramFetcher)
     {
+        $filter = $paramFetcher->get('filter');
+
         $definition = $this->getObjects()->getDefinition($objectKey);
         if (!$definition) {
             throw new ObjectNotFoundException(sprintf('Object %s can not be found.', $objectKey));
@@ -358,7 +275,7 @@ class Controller extends KrynController
             'permissionCheck' => true
         );
 
-        $condition = ObjectCrud::buildFilter($_);
+        $condition = ObjectCrud::buildFilter($filter);
 
         if ($definition['browserDataModel'] == 'custom') {
 
