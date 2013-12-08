@@ -15,16 +15,6 @@ use Symfony\Component\Debug\Debug;
 // read http://symfony.com/doc/current/book/installation.html#configuration-and-setup for more information
 umask(0006);
 
-// This check prevents access to debug front controllers that are deployed by accident to production servers.
-// Feel free to remove this, extend it, or make something more sophisticated.
-if (isset($_SERVER['HTTP_CLIENT_IP'])
-    || isset($_SERVER['HTTP_X_FORWARDED_FOR'])
-    || !in_array(@$_SERVER['REMOTE_ADDR'], array('127.0.0.1', 'fe80::1', '::1'))
-) {
-    header('HTTP/1.0 403 Forbidden');
-    exit('You are not allowed to access this file. Check '.basename(__FILE__).' for more information.');
-}
-
 $loader = require_once __DIR__.'/../app/bootstrap.php.cache';
 Debug::enable();
 
@@ -363,6 +353,9 @@ function checkConfig()
         $filePermission->setEveryonePermission(@$_REQUEST['fileEveryonePermission']);
         $filePermission->setGroupOwner(@$_REQUEST['fileGroupName']);
 
+        if (@$_REQUEST['removeScript']) {
+            file_put_contents($kernel->getCacheDir().'/kryn_installer_remove', '1');
+        }
         $root = realpath($kernel->getRootDir().'/..');
         if (!$krynCore->getSystemConfig()->save($root . '/app/config/config.kryn.xml', true)) {
             $res['error'] = 'Can not open file app/config/config.xml - please change the permissions.';
@@ -549,12 +542,17 @@ function step5_4()
 //Cleanup
 function step5_5()
 {
-    global $krynCore;
+    global $krynCore, $kernel;
 
     $propelHelper = new \Kryn\CmsBundle\Propel\PropelHelper($krynCore);
 
     try {
         $propelHelper->cleanup();
+
+        if (file_exists($file = $kernel->getCacheDir().'/kryn_installer_remove')) {
+            @unlink($file);
+            @unlink($kernel->getRootDir().'/../web/install.php');
+        }
     } catch (Exception $e) {
         step5Failed($e);
     }
@@ -1206,10 +1204,10 @@ function step3()
         <table style="width: 100%" cellpadding="3">
             <tr>
                 <td width="450">
-                    Rename install.php to random name at the end of the installation.
+                    Remove install.php the end of the installation.
                     <div style="color: #aaa">Highly recommended for security reasons.</div>
                 </td>
-                <td><input type="checkbox" checked="checked" name="rename" value="1"/></td>
+                <td><input type="checkbox" checked="checked" name="removeScript" value="1"/></td>
             </tr>
         </table>
         <div id="status" style="padding: 4px;"></div>

@@ -11,7 +11,7 @@ A end-user zip package can be downloaded at http://kryn.org when we've released 
 Download all php files:
 
 ```bash
-   ./composer.phar require kryn.cms/kryn.cms
+./composer.phar require kryncms/kryncms-bundle
 ```
 
 Activate the bundle in your AppKernel:
@@ -72,40 +72,40 @@ Open the `install.php` script in your browser and follow the wizard.
 #### 3.2.2 Using the configuration command
 
 ```
-    $ app/console kryncms:configuration:database --help
-    Usage:
-     kryncms:configuration:database type database-name username [pw] [server] [port]
+$ app/console kryncms:configuration:database --help
+Usage:
+ kryncms:configuration:database type database-name username [pw] [server] [port]
 
-    Arguments:
-     type                  database type: mysql|pgsql|sqlite
-     database-name         database name
-     username              database login username
-     pw                    use '' to define a empty password
-     server                hostname or ip
-     port
+Arguments:
+ type                  database type: mysql|pgsql|sqlite
+ database-name         database name
+ username              database login username
+ pw                    use '' to define a empty password
+ server                hostname or ip
+ port
 
-    Options:
-     --help (-h)           Display this help message.
-     --quiet (-q)          Do not output any message.
-     --verbose (-v|vv|vvv) Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug
-     --version (-V)        Display this application version.
-     --ansi                Force ANSI output.
-     --no-ansi             Disable ANSI output.
-     --no-interaction (-n) Do not ask any interactive question.
-     --shell (-s)          Launch the shell.
-     --process-isolation   Launch commands from shell as a separate process.
-     --env (-e)            The Environment name. (default: "dev")
-     --no-debug            Switches off debug mode.
+Options:
+ --help (-h)           Display this help message.
+ --quiet (-q)          Do not output any message.
+ --verbose (-v|vv|vvv) Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug
+ --version (-V)        Display this application version.
+ --ansi                Force ANSI output.
+ --no-ansi             Disable ANSI output.
+ --no-interaction (-n) Do not ask any interactive question.
+ --shell (-s)          Launch the shell.
+ --process-isolation   Launch commands from shell as a separate process.
+ --env (-e)            The Environment name. (default: "dev")
+ --no-debug            Switches off debug mode.
 
-    Help:
+Help:
 
-     You can set with this command configuration values inside the app/config/config.kryn.xml file.
+ You can set with this command configuration values inside the app/config/config.kryn.xml file.
 
-     It overwrites only options that you provide.
+ It overwrites only options that you provide.
 ```
 
 ```bash
-    app/console kryncms:configuration:database mysql symfony root ''
+app/console kryncms:configuration:database mysql symfony root ''
 ```
 
 #### 3.2.3 or Editing the kryn configuration directly
@@ -147,9 +147,9 @@ Open the `install.php` script in your browser and follow the wizard.
 ### 4. Setup models and database schema
 
 ```bash
-   app/console kryncms:models:build
-   app/console kryncms:schema:update #updates database's schema
-   app/console kryncms:install:demo localhost /web-folder/ #the web-folder is usually just /
+app/console kryncms:models:build
+app/console kryncms:schema:update #updates database's schema
+app/console kryncms:install:demo localhost /web-folder/ #the web-folder is usually just /
 ```
 
 Important: If you haven't configured a database-prefix the `kryncms:schema:update` will **DROP ALL TABLES** in the current
