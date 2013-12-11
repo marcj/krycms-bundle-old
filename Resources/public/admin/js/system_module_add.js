@@ -1,4 +1,4 @@
-var kryncmsbundle_system_module_add = new Class({
+var kryncms_system_module_add = new Class({
     initialize: function (pWin) {
         this.win = pWin;
         this.checkName(this.win.params.name);

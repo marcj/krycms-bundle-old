@@ -1,4 +1,4 @@
-var kryncmsbundle_system_module_publish = new Class({
+var kryncms_system_module_publish = new Class({
 
     initialize: function (pWin) {
         this.win = pWin;

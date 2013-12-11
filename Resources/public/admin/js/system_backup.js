@@ -1,4 +1,4 @@
-var kryncmsbundle_system_backup = new Class({
+var kryncms_system_backup = new Class({
 
     items: {},
 

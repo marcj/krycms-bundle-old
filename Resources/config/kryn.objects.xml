@@ -25,8 +25,11 @@
           <field id="search" type="checkbox">
             <label>Enable search</label>
           </field>
-          <field id="path" type="folder">
+          <field id="path" type="file">
             <label>Start path</label>
+            <options>
+              <option key="onlyFolders">true</option>
+            </options>
           </field>
           <field id="selectionOnlyFolders" type="checkbox">
             <label>Only folders</label>
@@ -160,7 +163,7 @@
           <field id="id" type="number" primaryKey="true" autoIncrement="true">
             <label>ID</label>
           </field>
-          <field id="domain" type="text">
+          <field id="domain" type="text" required="true">
             <label>Domain name</label>
           </field>
           <field id="lang" type="lang">
@@ -177,22 +180,20 @@
             <label>Domain Redirects</label>
             <desc>A comma separated list of domain redirections.</desc>
           </field>
-          <field id="startnodeId" type="object">
+          <field id="startnodeId" type="object" required="true">
             <label>Startpage</label>
             <object>KrynCmsBundle:Node</object>
             <objectRelation>1ToN</objectRelation>
             <objectRelationName>startnode</objectRelationName>
-            <required>true</required>
           </field>
           <field id="resourceCompression" type="checkbox">
             <label>Resource compression</label>
             <desc>JS and CSS compression.</desc>
           </field>
-          <field id="path" type="text">
+          <field id="path" type="text" required="true">
             <label>Path</label>
             <desc>If your installation does not point to a domain name directly but is in a subfolder, then this is the name of this folder. Default /.</desc>
             <default>/</default>
-            <required>true</required>
           </field>
           <field id="email" type="text">
             <label>Email</label>

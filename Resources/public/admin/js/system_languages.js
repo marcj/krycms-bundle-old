@@ -1,4 +1,4 @@
-var kryncmsbundle_system_languages = new Class({
+var kryncms_system_languages = new Class({
 
     initialize: function (pWin) {
         this.win = pWin;

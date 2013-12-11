@@ -219,9 +219,9 @@ class Objects
     public function getDefinition($objectKey)
     {
         $objectKey = Objects::normalizeObjectKey($objectKey);
-        $temp = explode(':', $objectKey);
+        $temp = explode('/', $objectKey);
         if (2 !== count($temp)) {
-            throw new InvalidArgumentException(sprintf('Not a value object key `%s`', $objectKey));
+            throw new InvalidArgumentException(sprintf('Not a valid object key `%s`', $objectKey));
         }
         $module = $temp[0];
         $name = $temp[1];
@@ -244,7 +244,7 @@ class Objects
     public function getName($objectKey)
     {
         $objectKey = Objects::normalizeObjectKey($objectKey);
-        $temp = explode(':', $objectKey);
+        $temp = explode('/', $objectKey);
         $config = $this->getKrynCore()->getConfig($temp[0]);
 
         if ($config && ($object = $config->getObject($temp[1]))) {
@@ -262,7 +262,7 @@ class Objects
      */
     public function getBundleName($objectKey) {
         $objectKey = Objects::normalizeObjectKey($objectKey);
-        $temp = explode(':', $objectKey);
+        $temp = explode('/', $objectKey);
         $config = $this->getKrynCore()->getConfig($temp[0]);
 
         return $config ? $config->getBundleName() : null;
@@ -281,7 +281,7 @@ class Objects
     public function getNamespace($objectKey)
     {
         $objectKey = Objects::normalizeObjectKey($objectKey);
-        $temp = explode(':', $objectKey);
+        $temp = explode('/', $objectKey);
         $config = $this->getKrynCore()->getConfig($temp[0]);
 
         return $config ? $config->getBundleClass()->getNamespace() : null;
@@ -601,24 +601,21 @@ class Objects
      *  'limit'           Limits the result set (in SQL LIMIT)
      *  'order'           The column to order. Example:
      *                    array(
-     *                      array('field' => 'category', 'direction' => 'asc'),
-     *                      array('field' => 'title',    'direction' => 'asc')
+     *                      array('category' => 'asc'),
+     *                      array(title' => 'asc')
      *                    )
-     *
-     *  'foreignKeys'     Defines which column should be resolved. If empty all columns will be resolved.
-     *                    Use a array or a comma separated list (like in SQL SELECT). 'field1, field2, field3'
      *
      *  'permissionCheck' Defines whether we check against the ACL or not. true or false. default false
      *
      * @static
      *
      * @param string    $objectKey
-     * @param Condition $condition
+     * @param array|Condition $condition
      * @param array     $options
      *
      * @return array|bool
      */
-    public function getList($objectKey, $condition = false, $options = array())
+    public function getList($objectKey, $condition = null, $options = array())
     {
         $obj = $this->getClass($objectKey);
         $definition = $this->getDefinition($objectKey);
@@ -655,7 +652,7 @@ class Objects
      * @param $objectKey
      *
      * @return \Kryn\CmsBundle\ORM\ORMAbstract
-     * @throws \ObjectNotFoundException
+     * @throws ObjectNotFoundException
      * @throws \Exception
      */
     public function &getClass($objectKey)
@@ -676,7 +673,7 @@ class Objects
             } else {
                 $clazz = sprintf('\\Kryn\\CmsBundle\\ORM\\%s', ucfirst($definition->getDataModel()));
                 if (class_exists($clazz) || class_exists($clazz = $definition->getDataModel())) {
-                    $this->instances[$objectKey] = new $clazz($objectKey, $definition, $this->getKrynCore());
+                    $this->instances[$objectKey] = new $clazz($this->normalizeObjectKey($objectKey), $definition, $this->getKrynCore());
                 }
             }
         }
@@ -793,7 +790,7 @@ class Objects
      *
      * @param string $objectKey
      * @param array  $values
-     * @param mixed  $pk              Full PK as array or as primary key string (url).
+     * @param mixed  $targetPk              Full PK as array or as primary key string (url).
      * @param string $position        If nested set. `first` (child), `last` (last child), `prev` (sibling), `next` (sibling)
      * @param bool   $targetObjectKey If this object key differs from $objectKey then we'll use $pk as `scope`. Also
      *                                 it is then only possible to have position `first` and `last`.
@@ -807,13 +804,13 @@ class Objects
     public function add(
         $objectKey,
         $values,
-        $pk = null,
+        $targetPk = null,
         $position = 'first',
         $targetObjectKey = null,
         $options = array()
     ) {
 
-        $pk = $this->normalizePk($objectKey, $pk);
+        $targetPk = $this->normalizePk($objectKey, $targetPk);
         $objectKey = Objects::normalizeObjectKey($objectKey);
         $targetObjectKey = Objects::normalizeObjectKey($targetObjectKey);
 
@@ -825,11 +822,11 @@ class Objects
 
                 //todo, what if $targetObjectKey differs from $objectKey
 
-                if (!$this->getKrynCore()->getACL()->checkAdd($objectKey, $pk, $fieldName)) {
+                if (!$this->getKrynCore()->getACL()->checkAdd($objectKey, $targetPk, $fieldName)) {
                     throw new \NoFieldWritePermission(sprintf(
                         "No update permission to field '%s' in item '%s' from object '%s'",
                         $fieldName,
-                        $pk,
+                        $targetPk,
                         $objectKey
                     ));
                 }
@@ -837,7 +834,7 @@ class Objects
         }
 
         $args = [
-            'pk' => $pk,
+            'pk' => $targetPk,
             'values' => &$values,
             'options' => &$options,
             'position' => &$position,
@@ -857,14 +854,14 @@ class Objects
                 );
             }
 
-            $pk = $this->normalizePk($targetObjectKey, $pk);
+            $targetPk = $this->normalizePk($targetObjectKey, $targetPk);
 
             //since propel's nested set behaviour only allows a single value as scope, we need to use the first pk
-            $scope = current($pk);
+            $scope = current($targetPk);
 
             $result = $obj->add($values, null, $position, $scope);
         } else {
-            $result = $obj->add($values, $pk, $position);
+            $result = $obj->add($values, $targetPk, $position);
         }
 
         $args['result'] = $result;
@@ -1361,9 +1358,10 @@ class Objects
 
     public static function normalizeObjectKey($key)
     {
-        $key = str_replace('\\', ':', $key);
-        $key = str_replace('/', ':', $key);
-        $key = str_replace('.', ':', $key);
+        $key = str_replace('\\', '/', $key);
+        $key = str_replace(':', '/', $key);
+        $key = str_replace('.', '/', $key);
+        $key = str_replace('bundle/', '/', $key);
         return strtolower($key);
     }
 
@@ -1385,6 +1383,10 @@ class Objects
      */
     public function normalizePkString($objectKey, $pkString)
     {
+        if (is_array($pkString)) {
+            return $pkString;
+        }
+
         $obj = $this->getClass($objectKey);
         $objectIds = $obj->primaryStringToArray($pkString);
 

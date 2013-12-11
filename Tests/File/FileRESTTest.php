@@ -14,7 +14,7 @@ class FileRESTTest extends KernelAwareTestCase
         $loggedIn = $this->restCall('/kryn/admin/logged-in');
 
         if (!$loggedIn || !$loggedIn['data']) {
-            $this->restCall('/kryn/admin/login?username=admin&password=admin');
+            $this->restCall('/kryn/admin/login', 'POST', ['username' => 'admin', 'password' => 'admin']);
         }
     }
 
@@ -22,6 +22,7 @@ class FileRESTTest extends KernelAwareTestCase
     {
         $response = $this->restCall('/kryn/admin/file?path=/');
         $bundle = null;
+        var_dump($response);
         foreach ($response['data'] as $file) {
             if ('/bundles' === $file['path']) {
                 $bundle = $file;

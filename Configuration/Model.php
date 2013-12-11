@@ -645,6 +645,8 @@ class Model implements \ArrayAccess
      */
     public function appendXmlProperty($key, \DOMNode $parentNode, $printDefaults)
     {
+        if (!$this->canPropertyBeExported($key)) return;
+
         if (!$this->_defaultProperties) {
             $reflection = new \ReflectionClass($this);
             $this->_defaultProperties = $reflection->getDefaultProperties();
@@ -804,6 +806,8 @@ class Model implements \ArrayAccess
      */
     public function propertyToArray($k, $printDefaults = false)
     {
+        if (!$this->canPropertyBeExported($k)) return;
+
         $reflection = new \ReflectionClass($this);
 
         $properties = $reflection->getDefaultProperties();
@@ -840,6 +844,11 @@ class Model implements \ArrayAccess
         }
 
         return $value;
+    }
+
+    public function canPropertyBeExported($key)
+    {
+        return true;
     }
 
     public function getArrayKey()

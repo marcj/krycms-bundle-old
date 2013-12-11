@@ -2,12 +2,14 @@
 
 namespace Kryn\CmsBundle\Configuration;
 
+use Kryn\CmsBundle\Admin\FieldTypes\TypeNotFoundException;
+use Kryn\CmsBundle\Exceptions\ObjectNotFoundException;
 use Kryn\CmsBundle\Form\Form;
 use Kryn\CmsBundle\Tools;
 
 class Field extends Model
 {
-    protected $attributes = ['id', 'type', 'primaryKey', 'autoIncrement'];
+    protected $attributes = ['id', 'type', 'required', 'primaryKey', 'autoIncrement'];
     protected $arrayKey = 'id';
 
     /**
@@ -228,6 +230,11 @@ class Field extends Model
     protected $options;
 
     /**
+     * @var \Kryn\CmsBundle\Admin\FieldTypes\TypeInterface
+     */
+    private $fieldType;
+
+    /**
      * If this is a virtual field or not. Virtual fields a dummy fields
      * to keep the relation between object fields in sync.
      *
@@ -236,7 +243,7 @@ class Field extends Model
     protected $virtual = false;
 
     /**
-     * @param array  $values
+     * @param array $values
      * @param string $key
      */
     public function fromArray($values, $key = null)
@@ -245,6 +252,50 @@ class Field extends Model
         if (is_string($key)) {
             $this->setId($key);
         }
+    }
+
+    /**
+     * @return string
+     */
+    public function getPhpDataType()
+    {
+        $fieldType = $this->getFieldType();
+
+        return $fieldType->getPhpDataType();
+    }
+
+    /**
+     * @return \Kryn\CmsBundle\Admin\FieldTypes\TypeInterface
+     */
+    public function getFieldType()
+    {
+        if (null === $this->fieldType) {
+            $type = $this->getType();
+            if ('predefined' === strtolower($type)) {
+                $object = $this->getKrynCore()->getObjects()->getDefinition($this->getObject());
+                if (null === $object) {
+                    throw new ObjectNotFoundException(sprintf(
+                        'Object `%s` for predefined field `%s` not found.',
+                        $this->getObject(),
+                        $this->getId()
+                    ));
+                }
+                $field = $object->getField($this->getField());
+                $type = $field->getType();
+            }
+            $this->fieldType = $this->getKrynCore()->getFieldTypes()->newType($type);
+            $this->fieldType->setFieldDefinition($this);
+        }
+
+        return $this->fieldType;
+    }
+
+    /**
+     * @param \Kryn\CmsBundle\Admin\FieldTypes\TypeInterface $fieldType
+     */
+    public function setFieldType($fieldType)
+    {
+        $this->fieldType = $fieldType;
     }
 
     /**
@@ -277,7 +328,7 @@ class Field extends Model
      */
     public function setOptions(Options $options)
     {
-        foreach ($options->getOptions() as $key => $option){
+        foreach ($options->getOptions() as $key => $option) {
             $setter = 'set' . ucfirst($key);
             if (is_callable(array($this, $setter))) {
                 $this->$setter($option);
@@ -293,7 +344,7 @@ class Field extends Model
      */
     public function setOption($key, $value)
     {
-        $this->options = $this->options ?: new Options(null, $this->getKrynCore());
+        $this->options = $this->options ? : new Options(null, $this->getKrynCore());
         $this->options->setOption($key, $value);
     }
 
@@ -332,12 +383,14 @@ class Field extends Model
         return $this->children;
     }
 
-    public function getChildrenArray(){
+    public function getChildrenArray()
+    {
         if (null !== $this->children) {
             $children = [];
             foreach ($this->children as $child) {
                 $children[$child->getId()] = $child->toArray();
             }
+
             return $children;
         }
     }
@@ -577,6 +630,14 @@ class Field extends Model
     }
 
     /**
+     * @return bool
+     */
+    public function isRequired()
+    {
+        return !!$this->required;
+    }
+
+    /**
      * @param boolean $returnDefault
      */
     public function setReturnDefault($returnDefault)
@@ -720,6 +781,18 @@ class Field extends Model
         return $this->value;
     }
 
+
+    public function canPropertyBeExported($k)
+    {
+        if ('requiredRegex' === $k) {
+            if (null === $this->requiredRegex) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     /**
      * @param string $requiredRegex
      */
@@ -733,6 +806,10 @@ class Field extends Model
      */
     public function getRequiredRegex()
     {
+        if (null === $this->requiredRegex) {
+            return $this->getFieldType()->getRequiredRegex();
+        }
+
         return $this->requiredRegex;
     }
 
@@ -758,7 +835,7 @@ class Field extends Model
             } else {
                 $againstField = $this->getParentField();
             }
-            if ($againstField){
+            if ($againstField) {
                 if ($againstField->isHidden()) {
                     return true;
                 }
@@ -766,8 +843,10 @@ class Field extends Model
                     if (!in_array($againstField->getValue(), $this->getNeedValue())) {
                         return true;
                     }
-                } else if ($againstField->getValue() != $this->getNeedValue()) {
-                    return true;
+                } else {
+                    if ($againstField->getValue() != $this->getNeedValue()) {
+                        return true;
+                    }
                 }
             }
         }
@@ -778,26 +857,9 @@ class Field extends Model
     /**
      * @return bool
      */
-    public function isValid()
+    public function validate()
     {
-        $ok = true;
-
-        if ($this->isHidden()) {
-            return $ok;
-        }
-
-        if ($this->getRequired() && ($this->getValue() === '' || $this->getValue() === '' )){
-            $ok = false;
-        }
-
-        if ($regex = $this->getRequiredRegex()) {
-            $value = (string) $this->getValue();
-            if (!preg_match('/'.addslashes($regex).'/', $value)) {
-                $ok = false;
-            }
-        }
-
-        return $ok;
+        return $this->getFieldType()->validate();
     }
 
     /**

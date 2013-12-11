@@ -160,7 +160,8 @@ database that are not port of Kryn.cms.
 ```yaml
 kryn_cms:
     resource: "@KrynCmsBundle/Resources/config/routing.yml"
-    prefix:   /
 ```
 
-The frontend routes are loaded a automatically.
+You have a parameter `kryn_admin_prefix: /kryn` to define your own administration path prefix.
+
+The frontend routes are loaded automatically.

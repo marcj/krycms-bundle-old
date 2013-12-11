@@ -435,13 +435,13 @@ ka.Select = new Class({
     },
 
     getObjectUrl: function() {
-        var uri = _pathAdmin + 'admin/object/' + ka.urlEncode(this.options.object);
+        var uri = _pathAdmin + 'admin/object/' + ka.normalizeObjectKey(this.options.object);
 
         if (this.options.objectBranch) {
             if (this.options.objectBranch === true) {
                 uri += '/:branch';
             } else {
-                uri += '/' + ka.urlEncode(this.options.objectBranch) + '/branch';
+                uri += '/' + ka.urlEncode(this.options.objectBranch) + '/:branch';
             }
         }
 

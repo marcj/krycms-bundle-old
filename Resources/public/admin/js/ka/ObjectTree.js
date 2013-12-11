@@ -283,7 +283,7 @@ ka.ObjectTree = new Class({
     },
 
     getUrl: function() {
-        return _pathAdmin + (this.options.entryPoint ? this.options.entryPoint : 'admin/object/' + ka.urlEncode(this.options.objectKey) ) + '/';
+        return _pathAdmin + (this.options.entryPoint ? this.options.entryPoint : 'admin/object/' + ka.normalizeObjectKey(this.options.objectKey) ) + '/';
     },
 
     /**
@@ -309,7 +309,7 @@ ka.ObjectTree = new Class({
             return;
         }
 
-        new Request.JSON({url: this.getUrl() + pId + '/parents', noCache: 1, onComplete: function(response) {
+        new Request.JSON({url: this.getUrl() + pId + '/:parents', noCache: 1, onComplete: function(response) {
             this.load_object_children = [];
             Array.each(response.data, function(item) {
                 if (item._object && ka.normalizeObjectKey(item._object) && ka.normalizeObjectKey(this.options.objectKey)) {
@@ -970,7 +970,8 @@ ka.ObjectTree = new Class({
             style: 'position: relative; top: 3px;'
         }).inject(pA.span);
 
-        new Request.JSON({url: this.getUrl() + ka.getCroppedObjectId(pA.id) + '/branch',
+        console.log('loadChildren', this.getUrl(), pA.id, '=>', ka.getCroppedObjectId(pA.id), '/:branch');
+        new Request.JSON({url: this.getUrl() + ka.getCroppedObjectId(pA.id) + '/:branch',
             noCache: 1, onComplete: function(pResponse) {
 
                 //save height

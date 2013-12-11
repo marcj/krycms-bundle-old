@@ -1,4 +1,4 @@
-var kryncmsbundle_system_development_logs = new Class({
+var kryncms_system_development_logs = new Class({
 
     initialize: function(pWin) {
         this.win = pWin;

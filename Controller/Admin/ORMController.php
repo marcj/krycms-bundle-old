@@ -5,6 +5,7 @@ namespace Kryn\CmsBundle\Controller\Admin;
 use Kryn\CmsBundle\Controller;
 use Kryn\CmsBundle\Propel\PropelHelper;
 use FOS\RestBundle\Controller\Annotations as Rest;
+use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 
 class ORMController extends Controller
 {
@@ -15,9 +16,10 @@ class ORMController extends Controller
     }
 
     /**
-     * Checks if all table/entity definitions are correct.
-     *
-     * @Rest\View()
+     * @ApiDoc(
+     *  section="ORM",
+     *  description="Checks if all table/entity definitions are correct"
+     * )
      *
      * @Rest\Get("admin/system/orm/check")
      * @return bool
@@ -30,9 +32,11 @@ class ORMController extends Controller
     }
 
     /**
-     * Writes all necessary model files.
+     * @ApiDoc(
+     *  section="ORM",
+     *  description="Writes all necessary model files from all bundles"
+     * )
      *
-     * @Rest\View()
      * @Rest\Post("admin/system/orm/models")
      *
      * @return bool
@@ -44,9 +48,11 @@ class ORMController extends Controller
     }
 
     /**
-     * Updates database's schema.
+     * @ApiDoc(
+     *  section="ORM",
+     *  description="Updates database's schema"
+     * )
      *
-     * @Rest\View()
      * @Rest\Post("admin/system/orm/schema")
      *
      * @return bool

@@ -1,4 +1,4 @@
-var kryncmsbundle_pages = new Class({
+var kryncms_pages = new Class({
 
     initialize: function (pWin) {
         this.win = pWin;

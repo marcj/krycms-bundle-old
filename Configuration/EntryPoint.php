@@ -179,6 +179,11 @@ class EntryPoint extends Model
         return $this->type;
     }
 
+    public function isFrameworkWindow()
+    {
+        return in_array($this->type, ['combine', 'list', 'edit', 'add']);
+    }
+
     /**
      * @param string $path
      */

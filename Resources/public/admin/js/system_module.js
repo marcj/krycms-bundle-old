@@ -1,4 +1,4 @@
-var kryncmsbundle_system_module = new Class({
+var kryncms_system_module = new Class({
 
     /**
      * @var {ka.Dialog}

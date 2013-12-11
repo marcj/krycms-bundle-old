@@ -1,10 +1,14 @@
 <?php
 
-namespace Kryn\CmsBundle\Controller\Admin\Windows;
+namespace Kryn\CmsBundle\Controller\Windows;
 
-use Kryn\CmsBundle\Admin\ObjectCrud;
+use Kryn\CmsBundle\Controller\WindowNestedController;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 
-class NodeCrudController extends ObjectCrud
+/**
+ * Class NodeCrudController
+ */
+class NodeCrudController extends WindowNestedController
 {
     public $fields = array(
         '__General__' => array(

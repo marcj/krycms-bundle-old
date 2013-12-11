@@ -38,6 +38,6 @@ abstract class AbstractCommand extends ContainerAwareCommand
      */
     protected function getKrynCore()
     {
-        return $this->getContainer()->get('kryn.cms');
+        return $this->getContainer()->get('kryn_cms');
     }
 }

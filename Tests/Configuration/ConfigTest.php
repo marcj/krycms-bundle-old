@@ -16,7 +16,7 @@ class ConfigTest extends KernelAwareTestCase
 {
     public function testBasics()
     {
-        $this->assertCount(10, $this->getKrynCore()->getBundles());
+        $this->assertCount(13, $this->getKrynCore()->getBundles());
         $this->assertCount(4, $this->getKrynCore()->getConfigs()->getConfigs());
         $this->assertCount(4, $this->getKrynCore()->getConfigs()->getConfigs());
     }

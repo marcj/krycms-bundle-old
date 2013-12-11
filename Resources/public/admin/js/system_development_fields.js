@@ -1,4 +1,4 @@
-var kryncmsbundle_system_development_fields = new Class({
+var kryncms_system_development_fields = new Class({
 
     /**
      *

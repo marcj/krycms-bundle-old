@@ -120,7 +120,7 @@ ka.WindowEdit = new Class({
         this.container.set('html',
             '<div style="text-align: center; padding: 50px; color: silver">' + t('Loading definition ...') + '</div>');
 
-        new Request.JSON({url: _pathAdmin + this.getEntryPoint(), noCache: true, onComplete: function (pResponse) {
+        new Request.JSON({url: _pathAdmin + this.getEntryPoint()+'/', noCache: true, onComplete: function (pResponse) {
 
             if (!pResponse.error && pResponse.data && pResponse.data._isClassDefinition) {
                 this.render(pResponse.data);
@@ -131,7 +131,7 @@ ka.WindowEdit = new Class({
                         'admin/' + this.getEntryPoint() + '?_method=options') + '</div>');
             }
 
-        }.bind(this)}).get({_method: 'options'});
+        }.bind(this)}).post({_method: 'options'});
     },
 
     generateItemParams: function (pVersion) {
@@ -381,7 +381,7 @@ ka.WindowEdit = new Class({
     loadVersions: function () {
 
         var req = this.generateItemParams();
-        new Request.JSON({url: _pathAdmin + this.getEntryPoint(), noCache: true, onComplete: function (res) {
+        new Request.JSON({url: _pathAdmin + this.getEntryPoint()+'/', noCache: true, onComplete: function (res) {
 
             if (res && res.data.versions) {
                 this.item.versions = res.data.versions;
@@ -588,14 +588,14 @@ ka.WindowEdit = new Class({
             this.win.setLoading(true, null, this.container.getCoordinates(this.win));
             var itemPk = ka.getObjectUrlId(this.classProperties['object'], this.winParams.item);
 
-            this.lastDeleteRq = new Request.JSON({url: _pathAdmin + this.getEntryPoint(),
+            this.lastDeleteRq = new Request.JSON({url: _pathAdmin + this.getEntryPoint()+'/',
                 onComplete: function (pResponse) {
                     this.win.setLoading(false);
                     this.fireEvent('remove', this.winParams.item);
                     ka.getAdminInterface().objectChanged(this.classProperties['object']);
                     this.destroy();
                     this.win.close();
-                }.bind(this)}).get({_method: 'delete', pk: itemPk});
+                }.bind(this)}).post({_method: 'delete', pk: itemPk});
 
         }.bind(this));
     },

@@ -479,7 +479,7 @@ ka.AdminInterface = new Class({
 
         new Request.JSON({url: _pathAdmin + 'admin/backend/cache', noCache: 1, onComplete: function(res) {
             this.cacheToolTip.stop(t('Cache cleared'));
-        }.bind(this)}).get({_method: 'delete'});
+        }.bind(this)}).post({_method: 'delete'});
     },
 
     /*
@@ -941,7 +941,7 @@ ka.AdminInterface = new Class({
                 this.loginFailed();
                 this.unblockLoginForm();
             }
-        }.bind(this)}).get({username: this.loginName.value, password: this.loginPw.value});
+        }.bind(this)}).post({username: this.loginName.value, password: this.loginPw.value});
     },
 
     logout: function() {
@@ -954,7 +954,7 @@ ka.AdminInterface = new Class({
         window.fireEvent('logout');
 
         ka.wm.closeAll();
-        new Request({url: _pathAdmin + 'admin/logout', noCache: 1}).get();
+        new Request({url: _pathAdmin + 'admin/logout', noCache: 1}).post();
 
         this.border.destroy();
 

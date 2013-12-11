@@ -1,4 +1,4 @@
-var kryncmsbundle_system_layout = new Class({
+var kryncms_system_layout = new Class({
 
     initialize: function (pWin) {
 

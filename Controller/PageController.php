@@ -78,12 +78,13 @@ class PageController extends PluginController
         }
 
         if ($this->getKrynCore()->isEditMode()) {
-            $loginController = new LoginController();
+            $loginController = new AdminLoginController();
             $loginController->setContainer($this->container);
             $loginController->handleKEditor();
         }
 
         $pageResponse = $this->getKrynCore()->getPageResponse();
+        $pageResponse->setRenderFrontPage(true);
         $pageResponse->renderContent();
 
         return $pageResponse; //new Response('<body>ho</body>');

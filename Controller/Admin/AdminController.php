@@ -14,7 +14,7 @@ namespace Kryn\CmsBundle\Controller\Admin;
 
 use FOS\RestBundle\Controller\Annotations\Get;
 use FOS\RestBundle\Request\ParamFetcher;
-use Kryn\CmsBundle\Admin\ObjectCrud;
+use Kryn\CmsBundle\Admin\ObjectCrudController;
 use Kryn\CmsBundle\Configuration\EntryPoint;
 use Kryn\CmsBundle\Core;
 use Kryn\CmsBundle\Exceptions\AccessDeniedException;
@@ -86,7 +86,7 @@ class AdminController extends Controller
      */
     public function getKrynCore()
     {
-        return $this->get('kryn.cms');
+        return $this->get('kryn_cms');
     }
 
     public function getUtils()
@@ -99,10 +99,11 @@ class AdminController extends Controller
     }
 
     /**
-     * @Route("/123{url}", requirements={"url" = ".+"})
+     * @ Route("/123{url}", requirements={"url" = ".+"})
      */
     public function mainAction($url = '/')
     {
+        return;
         @header('Expires:');
 
         $exceptionHandler = array($this, 'exceptionHandler');
@@ -209,7 +210,7 @@ class AdminController extends Controller
                     throw new ObjectNotFoundException(sprintf('Object `%s` not found.', $objectKey));
                 }
 
-                $object = new ObjectCrud();
+                $object = new ObjectCrudController();
                 $object->setObject($objectKey);
                 $object->setKrynCore($this->getKrynCore());
                 $object->setRequest($this->getKrynCore()->getRequest());
@@ -236,6 +237,7 @@ class AdminController extends Controller
 
     /**
      * @ApiDoc(
+     *  section="Administration",
      *  description="Returns a content template/view with placeholder for ka.Editor."
      * )
      *
@@ -244,9 +246,7 @@ class AdminController extends Controller
      *
      * @Rest\QueryParam(name="type", requirements=".+", strict=true, description="The content type")
      *
-     * @Rest\View()
-     *
-     * @Rest\Get("/content/template")
+     * @Rest\Get("/admin/content/template")
      *
      * @param ParamFetcher $paramFetcher
      *
@@ -273,6 +273,7 @@ class AdminController extends Controller
 
     /**
      * @ApiDoc(
+     *  section="Administration",
      *  description="Returns a renderer content element as preview for ka.Editor"
      * )
      *
@@ -288,9 +289,7 @@ class AdminController extends Controller
      *
      * @Rest\RequestParam(name="content", requirements=".?", strict=true, description="The actual content")
      *
-     * @Rest\View()
-     *
-     * @Rest\Get("/content/preview")
+     * @Rest\Get("/admin/content/preview")
      *
      * @param ParamFetcher $paramFetcher
      *
@@ -322,6 +321,7 @@ class AdminController extends Controller
 
     /**
      * @ApiDoc(
+     *  section="Administration",
      *  description="Logs in a user to the current session"
      * )
      *
@@ -335,12 +335,10 @@ class AdminController extends Controller
      *    lastName: "strator"
      *}
      *
-     * @Rest\QueryParam(name="username", requirements=".+", strict=true)
-     * @Rest\QueryParam(name="password", requirements=".+", strict=true)
+     * @Rest\RequestParam(name="username", requirements=".+", strict=true)
+     * @Rest\RequestParam(name="password", requirements=".+", strict=true)
      *
-     * @Rest\View()
-     *
-     * @Rest\Get("/login")
+     * @Rest\Post("/admin/login")
      *
      * @param ParamFetcher $paramFetcher
      *
@@ -374,12 +372,11 @@ class AdminController extends Controller
 
     /**
      * @ApiDoc(
+     *  section="Administration",
      *  description="Logs out a user from the current session"
      * )
      *
-     * @Rest\View()
-     *
-     * @Rest\Get("/logout")
+     * @Rest\Post("/admin/logout")
      *
      * @return bool returns false if the user is not logged in or true when successfully logged out.
      */
@@ -396,30 +393,28 @@ class AdminController extends Controller
 
     /**
      * @ApiDoc(
+     *  section="Administration",
      *  description="Returns the status of current user"
      * )
      *
-     * @Rest\View()
-     *
-     * @Rest\Get("/logged-in")
+     * @Rest\Get("/admin/logged-in")
      *
      * @return bool
      */
-    public function loggedIn()
+    public function loggedInAction()
     {
         return $this->getKrynCore()->getAdminClient()->getUserId() > 0;
     }
 
     /**
      * @ApiDoc(
+     *  section="Administration",
      *  description="Returns a stream value collection"
      * )
      *
      * @Rest\QueryParam(name="streams", array=true, requirements=".+", strict=true, description="List of stream ids")
      *
-     * @Rest\View()
-     *
-     * @Rest\Get("/stream")
+     * @Rest\Get("/admin/stream")
      *
      * @param ParamFetcher $paramFetcher
      *

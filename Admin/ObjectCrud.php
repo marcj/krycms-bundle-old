@@ -2,18 +2,22 @@
 
 namespace Kryn\CmsBundle\Admin;
 
-use Kryn\CmsBundle\Controller\Admin\ObjectCrudController;
 use Kryn\CmsBundle\Configuration\Condition;
 use Kryn\CmsBundle\Configuration\EntryPoint;
 use Kryn\CmsBundle\Configuration\Field;
 use Kryn\CmsBundle\Configuration\Model;
 use Kryn\CmsBundle\Core;
 use Kryn\CmsBundle\Exceptions\ObjectNotFoundException;
+use Kryn\CmsBundle\Exceptions\Rest\ValidationFailedException;
+use Kryn\CmsBundle\Exceptions\RestException;
 use Kryn\CmsBundle\Form\Form;
 use Kryn\CmsBundle\Tools;
+use Symfony\Component\DependencyInjection\ContainerAware;
+use Symfony\Component\DependencyInjection\ContainerAwareInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 
-class ObjectCrud implements ObjectCrudInterface
+class ObjectCrud extends ContainerAware
 {
     /**
      * Defines the table which should be accessed.
@@ -305,13 +309,6 @@ class ObjectCrud implements ObjectCrudInterface
     protected $itemLayout = '';
 
     /**
-     * The admin entry point out which this class has been called.
-     *
-     * @var array|null
-     */
-    protected $entryPoint = array();
-
-    /**
      * @var array
      */
     protected $filterFields = array();
@@ -353,14 +350,6 @@ class ObjectCrud implements ObjectCrudInterface
     protected $usePatch = true;
 
     /**
-     * Constructor
-     */
-    public function __construct(EntryPoint $entryPoint = null)
-    {
-        $this->entryPoint = $entryPoint;
-    }
-
-    /**
      * Translate the label/title item of $fields.
      *
      * @param $fields
@@ -377,6 +366,8 @@ class ObjectCrud implements ObjectCrudInterface
 
     }
 
+
+
     /**
      * @param bool $withoutObjectCheck
      *
@@ -384,7 +375,11 @@ class ObjectCrud implements ObjectCrudInterface
      */
     public function initialize($withoutObjectCheck = false)
     {
+        if ($this->objectDefinition) {
+            return;
+        }
         $this->objectDefinition = $this->getKrynCore()->getObjects()->getDefinition($this->getObject());
+
         if (!$this->objectDefinition && $this->getObject() && !$withoutObjectCheck) {
             throw new ObjectNotFoundException("Can not find object '" . $this->getObject() . "'");
         }
@@ -464,18 +459,12 @@ class ObjectCrud implements ObjectCrudInterface
             $this->primary = explode(',', str_replace(' ', '', $this->primary));
         }
 
-        if ($order = $this->getRequest()->request->get('order')) {
-            $this->setOrder($order);
-        }
-
         if (!$this->order || count($this->order) == 0) {
-
             /* compatibility */
             $this->orderByDirection = (strtolower($this->orderByDirection) == 'asc') ? 'asc' : 'desc';
             if ($this->orderBy) {
                 $this->order = array($this->orderBy => $this->orderByDirection);
             }
-
         }
 
         if ((!$this->order || count($this->order) == 0) && $this->columns) {
@@ -537,7 +526,7 @@ class ObjectCrud implements ObjectCrudInterface
      */
     public function getKrynCore()
     {
-        return $this->krynCore;
+        return $this->container->get('kryn_cms');
     }
 
     /**
@@ -619,7 +608,7 @@ class ObjectCrud implements ObjectCrudInterface
         $i = 0;
 
         foreach ($fields as $key => $field) {
-            if (is_numeric($key)) {
+            if (is_numeric($key) && !$field instanceof Field) {
 
                 $newItem = $this->objectDefinition->getField($field);
                 if ($newItem) {
@@ -797,7 +786,7 @@ class ObjectCrud implements ObjectCrudInterface
 
     public function getPosition($pk)
     {
-        /*$obj = $this->getKrynCore()->getObjects()->getClass($this->object);
+        /*$obj = $this->getKrynCore()->getObjects()->getClass($this->getObject());
         $primaryKey = $obj->normalizePrimaryKey($pk);
 
         $condition = $this->getCondition();
@@ -807,7 +796,7 @@ class ObjectCrud implements ObjectCrudInterface
 
         $options['permissionCheck'] = $this->permissionCheck;
         */
-        $obj = $this->getKrynCore()->getObjects()->getClass($this->object);
+        $obj = $this->getKrynCore()->getObjects()->getClass($this->getObject());
         $primaryKey = $obj->normalizePrimaryKey($pk);
         $items = $this->getItems();
 
@@ -844,7 +833,6 @@ class ObjectCrud implements ObjectCrudInterface
     }
 
     /**
-     * Returns a single item.
      *
      * $pk is an array with the primary key values.
      *
@@ -872,7 +860,7 @@ class ObjectCrud implements ObjectCrudInterface
 
         $options['permissionCheck'] = $this->getPermissionCheck();
 
-        $item = $this->getKrynCore()->getObjects()->get($this->object, $pk, $options);
+        $item = $this->getKrynCore()->getObjects()->get($this->getObject(), $pk, $options);
 
         //add custom values
         foreach ($this->_fields as $key => $field) {
@@ -883,7 +871,6 @@ class ObjectCrud implements ObjectCrudInterface
 
         //check against additionaly our own custom condition
         if ($item && ($condition = $this->getCondition()) && $condition->hasRules()) {
-            var_dump($condition);
             if (!$condition->satisfy($item, $this->getObject())) {
                 $item = null;
             }
@@ -914,7 +901,6 @@ class ObjectCrud implements ObjectCrudInterface
     }
 
     /**
-     * Returns items with some information.
      *
      *   array(
      *       'items' => $items,
@@ -922,15 +908,17 @@ class ObjectCrud implements ObjectCrudInterface
      *       'pages' => $maxPages
      *   );
      *
-     * @param  array $filter
-     * @param  int   $limit
-     * @param  int   $offset
-     * @param  string $query
-     * @param  string $fields
+     * @param Request $request
+     * @param array $filter
+     * @param integer $limit
+     * @param integer $offset
+     * @param string $query
+     * @param string $fields
+     * @param array $orderBy
      *
      * @return array
      */
-    public function getItems($filter = null, $limit = null, $offset = null, $query = '', $fields = null, $orderBy = [])
+    public function getItems($filter = null, $limit = null, $offset = null, $query = '', $fields = null, $orderBy = [], $withAcl = false)
     {
         $options = array();
         $options['permissionCheck'] = $this->getPermissionCheck();
@@ -943,7 +931,7 @@ class ObjectCrud implements ObjectCrudInterface
             $condition->mergeAnd($extraCondition);
         }
 
-        $options['order'] = $orderBy ?: $this->getOrder();
+        $options['order'] = $orderBy ? : $this->getOrder();
         $options['fields'] = $this->getSelection($fields);
 
         if ($filter && $filterCondition = self::buildFilter($filter)) {
@@ -955,7 +943,9 @@ class ObjectCrud implements ObjectCrudInterface
             if ($this->objectDefinition->getField('lang')) {
                 //add language condition
                 $langCondition = new Condition(null, $this->getKrynCore());
-                $langCondition->addAnd(array('lang', '=', substr((string)$this->getRequest()->request->get('lang'), 0, 3)));
+                $langCondition->addAnd(
+                    array('lang', '=', substr((string)$this->getRequest()->request->get('lang'), 0, 3))
+                );
                 $langCondition->addOr(array('lang', 'IS NULL'));
 
                 $condition->addAnd($langCondition);
@@ -963,14 +953,14 @@ class ObjectCrud implements ObjectCrudInterface
         }
 
         if ($query) {
-            if ($queryCondition = $this->getQueryCondition($query, $options['fields'])){
+            if ($queryCondition = $this->getQueryCondition($query, $options['fields'])) {
                 $condition->mergeAnd($queryCondition);
             }
         }
 
-        $items = $this->getKrynCore()->getObjects()->getList($this->object, $condition, $options);
+        $items = $this->getKrynCore()->getObjects()->getList($this->getObject(), $condition, $options);
 
-        if (is_array($items)) {
+        if ($withAcl && is_array($items)) {
             foreach ($items as &$item) {
                 if ($item) {
                     $this->prepareRow($item);
@@ -978,17 +968,17 @@ class ObjectCrud implements ObjectCrudInterface
             }
         }
 
-        return $items ?: null;
+        return $items ? : null;
     }
 
     /**
      * Returns the selection (field names)
      *
      * @param array $fields
-     * @param bool  $getColumns
+     * @param bool $getColumns
      * @return array
      */
-    public function getSelection($fields, $getColumns = true)
+    protected function getSelection($fields, $getColumns = true)
     {
         $result = [];
         if ($fields && $this->getAllowCustomSelectFields()) {
@@ -1014,7 +1004,7 @@ class ObjectCrud implements ObjectCrudInterface
         return $result;
     }
 
-    public function getExtraSelection()
+    protected function getExtraSelection()
     {
         if (is_string($this->extraSelection)) {
             return explode(',', trim(preg_replace('/[^a-zA-Z0-9_\.\-,\*]/', '', $this->extraSelection)));
@@ -1023,12 +1013,12 @@ class ObjectCrud implements ObjectCrudInterface
         return $this->extraSelection;
     }
 
-    public function setExtraSelection($selection)
+    protected function setExtraSelection($selection)
     {
         $this->extraSelection = $selection;
     }
 
-    public function getQueryCondition($query, $fields)
+    protected function getQueryCondition($query, $fields)
     {
         $fields = $this->getSelection($fields);
 
@@ -1046,7 +1036,9 @@ class ObjectCrud implements ObjectCrudInterface
             }
 
             $result[] = [
-                $field, 'LIKE', $query . '%'
+                $field,
+                'LIKE',
+                $query . '%'
             ];
         }
 
@@ -1054,11 +1046,11 @@ class ObjectCrud implements ObjectCrudInterface
     }
 
     /**
-     * @param  array      $filter
+     * @param  array $filter
      *
      * @return array|null
      */
-    public static function buildFilter($filter)
+    protected static function buildFilter($filter)
     {
         $condition = null;
 
@@ -1084,8 +1076,6 @@ class ObjectCrud implements ObjectCrudInterface
     }
 
     /**
-     *
-     *
      * @param  string $fields
      *
      * @return array
@@ -1133,9 +1123,9 @@ class ObjectCrud implements ObjectCrudInterface
      * @param  array $filter
      * @param  mixed $fields
      * @param  mixed $scope
-     * @param  int   $depth
-     * @param  int   $limit
-     * @param  int   $offset
+     * @param  int $depth
+     * @param  int $limit
+     * @param  int $offset
      *
      * @return mixed
      */
@@ -1197,7 +1187,14 @@ class ObjectCrud implements ObjectCrudInterface
             }
         }
 
-        $items = $this->getKrynCore()->getObjects()->getBranch($this->object, $pk, $condition, $depth, $scope, $options);
+        $items = $this->getKrynCore()->getObjects()->getBranch(
+            $this->getObject(),
+            $pk,
+            $condition,
+            $depth,
+            $scope,
+            $options
+        );
 
 
         if (is_array($items)) {
@@ -1239,33 +1236,41 @@ class ObjectCrud implements ObjectCrudInterface
 
         $options['fields'] = array_keys($this->getColumns());
 
-        return $this->getKrynCore()->getObjects()->getBranchChildrenCount($this->object, $pk, $condition, $scope, $options);
+        return $this->getKrynCore()->getObjects()->getBranchChildrenCount(
+            $this->getObject(),
+            $pk,
+            $condition,
+            $scope,
+            $options
+        );
 
     }
 
-    public function getCount()
+    public function getCount($filter, $query)
     {
         $options['permissionCheck'] = $this->getPermissionCheck();
+        $options['filter'] = $filter;
+        $options['query'] = $query;
 
-        return $this->getKrynCore()->getObjects()->getCount($this->object);
+        return $this->getKrynCore()->getObjects()->getCount($this->getObject());
 
     }
 
     public function getParent($pk)
     {
         $options = array('permissionCheck' => $this->getPermissionCheck());
-        $primaryKey = $this->getKrynCore()->getObjects()->normalizePkString($this->object, $pk);
+        $primaryKey = $this->getKrynCore()->getObjects()->normalizePkString($this->getObject(), $pk);
 
-        return $this->getKrynCore()->getObjects()->getParent($this->object, $primaryKey, $options);
+        return $this->getKrynCore()->getObjects()->getParent($this->getObject(), $primaryKey, $options);
 
     }
 
     public function getParents($pk)
     {
         $options = array('permissionCheck' => $this->getPermissionCheck());
-        $primaryKey = $this->getKrynCore()->getObjects()->normalizePkString($this->object, $pk);
+        $primaryKey = $this->getKrynCore()->getObjects()->normalizePkString($this->getObject(), $pk);
 
-        return $this->getKrynCore()->getObjects()->getParents($this->object, $primaryKey, $options);
+        return $this->getKrynCore()->getObjects()->getParents($this->getObject(), $primaryKey, $options);
 
     }
 
@@ -1273,8 +1278,8 @@ class ObjectCrud implements ObjectCrudInterface
     {
         $options = array('permissionCheck' => $this->getPermissionCheck());
 
-        $sourceObjectKey = $this->getKrynCore()->getObjects()->getObjectKey($sourceUrl) ?: $this->getObject();
-        $targetObjectKey = $this->getKrynCore()->getObjects()->getObjectKey($targetUrl) ?: $this->getObject();
+        $sourceObjectKey = $this->getKrynCore()->getObjects()->getObjectKey($sourceUrl) ? : $this->getObject();
+        $targetObjectKey = $this->getKrynCore()->getObjects()->getObjectKey($targetUrl) ? : $this->getObject();
 
         $sourcePkString = $this->getKrynCore()->getObjects()->getCroppedObjectId($sourceUrl);
         $targetPkString = $this->getKrynCore()->getObjects()->getCroppedObjectId($targetUrl);
@@ -1289,14 +1294,22 @@ class ObjectCrud implements ObjectCrudInterface
             $targetPkString
         );
 
-        return $this->getKrynCore()->getObjects()->move($sourceObjectKey, $sourcePk, $targetPk, $position, $targetObjectKey, $options, $overwrite);
+        return $this->getKrynCore()->getObjects()->move(
+            $sourceObjectKey,
+            $sourcePk,
+            $targetPk,
+            $position,
+            $targetObjectKey,
+            $options,
+            $overwrite
+        );
     }
 
     public function getRoots()
     {
         $options['permissionCheck'] = $this->getPermissionCheck();
 
-        return $this->getKrynCore()->getObjects()->getRoots($this->object, $options);
+        return $this->getKrynCore()->getObjects()->getRoots($this->getObject(), $options);
 
     }
 
@@ -1304,7 +1317,7 @@ class ObjectCrud implements ObjectCrudInterface
     {
         $options['permissionCheck'] = $this->getPermissionCheck();
 
-        return $this->getKrynCore()->getObjects()->getRoot($this->object, $scope, $options);
+        return $this->getKrynCore()->getObjects()->getRoot($this->getObject(), $scope, $options);
 
     }
 
@@ -1395,7 +1408,12 @@ class ObjectCrud implements ObjectCrudInterface
             $data += $this->collectData($fields, $item);
 
             try {
-                $inserted[] = $this->add($data, $this->getRequest()->request->get('_pk'), $position, $this->getRequest()->request->get('_targetObjectKey'));
+                $inserted[] = $this->add(
+                    $data,
+                    $this->getRequest()->request->get('_pk'),
+                    $position,
+                    $this->getRequest()->request->get('_targetObjectKey')
+                );
             } catch (\Exception $e) {
                 $inserted[] = array('error' => $e);
             }
@@ -1411,9 +1429,9 @@ class ObjectCrud implements ObjectCrudInterface
      *
      * Data is passed as POST.
      *
-     * @param  array      $data
-     * @param  array      $pk
-     * @param  string     $position        If nested set. `first` (child), `last` (child), `prev` (sibling), `next` (sibling)
+     * @param  array $data
+     * @param  array $pk
+     * @param  string $position If nested set. `first` (child), `last` (child), `prev` (sibling), `next` (sibling)
      * @param  int|string $targetObjectKey
      *
      * @return mixed      False if some went wrong or a array with the new primary keys.
@@ -1458,17 +1476,16 @@ class ObjectCrud implements ObjectCrudInterface
         $this->primaryKey = $pk;
         $options['permissionCheck'] = $this->getPermissionCheck();
 
-        return $this->getKrynCore()->getObjects()->remove($this->object, $pk, $options);
+        return $this->getKrynCore()->getObjects()->remove($this->getObject(), $pk, $options);
     }
 
 
     /**
      * Updates a object entry. This means, all fields which are not defined will be saved as NULL.
      *
-     * @param  array                        $pk
+     * @param  array $pk
      *
      * @return bool
-     * @throws \ObjectItemNotFoundException
      */
     public function update($pk)
     {
@@ -1503,10 +1520,9 @@ class ObjectCrud implements ObjectCrudInterface
      * Patches a object entry. This means, only defined fields will be saved. Fields which are not defined will
      * not be overwritten.
      *
-     * @param  array                        $pk
+     * @param  array $pk
      *
      * @return bool
-     * @throws \ObjectItemNotFoundException
      */
     public function patch($pk)
     {
@@ -1521,7 +1537,7 @@ class ObjectCrud implements ObjectCrudInterface
         $allData = $this->collectData(null, $item);
         $data = [];
 
-        foreach ($allData as $k => $v){
+        foreach ($allData as $k => $v) {
             if (@$item[$k] != @$allData[$k]) {
                 $data[$k] = $v;
             }
@@ -1550,7 +1566,7 @@ class ObjectCrud implements ObjectCrudInterface
      * Iterates only through all defined fields in $fields.
      *
      * @param  \Kryn\CmsBundle\Configuration\Field[] $fields The fields definition. If empty we use $this->fields.
-     * @param  mixed $data  Default data. Is used if a field is not defined through _POST or _GET
+     * @param  mixed $data Default data. Is used if a field is not defined through _POST or _GET
      *
      * @return array
      * @throws \Kryn\CmsBundle\Exceptions\InvalidFieldValueException
@@ -1572,7 +1588,7 @@ class ObjectCrud implements ObjectCrudInterface
             $fields2[] = $langField;
         }
 
-        $form = new Form($fields2);
+        $form = new \Kryn\CmsBundle\Admin\Form\Form($fields2);
 
         foreach ($fields2 as $field) {
             $key = lcfirst($field->getId());
@@ -1603,10 +1619,15 @@ class ObjectCrud implements ObjectCrudInterface
                 continue;
             }
 
-            if ($field->isValid()) {
+            if (!$errors = $field->validate()) {
                 $data2[$key] = $field->getValue();
             } else {
-                throw new \Kryn\CmsBundle\Exceptions\InvalidFieldValueException(tf('The field `%s` has a invalid value.', $key));
+                $restException = new ValidationFailedException(sprintf(
+                    'Field `%s` has a invalid value.',
+                    $key
+                ), 420);
+                $restException->setdata($errors);
+                throw $restException;
             }
         }
 
@@ -2040,22 +2061,6 @@ class ObjectCrud implements ObjectCrudInterface
     public function getPrimary()
     {
         return $this->primary;
-    }
-
-    /**
-     * @param EntryPoint $entryPoint
-     */
-    public function setEntryPoint($entryPoint)
-    {
-        $this->entryPoint = $entryPoint;
-    }
-
-    /**
-     * @return EntryPoint
-     */
-    public function getEntryPoint()
-    {
-        return $this->entryPoint;
     }
 
     /**

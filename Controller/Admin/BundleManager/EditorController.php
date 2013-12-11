@@ -23,17 +23,20 @@ use Symfony\Component\DependencyInjection\ContainerAware;
 use Symfony\Component\Finder\Finder;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Symfony\Component\HttpKernel\Bundle\BundleInterface;
+use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 
 class EditorController extends ContainerAware
 {
     use ContainerHelperTrait;
 
     /**
-     * Returns the composer config.
+     * @ApiDoc(
+     *  section="Bundle Editor",
+     *  description="Returns the composer config"
+     * )
      *
      * @Rest\QueryParam(name="bundle", requirements=".*", strict=true, description="The bundle name")
      *
-     * @Rest\View()
      * @Rest\Get("/admin/system/bundle/editor/config")
      *
      * @param ParamFetcher $paramFetcher
@@ -52,18 +55,39 @@ class EditorController extends ContainerAware
     }
 
     /**
-     * Returns the basic configuration. Usually in Resources/config/kryn.xml
-     *
-     * @param string $bundle
-     * @return array
-     */
-
-    /**
-     * Returns the basic configuration. Usually in Resources/config/kryn.xml
+     * @ApiDoc(
+     *  section="Bundle Editor",
+     *  description="Saves the composer config"
+     * )
      *
      * @Rest\QueryParam(name="bundle", requirements=".*", strict=true, description="The bundle name")
      *
-     * @Rest\View()
+     * @Rest\Post("/admin/system/bundle/editor/config")
+     *
+     * @param ParamFetcher $paramFetcher
+     *
+     * @return array
+     */
+    public function saveConfigAction(ParamFetcher $paramFetcher)
+    {
+        return "#todo";
+        $bundle = $paramFetcher->get('bundle');
+        if ($this->getKrynCore()->getBundleDir($bundle)) {
+            $config = $this->getKrynCore()->getUtils()->getComposerArray($bundle);
+            $config['_path'] = $this->getKrynCore()->getBundleDir($bundle);
+
+            return $config;
+        }
+    }
+
+    /**
+     * @ApiDoc(
+     *  section="Bundle Editor",
+     *  description="Returns the basic configuration. Usually in Resources/config/kryn.xml"
+     * )
+     *
+     * @Rest\QueryParam(name="bundle", requirements=".*", strict=true, description="The bundle name")
+     *
      * @Rest\Get("/admin/system/bundle/editor/basic")
      *
      * @param ParamFetcher $paramFetcher
@@ -102,7 +126,10 @@ class EditorController extends ContainerAware
     }
 
     /**
-     * Saves the basic configuration. Usually in Resources/config/kryn.xml
+     * @ApiDoc(
+     *  section="Bundle Editor",
+     *  description="Saves the basic configuration. Usually in Resources/config/kryn.xml"
+     * )
      *
      * @Rest\QueryParam(name="bundle", requirements=".*", strict=true, description="The bundle name")
      * @Rest\QueryParam(name="events", description="The `events` values array")
@@ -110,7 +137,6 @@ class EditorController extends ContainerAware
      * @Rest\QueryParam(name="adminAssets", description="The `adminAssets` values array")
      * @Rest\QueryParam(name="falDrivers", description="The `falDrivers` values array")
      *
-     * @Rest\View()
      * @Rest\Post("/admin/system/bundle/editor/basic")
      *
      * @param ParamFetcher $paramFetcher
@@ -151,12 +177,15 @@ class EditorController extends ContainerAware
     }
 
     /**
-     * Returns all php classes that use the window framework class as parents. So in fact, returns
-     * all framework window classes.
+     * @ApiDoc(
+     *  section="Bundle Editor",
+     *  description="Returns all php classes that use the window framework class as parents. So in fact, returns
+     * all framework window classes."
+     * )
+     *
      *
      * @Rest\QueryParam(name="bundle", requirements=".*", strict=true, description="The bundle name")
      *
-     * @Rest\View()
      * @Rest\Get("/admin/system/bundle/editor/windows")
      *
      * @param ParamFetcher $paramFetcher
@@ -215,11 +244,13 @@ class EditorController extends ContainerAware
     }
 
     /**
-     * Returns all defined plugins. Usually in Resources/config/kryn.plugins.xml
+     * @ApiDoc(
+     *  section="Bundle Editor",
+     *  description="Returns all defined plugins. Usually in Resources/config/kryn.plugins.xml"
+     * )
      *
      * @Rest\QueryParam(name="bundle", requirements=".*", strict=true, description="The bundle name")
      *
-     * @Rest\View()
      * @Rest\Get("/admin/system/bundle/editor/plugins")
      *
      * @param ParamFetcher $paramFetcher
@@ -237,12 +268,14 @@ class EditorController extends ContainerAware
     }
 
     /**
-     * Saves plugins. Usually in Resources/config/kryn.plugins.xml
+     * @ApiDoc(
+     *  section="Bundle Editor",
+     *  description="Saves plugins. Usually in Resources/config/kryn.plugins.xml"
+     * )
      *
      * @Rest\QueryParam(name="bundle", requirements=".*", strict=true, description="The bundle name")
      * @Rest\QueryParam(name="plugins", array=true, description="The `plugins` value array")
      *
-     * @Rest\View()
      * @Rest\Post("/admin/system/bundle/editor/plugins")
      *
      * @param ParamFetcher $paramFetcher
@@ -268,11 +301,13 @@ class EditorController extends ContainerAware
     }
 
     /**
-     * Returns all defined themes.  Usually in Resources/config/kryn.themes.xml
+     * @ApiDoc(
+     *  section="Bundle Editor",
+     *  description="Returns all defined themes.  Usually in Resources/config/kryn.themes.xml"
+     * )
      *
      * @Rest\QueryParam(name="bundle", requirements=".*", strict=true, description="The bundle name")
      *
-     * @Rest\View()
      * @Rest\Get("/admin/system/bundle/editor/themes")
      *
      * @param ParamFetcher $paramFetcher
@@ -290,12 +325,14 @@ class EditorController extends ContainerAware
     }
 
     /**
-     * Saves themes.  Usually in Resources/config/kryn.themes.xml
+     * @ApiDoc(
+     *  section="Bundle Editor",
+     *  description="Saves themes. Usually in Resources/config/kryn.themes.xml"
+     * )
      *
      * @Rest\QueryParam(name="bundle", requirements=".*", strict=true, description="The bundle name")
      * @Rest\QueryParam(name="themes", array=true, description="The `themes` value array")
      *
-     * @Rest\View()
      * @Rest\Post("/admin/system/bundle/editor/themes")
      *
      * @param ParamFetcher $paramFetcher
@@ -322,11 +359,13 @@ class EditorController extends ContainerAware
     }
 
     /**
-     * Returns the documentation. Usually in Resources/doc/index.md
+     * @ApiDoc(
+     *  section="Bundle Editor",
+     *  description="Returns the documentation. Usually in Resources/doc/index.md"
+     * )
      *
      * @Rest\QueryParam(name="bundle", requirements=".*", strict=true, description="The bundle name")
      *
-     * @Rest\View()
      * @Rest\Get("/admin/system/bundle/editor/docu")
      *
      * @param ParamFetcher $paramFetcher
@@ -343,12 +382,14 @@ class EditorController extends ContainerAware
     }
 
     /**
-     * Saves the documentation. Usually in Resources/doc/index.md
+     * @ApiDoc(
+     *  section="Bundle Editor",
+     *  description="Saves the documentation. Usually in Resources/doc/index.md"
+     * )
      *
      * @Rest\QueryParam(name="bundle", requirements=".*", strict=true, description="The bundle name")
      * @Rest\RequestParam(name="content", requirements=".*", strict=true, description="The markdown content")
      *
-     * @Rest\View()
      * @Rest\Post("/admin/system/bundle/editor/docu")
      *
      * @param ParamFetcher $paramFetcher
@@ -367,11 +408,13 @@ class EditorController extends ContainerAware
     }
 
     /**
-     * Returns all objects. Usually in Resources/config/kryn.objects.xml
+     * @ApiDoc(
+     *  section="Bundle Editor",
+     *  description="Returns all objects. Usually in Resources/config/kryn.objects.xml"
+     * )
      *
      * @Rest\QueryParam(name="bundle", requirements=".*", strict=true, description="The bundle name")
      *
-     * @Rest\View()
      * @Rest\Get("/admin/system/bundle/editor/objects")
      *
      * @param ParamFetcher $paramFetcher
@@ -389,12 +432,14 @@ class EditorController extends ContainerAware
     }
 
     /**
-     * Saves objects. Usually in Resources/config/kryn.objects.xml
+     * @ApiDoc(
+     *  section="Bundle Editor",
+     *  description="Saves objects. Usually in Resources/config/kryn.objects.xml"
+     * )
      *
      * @Rest\QueryParam(name="bundle", requirements=".*", strict=true, description="The bundle name")
      * @Rest\QueryParam(name="objects", array=true, description="The `objects` value array")
      *
-     * @Rest\View()
      * @Rest\Post("/admin/system/bundle/editor/objects")
      *
      * @param ParamFetcher $paramFetcher
@@ -420,11 +465,13 @@ class EditorController extends ContainerAware
     }
 
     /**
-     * Returns the content and full path of Propel's Resources/config/models.xml.
+     * @ApiDoc(
+     *  section="Bundle Editor",
+     *  description="Returns the content and full path of Propel's Resources/config/models.xml"
+     * )
      *
      * @Rest\QueryParam(name="bundle", requirements=".*", strict=true, description="The bundle name")
      *
-     * @Rest\View()
      * @Rest\Get("/admin/system/bundle/editor/model")
      *
      * @param ParamFetcher $paramFetcher
@@ -443,12 +490,14 @@ class EditorController extends ContainerAware
     }
 
     /**
-     * Saves Propel's Resources/config/models.xml file.
+     * @ApiDoc(
+     *  section="Bundle Editor",
+     *  description="Saves Propel's Resources/config/kryn.propel.schema.xml file"
+     * )
      *
      * @Rest\QueryParam(name="bundle", requirements=".*", strict=true, description="The bundle name")
      * @Rest\QueryParam(name="model", requirements=".*", description="Propel's model content (schema.xml)")
      *
-     * @Rest\View()
      * @Rest\Post("/admin/system/bundle/editor/model")
      *
      * @param ParamFetcher $paramFetcher
@@ -466,11 +515,13 @@ class EditorController extends ContainerAware
     }
 
     /**
-     * Modifies Propel's Resources/config/models.xml based on the object definition in $bundle.
+     * @ApiDoc(
+     *  section="Bundle Editor",
+     *  description="Modifies Propel's Resources/config/kryn.propel.schema.xml based on the object definition in $bundle"
+     * )
      *
      * @Rest\QueryParam(name="bundle", requirements=".*", strict=true, description="The bundle name")
      *
-     * @Rest\View()
      * @Rest\Post("/admin/system/bundle/editor/model/from-objects")
      *
      * @param ParamFetcher $paramFetcher
@@ -525,11 +576,13 @@ class EditorController extends ContainerAware
     }
 
     /**
-     * Returns entryPoints. Usually in Resources/config/kryn.entryPoints.xml.
+     * @ApiDoc(
+     *  section="Bundle Editor",
+     *  description="Returns entryPoints. Usually in Resources/config/kryn.entryPoints.xml"
+     * )
      *
      * @Rest\QueryParam(name="bundle", requirements=".*", strict=true, description="The bundle name")
      *
-     * @Rest\View()
      * @Rest\Get("/admin/system/bundle/editor/entry-points")
      *
      * @param ParamFetcher $paramFetcher
@@ -549,12 +602,14 @@ class EditorController extends ContainerAware
     }
 
     /**
-     * Saves entryPoints. Usually in Resources/config/kryn.entryPoints.xml.
+     * @ApiDoc(
+     *  section="Bundle Editor",
+     *  description="Saves entryPoints. Usually in Resources/config/kryn.entryPoints.xml"
+     * )
      *
      * @Rest\QueryParam(name="bundle", requirements=".*", strict=true, description="The bundle name")
      * @Rest\QueryParam(name="entryPoints", array=true, description="The `objects` value array")
      *
-     * @Rest\View()
      * @Rest\Post("/admin/system/bundle/editor/entry-points")
      *
      * @param ParamFetcher $paramFetcher
@@ -607,7 +662,6 @@ class EditorController extends ContainerAware
             "    "
             . $visibility . ($static ? ' static' : '') . ' $' . $name . ' = ' . $val
             . ";\n\n";
-
     }
 
     /**
@@ -630,11 +684,13 @@ class EditorController extends ContainerAware
     }
 
     /**
-     * Returns the window class properties as array with some additional information about that window class.
+     * @ApiDoc(
+     *  section="Bundle Editor",
+     *  description="Returns the window class properties as array with some additional information about that window class"
+     * )
      *
      * @Rest\QueryParam(name="class", requirements=".*", strict=true, description="The php class")
      *
-     * @Rest\View()
      * @Rest\Get("/admin/system/bundle/editor/window")
      *
      * @param ParamFetcher $paramFetcher
@@ -717,7 +773,10 @@ class EditorController extends ContainerAware
     }
 
     /**
-     * Saves the php class definition into a php class.
+     * @ApiDoc(
+     *  section="Bundle Editor",
+     *  description="Saves the php class definition into a php class"
+     * )
      *
      * Target path is specified in $general['file'].
      *
@@ -728,7 +787,6 @@ class EditorController extends ContainerAware
      * @Rest\QueryParam(name="methods", array=true, description="The `methods` value array")
      * @Rest\QueryParam(name="fields", array=true, description="The `fields` value array")
      *
-     * @Rest\View()
      * @Rest\Post("/admin/system/bundle/editor/window")
      *
      * @param ParamFetcher $paramFetcher
@@ -884,13 +942,15 @@ class EditorController extends ContainerAware
     }
 
     /**
-     * Creates a new CRUD object window.
+     * @ApiDoc(
+     *  section="Bundle Editor",
+     *  description="Creates a new CRUD object window class"
+     * )
      *
      * @Rest\QueryParam(name="class", requirements=".*", strict=true, description="The PHP class name")
      * @Rest\QueryParam(name="bundle", requirements=".*", strict=true, description="The bundle name")
      * @Rest\QueryParam(name="force", requirements=".*", default="false", description="Overwrites existing")
      *
-     * @Rest\View()
      * @Rest\Put("/admin/system/bundle/editor/window")
      *
      * @param ParamFetcher $paramFetcher

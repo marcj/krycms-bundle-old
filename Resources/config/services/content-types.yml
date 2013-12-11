@@ -1,26 +1,26 @@
 parameters:
-     kryn.content.types.class: Kryn\CmsBundle\ContentTypes\ContentTypes
-     kryn.content.types.text.class: Kryn\CmsBundle\ContentTypes\TypeText
-     kryn.content.types.plugin.class: Kryn\CmsBundle\ContentTypes\TypePlugin
-     kryn.content.types.markdown.class: Kryn\CmsBundle\ContentTypes\TypeMarkdown
+     kryn_cms.content.types.class: Kryn\CmsBundle\ContentTypes\ContentTypes
+     kryn_cms.content.types.text.class: Kryn\CmsBundle\ContentTypes\TypeText
+     kryn_cms.content.types.plugin.class: Kryn\CmsBundle\ContentTypes\TypePlugin
+     kryn_cms.content.types.markdown.class: Kryn\CmsBundle\ContentTypes\TypeMarkdown
 
 services:
-     kryn.content.types:
-         class: %kryn.content.types.class%
+     kryn_cms.content.types:
+         class: %kryn_cms.content.types.class%
 
-     kryn.content.types.text:
-         class: %kryn.content.types.text.class%
+     kryn_cms.content.types.text:
+         class: %kryn_cms.content.types.text.class%
          tags:
-             - { name: kryn.content.type, alias: text }
+             - { name: kryn_cms.content.type, alias: text }
 
-     kryn.content.types.plugin:
-         class: %kryn.content.types.plugin.class%
-         arguments: ["@kryn.cms"]
+     kryn_cms.content.types.plugin:
+         class: %kryn_cms.content.types.plugin.class%
+         arguments: ["@kryn_cms"]
          tags:
-             - { name: kryn.content.type, alias: plugin }
+             - { name: kryn_cms.content.type, alias: plugin }
 
-     kryn.content.types.markdown:
-         class: %kryn.content.types.markdown.class%
-         arguments: ["@kryn.cms"]
+     kryn_cms.content.types.markdown:
+         class: %kryn_cms.content.types.markdown.class%
+         arguments: ["@kryn_cms"]
          tags:
-             - { name: kryn.content.type, alias: markdown }
+             - { name: kryn_cms.content.type, alias: markdown }

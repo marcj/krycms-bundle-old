@@ -19,6 +19,10 @@ class ObjectFile extends Propel
      */
     public function primaryStringToArray($primaryKey)
     {
+        if (is_array($primaryKey)) {
+            return $primaryKey;
+        }
+
         if ($primaryKey === '') {
             return false;
         }
@@ -133,7 +137,7 @@ class ObjectFile extends Propel
         }
 
         if (!$path) {
-            return;
+            return null;
         }
         $item = $this->getKrynCore()->getWebFileSystem()->getFile($path);
         if ($item) {

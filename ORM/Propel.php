@@ -5,6 +5,7 @@ namespace Kryn\CmsBundle\ORM;
 use Kryn\CmsBundle\Configuration\Condition;
 use Kryn\CmsBundle\Configuration\ConditionSubSelect;
 use Kryn\CmsBundle\Configuration\Object as ConfigObject;
+use Kryn\CmsBundle\Exceptions\ObjectNotFoundException;
 use Kryn\CmsBundle\Objects;
 use Kryn\CmsBundle\Tools;
 use Propel\Runtime\ActiveQuery\Criteria;
@@ -248,7 +249,7 @@ class Propel extends ORMAbstract
      * @param null $name
      *
      * @return mixed
-     * @throws \ObjectNotFoundException
+     * @throws ObjectNotFoundException
      */
     public function getQueryClass($name = null)
     {
@@ -256,7 +257,7 @@ class Propel extends ORMAbstract
 
         $clazz = $objectKey . 'Query';
         if (!class_exists($clazz)) {
-            throw new \ObjectNotFoundException(tf('The object query %s of %s does not exist.', $clazz, $objectKey));
+            throw new ObjectNotFoundException(sprintf('The object query %s of %s does not exist.', $clazz, $objectKey));
         }
 
         return $clazz::create();
@@ -274,7 +275,7 @@ class Propel extends ORMAbstract
         if (!$objectName && class_exists($clazz = $this->definition->getPropelClassName())) {
             return $clazz;
         }
-        $clazz = Objects::normalizeObjectKey($objectName ?: $this->objectKey);
+        $clazz = Objects::normalizeObjectKey($objectName ?: $this->getObjectKey());
         $clazz = ucfirst($this->getKrynCore()->getObjects()->getNamespace($clazz) . '\\Model\\' . $this->getKrynCore()->getObjects()->getName($clazz));
         return $clazz;
     }
@@ -314,7 +315,7 @@ class Propel extends ORMAbstract
         if (isset($options['order']) && is_array($options['order'])) {
             foreach ($options['order'] as $field => $direction) {
                 if (!$this->tableMap->hasColumnByPhpName(ucfirst($field))) {
-                    throw new \FieldNotFoundException(tf('Field %s in object %s not found', $field, $this->objectKey));
+                    throw new \FieldNotFoundException(tf('Field %s in object %s not found', $field, $this->getObjectKey()));
                 } else {
                     $column = $this->tableMap->getColumnByPhpName(ucfirst($field));
 
@@ -726,7 +727,7 @@ class Propel extends ORMAbstract
             return null;
         } else {
 
-            if ($targetObjectKey && $this->objectKey != $targetObjectKey) {
+            if ($targetObjectKey && $this->getObjectKey() != $targetObjectKey) {
                 if (!$this->definition['nestedRootAsObject']) {
                     throw new \InvalidArgumentException('This object has no different object as root.');
                 }

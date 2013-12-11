@@ -69,7 +69,7 @@ class PackageManager extends ContainerAware {
      */
     public function getKrynCore()
     {
-        return $this->container->get('kryn.cms');
+        return $this->container->get('kryn_cms');
     }
 
     public function installDemoData()

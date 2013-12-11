@@ -424,7 +424,7 @@ ka.WindowAdd = new Class({
 
             this.saveBtn.startTip(t('Adding ...'));
 
-            this.lastSaveRq = new Request.JSON({url: _pathAdmin + this.getEntryPoint(),
+            this.lastSaveRq = new Request.JSON({url: _pathAdmin + this.getEntryPoint()+'/',
                 noErrorReporting: ['DuplicateKeysException', 'ObjectItemNotModified'],
                 noCache: true,
                 onError: function() {

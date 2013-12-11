@@ -1,4 +1,4 @@
-var kryncmsbundle_system_development_restLogger = new Class({
+var kryncms_system_development_restLogger = new Class({
 
     initialize: function (pWin) {
 

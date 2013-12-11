@@ -24,6 +24,7 @@ use Kryn\CmsBundle\Controller;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\HttpKernel\Bundle\BundleInterface;
 use FOS\RestBundle\Controller\Annotations as Rest;
+use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 
 class ManagerController extends Controller
 {
@@ -40,11 +41,13 @@ class ManagerController extends Controller
     protected $versionParser;
 
     /**
-     * Deactivates a bundle in the AppKernel.
+     * @ApiDoc(
+     *  section="Bundle/Package Manager",
+     *  description="Deactivates a bundle in the AppKernel"
+     * )
      *
      * @Rest\QueryParam(name="bundle", requirements=".+", strict=true, description="The bundle name")
      *
-     * @Rest\View()
      * @Rest\Post("/system/bundle/manager/deactivate")
      *
      * @param ParamFetcher $paramFetcher
@@ -54,6 +57,18 @@ class ManagerController extends Controller
     public function deactivateAction(ParamFetcher $paramFetcher)
     {
         $bundle = $paramFetcher->get('bundle');
+
+        return $this->deactivate($bundle);
+    }
+
+    /**
+     * Deactivated a bundle in the AppKernel
+     *
+     * @param string $bundle
+     * @return bool
+     */
+    public function deactivate($bundle)
+    {
 
         ManagerController::prepareName($bundle);
 
@@ -71,13 +86,15 @@ class ManagerController extends Controller
     }
 
     /**
-     * Creates a Symfony bundle.
+     * @ApiDoc(
+     *  section="Bundle/Package Manager",
+     *  description="Creates a Symfony bundle"
+     * )
      *
      * @Rest\QueryParam(name="package", requirements=".+", strict=true, description="The composer package name")
      * @Rest\QueryParam(name="namespace", requirements=".+", description="The PHP namespace")
      * @Rest\QueryParam(name="directoryStructure", requirements=".+", default="false", description="If some directory structures should be created")
      *
-     * @Rest\View()
      * @Rest\Put("/system/bundle/manager")
      *
      * @param ParamFetcher $paramFetcher
@@ -177,11 +194,13 @@ This is the bundle $bundleClassName.
     }
 
     /**
-     * Activates a bundle in the AppKernel.
+     * @ApiDoc(
+     *  section="Bundle/Package Manager",
+     *  description="Activates a bundle in the AppKernel"
+     * )
      *
      * @Rest\QueryParam(name="bundle", requirements=".+", strict=true, description="The bundle name")
      *
-     * @Rest\View()
      * @Rest\Post("/system/bundle/manager/activate")
      *
      * @param ParamFetcher $paramFetcher
@@ -191,6 +210,18 @@ This is the bundle $bundleClassName.
     public function activateAction(ParamFetcher $paramFetcher)
     {
         $bundle = $paramFetcher->get('bundle');
+
+        return $this->activate($bundle);
+    }
+
+    /**
+     * Activates a bundle in the AppKernel
+     *
+     * @param $bundle
+     * @return bool
+     */
+    public function activate($bundle)
+    {
         ManagerController::prepareName($bundle);
 
         $appModifier = new AppKernelModifier();
@@ -206,11 +237,13 @@ This is the bundle $bundleClassName.
     }
 
     /**
-     * Returns composer information for given package.
+     * @ApiDoc(
+     *  section="Bundle/Package Manager",
+     *  description="Returns composer information for given package"
+     * )
      *
      * @Rest\QueryParam(name="name", requirements="[a-zA-Z0-9/]", strict=true, description="The composer package name")
      *
-     * @Rest\View()
      * @Rest\Get("/system/bundle/manager/info")
      *
      * @param ParamFetcher $paramFetcher
@@ -239,7 +272,10 @@ This is the bundle $bundleClassName.
     }
 
     /**
-     * @Rest\View()
+     * @ApiDoc(
+     *  section="Bundle/Package Manager",
+     *  description="Returns a list of all installed bundles and packages"
+     * )
      *
      * @Rest\Get("/system/bundle/manager/installed")
      *
@@ -342,7 +378,7 @@ This is the bundle $bundleClassName.
      * @param string $path
      * @return array
      */
-    public function getBundlesFromPath($path)
+    protected function getBundlesFromPath($path)
     {
         $bundles = [];
         if ($this->getKrynCore()->getFileSystem()->has($path)) {
@@ -385,6 +421,11 @@ This is the bundle $bundleClassName.
         return $bundles;
     }
 
+    /**
+     * @param $local
+     * @param $server
+     * @return string
+     */
     private static function versionCompareToServer($local, $server)
     {
         list($major, $minor, $patch) = explode(".", $local);
@@ -407,7 +448,10 @@ This is the bundle $bundleClassName.
     }
 
     /**
-     * @Rest\View()
+     * @ApiDoc(
+     *  section="Bundle/Package Manager",
+     *  description="Returns a list of all local available bundles and packages"
+     * )
      *
      * @Rest\Get("/system/bundle/manager/local")
      *
@@ -435,7 +479,11 @@ This is the bundle $bundleClassName.
         return $this->getBundles($finder);
     }
 
-    public function getBundles($finder)
+    /**
+     * @param Finder $finder
+     * @return array
+     */
+    protected function getBundles($finder)
     {
         $bundles = array();
         /** @var \Symfony\Component\Finder\SplFileInfo $file */
@@ -488,7 +536,10 @@ This is the bundle $bundleClassName.
     }
 
     /**
-     * @Rest\View()
+     * @ApiDoc(
+     *  section="Bundle/Package Manager",
+     *  description="Checks for updates in composer packages"
+     * )
      *
      * @Rest\Get("/system/bundle/manager/check-updates")
      *
@@ -516,30 +567,10 @@ This is the bundle $bundleClassName.
     }
 
     /**
-     * Returns true if all dependencies are fine.
-     *
-     * @param $name
-     *
-     * @return boolean
-     */
-    public function hasOpenDependencies($name)
-    {
-    }
-
-    /**
-     * Returns a list of open dependencies.
-     *
-     * @param $name
-     */
-    public function getOpenDependencies($name)
-    {
-    }
-
-    /**
-     *
-     * Installs a bundle.
-     * Activates a bundle, fires his package scripts
-     * and updates the propel ORM, if the bundle has a model.xml.
+     * @ApiDoc(
+     *  section="Bundle/Package Manager",
+     *  description="Installs a bundle"
+     * )
      *
      * @param  string $bundle
      * @param  bool $ormUpdate
@@ -551,7 +582,6 @@ This is the bundle $bundleClassName.
      * @Rest\QueryParam(name="bundle", requirements=".+", strict=true, description="The bundle name")
      * @Rest\QueryParam(name="ormUpdate", requirements=".+", default="false", description="If the orm should be updated")
      *
-     * @Rest\View()
      * @Rest\Post("/system/bundle/manager/install")
      *
      * @param ParamFetcher $paramFetcher
@@ -583,20 +613,11 @@ This is the bundle $bundleClassName.
     }
 
     /**
-     * Fires the database package script.
+     * @ApiDoc(
+     *  section="Bundle/Package Manager",
+     *  description="Uninstalls a bundle"
+     * )
      *
-     * @param  string $name
-     *
-     * @return bool
-     */
-    public function installDatabase($name)
-    {
-        $this->firePackageManager($name, 'install.database');
-
-        return true;
-    }
-
-    /**
      * Removes relevant data and object's data. Executes also the uninstall script.
      * Removes database values, some files etc.
      *
@@ -604,7 +625,6 @@ This is the bundle $bundleClassName.
      * @Rest\QueryParam(name="removeFiles", requirements=".+", default="true", description="If the orm should be updated")
      * @Rest\QueryParam(name="ormUpdate", requirements=".+", default="false", description="If the orm should be updated")
      *
-     * @Rest\View()
      * @Rest\Post("/system/bundle/manager/install")
      *
      * @param ParamFetcher $paramFetcher
@@ -659,11 +679,13 @@ This is the bundle $bundleClassName.
     }
 
     /**
-     * Uninstalls a composer package and deactivates its containing bundle.
+     * @ApiDoc(
+     *  section="Bundle/Package Manager",
+     *  description="Uninstalls a composer package and deactivates its containing bundle"
+     * )
      *
      * @Rest\QueryParam(name="name", requirements=".+", strict=true, description="The composer package name")
      *
-     * @Rest\View()
      * @Rest\Post("/system/bundle/manager/composer/uninstall")
      *
      * @param ParamFetcher $paramFetcher
@@ -703,6 +725,7 @@ This is the bundle $bundleClassName.
                         throw new PackageNotFoundException(sprintf('Package `%s` not found.', $name));
                     }
                     $this->updateAutoloader();
+
                     return true;
                 }
             }
@@ -755,13 +778,15 @@ This is the bundle $bundleClassName.
     }
 
     /**
-     * Installs a composer package and (optional) activates its containing bundle.
+     * @ApiDoc(
+     *  section="Bundle/Package Manager",
+     *  description="Installs a composer package and (optional) activates its containing bundle"
+     * )
      *
      * @Rest\QueryParam(name="name", requirements=".+", strict=true, description="The composer package name")
      * @Rest\QueryParam(name="version", requirements=".+", strict=true, description="The version")
      * @Rest\QueryParam(name="withBundles", requirements=".+", default="false", description="If the containing bundle should be activated")
      *
-     * @Rest\View()
      * @Rest\Post("/system/bundle/manager/composer/install")
      *
      * @param ParamFetcher $paramFetcher

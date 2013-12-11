@@ -1,4 +1,4 @@
-var kryncmsbundle_system_development_database = new Class({
+var kryncms_system_development_database = new Class({
 
     initialize: function (pWin) {
 

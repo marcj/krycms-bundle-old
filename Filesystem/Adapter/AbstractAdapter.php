@@ -47,7 +47,7 @@ abstract class AbstractAdapter extends ContainerAware implements AdapterInterfac
      */
     public function getKrynCore()
     {
-        return $this->container->get('kryn.cms');
+        return $this->container->get('kryn_cms');
     }
 
     /**

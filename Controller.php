@@ -12,7 +12,12 @@ class Controller extends sController implements ContainerAwareInterface {
      */
     public function isAdmin()
     {
-        return (0 === strpos($this->getRequest()->getPathInfo() . '/', $this->getSystemConfig()->getAdminUrl()));
+        $adminPrefix = $this->getKernel()->getContainer()->getParameter('kryn_admin_prefix');
+        if ('/' === substr($adminPrefix, -1)) {
+            $adminPrefix = substr($adminPrefix, 0, -1);
+        }
+
+        return (0 === strpos($this->getRequest()->getPathInfo(), $adminPrefix.'/'));
     }
 
     public function isEditMode()

@@ -10,16 +10,16 @@ class ContentTypesCompilerPass implements CompilerPassInterface {
 
     public function process(ContainerBuilder $container)
     {
-        if (!$container->hasDefinition('kryn.content.types')) {
+        if (!$container->hasDefinition('kryn_cms.content.types')) {
             return;
         }
 
         $definition = $container->getDefinition(
-            'kryn.content.types'
+            'kryn_cms.content.types'
         );
 
         $taggedServices = $container->findTaggedServiceIds(
-            'kryn.content.type'
+            'kryn_cms.content.type'
         );
 
         foreach ($taggedServices as $id => $tagAttributes) {

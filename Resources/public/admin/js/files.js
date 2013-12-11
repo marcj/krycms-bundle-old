@@ -1,4 +1,4 @@
-var kryncmsbundle_files = new Class({
+var kryncms_files = new Class({
 
     initialize: function (pWindow) {
         this.win = pWindow;

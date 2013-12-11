@@ -11,7 +11,7 @@ trait ContainerHelperTrait
      */
     public function getKrynCore()
     {
-        return $this->container->get('kryn.cms');
+        return $this->container->get('kryn_cms');
     }
 
     /**
@@ -21,7 +21,7 @@ trait ContainerHelperTrait
      */
     public function getFileSystem()
     {
-        return $this->container->get('kryn.filesystem.local');
+        return $this->container->get('kryn_cms.filesystem.local');
     }
 
     /**
@@ -31,7 +31,7 @@ trait ContainerHelperTrait
      */
     public function getCacheFileSystem()
     {
-        return $this->container->get('kryn.filesystem.cache');
+        return $this->container->get('kryn_cms.filesystem.cache');
     }
 
     /**
@@ -41,7 +41,7 @@ trait ContainerHelperTrait
      */
     public function getWebFileSystem()
     {
-        return $this->container->get('kryn.filesystem.web');
+        return $this->container->get('kryn_cms.filesystem.web');
     }
 
     /**
@@ -49,7 +49,7 @@ trait ContainerHelperTrait
      */
     public function getObjects()
     {
-        return $this->container->get('kryn.objects');
+        return $this->container->get('kryn_cms.objects');
     }
 
     /**
@@ -73,7 +73,7 @@ trait ContainerHelperTrait
      */
     public function getPageResponse()
     {
-        return $this->container->get('kryn.page.response');
+        return $this->container->get('kryn_cms.page.response');
     }
 
     /**
@@ -97,7 +97,7 @@ trait ContainerHelperTrait
      */
     public function getFastCache()
     {
-        return $this->container->get('kryn.cache.fast');
+        return $this->container->get('kryn_cms.cache.fast');
     }
 
     /**
@@ -105,7 +105,7 @@ trait ContainerHelperTrait
      */
     public function getNavigation()
     {
-        return $this->container->get('kryn.navigation');
+        return $this->container->get('kryn_cms.navigation');
     }
 
     /**
@@ -113,7 +113,7 @@ trait ContainerHelperTrait
      */
     public function getStopwatch()
     {
-        return $this->container->get('kryn.stopwatch');
+        return $this->container->get('kryn_cms.stopwatch');
     }
 
     /**
@@ -121,7 +121,7 @@ trait ContainerHelperTrait
      */
     public function getACL()
     {
-        return $this->container->get('kryn.acl');
+        return $this->container->get('kryn_cms.acl');
     }
 
     /**
@@ -137,7 +137,7 @@ trait ContainerHelperTrait
      */
     public function getTranslator()
     {
-        return $this->container->get('kryn.translator');
+        return $this->container->get('kryn_cms.translator');
     }
 
     /**
@@ -145,7 +145,7 @@ trait ContainerHelperTrait
      */
     public function getContentRender()
     {
-        return $this->container->get('kryn.content.render');
+        return $this->container->get('kryn_cms.content.render');
     }
 
     /**
@@ -153,7 +153,15 @@ trait ContainerHelperTrait
      */
     public function getContentTypes()
     {
-        return $this->container->get('kryn.content.types');
+        return $this->container->get('kryn_cms.content.types');
+    }
+
+    /**
+     * @return Admin\FieldTypes\FieldTypes
+     */
+    public function getFieldTypes()
+    {
+        return $this->container->get('kryn_cms.field.types');
     }
 
 }

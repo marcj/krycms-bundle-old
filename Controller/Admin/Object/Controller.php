@@ -3,13 +3,14 @@
 namespace Kryn\CmsBundle\Controller\Admin\Object;
 
 use FOS\RestBundle\Request\ParamFetcher;
-use Kryn\CmsBundle\Admin\ObjectCrud;
+use Kryn\CmsBundle\Admin\ObjectCrudController;
 use Kryn\CmsBundle\Controller as KrynController;
 use Kryn\CmsBundle\Exceptions\ClassNotFoundException;
 use Kryn\CmsBundle\Exceptions\ObjectMisconfiguration;
 use Kryn\CmsBundle\Exceptions\ObjectNotFoundException;
 use Kryn\CmsBundle\Tools;
 use FOS\RestBundle\Controller\Annotations as Rest;
+use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 
 /**
  * Controller
@@ -19,12 +20,14 @@ use FOS\RestBundle\Controller\Annotations as Rest;
 class Controller extends KrynController
 {
     /**
-     * General object items output.
+     * @ApiDoc(
+     *  section="Object Browser",
+     *  description="General single object item output"
+     * )
      *
      * @Rest\QueryParam(name="url", requirements=".+", strict=true, description="The object url")
      * @Rest\QueryParam(name="fields", requirements=".+", description="Comma separated list of field names")
      *
-     * @Rest\View()
      * @Rest\Get("/object")
      *
      * @param ParamFetcher $paramFetcher
@@ -47,14 +50,16 @@ class Controller extends KrynController
     }
 
     /**
-     * General object items output.
+     * @ApiDoc(
+     *  section="Object Browser",
+     *  description="General object item list output"
+     * )
      *
      * @Rest\QueryParam(name="url", requirements=".+", strict=true, description="The object url")
      * @Rest\QueryParam(name="fields", requirements=".+", description="Comma separated list of field names")
      * @Rest\QueryParam(name="returnKey", requirements=".+", description="If the result should be indexed by the pk")
      * @Rest\QueryParam(name="returnKeyAsRequested", requirements=".+", description="If the result should be indexed by the pk as requested")
      *
-     * @Rest\View()
      * @Rest\Get("/objects")
      *
      * @param ParamFetcher $paramFetcher
@@ -146,7 +151,10 @@ class Controller extends KrynController
     }
 
     /**
-     * General object items output for the object browser.
+     * @ApiDoc(
+     *  section="Object Browser",
+     *  description="General object items output for the object browser"
+     * )
      *
      * @Rest\QueryParam(name="returnHash", requirements=".+", description="If the result should be indexed by the pk")
      *
@@ -155,7 +163,6 @@ class Controller extends KrynController
      * @Rest\QueryParam(name="order", array=true, requirements=".+", description="Order the result")
      * @Rest\QueryParam(name="filter", array=true, requirements=".+", description="Filter the result")
      *
-     * @Rest\View()
      * @Rest\Get("/object-browser/{objectKey}", requirements={"objectKey" = "[a-zA-Z0-9-_\.\\\\:]+"})
      *
      * @param string $objectKey
@@ -194,7 +201,7 @@ class Controller extends KrynController
             'order' => $order
         );
 
-        $condition = ObjectCrud::buildFilter($filter);
+        $condition = ObjectCrudController::buildFilter($filter);
 
         if ($definition['browserDataModel'] == 'custom') {
 
@@ -241,11 +248,13 @@ class Controller extends KrynController
     }
 
     /**
-     * General object items output for the object browser.
+     * @ApiDoc(
+     *  section="Object Browser",
+     *  description="General object items output for the object browser"
+     * )
      *
      * @Rest\QueryParam(name="filter", array=true, requirements=".+", description="Filter the result")
      *
-     * @Rest\View()
      * @Rest\Get("/object-browser-count/{objectKey}", requirements={"objectKey" = "[a-zA-Z0-9-_\.\\\\:]+"})
      *
      * @param string $objectKey
@@ -275,7 +284,7 @@ class Controller extends KrynController
             'permissionCheck' => true
         );
 
-        $condition = ObjectCrud::buildFilter($filter);
+        $condition = ObjectCrudController::buildFilter($filter);
 
         if ($definition['browserDataModel'] == 'custom') {
 

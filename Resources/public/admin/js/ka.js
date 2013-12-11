@@ -405,7 +405,15 @@ ka.urlDecode = function (pValue) {
 }
 
 ka.normalizeObjectKey = function (objectKey) {
-    return objectKey.replace('\\', ':').replace('.', ':').replace('/', ':').toLowerCase();
+    objectKey = objectKey.replace('\\', '/').replace('.', '/').replace(':', '/').toLowerCase().replace('bundle/', '/');
+    var bundleName = objectKey.split('/')[0];
+    var objectName = objectKey.split('/')[1];
+
+    if (!bundleName || !objectName) {
+        throw tf('objectKey `%s` is not a valid object idefntifier (bundlename/objectName)', objectKey);
+    }
+
+    return bundleName+'/'+objectName.lcfirst();
 }
 
 /**
@@ -476,21 +484,25 @@ ka.getObjectPk = function (pObjectKey, pItem) {
 /**
  * This just cut off object://<objectName>/ and returns the raw primary key part.
  *
- * @param {String} pUri Internal uri
+ * @param {String} uri Internal uri
  * @return {String}
  */
-ka.getCroppedObjectId = function (pUri) {
-    if ('string' !== typeOf(pUri)) {
-        return pUri;
+ka.getCroppedObjectId = function (uri) {
+    if ('string' !== typeOf(uri)) {
+        return uri;
     }
 
-    if (pUri.indexOf('object://') == 0) {
-        pUri = pUri.substr(9);
+    if (uri.indexOf('object://') == 0) {
+        uri = uri.substr(9);
     }
 
-    var idx = pUri.indexOf('/');
+    var idx = uri.indexOf('/'); //cut of bundleName
+    uri = -1 === idx ? uri : uri.substr(idx + 1);
 
-    return -1 === idx ? pUri : pUri.substr(idx + 1);
+    var idx = uri.indexOf('/'); //cut of objectName
+    uri = -1 === idx ? uri : uri.substr(idx + 1);
+
+    return uri;
 }
 
 /**
@@ -539,23 +551,24 @@ ka.getObjectUrl = function (pObjectKey, pId) {
 /**
  * Returns the object key (not id) from an object uri.
  *
- * @param pUrl
+ * @param url
  */
-ka.getObjectKey = function (pUrl) {
-    if (typeOf(pUrl) != 'string') {
-        throw 'pUrl is not a string';
+ka.getObjectKey = function (url) {
+    if (typeOf(url) != 'string') {
+        throw 'url is not a string';
     }
 
-    if (pUrl.indexOf('object://') == 0) {
-        pUrl = pUrl.substr(9);
+    if (url.indexOf('object://') == 0) {
+        url = url.substr(9);
     }
 
-    var idx = pUrl.indexOf('/');
+    var idx = url.indexOf('/');
     if (idx == -1) {
         return '';
     }
 
-    return ka.normalizeObjectKey(pUrl.substr(0, idx));
+    idx = idx + url.substr(idx + 1).indexOf('/');
+    return ka.normalizeObjectKey(url.substr(0, idx + 1));
 }
 
 /**
@@ -1047,14 +1060,14 @@ ka.loadStream = function () {
         clearTimeout(ka._lastStreamId);
     }
 
-    ka.streamParams.__streams = [];
+    ka.streamParams.streams = [];
     Object.each(ka.streamRegistered, function (cbs, path) {
         if (0 !== cbs.length) {
-            ka.streamParams.__streams.push(path);
+            ka.streamParams.streams.push(path);
         }
     });
 
-    if (0 === ka.streamParams.__streams.length) {
+    if (0 === ka.streamParams.streams.length) {
         return;
     }
 
@@ -1279,8 +1292,8 @@ ka.getObjectDefinition = function (pObjectKey) {
 
     pObjectKey = ka.normalizeObjectKey(pObjectKey);
 
-    var module = ("" + pObjectKey.split(':')[0]).toLowerCase();
-    var name = pObjectKey.split(':')[1].toLowerCase();
+    var module = ("" + pObjectKey.split('/')[0]).toLowerCase();
+    var name = pObjectKey.split('/')[1].toLowerCase();
 
     if (ka.getConfig(module) && ka.getConfig(module)['objects'][name]) {
         var config = ka.getConfig(module)['objects'][name];

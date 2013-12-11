@@ -10,11 +10,18 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use FOS\RestBundle\Controller\Annotations as Rest;
+use Nelmio\ApiDocBundle\Annotation\ApiDoc;
+use Symfony\Component\HttpFoundation\Response;
 
 class UIAssetsController extends Controller
 {
     /**
-     * @Rest\Get("ui/languages")
+     * @ApiDoc(
+     *  section="Interface assets",
+     *  description="Prints all possible language codes"
+     * )
+     *
+     * @Rest\Get("/admin/ui/languages")
      *
      * @return string javascript
      */
@@ -32,9 +39,9 @@ class UIAssetsController extends Controller
             $json = json_encode($languages);
         }
 
-        header('Content-Type: text/javascript');
-        print "window.ka = window.ka || {}; ka.possibleLangs = " . $json.';';
-        exit;
+        $response = new Response("window.ka = window.ka || {}; ka.possibleLangs = " . $json.';');
+        #$response->headers->set('Content-Type', 'text/javascript');
+        return $response;
     }
 
     /**
@@ -42,13 +49,18 @@ class UIAssetsController extends Controller
      */
     public function getKrynCore()
     {
-        return $this->get('kryn.cms');
+        return $this->get('kryn_cms');
     }
 
     /**
+     * @ApiDoc(
+     *  section="Interface assets",
+     *  description="Prints the language plural form"
+     * )
+     *
      * @Rest\QueryParam(name="lang", requirements="[a-z]{2,3}", strict=true, description="The language code")
      *
-     * @Rest\Get("ui/language-plural")
+     * @Rest\Get("/admin/ui/language-plural")
      *
      * @param ParamFetcher $paramFetcher
      *
@@ -67,21 +79,23 @@ class UIAssetsController extends Controller
     }
 
     /**
+     * @ApiDoc(
+     *  section="Interface assets",
+     *  description="Prints all language messages"
+     * )
+     *
      * @Rest\QueryParam(name="lang", requirements="[a-z]{2,3}", strict=true, description="The language code")
      * @Rest\QueryParam(name="javascript", requirements=".+", default=false, description="If it should be printed as javascript")
      *
-     * @Rest\View()
-     * @Rest\Get("ui/language")
+     * @Rest\Get("/admin/ui/language")
      *
-     * @param ParamFetcher $paramFetcher
+     * @param string $lang
+     * @param string $javascript
      *
      * @return array|string depends on javascript param
      */
-    public function getLanguageAction(ParamFetcher $paramFetcher)
+    public function getLanguageAction($lang, $javascript)
     {
-        $lang = $paramFetcher->get('lang');
-        $javascript = filter_var($paramFetcher->get('javascript'), FILTER_VALIDATE_BOOLEAN);
-
         if (!$this->getKrynCore()->getTranslator()->isValidLanguage($lang)) {
             $lang = 'en';
         }

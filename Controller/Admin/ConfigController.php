@@ -5,13 +5,17 @@ namespace Kryn\CmsBundle\Controller\Admin;
 use Kryn\CmsBundle\Controller;
 use Kryn\CmsBundle\Model\LanguageQuery;
 use Propel\Runtime\Map\TableMap;
-
 use FOS\RestBundle\Controller\Annotations as Rest;
+use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 
 class ConfigController extends Controller
 {
     /**
-     * @Rest\View()
+     * @ApiDoc(
+     *  section="System configuration",
+     *  section="System configuration",
+     *  description="Returns labels for the settings window"
+     * )
      *
      * @Rest\Get("/system/config/labels")
      *
@@ -30,7 +34,11 @@ class ConfigController extends Controller
     }
 
     /**
-     * @Rest\View()
+     * @ApiDoc(
+     *  section="System configuration",
+     *  description="Returns the system configuration"
+     * )
+     *
      *
      * @Rest\Get("/system/config")
      *
@@ -42,7 +50,11 @@ class ConfigController extends Controller
     }
 
     /**
-     * @Rest\View()
+     * @ApiDoc(
+     *  section="System configuration",
+     *  description="Saves the system configuration"
+     * )
+     *
      *
      * @Rest\Put("/system/config")
      *

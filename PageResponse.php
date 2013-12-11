@@ -41,14 +41,14 @@ class PageResponse extends Response
      *
      * @var array
      */
-    private $pluginResponse = array();
+    protected $pluginResponse = array();
 
     /**
      * CSS files.
      *
      * @var array
      */
-    private $css = array(
+    protected $css = array(
         array('path' => '@KrynCmsBundle/css/normalize.css', 'type' => 'text/css'),
         array('path' => '@KrynCmsBundle/css/defaults.css', 'type' => 'text/css')
     );
@@ -58,39 +58,49 @@ class PageResponse extends Response
      *
      * @var array
      */
-    private $js = array();
+    protected $js = array();
 
     /**
      * @var string
      */
-    private $title;
+    protected $title;
 
     /**
      * All additional html>head elements.
      *
      * @var array
      */
-    private $header = array();
-
-    /**
-     * @var bool
-     */
-    private $domainHandling = true;
+    protected $header = array();
 
     /**
      * @var string
      */
-    private $favicon = '@KrynCmsBundle/images/favicon.ico';
+    protected $body = '';
 
     /**
      * @var bool
      */
-    private $resourceCompression = false;
+    protected $renderFrontPage = false;
+
+    /**
+     * @var bool
+     */
+    protected $domainHandling = true;
+
+    /**
+     * @var string
+     */
+    protected $favicon = '@KrynCmsBundle/images/favicon.ico';
+
+    /**
+     * @var bool
+     */
+    protected $resourceCompression = false;
 
     /**
      * @var StopwatchHelper
      */
-    private $stopwatch;
+    protected $stopwatch;
 
     /**
      * Constructor
@@ -179,6 +189,38 @@ class PageResponse extends Response
     public function getDomainHandling()
     {
         return $this->domainHandling;
+    }
+
+    /**
+     * @param string $body
+     */
+    public function setBody($body)
+    {
+        $this->body = $body;
+    }
+
+    /**
+     * @return string
+     */
+    public function getBody()
+    {
+        return $this->body;
+    }
+
+    /**
+     * @param boolean $renderFrontPage
+     */
+    public function setRenderFrontPage($renderFrontPage)
+    {
+        $this->renderFrontPage = $renderFrontPage;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function getRenderFrontPage()
+    {
+        return $this->renderFrontPage;
     }
 
     /**
@@ -278,7 +320,7 @@ class PageResponse extends Response
 
     public function prepare(Request $request)
     {
-        parent::prepare($this->getKrynCore()->getRequest());
+        parent::prepare($request);
         if (!$this->getContent()) {
             $this->renderContent();
         }
@@ -311,7 +353,11 @@ class PageResponse extends Response
 
     public function buildHtml()
     {
-        $body = $this->buildBody();
+        $body = $this->getBody();
+
+        if ($this->getRenderFrontPage()) {
+            $body = $this->buildBody();
+        }
 
         $templating = $this->getKrynCore()->getTemplating();
 
@@ -849,7 +895,9 @@ class PageResponse extends Response
                         if (file_exists($file) && $modifiedTime = filemtime($file)) {
                             $jsCode .= $file . '_' . $modifiedTime;
                         } else {
-                            $this->getKrynCore()->getLogger()->error(sprintf('JavaScript file `%s` [%s] not found.', $file, $js['path']));
+                            $this->getKrynCore()->getLogger()->error(
+                                sprintf('JavaScript file `%s` [%s] not found.', $file, $js['path'])
+                            );
                         }
                     }
                 } else {

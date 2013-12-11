@@ -11,13 +11,17 @@ use Kryn\CmsBundle\Properties;
 use Propel\Runtime\Map\TableMap;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use FOS\RestBundle\Controller\Annotations as Rest;
+use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 
 class BackendController extends Controller
 {
     /**
-     * Clears the cache.
+     * @ApiDoc(
+     *  section="Backend",
+     *  description="Clears the cache"
+     * )
      *
-     * @Rest\Delete("/backend/cache")
+     * @Rest\Delete("/admin/backend/cache")
      *
      * @return bool
      */
@@ -35,13 +39,18 @@ class BackendController extends Controller
      */
     public function getKrynCore()
     {
-        return $this->get('kryn.cms');
+        return $this->get('kryn_cms');
     }
 
     /**
+     * @ApiDoc(
+     *  section="Backend",
+     *  description="Saves user settings"
+     * )
+     *
      * @Rest\RequestParam(name="settings", array=true)
      *
-     * @Rest\Post("/backend/user-settings")
+     * @Rest\Post("/admin/backend/user-settings")
      *
      * @param ParamFetcher $paramFetcher
      *
@@ -62,13 +71,16 @@ class BackendController extends Controller
     }
 
     /**
-     * Prints the javascript file content of $bundle and $code.
+     * @ApiDoc(
+     *  section="Backend",
+     *  description="Prints the javascript file content of $bundle and $code."
+     * )
      *
      * @Rest\QueryParam(name="bundle", requirements=".+", strict=true, description="The bundle name")
      * @Rest\QueryParam(name="code", requirements=".+", strict=true, description="Slash separated entry point path")
      * @Rest\QueryParam(name="onLoad", requirements=".+", strict=true, description="onLoad id")
 
-     * @Rest\Get("/backend/custom-js")
+     * @Rest\Get("/admin/backend/custom-js")
      *
      * @param ParamFetcher $paramFetcher
      *
@@ -102,7 +114,10 @@ class BackendController extends Controller
     }
 
     /**
-     * Returns a huge array with settings.
+     * @ApiDoc(
+     *  section="Backend",
+     *  description="Returns a array with settings for the administration interface"
+     * )
      *
      * items:
      *  modules
@@ -120,8 +135,7 @@ class BackendController extends Controller
      *
      * @Rest\QueryParam(name="keys", array=true, requirements=".+", description="List of config keys to filter"))
      *
-     * @Rest\View()
-     * @Rest\Get("/backend/settings")
+     * @Rest\Get("/admin/backend/settings")
      *
      * @param ParamFetcher $paramFetcher
      *
@@ -185,9 +199,10 @@ class BackendController extends Controller
         }
 
         if ($loadKeys == false || in_array('system', $loadKeys)) {
-            $res['system'] = clone $this->getKrynCore()->getSystemConfig();
-            $res['system']->setDatabase(null);
-            $res['system']->setPasswordHashKey('');
+            $system = clone $this->getKrynCore()->getSystemConfig();
+            $system->setDatabase(null);
+            $system->setPasswordHashKey('');
+            $res['system'] = $system->toArray();
         }
 
         if ($loadKeys == false || in_array('domains', $loadKeys)) {
@@ -230,7 +245,12 @@ class BackendController extends Controller
     }
 
     /**
-     * @Rest\Get("/backend/script-map")
+     * @ApiDoc(
+     *  section="Backend",
+     *  description="Prints compressed script map"
+     * )
+     *
+     * @Rest\Get("/admin/backend/script-map")
      */
     public function loadJsMap()
     {
@@ -238,9 +258,12 @@ class BackendController extends Controller
     }
 
     /**
-     * Prints all CSS files combined.
+     * @ApiDoc(
+     *  section="Backend",
+     *  description="Prints all CSS files combined"
+     * )
      *
-     * @Rest\Get("/backend/css")
+     * @Rest\Get("/admin/backend/css")
      *
      * @return string CCS
      */
@@ -293,11 +316,14 @@ class BackendController extends Controller
     }
 
     /**
-     * Prints all JavaScript files combined.
+     * @ApiDoc(
+     *  section="Backend",
+     *  description="Prints all JavaScript files combined"
+     * )
      *
      * @Rest\QueryParam(name="printSourceMap", requirements=".+", description="If the sourceMap should printed")
      *
-     * @Rest\Get("/backend/script")
+     * @Rest\Get("/admin/backend/script")
      *
      * @param ParamFetcher $paramFetcher
      *
@@ -419,10 +445,13 @@ class BackendController extends Controller
     }
 
     /**
-     * Returns all available menu/entryPoint items for the main navigation bar in the administration.
+     * @ApiDoc(
+     *  section="Backend",
+     *  description="Returns all available menu/entryPoint items for the main navigation bar in the administration"
+     * )
      *
      * @Rest\View()
-     * @Rest\Get("/backend/menus")
+     * @Rest\Get("/admin/backend/menus")
      *
      * @return array
      */
@@ -432,7 +461,7 @@ class BackendController extends Controller
 
         foreach ($this->getKrynCore()->getConfigs() as $bundleName => $bundleConfig) {
             foreach ($bundleConfig->getAllEntryPoints() as $subEntryPoint) {
-                $path = $bundleConfig->getBundleName() . '/' . $subEntryPoint->getFullPath(true);
+                $path = $bundleConfig->getName() . '/' . $subEntryPoint->getFullPath(true);
 
                 if (substr_count($path, '/') <= 3) {
                     if ($subEntryPoint->isLink()) {
@@ -455,6 +484,11 @@ class BackendController extends Controller
         return $entryPoints;
     }
 
+    /**
+     * @param string $code
+     * @param string $value
+     * @return array
+     */
     protected function getChildMenus($code, $value)
     {
         $links = array();

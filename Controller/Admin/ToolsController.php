@@ -8,17 +8,20 @@ use Kryn\CmsBundle\Model\LogRequestQuery;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Map\TableMap;
 use FOS\RestBundle\Controller\Annotations as Rest;
+use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 
 class ToolsController
 {
 
     /**
-     * Returns all stored log entries from the given request.
+     * @ApiDoc(
+     *  section="Tools",
+     *  description="Returns all stored log entries from the given request"
+     * )
      *
      * @Rest\QueryParam(name="requestId", requirements=".+", strict=true, description="The request id")
      * @Rest\QueryParam(name="level", requirements=".+",  default="all", description="Level to filter")
      *
-     * @Rest\View()
      * @Rest\Get("admin/system/tools/logs")
      *
      * @param ParamFetcher $paramFetcher
@@ -52,11 +55,13 @@ class ToolsController
     }
 
     /**
-     * Returns all stored log requests.
+     * @ApiDoc(
+     *  section="Tools",
+     *  description="Returns all stored log requests"
+     * )
      *
      * @Rest\QueryParam(name="page", requirements="[0-9]+",  default="1", description="page")
      *
-     * @Rest\View()
      * @Rest\Get("admin/system/tools/requests")
      *
      * @param ParamFetcher $paramFetcher
@@ -84,9 +89,11 @@ class ToolsController
     }
 
     /**
-     * Deletes all stored log entries and log requests.
+     * @ApiDoc(
+     *  section="Tools",
+     *  description="Deletes all stored log entries and log requests"
+     * )
      *
-     * @Rest\View()
      * @Rest\Delete("admin/system/tools/requests")
      *
      * @return int count of deleted records

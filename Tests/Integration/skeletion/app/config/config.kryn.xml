@@ -3,8 +3,6 @@
   <id></id>
   <!--The system title of this installation.-->
   <systemTitle></systemTitle>
-  <!--Defines under which url the backend is. Default is http://<domain>/kryn. where `kryn` is the `adminUrl`.-->
-  <adminUrl>/kryn/</adminUrl>
   <!--Comma separated list of supported languages. (systemwide)-->
   <languages>en</languages>
   <!--Is displayed as the administrator's email in error messages etc.-->

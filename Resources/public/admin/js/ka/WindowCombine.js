@@ -71,13 +71,10 @@ ka.WindowCombine = new Class({
             //classic list
             this.mainLeftItems = new Element('div', {
                 'class': 'ka-WindowList-combine-items ka-List'
-            })
-                .addEvent('scroll', this.checkScrollPosition.bind(this, true))
-                .inject(this.mainLeft, 'top');
+            }).addEvent('scroll', this.checkScrollPosition.bind(this, true)).inject(this.mainLeft, 'top');
 
-
-            this.mainLeftItems.addEvent('click:relay(.ka-List-item)', function(event, item){
-                if (event.target.hasClass('ka-List-item-remove') || event.target.getParent('.ka-List-item-remove')){
+            this.mainLeftItems.addEvent('click:relay(.ka-List-item)', function(event, item) {
+                if (event.target.hasClass('ka-List-item-remove') || event.target.getParent('.ka-List-item-remove')) {
                     return;
                 }
                 this.loadItem(item._item);
@@ -122,9 +119,7 @@ ka.WindowCombine = new Class({
                 }
             }.bind(this)).inject(this.mainLeftDeleter);
 
-            this.removeCombineSelectedBtn = new ka.Button(t('Remove selected'))
-                .addEvent('click', this.removeCombineSelected.bind(this))
-                .inject(this.mainLeftDeleter);
+            this.removeCombineSelectedBtn = new ka.Button(t('Remove selected')).addEvent('click', this.removeCombineSelected.bind(this)).inject(this.mainLeftDeleter);
 
             this.removeCombineSelectedBtn.setButtonStyle('blue');
 
@@ -164,9 +159,9 @@ ka.WindowCombine = new Class({
         }
     },
 
-    getCombinedSelected: function () {
+    getCombinedSelected: function() {
         var res = [];
-        this.combineCheckboxes.each(function (check) {
+        this.combineCheckboxes.each(function(check) {
             if (check.checked) {
                 res.include(check.value);
             }
@@ -179,9 +174,9 @@ ka.WindowCombine = new Class({
         ka.getAdminInterface().objectChanged(this.classProperties['object']);
 
         return;
-        var items  = this.getCombinedSelected();
+        var items = this.getCombinedSelected();
         if ('array' === typeOf(items) && 0 < items.length) {
-            this.win.confirm(_('Really remove selected?'), function (res) {
+            this.win.confirm(_('Really remove selected?'), function(res) {
                 if (!res) {
                     return;
                 }
@@ -193,7 +188,7 @@ ka.WindowCombine = new Class({
                 this.removeCombineSelectedBtn.startTip(t('Removing ...'));
 
                 this.lastDeleteRq = new Request.JSON({url: _pathAdmin + this.win.getEntryPoint(),
-                    noCache: 1, onComplete: function (res) {
+                    noCache: 1, onComplete: function(res) {
 
                         this.removeCombineSelectedBtn.stopTip(t('Removed.'));
                         ka.getAdminInterface().objectChanged(this.classProperties['object']);
@@ -341,8 +336,7 @@ ka.WindowCombine = new Class({
         this.viewActionBar.inject(this.topActionBar, 'top');
         this.viewListBtn = this.viewActionBar.addIconButton(t('Grid'), '#icon-list-9', this.setView.bind(this, 'list'));
 
-        this.viewCompactBtn = this.viewActionBar
-            .addIconButton(t('Compact'), '#icon-layout', this.setView.bind(this, 'combine'));
+        this.viewCompactBtn = this.viewActionBar.addIconButton(t('Compact'), '#icon-layout', this.setView.bind(this, 'combine'));
 
         this.viewListBtn.setPressed(true);
 
@@ -394,9 +388,7 @@ ka.WindowCombine = new Class({
                     this.listContainer.setStyle('visibility', 'visible');
 
                     this.lastViewFx = new Fx.Elements([
-                        this.listContainer,
-                        this.actionBarNavigation,
-                        this.combineContainer
+                        this.listContainer, this.actionBarNavigation, this.combineContainer
                     ], options).start({
                             0: {opacity: 1},
                             1: {opacity: 1},
@@ -429,9 +421,7 @@ ka.WindowCombine = new Class({
                     });
 
                     this.lastViewFx = new Fx.Elements([
-                        this.listContainer,
-                        this.actionBarNavigation,
-                        this.combineContainer
+                        this.listContainer, this.actionBarNavigation, this.combineContainer
                     ], options).start({
                             0: {opacity: 0},
                             1: {opacity: 0},
@@ -442,7 +432,7 @@ ka.WindowCombine = new Class({
                             }
                         }).chain(function() {
                             this.listContainer.setStyle('display', 'none');
-                       }.bind(this));
+                        }.bind(this));
                 }
 
                 if (!this.initialLoaded) {
@@ -493,8 +483,7 @@ ka.WindowCombine = new Class({
             this.setWinParams();
         }.bind(this));
 
-        new Element('div',
-            {style: 'color: gray; padding-left: 4px; padding-top:3px;', html: _('Use * as wildcard')}).inject(this.mainLeftSearch);
+        new Element('div', {style: 'color: gray; padding-left: 4px; padding-top:3px;', html: _('Use * as wildcard')}).inject(this.mainLeftSearch);
 
         var table = new Element('table').inject(this.mainLeftSearch);
 
@@ -601,8 +590,7 @@ ka.WindowCombine = new Class({
 
     loadMore: function(pAndScrollToSelect) {
         if (this.loadedCount < this.maxItems) {
-            this.loadItems(this.loadedCount,
-                (this.classProperties.itemsPerPage) ? this.classProperties.itemsPerPage : 5, pAndScrollToSelect);
+            this.loadItems(this.loadedCount, (this.classProperties.itemsPerPage) ? this.classProperties.itemsPerPage : 5, pAndScrollToSelect);
         }
     },
 
@@ -866,8 +854,7 @@ ka.WindowCombine = new Class({
         if (!this.prevItemLoader) {
             return;
         }
-        this.prevItemLoader.set('html',
-            '<img src="' + _path + 'bundles/kryncms/admin/images/loading.gif" />' + '<br />' + _('Loading entries ...'));
+        this.prevItemLoader.set('html', '<img src="' + _path + 'bundles/kryncms/admin/images/loading.gif" />' + '<br />' + _('Loading entries ...'));
     },
 
     prevItemLoaderStop: function() {
@@ -1027,12 +1014,7 @@ ka.WindowCombine = new Class({
 
     getSplitTitle: function(pItem) {
 
-        var value = ka.getObjectFieldLabel(
-            pItem,
-            this.classProperties.columns[this.sortCombineField],
-            this.sortCombineField,
-            this.classProperties['object']
-        );
+        var value = ka.getObjectFieldLabel(pItem, this.classProperties.columns[this.sortCombineField], this.sortCombineField, this.classProperties['object']);
         if (value == '') {
             return _('-- No value --');
         }
@@ -1041,8 +1023,7 @@ ka.WindowCombine = new Class({
             return value;
         }
 
-        if (!this.classProperties.columns[this.sortCombineField]['type'] ||
-            this.classProperties.columns[this.sortCombineField].type == "text") {
+        if (!this.classProperties.columns[this.sortCombineField]['type'] || this.classProperties.columns[this.sortCombineField].type == "text") {
 
             return '<b>' + ((typeOf(value) == 'string') ? value.substr(0, 1).toUpperCase() : value) + '</b>';
 
@@ -1229,15 +1210,12 @@ ka.WindowCombine = new Class({
     getRefWin: function() {
         var res = {};
         Object.each([
-            'addEvent', 'removeEvent', 'extendHead', 'addSmallTabGroup', 'addButtonGroup', 'border',
-            'inlineContainer', 'titleGroups', 'id', 'close', 'setTitle', '_confirm',
-            'interruptClose'
+            'addEvent', 'removeEvent', 'extendHead', 'addSmallTabGroup', 'addButtonGroup', 'border', 'inlineContainer', 'titleGroups', 'id', 'close', 'setTitle', '_confirm', 'interruptClose'
         ], function(id) {
             res[id] = this.win[id];
             if (typeOf(this.win[id]) == 'function') {
                 res[id] = this.win[id].bind(this.win);
-            }
-            else {
+            } else {
                 res[id] = this.win[id];
             }
         }.bind(this));
@@ -1374,8 +1352,7 @@ ka.WindowCombine = new Class({
                 win[i] = this.win[i];
             }
 
-            win.entryPoint =
-                ka.entrypoint.getRelative(this.win.entryPoint, this.classProperties.nestedRootEditEntrypoint);
+            win.entryPoint = ka.entrypoint.getRelative(this.win.entryPoint, this.classProperties.nestedRootEditEntrypoint);
             win.params = {item: pItem};
             win.getSidebar = function() {
                 return this.editAddSidebarContainer;
@@ -1562,35 +1539,34 @@ ka.WindowCombine = new Class({
         this.setViewToCombine = true;
         this.order = {};
         this.order[this.sortCombineField] = this.sortCombineDirection;
+        var id = ka.getCroppedObjectId(pPrimary);
+        var url = _pathAdmin + this.getEntryPoint() + '/' + id + '/:position';
 
-        this.lastLoadAroundRequest =
-            new Request.JSON({url: _pathAdmin + this.getEntryPoint(), noCache: true, onComplete: function(response) {
+        this.lastLoadAroundRequest = new Request.JSON({url: url, noCache: true, onComplete: function(response) {
+            var position = response.data;
 
-                var position = response.data;
+            if (typeOf(position) == 'number') {
+                var range = (this.classProperties.itemsPerPage) ? this.classProperties.itemsPerPage : 5;
 
-                if (typeOf(position) == 'number') {
-                    var range = (this.classProperties.itemsPerPage) ? this.classProperties.itemsPerPage : 5;
-
-                    var from = position;
-                    if (position < range) {
-                        from = 0;
-                    } else {
-                        from = position - Math.floor(range / 2);
-                    }
-
-                    this.clearItemList();
-                    this.loadItems(from, range);
+                var from = position;
+                if (position < range) {
+                    from = 0;
                 } else {
-                    this.loadItems(0, 1);
+                    from = position - Math.floor(range / 2);
                 }
 
-            }.bind(this)}).get({
-                    getPosition: ka.getCroppedObjectId(pPrimary),
-                    order: this.order,
-                    filter: this.searchEnable,
-                    lang: (this.languageSelect) ? this.languageSelect.getValue() : null,
-                    filterVals: (this.searchEnable) ? this.getSearchVals() : null
-                });
+                this.clearItemList();
+                this.loadItems(from, range);
+            } else {
+                this.loadItems(0, 1);
+            }
+
+        }.bind(this)}).get({
+                order: this.order,
+                filter: this.searchEnable,
+                lang: (this.languageSelect) ? this.languageSelect.getValue() : null,
+                filterVals: (this.searchEnable) ? this.getSearchVals() : null
+            });
     },
 
     saved: function(pItem, pRes) {
@@ -1676,18 +1652,13 @@ ka.WindowCombine = new Class({
 
         var item = new Element('div', {
             html: layout,
-            'class': 'ka-List-item' + (this.classProperties.edit ? ' editable': '')
+            'class': 'ka-List-item' + (this.classProperties.edit ? ' editable' : '')
         });
         item._item = pItem;
         item._pk = pk;
 
         //parse template
-        var data = ka.getObjectLabels(
-            this.classProperties.columns,
-            pItem,
-            this.classProperties['object'],
-            true
-        );
+        var data = ka.getObjectLabels(this.classProperties.columns, pItem, this.classProperties['object'], true);
 
         mowla.render(item, data);
 
@@ -1706,8 +1677,7 @@ ka.WindowCombine = new Class({
                 var checkbox = new Element('input', {
                     value: ka.getObjectUrlId(this.classProperties['object'], pItem),
                     type: 'checkbox'
-                })
-                    .addEvent('click',function(e) {
+                }).addEvent('click',function(e) {
                         e.stopPropagation();
                     }).inject(removeCheckBox);
 

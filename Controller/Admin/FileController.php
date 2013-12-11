@@ -14,15 +14,18 @@ use Kryn\CmsBundle\Model\Base\FileQuery;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
+use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 
 class FileController extends Controller
 {
     /**
-     * Removes a file or folder (recursively) in /web.
+     * @ApiDoc(
+     *  section="File Manager",
+     *  description="Removes a file or folder (recursively) in /web"
+     * )
      *
      * @Rest\QueryParam(name="path", requirements=".+", strict=true, description="The file path")
      *
-     * @Rest\View()
      * @Rest\Delete("/admin/file")
      *
      * @param ParamFetcher $paramFetcher
@@ -40,12 +43,14 @@ class FileController extends Controller
     }
 
     /**
-     * Creates a file in /web.
+     * @ApiDoc(
+     *  section="File Manager",
+     *  description="Creates a file in /web"
+     * )
      *
      * @Rest\QueryParam(name="path", requirements=".+", strict=true, description="The file path")
      * @Rest\RequestParam(name="content", requirements=".*", description="The file content")
      *
-     * @Rest\View()
      * @Rest\Put("/admin/file")
      *
      * @param ParamFetcher $paramFetcher
@@ -62,13 +67,15 @@ class FileController extends Controller
     }
 
     /**
-     * Moves a file in /web to $target in /web.
+     * @ApiDoc(
+     *  section="File Manager",
+     *  description="Moves a file in /web to $target in /web"
+     * )
      *
      * @Rest\QueryParam(name="path", requirements=".+", strict=true, description="The file path")
      * @Rest\QueryParam(name="target", requirements=".*", strict=true, description="The target file path")
      * @Rest\QueryParam(name="overwrite", requirements=".*", default="false", description="If the target should be overwritten")
      *
-     * @Rest\View()
      * @Rest\Post("/admin/file/move")
      *
      * @param ParamFetcher $paramFetcher
@@ -92,14 +99,16 @@ class FileController extends Controller
     }
 
     /**
-     * Moves or Copies a file in /web to $target in /web.
+     * @ApiDoc(
+     *  section="File Manager",
+     *  description="Moves or copies files in /web to $target in /web"
+     * )
      *
      * @Rest\QueryParam(name="files", requirements=".*", array=true, strict=true, description="The file paths")
      * @Rest\QueryParam(name="target", requirements=".*", strict=true, description="The target file path")
      * @Rest\QueryParam(name="overwrite", requirements=".*", default="false", description="If the target should be overwritten")
      * @Rest\QueryParam(name="move", requirements=".*", default="false", description="If files should be moved (cut&paste) or copied (copy&paste)")
      *
-     * @Rest\View()
      * @Rest\Post("/admin/file/paste")
      *
      * @param ParamFetcher $paramFetcher
@@ -127,12 +136,14 @@ class FileController extends Controller
     }
 
     /**
-     * Creates a folder in /web.
+     * @ApiDoc(
+     *  section="File Manager",
+     *  description="Creates a folder in /web"
+     * )
      *
      * @Rest\QueryParam(name="path", requirements=".+", strict=true, description="The file path")
      * @Rest\RequestParam(name="content", requirements=".*", description="The file content")
      *
-     * @Rest\View()
      * @Rest\Post("/admin/file/dir")
      *
      * @param ParamFetcher $paramFetcher
@@ -148,7 +159,10 @@ class FileController extends Controller
     }
 
     /**
-     * Checks the file access.
+     * @ApiDoc(
+     *  section="File Manager",
+     *  description="Checks the file access"
+     * )
      *
      * @param string $path
      * @param array $fields
@@ -186,14 +200,16 @@ class FileController extends Controller
     }
 
     /**
-     * Prepares a file upload process.
+     * @ApiDoc(
+     *  section="File Manager",
+     *  description="Prepares a file upload process"
+     * )
      *
      * @Rest\QueryParam(name="path", requirements=".+", strict=true, description="The file path")
      * @Rest\QueryParam(name="name", requirements=".*", strict=true, description="The file path")
      * @Rest\QueryParam(name="overwrite", requirements=".*", default="false", description="If the target should be overwritten")
      * @Rest\QueryParam(name="autoRename", requirements=".*", default="false", description="If the target name should be autoRenamed ($name-n) when already exists")
      *
-     * @Rest\View()
      * @Rest\Post("/admin/file/upload/prepare")
      *
      * @param ParamFetcher $paramFetcher
@@ -263,14 +279,16 @@ class FileController extends Controller
     }
 
     /**
-     * Uploads a file to $path with $name as name.
+     * @ApiDoc(
+     *  section="File Manager",
+     *  description="Uploads a file to $path with $name as name"
+     * )
      *
      * @Rest\QueryParam(name="path", requirements=".+", strict=true, description="The target path")
      * @Rest\QueryParam(name="name", requirements=".*", strict=true, description="The file name")
      * @Rest\QueryParam(name="overwrite", requirements=".*", default="false", description="If the target should be overwritten")
      * @Rest\RequestParam(name="file", strict=true, description="The file")
      *
-     * @Rest\View()
      * @Rest\Post("/admin/file/upload")
      *
      * @param Request $request
@@ -346,12 +364,13 @@ class FileController extends Controller
     }
 
     /**
-     *
-     * Returns the content of the file. If $path is a directory it returns all containing files as array.
+     * @ApiDoc(
+     *  section="File Manager",
+     *  description="Returns the content of the file. If $path is a directory it returns all containing files as array"
+     * )
      *
      * @Rest\QueryParam(name="path", requirements=".+", strict=true, description="The file path or its ID")
      *
-     * @Rest\View()
      * @Rest\Get("/admin/file")
      *
      * @param ParamFetcher $paramFetcher
@@ -456,13 +475,15 @@ class FileController extends Controller
     }
 
     /**
-     * Searches for files.
+     * @ApiDoc(
+     *  section="File Manager",
+     *  description="Searches for files"
+     * )
      *
      * @Rest\QueryParam(name="path", requirements=".+", strict=true, description="The target path")
      * @Rest\QueryParam(name="q", requirements=".*", strict=true, description="Search query")
      * @Rest\QueryParam(name="depth", requirements="[0-9]+", default=1, description="Depth")
      *
-     * @Rest\View()
      * @Rest\Get("/admin/file/search")
      *
      * @param ParamFetcher $paramFetcher
@@ -481,11 +502,13 @@ class FileController extends Controller
     }
 
     /**
-     * Gets information about a single file.
+     * @ApiDoc(
+     *  section="File Manager",
+     *  description="Gets information about a single file"
+     * )
      *
      * @Rest\QueryParam(name="path", requirements=".+", strict=true, description="The file path or its ID")
      *
-     * @Rest\View()
      * @Rest\Get("/admin/file/single")
      *
      * @param ParamFetcher $paramFetcher
@@ -521,7 +544,11 @@ class FileController extends Controller
     }
 
     /**
-     * Displays a thumbnail/resized version of a image.
+     * @ApiDoc(
+     *  section="File Manager",
+     *  description="Displays a thumbnail/resized version of a image"
+     * )
+     *
      * This exists the process and sends a `content-type: image/png` http header.
      *
      * @Rest\QueryParam(name="path", requirements=".+", strict=true, description="The file path or its ID")
@@ -569,6 +596,11 @@ class FileController extends Controller
     }
 
     /**
+     * @ApiDoc(
+     *  section="File Manager",
+     *  description="Views the file content directly in the browser with a proper Content-Type and cache headers"
+     * )
+     *
      * Views the file content directly in the browser with a proper Content-Type and cache headers.
      *
      * @Rest\QueryParam(name="path", requirements=".+", strict=true, description="The file path or its ID")
@@ -614,11 +646,15 @@ class FileController extends Controller
     }
 
     /**
-     * @Rest\QueryParam(name="path", requirements=".+", strict=true, description="The file path or its ID")
-     * @Rest\RequestParam(name="content", description="The file content")
-     * @Rest\QueryParam(name="contentEncoding", requirements=".+", default="plain", description="The $content contentEncoding. plain|base64")
+     * @ApiDoc(
+     *  section="File Manager",
+     *  description="Saves the file content"
+     * )
      *
-     * @Rest\View()
+     * @Rest\QueryParam(name="path", requirements=".+", strict=true, description="The file path or its ID")
+     * @Rest\QueryParam(name="contentEncoding", requirements="plain|base64", default="plain", description="The $content contentEncoding.")
+     * @Rest\RequestParam(name="content", description="The file content")
+     *
      * @Rest\Post("/admin/file/content")
      *
      * @param ParamFetcher $paramFetcher
@@ -639,7 +675,10 @@ class FileController extends Controller
     }
 
     /**
-     * Displays a (complete) image (with cache-headers).
+     * @ApiDoc(
+     *  section="File Manager",
+     *  description="Displays a (complete) image (with cache-headers)"
+     * )
      *
      * @Rest\QueryParam(name="path", requirements=".+", strict=true, description="The file path or its ID")
      *

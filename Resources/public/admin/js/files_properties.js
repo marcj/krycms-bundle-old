@@ -1,4 +1,4 @@
-var admin_files_properties = new Class({
+var kryncms__files_properties = new Class({
 
     initialize: function (pWindow) {
         this.win = pWindow;

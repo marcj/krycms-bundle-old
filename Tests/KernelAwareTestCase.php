@@ -53,7 +53,8 @@ class KernelAwareTestCase extends WebTestCase
     {
         $client = static::createClient();
 
-        $server['HTTP_X-REQUEST'] = 'JSON';
+//        $server['HTTP_X-REQUEST'] = 'JSON';
+        $server = [];
 
         $pos = strpos($path, '?');
         $parameters = [];
@@ -73,6 +74,7 @@ class KernelAwareTestCase extends WebTestCase
             }
         }
 
+        echo "$method $path\n";
         $client->request($method, $path, $parameters, $files = array(), $server);
 
         $this->allCookies = $client->getCookieJar()->all();

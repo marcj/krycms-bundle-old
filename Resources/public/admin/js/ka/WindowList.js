@@ -55,7 +55,7 @@ ka.WindowList = new Class({
         this.container.set('html',
             '<div style="text-align: center; padding: 50px; color: silver">' + t('Loading definition ...') + '</div>');
 
-        new Request.JSON({url: _pathAdmin + this.win.getEntryPoint(), noCache: true, onComplete: function (res) {
+        new Request.JSON({url: _pathAdmin + this.win.getEntryPoint()+'/', noCache: true, onComplete: function (res) {
             if (res.error) {
                 this.container.set('html', '<div style="text-align: center; padding: 50px; color: red">' +
                     tf('Failed. Error %s: %s', res.error, res.message) + '</div>');
@@ -66,7 +66,7 @@ ka.WindowList = new Class({
             this.classLoaded = true;
             this.fireEvent('render');
 
-        }.bind(this)}).get({_method: 'options'});
+        }.bind(this)}).post({_method: 'options'});
     },
 
     _deleteSuccess: function () {
@@ -507,14 +507,14 @@ ka.WindowList = new Class({
                     this.lastDeleteRq.cancel();
                 }
 
-                this.lastDeleteRq = new Request.JSON({url: _pathAdmin + this.win.getEntryPoint(),
+                this.lastDeleteRq = new Request.JSON({url: _pathAdmin + this.win.getEntryPoint() + '/',
                     noCache: 1, onComplete: function (res) {
 
                     this.win.setLoading(false);
                     ka.getAdminInterface().objectChanged(this.classProperties['object']);
                     this._deleteSuccess();
 
-                }.bind(this)}).get({
+                }.bind(this)}).post({
                     _method: 'delete',
                     pk: pItems
                 });
@@ -640,7 +640,7 @@ ka.WindowList = new Class({
             req.q = this.actionBarSearchInput.getValue();
         }
 
-        this.lastLoadPageRequest = new Request.JSON({url: _pathAdmin + this.win.getEntryPoint(),
+        this.lastLoadPageRequest = new Request.JSON({url: _pathAdmin + this.win.getEntryPoint() + '/',
             noCache: true,
             onComplete: function (res) {
                 this.currentPage = pPage;

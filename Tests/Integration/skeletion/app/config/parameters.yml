@@ -12,3 +12,4 @@ parameters:
     mailer_password: null
     locale: en
     secret: 1234onwdfhouh23bhou325iuhno4
+    kryn_admin_prefix: /kryn

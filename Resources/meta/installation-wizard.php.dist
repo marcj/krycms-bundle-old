@@ -32,7 +32,7 @@ try {
 
 
 /** @var $krynCore \Kryn\CmsBundle\Core */
-$krynCore = $kernel->getContainer()->get('kryn.cms');
+$krynCore = $kernel->getContainer()->get('kryn_cms');
 $krynCore->prepareWebSymlinks();
 
 

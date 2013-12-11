@@ -1,59 +1,59 @@
 services:
-     kryn.twig.extension.navigation:
+     kryn_cms.twig.extension.navigation:
          class: Kryn\CmsBundle\Twig\NavigationExtension
-         arguments: ["@kryn.cms"]
+         arguments: ["@kryn_cms"]
          tags:
             - { name: twig.extension }
 
-     kryn.twig.extension.nodeIsActive:
+     kryn_cms.twig.extension.nodeIsActive:
          class: Kryn\CmsBundle\Twig\NodeIsActiveExtension
-         arguments: ["@kryn.cms"]
+         arguments: ["@kryn_cms"]
          tags:
             - { name: twig.extension }
 
-     kryn.twig.extension.nodeUrl:
+     kryn_cms.twig.extension.nodeUrl:
          class: Kryn\CmsBundle\Twig\NodeUrlExtension
-         arguments: ["@kryn.cms"]
+         arguments: ["@kryn_cms"]
          tags:
             - { name: twig.extension }
 
-     kryn.twig.extension.addCss:
+     kryn_cms.twig.extension.addCss:
          class: Kryn\CmsBundle\Twig\AddCssExtension
-         arguments: ["@kryn.cms"]
+         arguments: ["@kryn_cms"]
          tags:
             - { name: twig.extension }
 
-     kryn.twig.extension.resizeImage:
+     kryn_cms.twig.extension.resizeImage:
          class: Kryn\CmsBundle\Twig\ResizeImageExtension
-         arguments: ["@kryn.cms"]
+         arguments: ["@kryn_cms"]
          tags:
             - { name: twig.extension }
 
-     kryn.twig.extension.breadcrumb:
+     kryn_cms.twig.extension.breadcrumb:
          class: Kryn\CmsBundle\Twig\BreadcrumbExtension
-         arguments: ["@kryn.cms"]
+         arguments: ["@kryn_cms"]
          tags:
             - { name: twig.extension }
 
-     kryn.twig.extension.contentSlot:
+     kryn_cms.twig.extension.contentSlot:
          class: Kryn\CmsBundle\Twig\ContentSlotExtension
-         arguments: ["@kryn.cms"]
+         arguments: ["@kryn_cms"]
          tags:
             - { name: twig.extension }
 
-     kryn.twig.extension.globals:
+     kryn_cms.twig.extension.globals:
          class: Kryn\CmsBundle\Twig\GlobalsExtension
-         arguments: ["@kryn.cms"]
+         arguments: ["@kryn_cms"]
          tags:
             - { name: twig.extension }
 
-     kryn.twig.extension.unsearchable:
+     kryn_cms.twig.extension.unsearchable:
          class: Kryn\CmsBundle\Twig\UnsearchableExtension
          tags:
             - { name: twig.extension }
 
-     kryn.twig.extension.translate:
+     kryn_cms.twig.extension.translate:
          class: Kryn\CmsBundle\Twig\TranslateExtension
-         arguments: ["@kryn.translator"]
+         arguments: ["@kryn_cms.translator"]
          tags:
             - { name: twig.extension }

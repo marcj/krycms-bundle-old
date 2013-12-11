@@ -1,76 +1,81 @@
 parameters:
-     kryn.core.class: Kryn\CmsBundle\Core
-     kryn.objects.class: Kryn\CmsBundle\Objects
-     kryn.cache.fast.factory.class: Kryn\CmsBundle\Cache\Factory
-     kryn.cache.fast.class: Kryn\CmsBundle\Cache\AbstractCache
-     kryn.content.render.class: Kryn\CmsBundle\ContentRender
-     kryn.routes.loader: Kryn\CmsBundle\Router\FrontendLoader
+     kryn_cms.core.class: Kryn\CmsBundle\Core
+     kryn_cms.objects.class: Kryn\CmsBundle\Objects
+     kryn_cms.cache.fast.factory.class: Kryn\CmsBundle\Cache\Factory
+     kryn_cms.cache.fast.class: Kryn\CmsBundle\Cache\AbstractCache
+     kryn_cms.content.render.class: Kryn\CmsBundle\ContentRender
+     kryn_cms.routes.loader: Kryn\CmsBundle\Router\FrontendLoader
+     kryn_cms.rest.routing_loader.class: Kryn\CmsBundle\Router\RestApiLoader
 
-     kryn.acl.class: Kryn\CmsBundle\ACL
+     kryn_cms.acl.class: Kryn\CmsBundle\ACL
 
-     kryn.navigation.class: Kryn\CmsBundle\Navigation
-     kryn.stopwatch.class: Kryn\CmsBundle\StopwatchHelper
-     kryn.translator.class: Kryn\CmsBundle\Translation\Translator
+     kryn_cms.navigation.class: Kryn\CmsBundle\Navigation
+     kryn_cms.stopwatch.class: Kryn\CmsBundle\StopwatchHelper
+     kryn_cms.translator.class: Kryn\CmsBundle\Translation\Translator
 
-     kryn.pluginResponse.listener.class: Kryn\CmsBundle\EventListener\PluginResponseListener
-     kryn.frontendRoutes.listener.class: Kryn\CmsBundle\EventListener\FrontendRouteListener
-     kryn.debugger.subscriber.class: Kryn\CmsBundle\EventListener\DebuggerSubscriber
-     kryn.latencyMonitor.subscriber.class: Kryn\CmsBundle\EventListener\LatencyMonitorSubscriber
+     kryn_cms.pluginResponse.listener.class: Kryn\CmsBundle\EventListener\PluginResponseListener
+     kryn_cms.paramFetcher.listener.class: Kryn\CmsBundle\EventListener\ParamFetcherListener
+     kryn_cms.format.listener.class: Kryn\CmsBundle\EventListener\FormatListener
+     kryn_cms.restException.listener.class: Kryn\CmsBundle\EventListener\RestExceptionListener
+     kryn_cms.viewResponse.listener.class: Kryn\CmsBundle\EventListener\ViewResponseListener
+     kryn_cms.frontendRoutes.listener.class: Kryn\CmsBundle\EventListener\FrontendRouteListener
+     kryn_cms.debugger.subscriber.class: Kryn\CmsBundle\EventListener\DebuggerSubscriber
+     kryn_cms.latencyMonitor.subscriber.class: Kryn\CmsBundle\EventListener\LatencyMonitorSubscriber
 
-     kryn.page.response.class: Kryn\CmsBundle\PageResponse
-     kryn.logger.handler.class: Kryn\CmsBundle\Logger\KrynHandler
+     kryn_cms.page.response.class: Kryn\CmsBundle\PageResponse
+     kryn_cms.logger.handler.class: Kryn\CmsBundle\Logger\KrynHandler
 
-     kryn.filesystem.local.class: Kryn\CmsBundle\Filesystem\Filesystem
-     kryn.filesystem.cache.class: Kryn\CmsBundle\Filesystem\Filesystem
-     kryn.filesystem.web.class: Kryn\CmsBundle\Filesystem\WebFilesystem
-     kryn.filesystem.adapter.local.class: Kryn\CmsBundle\Filesystem\Adapter\Local
+     kryn_cms.filesystem.local.class: Kryn\CmsBundle\Filesystem\Filesystem
+     kryn_cms.filesystem.cache.class: Kryn\CmsBundle\Filesystem\Filesystem
+     kryn_cms.filesystem.web.class: Kryn\CmsBundle\Filesystem\WebFilesystem
+     kryn_cms.filesystem.adapter.local.class: Kryn\CmsBundle\Filesystem\Adapter\Local
 
-#     kryn.configuration.class: Kryn\CmsBundle\Configuration\SystemConfig
-     kryn.configuration.database.class: Kryn\CmsBundle\Configuration\Database
+#     kryn_cms.configuration.class: Kryn\CmsBundle\Configuration\SystemConfig
+     kryn_cms.configuration.database.class: Kryn\CmsBundle\Configuration\Database
 
-     kryn.configuration.database.connection.main.class: Kryn\CmsBundle\Configuration\Connection
+     kryn_cms.configuration.database.connection.main.class: Kryn\CmsBundle\Configuration\Connection
 
      database_table_prefix: kryn_
 
 services:
-     kryn.cms:
-         class: %kryn.core.class%
+     kryn_cms:
+         class: %kryn_cms.core.class%
          arguments: ["@service_container"]
 
-     kryn.objects:
-         class: %kryn.objects.class%
-         arguments: ["@kryn.cms"]
+     kryn_cms.objects:
+         class: %kryn_cms.objects.class%
+         arguments: ["@kryn_cms"]
 
-     kryn.cache.fast:
-         class: %kryn.cache.fast.class%
-         factory_class: %kryn.cache.fast.factory.class%
+     kryn_cms.cache.fast:
+         class: %kryn_cms.cache.fast.class%
+         factory_class: %kryn_cms.cache.fast.factory.class%
          factory_method: createFast
-         arguments: ["@kryn.cms"]
+         arguments: ["@kryn_cms"]
 
-     kryn.page.response:
-         class: %kryn.page.response.class%
+     kryn_cms.page.response:
+         class: %kryn_cms.page.response.class%
          calls:
-            - [setKrynCore, ["@kryn.cms"]]
-            - [setStopwatch, ["@kryn.stopwatch"]]
+            - [setKrynCore, ["@kryn_cms"]]
+            - [setStopwatch, ["@kryn_cms.stopwatch"]]
 
-     kryn.content.render:
-         class: %kryn.content.render.class%
-         arguments: ["@kryn.cms", "@kryn.stopwatch"]
+     kryn_cms.content.render:
+         class: %kryn_cms.content.render.class%
+         arguments: ["@kryn_cms", "@kryn_cms.stopwatch"]
 #
-#     kryn.configuration:
-#         class: %kryn.configuration.class%
+#     kryn_cms.configuration:
+#         class: %kryn_cms.configuration.class%
 #         calls:
-#            - [setDatabase, ["@kryn.configuration.database"]]
-#            - [setKrynCore, ["@kryn.cms"]]
+#            - [setDatabase, ["@kryn_cms.configuration.database"]]
+#            - [setKrynCore, ["@kryn_cms"]]
 
-     kryn.configuration.database:
-         class: %kryn.configuration.database.class%
+     kryn_cms.configuration.database:
+         class: %kryn_cms.configuration.database.class%
          calls:
-            - [addConnection, ["@kryn.configuration.database.connection.main"]]
+            - [addConnection, ["@kryn_cms.configuration.database.connection.main"]]
             - [setPrefix, ["%database_table_prefix%"]]
 
-     kryn.configuration.database.connection.main:
-         class: %kryn.configuration.database.connection.main.class%
+     kryn_cms.configuration.database.connection.main:
+         class: %kryn_cms.configuration.database.connection.main.class%
          calls:
             - [setType, ["%database_driver%"]]
             - [setServer, ["%database_host%"]]
@@ -79,73 +84,104 @@ services:
             - [setUsername, ["%database_user%"]]
             - [setPassword, ["%database_password%"]]
 
-     kryn.filesystem.adapter.local:
-         class: %kryn.filesystem.adapter.local.class%
+     kryn_cms.filesystem.adapter.local:
+         class: %kryn_cms.filesystem.adapter.local.class%
          arguments: ["/"]
          calls:
              - [setRoot, ["%kernel.root_dir%/.."]]
 
-     kryn.filesystem.adapter.cache:
-         class: %kryn.filesystem.adapter.local.class%
+     kryn_cms.filesystem.adapter.cache:
+         class: %kryn_cms.filesystem.adapter.local.class%
          arguments: ["/"]
          calls:
              - [setRoot, ["%kernel.cache_dir%"]]
 
-     kryn.filesystem.local:
-         class: %kryn.filesystem.local.class%
+     kryn_cms.filesystem.local:
+         class: %kryn_cms.filesystem.local.class%
          calls:
-            - [setAdapter, ["@kryn.filesystem.adapter.local"]]
+            - [setAdapter, ["@kryn_cms.filesystem.adapter.local"]]
 
-     kryn.filesystem.cache:
-         class: %kryn.filesystem.cache.class%
+     kryn_cms.filesystem.cache:
+         class: %kryn_cms.filesystem.cache.class%
          calls:
-            - [setAdapter, ["@kryn.filesystem.adapter.cache"]]
+            - [setAdapter, ["@kryn_cms.filesystem.adapter.cache"]]
 
-     kryn.filesystem.web:
-         class: %kryn.filesystem.web.class%
-         arguments: ["@kryn.cms"]
+     kryn_cms.filesystem.web:
+         class: %kryn_cms.filesystem.web.class%
+         arguments: ["@kryn_cms"]
 
-     kryn.navigation:
-         class: %kryn.navigation.class%
-         arguments: ["@kryn.cms"]
+     kryn_cms.navigation:
+         class: %kryn_cms.navigation.class%
+         arguments: ["@kryn_cms"]
 
-     kryn.pluginResponse.listener:
-        class: %kryn.pluginResponse.listener.class%
-        arguments: ["@kryn.cms", "@kryn.frontendRoutes.listener"]
+     kryn_cms.pluginResponse.listener:
+        class: %kryn_cms.pluginResponse.listener.class%
+        arguments: ["@kryn_cms", "@kryn_cms.frontendRoutes.listener"]
         tags:
             - { name: kernel.event_listener, event: kernel.response }
             - { name: kernel.event_listener, event: kernel.view }
 
-     kryn.frontendRoutes.listener:
-        class: %kryn.frontendRoutes.listener.class%
-        arguments: ["@kryn.cms"]
+     kryn_cms.paramFetcher.listener:
+        class: %kryn_cms.paramFetcher.listener.class%
+        arguments: ["@service_container"]
+        tags:
+            - { name: kernel.event_listener, event: kernel.controller, prioarity: 6 }
+
+     kryn_cms.viewResponse.listener:
+        class: %kryn_cms.viewResponse.listener.class%
+        arguments: ["@service_container"]
+        tags:
+            - { name: kernel.event_listener, event: kernel.view, priority: 101 }
+            - { name: kernel.event_listener, event: kernel.controller, priority: -9 }
+
+     kryn_cms.frontendRoutes.listener:
+        class: %kryn_cms.frontendRoutes.listener.class%
+        arguments: ["@kryn_cms"]
         tags:
             - { name: kernel.event_listener, event: kernel.request, priority: 33 }
 
-     kryn.latencyMonitor.subscriber:
-        class: %kryn.latencyMonitor.subscriber.class%
-        arguments: ["@kryn.cms"]
+     kryn_cms.format.listener:
+        class: %kryn_cms.format.listener.class%
+        arguments: ["@service_container"]
+        tags:
+            - { name: kernel.event_listener, event: kernel.request, priority: 21 }
+
+     kryn_cms.restException.listener:
+        class: %kryn_cms.restException.listener.class%
+        arguments: ["@service_container"]
+        tags:
+            - { name: kernel.event_listener, event: kernel.exception}
+
+     kryn_cms.latencyMonitor.subscriber:
+        class: %kryn_cms.latencyMonitor.subscriber.class%
+        arguments: ["@kryn_cms"]
         tags:
             - { name: kernel.event_subscriber }
 
-     kryn.debugger.subscriber:
-        class: %kryn.debugger.subscriber.class%
-        arguments: ["@kryn.cms", "@kryn.logger.handler"]
+     kryn_cms.debugger.subscriber:
+        class: %kryn_cms.debugger.subscriber.class%
+        arguments: ["@kryn_cms", "@kryn_cms.logger.handler"]
         tags:
             - { name: kernel.event_subscriber }
 
-     kryn.translator:
-        class: %kryn.translator.class%
-        arguments: ["@kryn.cms"]
+     kryn_cms.translator:
+        class: %kryn_cms.translator.class%
+        arguments: ["@kryn_cms"]
 
-     kryn.stopwatch:
-        class: %kryn.stopwatch.class%
+     kryn_cms.stopwatch:
+        class: %kryn_cms.stopwatch.class%
         arguments: ["@?debug.stopwatch"]
 
-     kryn.acl:
-        class: %kryn.acl.class%
-        arguments: ["@kryn.cms", "@kryn.objects"]
+     kryn_cms.acl:
+        class: %kryn_cms.acl.class%
+        arguments: ["@kryn_cms", "@kryn_cms.objects"]
 
-     kryn.logger.handler:
-        class: %kryn.logger.handler.class%
-        arguments: ["@kryn.cms"]
+     kryn_cms.logger.handler:
+        class: %kryn_cms.logger.handler.class%
+        arguments: ["@kryn_cms"]
+        
+     kryn_cms.rest.routing_loader:
+        class: %kryn_cms.rest.routing_loader.class%
+        arguments: ["@kryn_cms"]
+        tags:
+            - { name: routing.loader }

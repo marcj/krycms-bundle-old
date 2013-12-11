@@ -1,4 +1,4 @@
-var kryncmsbundle_system_settings = new Class({
+var kryncms_system_settings = new Class({
 
     Binds: ['renderData', 'save'],
 

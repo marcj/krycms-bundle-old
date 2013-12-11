@@ -206,7 +206,7 @@ ka.FieldTypes.Tree = new Class({
 
     getUrl: function () {
         return _pathAdmin + (this.options.entryPoint ? this.options.entryPoint :
-            'admin/object/' + ka.urlEncode(this.options.object) ) + '/';
+            'admin/object/' + ka.normalizeObjectKey(this.options.object) ) + '/';
     },
 
     loadTree: function (pScope) {

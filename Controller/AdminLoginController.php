@@ -1,20 +1,29 @@
 <?php
 
-namespace Kryn\CmsBundle\Controller\Admin;
+namespace Kryn\CmsBundle\Controller;
 
 use Kryn\CmsBundle\Model\NodeQuery;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Kryn\CmsBundle\PluginController;
 use FOS\RestBundle\Controller\Annotations as Rest;
+use Nelmio\ApiDocBundle\Annotation\ApiDoc;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
-class LoginController extends PluginController
+class AdminLoginController extends PluginController
 {
     /**
-     * @Route("")
+     * @ApiDoc(
+     *  section="Administration",
+     *  description="Show the login page of the administration"
+     * )
+     *
+     * @Rest\Get("%kryn_admin_prefix%")
+     * @param Request $request
      *
      * @return \Kryn\CmsBundle\PageResponse
      */
-    public function showLogin()
+    public function showLoginAction(Request $request)
     {
         if ($this->container->has('profiler')) {
             $this->container->get('profiler')->disable();
@@ -37,6 +46,7 @@ class LoginController extends PluginController
         $response->setDomainHandling(false);
 
         $response->setTitle($this->getKrynCore()->getSystemConfig()->getSystemTitle() . ' | Kryn.cms Administration');
+        $response->prepare($request);
         return $response;
     }
 
@@ -54,7 +64,7 @@ class LoginController extends PluginController
         $session['sessionid'] = $client->getToken();
         $session['tokenid'] = $client->getTokenId();
         $session['lang'] = $client->getSession()->getLanguage();
-        $session['access'] = $this->get('kryn.acl')->check('KrynCmsBundle:EntryPoint', '/admin');
+        $session['access'] = $this->get('kryn_cms.acl')->check('KrynCmsBundle:EntryPoint', '/admin');
         if ($client->getUserId()) {
             $session['username'] = $client->getUser()->getUsername();
             $session['lastLogin'] = $client->getUser()->getLastlogin();
@@ -69,8 +79,7 @@ class LoginController extends PluginController
     public function addLanguageResources()
     {
         $response = $this->getKrynCore()->getPageResponse();
-        $baseUrl = $this->getRequest()->getBaseUrl() . '/';
-        $prefix = substr($this->getRequest()->getRequestUri(), strlen($baseUrl));
+        $prefix = substr($this->getKernel()->getContainer()->getParameter('kryn_admin_prefix'), 1);
 
         $response->addJsFile($prefix . '/admin/ui/languages?noCache=978699877');
         $response->addJsFile($prefix . '/admin/ui/language?lang=en&javascript=1');
@@ -82,12 +91,13 @@ class LoginController extends PluginController
         $response = $this->getKrynCore()->getPageResponse();
         $options['noJs'] = isset($options['noJs']) ? $options['noJs'] : false;
 
-        $prefix = $this->getKrynCore()->getSystemConfig()->getAdminUrl();
+        $prefix = substr($this->getKernel()->getContainer()->getParameter('kryn_admin_prefix'), 1);
+//        $prefix = $this->getKernel()->getContainer()->getParameter('kryn_admin_prefix');
 
         $response->addJs(
             '
         window._path = window._baseUrl = ' . json_encode($this->getRequest()->getBasePath() . '/') . '
-        window._pathAdmin = ' . json_encode($this->getRequest()->getBaseUrl() . $prefix)
+        window._pathAdmin = ' . json_encode($this->getRequest()->getBaseUrl() .'/' . $prefix . '/')
         );
 
         if ($this->getKrynCore()->getKernel()->isDebug()) {
@@ -103,9 +113,9 @@ class LoginController extends PluginController
                 }
             }
         } else {
-            $response->addCssFile(substr($prefix, 1) . 'admin/backend/style');
+            $response->addCssFile($prefix . '/admin/backend/css');
             if (!$options['noJs']) {
-                $response->addJsFile(substr($prefix, 1) . 'admin/backend/script');
+                $response->addJsFile($prefix . '/admin/backend/script');
             }
 
             foreach ($this->getKrynCore()->getConfigs() as $bundleConfig) {

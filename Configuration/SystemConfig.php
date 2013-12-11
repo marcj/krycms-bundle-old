@@ -33,11 +33,6 @@ class SystemConfig extends Model {
     /**
      * @var string
      */
-    protected $adminUrl = '/kryn/';
-
-    /**
-     * @var string
-     */
     protected $languages = 'en';
 
     /**
@@ -279,30 +274,6 @@ class SystemConfig extends Model {
     public function getId()
     {
         return $this->id;
-    }
-
-    /**
-     * @param string $adminUrl
-     */
-    public function setAdminUrl($adminUrl)
-    {
-        $this->adminUrl = $adminUrl;
-    }
-
-    /**
-     *
-     * @return string with starting and trailing slash
-     */
-    public function getAdminUrl()
-    {
-        $url = $this->adminUrl;
-        if ('/' !== substr($url, 0, 1)){
-            $url = '/' . $url;
-        }
-        if ('/' !== substr($url, -1)){
-            $url .= '/';
-        }
-        return $url;
     }
 
     /**

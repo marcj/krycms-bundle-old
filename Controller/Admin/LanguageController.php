@@ -6,28 +6,30 @@ use FOS\RestBundle\Request\ParamFetcher;
 use Kryn\CmsBundle\Controller;
 use Kryn\CmsBundle\Controller\Admin\BundleManager\ManagerController;
 use FOS\RestBundle\Controller\Annotations as Rest;
+use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 
 class LanguageController extends Controller
 {
 
     /**
-     * Returns all language messages + pluralCount and pluralForm.
+     * @ApiDoc(
+     *  section="Language",
+     *  section="Language",
+     *  description="Returns all language messages + pluralCount and pluralForm"
+     * )
      *
      * @Rest\QueryParam(name="bundle", requirements=".+", strict=true, description="The bundle name")
      * @Rest\QueryParam(name="lang", requirements="[a-z]{2,3}", strict=true, description="The language code")
      *
-     * @Rest\View()
      * @Rest\Get("/admin/system/bundle/editor/language")
      *
-     * @param ParamFetcher $paramFetcher
+     * @param string $bundle
+     * @param string $lang
      *
      * @return array
      */
-    public function getLanguageAction(ParamFetcher $paramFetcher)
+    public function getLanguageAction($bundle, $lang)
     {
-        $bundle = $paramFetcher->get('bundle');
-        $lang = $paramFetcher->get('lang');
-
         return $this->getLanguage($bundle, $lang);
     }
 
@@ -54,13 +56,15 @@ class LanguageController extends Controller
     }
 
     /**
-     * Saves language messages.
+     * @ApiDoc(
+     *  section="Language",
+     *  description="Saves language messages"
+     * )
      *
      * @Rest\QueryParam(name="bundle", requirements=".+", strict=true, description="The bundle name")
      * @Rest\QueryParam(name="lang", requirements="[a-z]{2,3}", strict=true, description="The language code")
      * @Rest\RequestParam(name="langs", array=true, description="The language messages")
      *
-     * @Rest\View()
      * @Rest\Post("/admin/system/bundle/editor/language")
      *
      * @param ParamFetcher $paramFetcher
@@ -79,11 +83,13 @@ class LanguageController extends Controller
     }
 
     /**
-     * Extras all language messages in the given bundle.
+     * @ApiDoc(
+     *  section="Language",
+     *  description="Extracts all language messages in the given bundle"
+     * )
      *
      * @Rest\QueryParam(name="bundle", requirements=".+", strict=true, description="The bundle name")
      *
-     * @Rest\View()
      * @Rest\Get("/admin/system/bundle/editor/extract")
      *
      * @param ParamFetcher $paramFetcher
@@ -100,12 +106,14 @@ class LanguageController extends Controller
     }
 
     /**
-     * Gets a overview of translated messages.
+     * @ApiDoc(
+     *  section="Language",
+     *  description="Gets a overview of translated messages"
+     * )
      *
      * @Rest\QueryParam(name="bundle", requirements=".+", strict=true, description="The bundle name")
      * @Rest\QueryParam(name="lang", requirements="[a-z]{2,3}", strict=true, description="The language code")
      *
-     * @Rest\View()
      * @Rest\Get("/admin/system/bundle/editor/overview")
      *
      * @param ParamFetcher $paramFetcher
@@ -136,6 +144,12 @@ class LanguageController extends Controller
         );
     }
 
+    /**
+     * not used yet.
+     *
+     * @param string $lang
+     * @return array
+     */
     public function getAllLanguages($lang = 'en')
     {
         if ($lang == '') {

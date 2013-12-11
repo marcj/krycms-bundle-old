@@ -1,4 +1,4 @@
-var kryncmsbundle_system_module_view = new Class({
+var kryncms_system_module_view = new Class({
 
     initialize: function (pWindow) {
         this.win = pWindow;

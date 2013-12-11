@@ -1,10 +1,14 @@
 <?php
 
-namespace Kryn\CmsBundle\Controller\Admin\Windows;
+namespace Kryn\CmsBundle\Controller\Windows;
 
-use Kryn\CmsBundle\Admin\ObjectCrud;
+use Kryn\CmsBundle\Controller\WindowController;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 
-class DomainCrudController extends ObjectCrud
+/**
+ * Class DomainCrudController
+ */
+class DomainCrudController extends WindowController
 {
     public $fields = array(
         '__General__' => array(
