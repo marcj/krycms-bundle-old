@@ -1,0 +1,115 @@
+parameters:
+     kryn_cms.field.types.class: Kryn\CmsBundle\Admin\FieldTypes\FieldTypes
+     kryn_cms.field.types.text.class: Kryn\CmsBundle\Admin\FieldTypes\TypeText
+     kryn_cms.field.types.number.class: Kryn\CmsBundle\Admin\FieldTypes\TypeNumber
+     kryn_cms.field.types.object.class: Kryn\CmsBundle\Admin\FieldTypes\TypeObject
+     kryn_cms.field.types.datetime.class: Kryn\CmsBundle\Admin\FieldTypes\TypeDatetime
+     kryn_cms.field.types.select.class: Kryn\CmsBundle\Admin\FieldTypes\TypeSelect
+     kryn_cms.field.types.checkbox.class: Kryn\CmsBundle\Admin\FieldTypes\TypeCheckbox
+     kryn_cms.field.types.page.class: Kryn\CmsBundle\Admin\FieldTypes\TypePage
+     kryn_cms.field.types.layout.class: Kryn\CmsBundle\Admin\FieldTypes\TypeLayout
+     kryn_cms.field.types.lang.class: Kryn\CmsBundle\Admin\FieldTypes\TypeLang
+     kryn_cms.field.types.textarea.class: Kryn\CmsBundle\Admin\FieldTypes\TypeTextarea
+     kryn_cms.field.types.file.class: Kryn\CmsBundle\Admin\FieldTypes\TypeFile
+     kryn_cms.field.types.filelist.class: Kryn\CmsBundle\Admin\FieldTypes\TypeFilelist
+     kryn_cms.field.types.layoutelement.class: Kryn\CmsBundle\Admin\FieldTypes\TypeLayoutElement
+     kryn_cms.field.types.view.class: Kryn\CmsBundle\Admin\FieldTypes\TypeView
+     kryn_cms.field.types.tab.class: Kryn\CmsBundle\Admin\FieldTypes\TypeTab
+     kryn_cms.field.types.childrenSwitcher.class: Kryn\CmsBundle\Admin\FieldTypes\TypeChildrenSwitcher
+     kryn_cms.field.types.array.class: Kryn\CmsBundle\Admin\FieldTypes\TypeArray
+     kryn_cms.field.types.content.class: Kryn\CmsBundle\Admin\FieldTypes\TypeContent
+
+services:
+     kryn_cms.field.types:
+         class: %kryn_cms.field.types.class%
+         arguments: ["@service_container"]
+
+     kryn_cms.field.types.text:
+         class: %kryn_cms.field.types.text.class%
+         tags:
+             - { name: kryn_cms.field.type, alias: text }
+
+     kryn_cms.field.types.number:
+         class: %kryn_cms.field.types.number.class%
+         tags:
+             - { name: kryn_cms.field.type, alias: number }
+
+     kryn_cms.field.types.object:
+         class: %kryn_cms.field.types.object.class%
+         tags:
+             - { name: kryn_cms.field.type, alias: object }
+
+     kryn_cms.field.types.datetime:
+         class: %kryn_cms.field.types.datetime.class%
+         tags:
+             - { name: kryn_cms.field.type, alias: datetime }
+
+     kryn_cms.field.types.select:
+         class: %kryn_cms.field.types.select.class%
+         tags:
+             - { name: kryn_cms.field.type, alias: select }
+
+     kryn_cms.field.types.checkbox:
+         class: %kryn_cms.field.types.checkbox.class%
+         tags:
+             - { name: kryn_cms.field.type, alias: checkbox }
+
+     kryn_cms.field.types.page:
+         class: %kryn_cms.field.types.page.class%
+         tags:
+             - { name: kryn_cms.field.type, alias: page }
+
+     kryn_cms.field.types.layout:
+         class: %kryn_cms.field.types.layout.class%
+         tags:
+             - { name: kryn_cms.field.type, alias: layout }
+
+     kryn_cms.field.types.lang:
+         class: %kryn_cms.field.types.lang.class%
+         tags:
+             - { name: kryn_cms.field.type, alias: lang }
+
+     kryn_cms.field.types.textarea:
+         class: %kryn_cms.field.types.textarea.class%
+         tags:
+             - { name: kryn_cms.field.type, alias: textarea }
+
+     kryn_cms.field.types.file:
+         class: %kryn_cms.field.types.file.class%
+         tags:
+             - { name: kryn_cms.field.type, alias: file }
+
+     kryn_cms.field.types.filelist:
+         class: %kryn_cms.field.types.filelist.class%
+         tags:
+             - { name: kryn_cms.field.type, alias: filelist }
+
+     kryn_cms.field.types.layoutelement:
+         class: %kryn_cms.field.types.layoutelement.class%
+         tags:
+             - { name: kryn_cms.field.type, alias: layoutelement }
+
+     kryn_cms.field.types.view:
+         class: %kryn_cms.field.types.view.class%
+         tags:
+             - { name: kryn_cms.field.type, alias: view }
+
+     kryn_cms.field.types.tab:
+         class: %kryn_cms.field.types.tab.class%
+         tags:
+             - { name: kryn_cms.field.type, alias: tab }
+
+     kryn_cms.field.types.childrenSwitcher:
+         class: %kryn_cms.field.types.childrenSwitcher.class%
+         tags:
+             - { name: kryn_cms.field.type, alias: childrenSwitcher }
+
+     kryn_cms.field.types.array:
+         class: %kryn_cms.field.types.array.class%
+         tags:
+             - { name: kryn_cms.field.type, alias: array }
+
+     kryn_cms.field.types.content:
+         class: %kryn_cms.field.types.content.class%
+         tags:
+             - { name: kryn_cms.field.type, alias: content }

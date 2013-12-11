@@ -1,6 +1,6 @@
 <?php
 
-namespace Kryn\CmsBundle\Form;
+namespace Kryn\CmsBundle\Admin\Form;
 
 use Kryn\CmsBundle\Configuration\Field;
 

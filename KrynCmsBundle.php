@@ -4,6 +4,7 @@ namespace Kryn\CmsBundle;
 
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Kryn\CmsBundle\DependencyInjection\ContentTypesCompilerPass;
+use Kryn\CmsBundle\DependencyInjection\FieldTypesCompilerPass;
 use Kryn\CmsBundle\Propel\PropelHelper;
 use Symfony\Component\ClassLoader\UniversalClassLoader;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -20,6 +21,7 @@ class KrynCmsBundle extends Bundle
     {
         parent::build($container);
         $container->addCompilerPass(new ContentTypesCompilerPass());
+        $container->addCompilerPass(new FieldTypesCompilerPass());
     }
 
     public function boot()
@@ -30,7 +32,7 @@ class KrynCmsBundle extends Bundle
         $this->additionalLoader->register();
 
         /** @var $krynCore Core */
-        $krynCore = $this->container->get('kryn.cms');
+        $krynCore = $this->container->get('kryn_cms');
 
         /*
          * Propel orm initialisation.
@@ -46,7 +48,7 @@ class KrynCmsBundle extends Bundle
         if ($krynCore->getSystemConfig()->getLogs(true)->isActive()) {
             /** @var $logger \Symfony\Bridge\Monolog\Logger */
             $logger = $this->container->get('logger');
-            $logger->pushHandler($this->container->get('kryn.logger.handler'));
+            $logger->pushHandler($this->container->get('kryn_cms.logger.handler'));
         }
     }
 
