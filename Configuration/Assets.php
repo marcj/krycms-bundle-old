@@ -2,7 +2,6 @@
 
 namespace Kryn\CmsBundle\Configuration;
 
-use \Kryn\CmsBundle\Core as Kryn;
 use Symfony\Component\Finder\Finder;
 
 /**

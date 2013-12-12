@@ -9,7 +9,7 @@ use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 
 class ORMController extends Controller
 {
-    public function getPropelHelper()
+    protected function getPropelHelper()
     {
         $propelHelper = new PropelHelper($this->getKrynCore());
         return $propelHelper;
@@ -41,7 +41,7 @@ class ORMController extends Controller
      *
      * @return bool
      */
-    public function writeModels()
+    public function writeModelsAction()
     {
         //todo, make it ORM agnostic
         return $this->getPropelHelper()->generateClasses();
@@ -57,7 +57,7 @@ class ORMController extends Controller
      *
      * @return bool
      */
-    public function updateScheme()
+    public function updateSchemeAction()
     {
         //todo, make it ORM agnostic
         return $this->getPropelHelper()->updateSchema();

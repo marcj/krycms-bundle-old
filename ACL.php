@@ -144,12 +144,11 @@ class ACL
      *
      * @param        $objectKey
      * @param  int   $mode
-     * @param  bool  $force
      *
      * @return mixed
      *
      */
-    public function &getRules($objectKey, $mode = 1, $targetType = null, $targetId = null, $force = false)
+    public function &getRules($objectKey, $mode = 1, $targetType = null, $targetId = null)
     {
         $objectKey = Objects::normalizeObjectKey($objectKey);
 

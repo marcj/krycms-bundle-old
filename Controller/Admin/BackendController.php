@@ -12,6 +12,7 @@ use Propel\Runtime\Map\TableMap;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
+use Symfony\Component\HttpFoundation\Response;
 
 class BackendController extends Controller
 {
@@ -25,7 +26,7 @@ class BackendController extends Controller
      *
      * @return bool
      */
-    public function clearCache()
+    public function clearCacheAction()
     {
         $utils = new Utils($this->getKrynCore());
 
@@ -37,7 +38,7 @@ class BackendController extends Controller
     /**
      * @return Core
      */
-    public function getKrynCore()
+    protected function getKrynCore()
     {
         return $this->get('kryn_cms');
     }
@@ -56,7 +57,7 @@ class BackendController extends Controller
      *
      * @return bool
      */
-    public function saveUserSettings(ParamFetcher $paramFetcher)
+    public function saveUserSettingsAction(ParamFetcher $paramFetcher)
     {
         $settings = $paramFetcher->get('settings');
 
@@ -86,7 +87,7 @@ class BackendController extends Controller
      *
      * @return string javascript
      */
-    public function getCustomJs(ParamFetcher $paramFetcher)
+    public function getCustomJsAction(ParamFetcher $paramFetcher)
     {
         $bundle = $paramFetcher->get('bundle');
         $code = $paramFetcher->get('code');
@@ -100,8 +101,6 @@ class BackendController extends Controller
 
         $file = $bundle->getPath() . '/Resources/public/admin/js/' . $code . '.js';
 
-        header('Content-Type: text/javascript');
-
         if (!file_exists($file)) {
             $content = "contentCantLoaded_" . $onLoad . "('$file');\n";
         } else {
@@ -110,7 +109,9 @@ class BackendController extends Controller
             $content .= "contentLoaded_" . $onLoad . '();' . "\n";
         }
 
-        die($content);
+        $response = new Response($content);
+        $response->headers->set('Content-Type', 'text/javascript');
+        return $response;
     }
 
     /**
@@ -141,7 +142,7 @@ class BackendController extends Controller
      *
      * @return array
      */
-    public function getSettings(ParamFetcher $paramFetcher)
+    public function getSettingsAction(ParamFetcher $paramFetcher)
     {
         $keys = $paramFetcher->get('keys');
 
@@ -252,9 +253,9 @@ class BackendController extends Controller
      *
      * @Rest\Get("/admin/backend/script-map")
      */
-    public function loadJsMap()
+    public function loadJsMapAction()
     {
-        $this->loadJs(true);
+        $this->loadJsAction(true);
     }
 
     /**
@@ -269,15 +270,6 @@ class BackendController extends Controller
      */
     public function loadCss()
     {
-        header('Content-Type: text/css');
-        $expires = 60 * 60 * 24 * 14;
-        header('Pragma: public');
-        header('Cache-Control: max-age=' . $expires);
-        header('Expires: ' . gmdate('D, d M Y H:i:s', time() + $expires) . ' GMT');
-
-        if (extension_loaded("zlib") && (ini_get("output_handler") != "ob_gzhandler")) {
-            ini_set("zlib.output_compression", 1);
-        }
 
         $oFile = $this->getKrynCore()->getKernel()->getRootDir(). '/../web/cache/admin.style-compiled.css';
         $md5String = '';
@@ -311,8 +303,15 @@ class BackendController extends Controller
             file_put_contents($oFile, $content);
         }
 
-        readfile($oFile);
-        exit;
+
+        $expires = 60 * 60 * 24 * 14;
+
+        $response = new Response(file_get_contents($oFile));
+        $response->headers->set('Content-Type', 'text/css');
+        $response->headers->set('Pragma', 'public');
+        $response->headers->set('Cache-Control', 'max-age=' . $expires);
+        $response->headers->set('Expires', gmdate('D, d M Y H:i:s', time() + $expires) . ' GMT');
+        return $response;
     }
 
     /**
@@ -325,13 +324,13 @@ class BackendController extends Controller
      *
      * @Rest\Get("/admin/backend/script")
      *
-     * @param ParamFetcher $paramFetcher
+     * @param boolean $printSourceMap
      *
      * @return string javascript
      */
-    public function loadJs(ParamFetcher $paramFetcher)
+    public function loadJsAction($printSourceMap = null)
     {
-        $printSourceMap = filter_var($paramFetcher->get('printSourceMap'), FILTER_VALIDATE_BOOLEAN);
+        $printSourceMap = filter_var($printSourceMap, FILTER_VALIDATE_BOOLEAN);
         $oFile = 'cache/admin.script-compiled.js';
 
         $files = array();
@@ -357,20 +356,20 @@ class BackendController extends Controller
         $ifModifiedSince = $this->getKrynCore()->getRequest()->headers->get('If-Modified-Since');
         if (isset($ifModifiedSince) && (strtotime($ifModifiedSince) == $newestMTime)) {
             // Client's cache IS current, so we just respond '304 Not Modified'.
-            header('Last-Modified: '.gmdate('D, d M Y H:i:s', $newestMTime).' GMT', true, 304);
-            exit;
+
+            $response = new Response();
+            $response->setStatusCode(304);
+            $response->headers->set('Last-Modified', gmdate('D, d M Y H:i:s', $newestMTime).' GMT');
+            return $response;
         }
 
-        header('Content-Type: application/x-javascript');
+
         $expires = 60 * 60 * 24 * 14; //2 weeks
-        header('Pragma: public');
-        header('Cache-Control: max-age=' . $expires);
-        header('Last-Modified: '.gmdate('D, d M Y H:i:s', $newestMTime).' GMT');
-        header('Expires: ' . gmdate('D, d M Y H:i:s', time() + $expires) . ' GMT');
-
-        if (extension_loaded("zlib") && (ini_get("output_handler") != "ob_gzhandler")) {
-            @ini_set("zlib.output_compression", 1);
-        }
+        $response = new Response();
+        $response->headers->set('Content-Type', 'application/javascript');
+        $response->headers->set('Pragma', 'public');
+        $response->headers->set('Cache-Control', 'max-age=' . $expires);
+        $response->headers->set('Expires', gmdate('D, d M Y H:i:s', time() + $expires) . ' GMT');
 
         $sourceMap = $oFile . '.map';
         $cmdTest = 'java -version';
@@ -384,8 +383,8 @@ class BackendController extends Controller
             $content = file_get_contents($sourceMap);
             $content = str_replace('"bundles/', '"../../../bundles/', $content);
             $content = str_replace('"cache/admin.script-compiled.js', '"kryn/admin/backend/script.js', $content);
-            echo $content;
-            exit;
+            $response->setContent($content);
+            return $response;
         }
 
         $handle = @fopen($oFile, 'r');
@@ -402,8 +401,8 @@ class BackendController extends Controller
 
         if ($fileUpToDate) {
             $content = file_get_contents($oFile);
-            echo substr($content, 35);
-            exit;
+            $response->setContent(substr($content, 35));
+            return $response;
         } else {
             if (!$debugMode) {
                 system($cmdTest, $returnVal);
@@ -418,28 +417,32 @@ class BackendController extends Controller
                 $output = shell_exec($cmd);
                 if (0 !== strpos($output, 'Unable to access jarfile')) {
                     if (false !== strpos($output, 'ERROR - Parse error')) {
-                        echo 'alert(\'Parse Error\;);';
-                        echo $output;
-                        exit;
+                        $content = 'alert(\'Parse Error\;);';
+                        $content .= $output;
+                        $response->setContent($content);
+                        return $response;
                     }
                     $content = file_get_contents($oFile);
                     $sourceMapUrl = '//@ sourceMappingURL=script-map';
                     $content = $md5Line . $content . $sourceMapUrl;
                     file_put_contents($oFile, $content);
 
-                    echo substr($content, 35);
-                    exit;
+                    $response->setContent(substr($content, 35));
+                    return $response;
                 }
 
             }
 
 
+            $content = '';
             foreach ($assets as $assetPath) {
-                echo "/* $assetPath */\n\n";
+                $content .= "/* $assetPath */\n\n";
                 $path = $this->getKrynCore()->resolvePath($assetPath, 'Resources/public');
-                echo file_get_contents($path);
+                $content .= file_get_contents($path);
             }
-            exit;
+
+            $response->setContent($content);
+            return $response;
         }
 
     }

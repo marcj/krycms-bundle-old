@@ -47,7 +47,7 @@ class NestedObjectCrudController extends ObjectCrudController
         $obj = $this->getObj();
 
         return '#todo';
-        return $obj->removeRoot();
+//        return $obj->removeRoot();
 //
 //        if (count($primaryKeys) > 0) {
 //            $result = false;

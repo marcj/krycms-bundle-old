@@ -6,9 +6,7 @@ use FOS\RestBundle\Request\ParamFetcher;
 use Kryn\CmsBundle\Core;
 use Kryn\CmsBundle\Model\LanguageQuery;
 use Propel\Runtime\Map\TableMap;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\HttpFoundation\Request;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 use Symfony\Component\HttpFoundation\Response;
@@ -25,7 +23,7 @@ class UITranslationsController extends Controller
      *
      * @return string javascript
      */
-    public function getPossibleLangs()
+    public function getPossibleLangAction()
     {
         $languages = LanguageQuery::create()
             ->filterByVisible(true)
@@ -47,7 +45,7 @@ class UITranslationsController extends Controller
     /**
      * @return Core
      */
-    public function getKrynCore()
+    protected function getKrynCore()
     {
         return $this->get('kryn_cms');
     }
@@ -66,16 +64,18 @@ class UITranslationsController extends Controller
      *
      * @return string javascript
      */
-    public function getLanguagePluralForm(ParamFetcher $paramFetcher)
+    public function getLanguagePluralFormAction(ParamFetcher $paramFetcher)
     {
         $lang = $paramFetcher->get('lang');
 
         $lang = preg_replace('/[^a-z]/', '', $lang);
         $file = $this->getKrynCore()->getTranslator()->getPluralJsFunctionFile($lang); //just make sure the file has been created
-        header('Content-Type: text/javascript');
         $fs = $this->getKrynCore()->getWebFileSystem();
-        echo $fs->read($file);
-        exit;
+
+        $response = new Response();
+        $response->headers->set('Content-Type', 'text/javascript');
+        $response->setContent($fs->read($file));
+        return $response;
     }
 
     /**
@@ -107,12 +107,14 @@ class UITranslationsController extends Controller
         $template = $this->getKrynCore()->getTemplating();
 
         if ($javascript) {
-            header('Content-Type: text/javascript');
-            print "if( typeof(ka)=='undefined') window.ka = {}; ka.lang = " . json_encode($messages, JSON_PRETTY_PRINT);
-            print "\nLocale.define('en-US', 'Date', " . $template->render(
+            $response = new Response();
+            $response->headers->set('Content-Type', 'text/javascript');
+            $content = "if( typeof(ka)=='undefined') window.ka = {}; ka.lang = " . json_encode($messages, JSON_PRETTY_PRINT);
+            $content .= "\nLocale.define('en-US', 'Date', " . $template->render(
                 'KrynCmsBundle:Default:javascript-locales.js.twig'
             ) . ");";
-            exit;
+            $response->setContent($content);
+            return $response;
         } else {
             $messages['mootools'] = $template->render('KrynCmsBundle:Default:javascript-locales.js.twig');
 

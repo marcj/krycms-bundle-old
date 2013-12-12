@@ -2,9 +2,6 @@
 
 namespace Kryn\CmsBundle\ContentTypes;
 
-use Kryn\CmsBundle\Model\Content;
-use Core\WebFile;
-
 class TypeImage extends AbstractType
 {
     public function render()

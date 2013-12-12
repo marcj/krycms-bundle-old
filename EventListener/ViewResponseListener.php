@@ -3,12 +3,7 @@
 namespace Kryn\CmsBundle\EventListener;
 
 use FOS\RestBundle\EventListener\ViewResponseListener as FOSViewResponseListener;
-use FOS\RestBundle\Util\Codes;
-use FOS\RestBundle\View\View;
-use JMS\Serializer\SerializationContext;
-use Symfony\Bundle\FrameworkBundle\Templating\TemplateReference;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 use Symfony\Component\HttpKernel\Event\GetResponseForControllerResultEvent;
 

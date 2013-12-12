@@ -122,8 +122,8 @@ class ConditionSubSelect extends Condition
             $joins
         );
 
-        if ($where = parent::toSql($params, $objectKey, $usedFieldNames)) {
-            $sql .= ' WHERE ' . $where;
+        if ($w = parent::toSql($params, $objectKey, $usedFieldNames)) {
+            $sql .= ' WHERE ' . $w;
         }
 
         if ($this->order) {

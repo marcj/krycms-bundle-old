@@ -267,14 +267,14 @@ class WorkspaceBehavior extends Behavior
         public static \$workspaceBehaviorPrefix = '{$this->prefix}';
         ";
     }
-
-    private function getColumnConstant($columnName, $builder = null)
-    {
-        if (!$builder) {
-            $builder = $this->builder;
-        }
-        return $builder->getColumnConstant($this->getTable()->getColumn($columnName));
-    }
+//
+//    private function getColumnConstant($columnName, $builder = null)
+//    {
+//        if (!$builder) {
+//            $builder = $this->builder;
+//        }
+//        return $builder->getColumnConstant($this->getTable()->getColumn($columnName));
+//    }
 
 
     protected function getColumnSetter($columnName)

@@ -7,18 +7,10 @@ use Kryn\CmsBundle\ContainerHelperTrait;
 use Kryn\CmsBundle\Exceptions\BuildException;
 use Kryn\CmsBundle\Configuration\Asset;
 use Kryn\CmsBundle\Configuration\Assets;
-use Kryn\CmsBundle\Core;
-use Kryn\CmsBundle\Configuration\Bundle;
-use Kryn\CmsBundle\Configuration\EntryPoint;
-use Kryn\CmsBundle\Configuration\Event;
 use Kryn\CmsBundle\Configuration\Model;
 use Kryn\CmsBundle\Configuration\Object;
-use Kryn\CmsBundle\Configuration\Plugin;
-use Kryn\CmsBundle\Configuration\Theme;
-use Kryn\CmsBundle\Exceptions\BundleNotFoundException;
 use Kryn\CmsBundle\Exceptions\ClassNotFoundException;
 use Kryn\CmsBundle\Exceptions\FileAlreadyExistException;
-use Kryn\CmsBundle\Exceptions\FileNotWritableException;
 use Symfony\Component\DependencyInjection\ContainerAware;
 use Symfony\Component\Finder\Finder;
 use FOS\RestBundle\Controller\Annotations as Rest;
@@ -66,18 +58,19 @@ class EditorController extends ContainerAware
      *
      * @param ParamFetcher $paramFetcher
      *
+     * @param string $bundle
+     *
      * @return array
      */
-    public function saveConfigAction(ParamFetcher $paramFetcher)
+    public function saveConfigAction($bundle)
     {
-        return "#todo";
-        $bundle = $paramFetcher->get('bundle');
         if ($this->getKrynCore()->getBundleDir($bundle)) {
             $config = $this->getKrynCore()->getUtils()->getComposerArray($bundle);
             $config['_path'] = $this->getKrynCore()->getBundleDir($bundle);
 
             return $config;
         }
+        return "#todo";
     }
 
     /**
@@ -865,8 +858,7 @@ class EditorController extends ContainerAware
         return $fs->write($path, $sourcecode);
     }
 
-
-    public function normalizeField(&$field, $key, $res)
+    protected function normalizeField(&$field, $key, $res)
     {
         if ('predefined' === $field['type']) {
             if (!@$field['object']) {
@@ -902,7 +894,7 @@ class EditorController extends ContainerAware
 
         $reflection = new \ReflectionClass($parentClass);
         $root = realpath($this->getKrynCore()->getKernel()->getRootDir() . '/../');
-        $parentPath = substr($reflection->getFileName(), strlen($root) + 1);
+//        $parentPath = substr($reflection->getFileName(), strlen($root) + 1);
 
         $parentContent = explode("\n", file_get_contents($reflection->getFileName()));
         $parentReflection = new \ReflectionClass($parentClass);
@@ -916,7 +908,9 @@ class EditorController extends ContainerAware
             if ($method->class == $parentClass) {
 
                 $code = '';
-                for ($i = $method->getStartLine() - 1; $i < $method->getEndLine(); $i++) {
+                $startLine = $method->getStartLine();
+                $endLine = $method->getEndLine();
+                for ($i = $startLine - 1; $i < $method->getEndLine(); $i++) {
 
                     $code .= $parentContent[$i] . "\n";
                     if (strpos($parentContent[$i], '{')) {

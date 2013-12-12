@@ -3,8 +3,6 @@
 namespace Kryn\CmsBundle\Admin\FieldTypes;
 
 use Kryn\CmsBundle\Configuration\Field;
-use Kryn\CmsBundle\Model\Content;
-use Kryn\CmsBundle\Core;
 
 abstract class AbstractType implements TypeInterface
 {
@@ -33,7 +31,17 @@ abstract class AbstractType implements TypeInterface
      */
     protected $form;
 
+    /**
+     * @return array
+     */
+    public function getSelection()
+    {
+        return [$this->getFieldDefinition()->getId()];
+    }
 
+    /**
+     * @return array
+     */
     public function validate()
     {
         $field = $this->getFieldDefinition();

@@ -6,8 +6,6 @@ use Kryn\CmsBundle\Core;
 use Nelmio\ApiDocBundle\Extractor\HandlerInterface;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 use Symfony\Component\Routing\Route;
-use FOS\RestBundle\Controller\Annotations\RequestParam;
-use FOS\RestBundle\Controller\Annotations\QueryParam;
 
 class ObjectCrudHandler implements HandlerInterface
 {

@@ -14,7 +14,7 @@ ka._links = {};
 PATH = _path;
 PATH_WEB = PATH;
 
-ka._ = function (p) {
+ka._ = function(p) {
     return t(p);
 };
 
@@ -29,7 +29,7 @@ if (typeOf(ka.langs) != 'object') {
  *
  * @params {*}
  */
-window.logger = ka.logger = function () {
+window.logger = ka.logger = function() {
     if (typeOf(console) != "undefined") {
         var args = arguments;
         if (args.length == 1) {
@@ -39,7 +39,7 @@ window.logger = ka.logger = function () {
     }
 };
 
-window.error = ka.error = function () {
+window.error = ka.error = function() {
     if (typeOf(console) != "undefined") {
         var args = arguments;
         if (args.length == 1) {
@@ -53,20 +53,13 @@ window.error = ka.error = function () {
  * Is true if the current browser has a mobile user agent.
  * @type {Boolean}
  */
-ka.mobile = (false
-    || navigator.userAgent.match(/Android/i)
-    || navigator.userAgent.match(/iPhone/i)
-    || navigator.userAgent.match(/webOS/i)
-    || navigator.userAgent.match(/iPad/i)
-    || navigator.userAgent.match(/iPod/i)
-    || navigator.userAgent.match(/BlackBerry/i)
-    || navigator.userAgent.match(/Windows Phone/i)
+ka.mobile = (false || navigator.userAgent.match(/Android/i) || navigator.userAgent.match(/iPhone/i) || navigator.userAgent.match(/webOS/i) || navigator.userAgent.match(/iPad/i) || navigator.userAgent.match(/iPod/i) || navigator.userAgent.match(/BlackBerry/i) || navigator.userAgent.match(/Windows Phone/i)
     );
 
 /**
  * Opens the frontend in a new tab.
  */
-ka.openFrontend = function () {
+ka.openFrontend = function() {
     if (top) {
         top.open(_path, '_blank');
     }
@@ -87,11 +80,11 @@ ka.getAdminInterface = function() {
  * @param int    pCount   the count for plural
  * @param string pContext the message id of the context (msgctxt)
  */
-window._ = window.t = ka.t = function (pMsg, pPlural, pCount, pContext) {
+window._ = window.t = ka.t = function(pMsg, pPlural, pCount, pContext) {
     return ka._kml2html(ka.translate(pMsg, pPlural, pCount, pContext));
 }
 
-ka.translate = function (pMsg, pPlural, pCount, pContext) {
+ka.translate = function(pMsg, pPlural, pCount, pContext) {
     if (!ka && parent) {
         ka = parent.ka;
     }
@@ -108,8 +101,7 @@ ka.translate = function (pMsg, pPlural, pCount, pContext) {
 
                 if (pCount && ka.lang[id][plural]) {
                     return ka.lang[id][plural].replace('%d', pCount);
-                }
-                else {
+                } else {
                     return ((pCount === null || pCount === false || pCount === 1) ? pMsg : pPlural);
                 }
             } else {
@@ -123,7 +115,7 @@ ka.translate = function (pMsg, pPlural, pCount, pContext) {
     }
 }
 
-window.tf = ka.tf = function () {
+window.tf = ka.tf = function() {
     var args = Array.from(arguments);
     var text = args.shift();
     if (typeOf(text) != 'string') {
@@ -139,21 +131,20 @@ window.tf = ka.tf = function () {
  * @param string pContext the message id of the context
  * @param string pMsg     message id
  */
-window.tc = ka.tc = function (pContext, pMsg) {
+window.tc = ka.tc = function(pContext, pMsg) {
     return t(pMsg, null, null, pContext);
 }
 
-ka._kml2html = function (pRes) {
+ka._kml2html = function(pRes) {
 
     var kml = ['ka:help'];
     if (pRes) {
-        pRes = pRes.replace(/<ka:help\s+id="(.*)">(.*)<\/ka:help>/g,
-            '<a href="javascript:;" onclick="ka.wm.open(\'admin/help\', {id: \'$1\'}); return false;">$2</a>');
+        pRes = pRes.replace(/<ka:help\s+id="(.*)">(.*)<\/ka:help>/g, '<a href="javascript:;" onclick="ka.wm.open(\'admin/help\', {id: \'$1\'}); return false;">$2</a>');
     }
     return pRes;
 }
 
-ka.findWindow = function (pElement) {
+ka.findWindow = function(pElement) {
 
     if (!typeOf(pElement)) {
         throw 'ka.findWindow(): pElement is not an element.';
@@ -175,7 +166,7 @@ ka.getLocalSetting = function(key) {
 
 ka.entrypoint = {
 
-    open: function (pEntrypoint, pOptions, pSource, pInline, pDependWindowId) {
+    open: function(pEntrypoint, pOptions, pSource, pInline, pDependWindowId) {
         var entrypoint = ka.entrypoint.get(pEntrypoint);
 
         if (!entrypoint) {
@@ -190,7 +181,7 @@ ka.entrypoint = {
         }
     },
 
-    getRelative: function (pCurrent, pEntryPoint) {
+    getRelative: function(pCurrent, pEntryPoint) {
 
         if (typeOf(pEntryPoint) != 'string' || !pEntryPoint) {
             return pCurrent;
@@ -210,7 +201,7 @@ ka.entrypoint = {
     },
 
     //executes a entry point from type function
-    exec: function (pEntrypoint, pOptions, pSource) {
+    exec: function(pEntrypoint, pOptions, pSource) {
 
         if (pEntrypoint.functionType == 'global') {
             if (window[pEntrypoint.functionName]) {
@@ -222,7 +213,7 @@ ka.entrypoint = {
 
     },
 
-    get: function (path) {
+    get: function(path) {
         if (typeOf(path) != 'string') {
             return;
         }
@@ -279,16 +270,16 @@ ka.entrypoint = {
  * @param {String} value
  * @returns {string} Safe for innerHTML usage.
  */
-ka.htmlEntities = function (value) {
+ka.htmlEntities = function(value) {
     if ('null' === typeOf(value)) return '';
     if ('array' === typeOf(value)) {
-        Array.each(value, function(v, k){
+        Array.each(value, function(v, k) {
             value[k] = ka.htmlEntities(v);
         });
         return value;
     }
     if ('object' === typeOf(value)) {
-        Object.each(value, function(v, k){
+        Object.each(value, function(v, k) {
             value[k] = ka.htmlEntities(v);
         });
         return value;
@@ -299,7 +290,7 @@ ka.htmlEntities = function (value) {
     return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-ka.newBubble = function (pTitle, pText, pDuration) {
+ka.newBubble = function(pTitle, pText, pDuration) {
     return ka.adminInterface.getHelpSystem().newBubble(pTitle, pText, pDuration);
 }
 
@@ -325,8 +316,8 @@ ka.newBubble = function (pTitle, pText, pDuration) {
  * @param {Array} pFields Reference to object.
  * @param {String} pPrefix
  */
-ka.addFieldKeyPrefix = function (pFields, pPrefix) {
-    Object.each(pFields, function (field, key) {
+ka.addFieldKeyPrefix = function(pFields, pPrefix) {
+    Object.each(pFields, function(field, key) {
         pFields[pPrefix + '[' + key + ']'] = field;
         delete pFields[key];
         if (pFields.children) {
@@ -341,14 +332,14 @@ ka.addFieldKeyPrefix = function (pFields, pPrefix) {
  * @param {String} pClassPath
  * @return {Class|Function}
  */
-ka.getClass = function (pClassPath) {
+ka.getClass = function(pClassPath) {
     pClassPath = pClassPath.replace('[\'', '.');
     pClassPath = pClassPath.replace('\']', '.');
 
     if (pClassPath.indexOf('.') > 0) {
         var path = pClassPath.split('.');
         var clazz = null;
-        Array.each(path, function (item) {
+        Array.each(path, function(item) {
             clazz = clazz ? clazz[item] : window[item];
         });
         return clazz;
@@ -365,19 +356,19 @@ ka.getClass = function (pClassPath) {
  * @param {String} pValue
  * @return {STring}
  */
-ka.urlEncode = function (pValue) {
+ka.urlEncode = function(pValue) {
 
     if (typeOf(pValue) == 'string') {
         return encodeURIComponent(pValue).replace(/\%2F/g, '%252F'); //fix apache default setting
     } else if (typeOf(pValue) == 'array') {
         var result = '';
-        Array.each(pValue, function (item) {
+        Array.each(pValue, function(item) {
             result += ka.urlEncode(item) + ',';
         });
         return result.substr(0, result.length - 1);
     } else if (typeOf(pValue) == 'object') {
         var result = '';
-        Array.each(pValue, function (item, key) {
+        Array.each(pValue, function(item, key) {
             result += key + '=' + ka.urlEncode(item) + ',';
         });
         return result.substr(0, result.length - 1);
@@ -392,7 +383,7 @@ ka.urlEncode = function (pValue) {
  * @param {String} pValue
  * @return {String}
  */
-ka.urlDecode = function (pValue) {
+ka.urlDecode = function(pValue) {
     if (typeOf(pValue) != 'string') {
         return pValue;
     }
@@ -404,7 +395,7 @@ ka.urlDecode = function (pValue) {
     }
 }
 
-ka.normalizeObjectKey = function (objectKey) {
+ka.normalizeObjectKey = function(objectKey) {
     objectKey = objectKey.replace('\\', '/').replace('.', '/').replace(':', '/').toLowerCase().replace('bundle/', '/');
     var bundleName = objectKey.split('/')[0];
     var objectName = objectKey.split('/')[1];
@@ -413,7 +404,14 @@ ka.normalizeObjectKey = function (objectKey) {
         throw tf('objectKey `%s` is not a valid object idefntifier (bundlename/objectName)', objectKey);
     }
 
-    return bundleName+'/'+objectName.lcfirst();
+    return bundleName + '/' + objectName.lcfirst();
+}
+
+ka.normalizeEntryPointPath = function(path) {
+    var slash = path.indexOf('/');
+
+    return ka.getShortBundleName(path.substr(0, slash))+ path.substr(slash);
+
 }
 
 /**
@@ -425,7 +423,7 @@ ka.normalizeObjectKey = function (objectKey) {
  * @param {String} pPath
  * @return {String}
  */
-ka.mediaPath = function (pPath) {
+ka.mediaPath = function(pPath) {
 
     if (typeOf(pPath) != 'string') {
         return pPath;
@@ -451,11 +449,11 @@ ka.mediaPath = function (pPath) {
  * @param {String} pObjectKey
  * @return {Array}
  */
-ka.getObjectPrimaryList = function (pObjectKey) {
+ka.getObjectPrimaryList = function(pObjectKey) {
     var def = ka.getObjectDefinition(pObjectKey);
 
     var res = [];
-    Object.each(def.fields, function (field, key) {
+    Object.each(def.fields, function(field, key) {
         if (field.primaryKey) {
             res.push(key);
         }
@@ -472,10 +470,10 @@ ka.getObjectPrimaryList = function (pObjectKey) {
  *
  * @return {Object}
  */
-ka.getObjectPk = function (pObjectKey, pItem) {
+ka.getObjectPk = function(pObjectKey, pItem) {
     var pks = ka.getObjectPrimaryList(pObjectKey);
     var result = {};
-    Array.each(pks, function (pk) {
+    Array.each(pks, function(pk) {
         result[pk] = pItem[pk];
     });
     return result;
@@ -487,7 +485,7 @@ ka.getObjectPk = function (pObjectKey, pItem) {
  * @param {String} uri Internal uri
  * @return {String}
  */
-ka.getCroppedObjectId = function (uri) {
+ka.getCroppedObjectId = function(uri) {
     if ('string' !== typeOf(uri)) {
         return uri;
     }
@@ -513,7 +511,7 @@ ka.getCroppedObjectId = function (uri) {
  * @param {Array}  pItem
  * @return {String} urlencoded internal uri part of the id.
  */
-ka.getObjectUrlId = function (pObjectKey, pItem) {
+ka.getObjectUrlId = function(pObjectKey, pItem) {
     var pks = ka.getObjectPrimaryList(pObjectKey);
 
     if (pks.length == 0) {
@@ -525,7 +523,7 @@ ka.getObjectUrlId = function (pObjectKey, pItem) {
         return ka.urlEncode(pItem) + '';
     } else {
         var allNull = false;
-        Array.each(pks, function (pk) {
+        Array.each(pks, function(pk) {
             allNull |= null === ka.urlEncode(pItem[pk]);
             urlId += ka.urlEncode(pItem[pk]) + ',';
         });
@@ -544,7 +542,7 @@ ka.getObjectUrlId = function (pObjectKey, pItem) {
  * @param {String} pId Has to be urlencoded (use ka.urlEncode())
  * @return {String}
  */
-ka.getObjectUrl = function (pObjectKey, pId) {
+ka.getObjectUrl = function(pObjectKey, pId) {
     return 'object://' + ka.normalizeObjectKey(pObjectKey) + '/' + pId;
 }
 
@@ -553,7 +551,7 @@ ka.getObjectUrl = function (pObjectKey, pId) {
  *
  * @param url
  */
-ka.getObjectKey = function (url) {
+ka.getObjectKey = function(url) {
     if (typeOf(url) != 'string') {
         throw 'url is not a string';
     }
@@ -588,7 +586,7 @@ ka.getObjectKey = function (url) {
  * @param  {String} pUrl   object://user/1
  * @return {String|Object}  If we have only one pk, it returns a string, otherwise an array.
  */
-ka.getObjectId = function (pUrl) {
+ka.getObjectId = function(pUrl) {
     if (typeOf(pUrl) != 'string') {
         return pUrl;
     }
@@ -611,9 +609,9 @@ ka.getObjectId = function (pUrl) {
 
     if (keys.length > 1) {
         var result = [];
-        Array.each(keys, function (key) {
+        Array.each(keys, function(key) {
             var pk = {};
-            Array.each(key.split(','), function (id, pos) {
+            Array.each(key.split(','), function(id, pos) {
                 pk[pks[pos]] = ka.urlDecode(id);
             });
             result.push(pk);
@@ -622,7 +620,7 @@ ka.getObjectId = function (pUrl) {
     } else {
         var result = {};
 
-        Array.each(objectUri.split(','), function (id, pos) {
+        Array.each(objectUri.split(','), function(id, pos) {
             result[pks[pos]] = ka.urlDecode(id);
         });
 
@@ -643,7 +641,7 @@ ka.getObjectId = function (pUrl) {
  * @param {Function} pCb the callback function.
  *
  */
-ka.getObjectLabel = function (pUri, pCb) {
+ka.getObjectLabel = function(pUri, pCb) {
     var objectKey = ka.normalizeObjectKey(ka.getObjectKey(pUri));
     var pkString = ka.getCroppedObjectId(pUri);
     var uri = 'object://' + objectKey + '/' + pkString;
@@ -667,12 +665,12 @@ ka.getObjectLabel = function (pUri, pCb) {
 
     ka.getObjectLabelQ[objectKey][uri].push(pCb);
 
-    ka.getObjectLabelQTimer[objectKey] = (function () {
+    ka.getObjectLabelQTimer[objectKey] = (function() {
 
         ka.getObjectLabelBusy = true;
 
         var uri = 'object://' + ka.urlEncode(ka.normalizeObjectKey(objectKey)) + '/';
-        Object.each(ka.getObjectLabelQ[objectKey], function (cbs, requestedUri) {
+        Object.each(ka.getObjectLabelQ[objectKey], function(cbs, requestedUri) {
             uri += ka.getCroppedObjectId(requestedUri) + '/';
         });
         if (uri.substr(-1) == '/') {
@@ -681,10 +679,10 @@ ka.getObjectLabel = function (pUri, pCb) {
 
         new Request.JSON({url: _pathAdmin + 'admin/objects',
             noCache: 1, noErrorReporting: true,
-            onComplete: function (pResponse) {
+            onComplete: function(pResponse) {
                 var result, fullId, cb;
 
-                Object.each(pResponse.data, function (item, pk) {
+                Object.each(pResponse.data, function(item, pk) {
                     if (item === null) {
                         return;
                     }
@@ -701,8 +699,8 @@ ka.getObjectLabel = function (pUri, pCb) {
                 });
 
                 //call the callback of invalid requests with false argument.
-                Object.each(ka.getObjectLabelQ[objectKey], function (cbs) {
-                    cbs.each(function (cb) {
+                Object.each(ka.getObjectLabelQ[objectKey], function(cbs) {
+                    cbs.each(function(cb) {
                         cb.attempt(false);
                     });
                 });
@@ -730,7 +728,7 @@ ka.getObjectLabelQTimer = {};
  * @param {Object} pDefinition overwrite definitions stored in the pObjectKey
  * @return {String}
  */
-ka.getObjectLabelByItem = function (pObjectKey, pItem, pMode, pDefinition) {
+ka.getObjectLabelByItem = function(pObjectKey, pItem, pMode, pDefinition) {
 
     var definition = ka.getObjectDefinition(pObjectKey);
     if (!definition) {
@@ -741,7 +739,7 @@ ka.getObjectLabelByItem = function (pObjectKey, pItem, pMode, pDefinition) {
     var label = (pDefinition && pDefinition.labelField) ? pDefinition.labelField : definition.labelField;
 
     if (pDefinition) {
-        ['fieldTemplate', 'fieldLabel', 'treeTemplate', 'treeLabel'].each(function (map) {
+        ['fieldTemplate', 'fieldLabel', 'treeTemplate', 'treeLabel'].each(function(map) {
             if (typeOf(pDefinition[map]) !== 'null') {
                 definition[map] = pDefinition[map];
             }
@@ -784,10 +782,10 @@ ka.getObjectLabelByItem = function (pObjectKey, pItem, pMode, pDefinition) {
  *
  * @return {Object}
  */
-ka.getObjectLabels = function (pFields, pItem, pObjectKey, pRelationsAsArray) {
+ka.getObjectLabels = function(pFields, pItem, pObjectKey, pRelationsAsArray) {
 
     var data = pItem, dataKey;
-    Object.each(pFields, function (field, fieldId) {
+    Object.each(pFields, function(field, fieldId) {
         dataKey = fieldId;
         if (pRelationsAsArray && dataKey.indexOf('.') > 0) {
             dataKey = dataKey.split('.')[0];
@@ -810,7 +808,7 @@ ka.getObjectLabels = function (pFields, pItem, pObjectKey, pRelationsAsArray) {
  *
  * @return {String} Safe HTML. Escapted with ka.htmlEntities()
  */
-ka.getObjectFieldLabel = function (pValue, pField, pFieldId, pObjectKey, pRelationsAsArray) {
+ka.getObjectFieldLabel = function(pValue, pField, pFieldId, pObjectKey, pRelationsAsArray) {
     var fields = ka.getObjectDefinition(pObjectKey);
     if (!fields) {
         throw 'Object not found ' + pObjectKey;
@@ -826,7 +824,7 @@ ka.getObjectFieldLabel = function (pValue, pField, pFieldId, pObjectKey, pRelati
 
     var showAsField = Object.clone(pField || field);
     if (!showAsField.type) {
-        Object.each(field, function (v, i) {
+        Object.each(field, function(v, i) {
             if (!showAsField[i]) {
                 showAsField[i] = v;
             }
@@ -867,7 +865,7 @@ ka.getObjectFieldLabel = function (pValue, pField, pFieldId, pObjectKey, pRelati
  * @param {String} pKey
  * @return {String} Or false, if the module does not exist/its not activated.
  */
-ka.getExtensionTitle = function (pKey) {
+ka.getExtensionTitle = function(pKey) {
     var config = ka.getBundleConfig(pKey);
     if (!config) {
         return null;
@@ -888,10 +886,10 @@ ka.getBundleConfig = function(bundle) {
     return result;
 }
 
-ka.tryLock = function (pWin, pKey, pForce) {
+ka.tryLock = function(pWin, pKey, pForce) {
     if (!pForce) {
 
-        new Request.JSON({url: _pathAdmin + 'admin/backend/tryLock', noCache: 1, onComplete: function (res) {
+        new Request.JSON({url: _pathAdmin + 'admin/backend/tryLock', noCache: 1, onComplete: function(res) {
 
             if (!res.locked) {
                 ka.lockNotPossible(pWin, res);
@@ -904,7 +902,7 @@ ka.tryLock = function (pWin, pKey, pForce) {
     }
 }
 
-ka.alreadyLocked = function (pWin, pResult) {
+ka.alreadyLocked = function(pWin, pResult) {
 
     pWin._alert(t('Currently, a other user has this content open.'));
 
@@ -915,7 +913,7 @@ ka.alreadyLocked = function (pWin, pResult) {
  * @param {Number} bytes
  * @returns {String}
  */
-ka.bytesToSize = function (bytes) {
+ka.bytesToSize = function(bytes) {
     var sizes = ['Bytes', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB'];
     if (!bytes) {
         return '0 Bytes';
@@ -933,7 +931,7 @@ ka.bytesToSize = function (bytes) {
  *
  * @return {String}
  */
-ka.dateTime = function (seconds) {
+ka.dateTime = function(seconds) {
     var date = new Date(seconds * 1000);
     var nowSeconds = new Date().getTime();
     var diffForThisWeek = 3600 * 24 * 7;
@@ -947,9 +945,9 @@ ka.dateTime = function (seconds) {
     return date.format(format);
 }
 
-ka.getDomain = function (pRsn) {
+ka.getDomain = function(pRsn) {
     var result = [];
-    ka.settings.domains.each(function (domain) {
+    ka.settings.domains.each(function(domain) {
         if (domain.id == pRsn) {
             result = domain;
         }
@@ -957,7 +955,7 @@ ka.getDomain = function (pRsn) {
     return result;
 }
 
-ka.loadSettings = function (keyLimitation, cb) {
+ka.loadSettings = function(keyLimitation, cb) {
     ka.adminInterface.loadSettings(keyLimitation, cb);
 }
 
@@ -969,21 +967,18 @@ ka.loadSettings = function (keyLimitation, cb) {
  */
 ka.getConfig = function(bundleName) {
     if (!bundleName) return;
-    return ka.settings.configs[bundleName]
-        || ka.settings.configs[bundleName.toLowerCase()]
-        || ka.settings.configsAlias[bundleName]
-        || ka.settings.configsAlias[bundleName.toLowerCase()];
+    return ka.settings.configs[bundleName] || ka.settings.configs[bundleName.toLowerCase()] || ka.settings.configsAlias[bundleName] || ka.settings.configsAlias[bundleName.toLowerCase()];
 }
 
 ka.getShortBundleName = function(bundleName) {
     return bundleName.toLowerCase().replace(/bundle$/, '');
 };
 
-ka.loadMenu = function () {
+ka.loadMenu = function() {
     ka.adminInterface.loadMenu();
 }
 
-ka.loadLanguage = function (pLang) {
+ka.loadLanguage = function(pLang) {
     if (!pLang) {
         pLang = 'en';
     }
@@ -993,37 +988,35 @@ ka.loadLanguage = function (pLang) {
 
     Asset.javascript(_pathAdmin + 'admin/ui/language-plural?lang=' + pLang);
 
-    new Request.JSON({url: _pathAdmin + 'admin/ui/language?lang=' +
-        pLang, async: false, noCache: 1, onComplete: function (pResponse) {
+    new Request.JSON({url: _pathAdmin + 'admin/ui/language?lang=' + pLang, async: false, noCache: 1, onComplete: function(pResponse) {
         ka.lang = pResponse.data;
         Locale.define('en-US', 'Date', ka.lang);
     }}).get();
 
 }
 
-ka.saveUserSettings = function () {
+ka.saveUserSettings = function() {
     if (ka.lastSaveUserSettings) {
         ka.lastSaveUserSettings.cancel();
     }
 
     ka.settings.user = new Hash(ka.settings.user);
 
-    ka.lastSaveUserSettings =
-        new Request.JSON({url: _pathAdmin + 'admin/backend/user-settings', noCache: 1, onComplete: function (res) {
-        }}).post({ settings: JSON.encode(ka.settings.user) });
+    ka.lastSaveUserSettings = new Request.JSON({url: _pathAdmin + 'admin/backend/user-settings', noCache: 1, onComplete: function(res) {
+    }}).post({ settings: JSON.encode(ka.settings.user) });
 }
 
-ka.resetWindows = function () {
+ka.resetWindows = function() {
     ka.settings.user['windows'] = new Hash();
     ka.saveUserSettings();
     ka.wm.resizeAll();
 }
 
-ka.addStreamParam = function (pKey, pVal) {
+ka.addStreamParam = function(pKey, pVal) {
     ka.streamParams[pKey] = pVal;
 }
 
-ka.removeStreamParam = function (pKey) {
+ka.removeStreamParam = function(pKey) {
     delete ka.streamParams[pKey];
 }
 
@@ -1032,7 +1025,7 @@ ka.removeStreamParam = function (pKey) {
  * @param path
  * @param callback
  */
-ka.registerStream = function (path, callback) {
+ka.registerStream = function(path, callback) {
     if (!ka.streamRegistered[path]) {
         ka.streamRegistered[path] = [];
     }
@@ -1047,7 +1040,7 @@ ka.streamRegistered = {};
  * @param {String}   path
  * @param {Function} callback
  */
-ka.deRegisterStream = function (path, callback) {
+ka.deRegisterStream = function(path, callback) {
     if (!ka.streamRegistered[path]) {
         return;
     }
@@ -1065,13 +1058,13 @@ ka.deRegisterStream = function (path, callback) {
 /**
  * The stream loader loop.
  */
-ka.loadStream = function () {
+ka.loadStream = function() {
     if (ka._lastStreamId) {
         clearTimeout(ka._lastStreamId);
     }
 
     ka.streamParams.streams = [];
-    Object.each(ka.streamRegistered, function (cbs, path) {
+    Object.each(ka.streamRegistered, function(cbs, path) {
         if (0 !== cbs.length) {
             ka.streamParams.streams.push(path);
         }
@@ -1081,16 +1074,16 @@ ka.loadStream = function () {
         return;
     }
 
-    ka._lastStreamId = (function () {
+    ka._lastStreamId = (function() {
         if (window._session.userId > 0) {
-            new Request.JSON({url: _pathAdmin + 'admin/stream', noCache: 1, onComplete: function (res) {
+            new Request.JSON({url: _pathAdmin + 'admin/stream', noCache: 1, onComplete: function(res) {
                 if (res) {
                     if (res.error) {
                         ka.newBubble(t('Stream error'), res.error + ': ' + res.message);
                     } else {
                         window.fireEvent('stream', res.data);
-                        Object.each(ka.streamRegistered, function (cbs, path) {
-                            Array.each(cbs, function (cb) {
+                        Object.each(ka.streamRegistered, function(cbs, path) {
+                            Array.each(cbs, function(cb) {
                                 cb(res.data[path], res.data);
                             });
                         });
@@ -1106,24 +1099,24 @@ ka.loadStream = function () {
  *
  * @returns {Object} {type: , value: }
  */
-ka.getClipboard = function () {
+ka.getClipboard = function() {
     return ka.clipboard;
 }
 
-ka.setClipboard = function (pTitle, pType, pValue) {
+ka.setClipboard = function(pTitle, pType, pValue) {
     ka.clipboard = { type: pType, value: pValue };
 }
 
-ka.clearClipboard = function () {
+ka.clearClipboard = function() {
     ka.clipboard = {};
 }
 
 ka.closeDialogsBodys = [];
 
-ka.closeDialog = function () {
+ka.closeDialog = function() {
 
     var killedOne = false;
-    Array.each(ka.closeDialogsBodys, function (body) {
+    Array.each(ka.closeDialogsBodys, function(body) {
         if (killedOne) {
             return;
         }
@@ -1136,7 +1129,7 @@ ka.closeDialog = function () {
     });
 }
 
-ka.openDialog = function (item) {
+ka.openDialog = function(item) {
     if (!item.element || !item.element.getParent) {
         throw 'Got no element.';
     }
@@ -1157,16 +1150,16 @@ ka.openDialog = function (item) {
         styles: {
             opacity: 0.001
         }
-    }).addEvent('click',function (e) {
-        ka.closeDialog();
-        e.stopPropagation();
-        this.fireEvent('close');
-        if (item.onClose) {
-            item.onClose();
-        }
-    }).inject(target);
+    }).addEvent('click',function(e) {
+            ka.closeDialog();
+            e.stopPropagation();
+            this.fireEvent('close');
+            if (item.onClose) {
+                item.onClose();
+            }
+        }).inject(target);
 
-    autoPositionLastOverlay.close = function () {
+    autoPositionLastOverlay.close = function() {
         autoPositionLastOverlay.destroy();
         delete autoPositionLastOverlay;
     };
@@ -1229,9 +1222,7 @@ ka.openDialog = function (item) {
             if (item.minHeight && height < item.minHeight) {
                 var currentTop = item.element.getStyle('top').toInt();
                 var offsetY = (item.offset ? item.offset.y : 0) || 0;
-                item.element.setStyle('top',
-                    currentTop - item.element.getSize().y - item.target.getSize().y + 1 + (offsetY*-1)
-                );
+                item.element.setStyle('top', currentTop - item.element.getSize().y - item.target.getSize().y + 1 + (offsetY * -1));
                 //item.element.position(item.secondary);
             } else {
                 item.element.setStyle('height', height);
@@ -1245,7 +1236,7 @@ ka.openDialog = function (item) {
     return autoPositionLastOverlay;
 }
 
-ka.getPrimariesForObject = function (pObjectKey) {
+ka.getPrimariesForObject = function(pObjectKey) {
 
     var definition = ka.getObjectDefinition(pObjectKey);
 
@@ -1256,7 +1247,7 @@ ka.getPrimariesForObject = function (pObjectKey) {
         return;
     }
 
-    Object.each(definition.fields, function (field, fieldKey) {
+    Object.each(definition.fields, function(field, fieldKey) {
 
         if (field.primaryKey) {
             result[fieldKey] = Object.clone(field);
@@ -1267,7 +1258,7 @@ ka.getPrimariesForObject = function (pObjectKey) {
     return result;
 }
 
-ka.getPrimaryListForObject = function (pObjectKey) {
+ka.getPrimaryListForObject = function(pObjectKey) {
 
     var definition = ka.getObjectDefinition(pObjectKey);
 
@@ -1278,7 +1269,7 @@ ka.getPrimaryListForObject = function (pObjectKey) {
         return;
     }
 
-    Object.each(definition.fields, function (field, fieldKey) {
+    Object.each(definition.fields, function(field, fieldKey) {
 
         if (field.primaryKey) {
             result.push(fieldKey);
@@ -1295,7 +1286,7 @@ ka.getPrimaryListForObject = function (pObjectKey) {
  * @param pObjectKey
  * @returns {Object}
  */
-ka.getObjectDefinition = function (pObjectKey) {
+ka.getObjectDefinition = function(pObjectKey) {
     if (typeOf(pObjectKey) != 'string') {
         throw 'pObjectKey is not a string: ' + pObjectKey;
     }
@@ -1312,7 +1303,7 @@ ka.getObjectDefinition = function (pObjectKey) {
     }
 }
 
-ka.getFieldCaching = function () {
+ka.getFieldCaching = function() {
     return {
         'cache_type': {
             label: _('Cache storage'),
@@ -1358,11 +1349,11 @@ ka.getFieldCaching = function () {
     }
 }
 
-ka.renderLayoutElements = function (pDom, pClassObj) {
+ka.renderLayoutElements = function(pDom, pClassObj) {
 
     var layoutBoxes = {};
 
-    pDom.getWindow().$$('.kryn_layout_content, .kryn_layout_slot').each(function (item) {
+    pDom.getWindow().$$('.kryn_layout_content, .kryn_layout_slot').each(function(item) {
 
         var options = {};
         if (item.get('params')) {
@@ -1381,7 +1372,7 @@ ka.renderLayoutElements = function (pDom, pClassObj) {
     return layoutBoxes;
 }
 
-ka.pregQuote = function (str) {
+ka.pregQuote = function(str) {
     // http://kevin.vanzonneveld.net
     // +   original by: booeyOH
     // +   improved by: Ates Goral (http://magnetiq.com)
@@ -1397,7 +1388,7 @@ ka.pregQuote = function (str) {
     return (str + '').replace(/([\\\.\+\*\?\[\^\]\$\(\)\{\}\=\!\<\>\|\:])/g, "\\$1");
 }
 
-initWysiwyg = function (pElement, pOptions) {
+initWysiwyg = function(pElement, pOptions) {
 
     var options = {
         extraClass: 'SilkTheme',
@@ -1420,13 +1411,12 @@ initWysiwyg = function (pElement, pOptions) {
  * @param {Element} element
  * @param {Number} opacity
  */
-ka.generateNoise = function (element, opacity) {
+ka.generateNoise = function(element, opacity) {
     if (!"getContent" in document.createElement('canvas')) {
         return false;
     }
 
-    var
-        canvas = document.createElement("canvas")
+    var canvas = document.createElement("canvas")
         , c2d = canvas.getContext("2d")
         , x
         , y

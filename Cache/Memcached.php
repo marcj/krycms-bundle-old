@@ -6,8 +6,6 @@ class Memcached extends AbstractCache
 {
     private $connection;
 
-    private $noServerTest = false;
-
     /**
      * {@inheritdoc}
      */

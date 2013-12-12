@@ -17,7 +17,7 @@ use Kryn\CmsBundle\Model\GroupQuery;
 use Kryn\CmsBundle\Model\SessionQuery;
 use Kryn\CmsBundle\Model\User;
 use Kryn\CmsBundle\Model\UserGroupQuery;
-use Kryn\CmsBundle\Model\UserQuery;use Propel\Runtime\Propel;
+use Kryn\CmsBundle\Model\UserQuery;
 use Symfony\Component\DependencyInjection\ContainerAware;
 
 class PackageManager extends ContainerAware {
@@ -332,98 +332,6 @@ class PackageManager extends ContainerAware {
 
         );
 
-        if (!function_exists(__NAMESPACE__ . '\installNodes')) {
-            /**
-             * @static
-             *
-             * @param Node  $pNode
-             * @param array $pChildren
-             */
-            function installNodes($pNode, $pChildren)
-            {
-                /*
-                * 0: type
-                * 1: Title
-                * 2: layout
-                * 3: url
-                * 4: link target
-                * 5: contents
-                * 6: children
-                * 7: visible
-                */
-                foreach ($pChildren as $Node) {
-                    $oNode = new Node();
-                    $oNode->setDomainId($pNode->getDomainId());
-                    $oNode->setType($Node[0]);
-                    $oNode->setTitle($Node[1]);
-                    $oNode->setLayout($Node[2]);
-                    $oNode->setUrn($Node[3]);
-                    $oNode->setParentId($pNode->getId());
-                    $oNode->insertAsLastChildOf($pNode);
-
-                    if ($Node[4]) {
-                        $oNode->setLink($Node[4]);
-                    }
-
-                    if (isset($Node[7])) {
-                        $oNode->setVisible($Node[7]);
-                    } else {
-                        $oNode->setVisible(1);
-                    }
-
-                    $oNode->save();
-
-                    if (isset($Node[5])) {
-                        installContents($oNode, $Node[5]);
-                    }
-
-                    if (isset($Node[6])) {
-                        installNodes($oNode, $Node[6]);
-                    }
-                }
-
-            }
-        }
-
-        if (!function_exists(__NAMESPACE__ . '\installContents')) {
-            /**
-             * @static
-             *
-             * @param Node  $pNode
-             * @param array $pBoxedContents
-             */
-            function installContents($pNode, $pBoxedContents)
-            {
-                if (!is_array($pBoxedContents)) {
-                    return;
-                }
-
-                /**
-                 * 0: type74
-                 * 1: title
-                 * 2: template
-                 * 3: content
-                 *
-                 */
-                foreach ($pBoxedContents as $boxId => $contents) {
-                    foreach ($contents as $content) {
-
-                        $oContent = new Content();
-
-                        $oContent->setNodeId($pNode->getId());
-                        $oContent->setBoxId($boxId);
-                        $oContent->setType($content[0]);
-                        $oContent->setTitle($content[1]);
-                        $oContent->setTemplate($content[2]);
-                        $oContent->setContent($content[3]);
-                        $oContent->save();
-
-                    }
-                }
-
-            }
-        }
-
         /*
         * 0: type
         * 1: Title
@@ -457,11 +365,11 @@ class PackageManager extends ContainerAware {
             }
 
             if ($Node[5]) {
-                installContents($oNode, $Node[5]);
+                $this->installContents($oNode, $Node[5]);
             }
 
             if ($Node[6]) {
-                installNodes($oNode, $Node[6]);
+                $this->installNodes($oNode, $Node[6]);
             }
         }
 
@@ -557,4 +465,88 @@ class PackageManager extends ContainerAware {
 
     }
 
+    /**
+     * @static
+     *
+     * @param Node  $pNode
+     * @param array $pChildren
+     */
+    function installNodes(Node $pNode, $pChildren)
+    {
+        /*
+        * 0: type
+        * 1: Title
+        * 2: layout
+        * 3: url
+        * 4: link target
+        * 5: contents
+        * 6: children
+        * 7: visible
+        */
+        foreach ($pChildren as $Node) {
+            $oNode = new Node();
+            $oNode->setDomainId($pNode->getDomainId());
+            $oNode->setType($Node[0]);
+            $oNode->setTitle($Node[1]);
+            $oNode->setLayout($Node[2]);
+            $oNode->setUrn($Node[3]);
+            $oNode->setParentId($pNode->getId());
+            $oNode->insertAsLastChildOf($pNode);
+
+            if ($Node[4]) {
+                $oNode->setLink($Node[4]);
+            }
+
+            if (isset($Node[7])) {
+                $oNode->setVisible($Node[7]);
+            } else {
+                $oNode->setVisible(1);
+            }
+
+            $oNode->save();
+
+            if (isset($Node[5])) {
+                $this->installContents($oNode, $Node[5]);
+            }
+
+            if (isset($Node[6])) {
+                $this->installNodes($oNode, $Node[6]);
+            }
+        }
+    }
+
+    /**
+     * @static
+     *
+     * @param Node  $pNode
+     * @param array $pBoxedContents
+     */
+    function installContents(Node $pNode, $pBoxedContents)
+    {
+        if (!is_array($pBoxedContents)) {
+            return;
+        }
+
+        /**
+         * 0: type74
+         * 1: title
+         * 2: template
+         * 3: content
+         *
+         */
+        foreach ($pBoxedContents as $boxId => $contents) {
+            foreach ($contents as $content) {
+
+                $oContent = new Content();
+
+                $oContent->setNodeId($pNode->getId());
+                $oContent->setBoxId($boxId);
+                $oContent->setType($content[0]);
+                $oContent->setTitle($content[1]);
+                $oContent->setTemplate($content[2]);
+                $oContent->setContent($content[3]);
+                $oContent->save();
+            }
+        }
+    }
 }

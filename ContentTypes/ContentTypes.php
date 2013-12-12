@@ -2,8 +2,6 @@
 
 namespace Kryn\CmsBundle\ContentTypes;
 
-use Kryn\CmsBundle\Core;
-
 class ContentTypes {
 
     /**

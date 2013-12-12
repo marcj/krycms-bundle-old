@@ -46,7 +46,7 @@ class ContentSlotExtension extends \Twig_Extension
         $params['name'] = $name;
 
         $render = $this->getKrynCore()->getContentRender();
-        return $render->renderSlot(PageController::getCurrentRenderPage(), $id, $params);
+        return $render->renderSlot($this->krynCore->getCurrentPage(), $id, $params);
     }
 
 }

@@ -82,7 +82,7 @@ class PluginResponseListener {
         } else {
             $foundRoute = false;
 
-            $router = $this->getKrynCore()->getRouter();
+//            $router = $this->getKrynCore()->getRouter();
             $routes = $this->frontendRouteListener->getRoutes();
 
             foreach ($routes as $idx => $route) {

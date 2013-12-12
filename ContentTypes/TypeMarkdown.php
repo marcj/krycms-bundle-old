@@ -2,9 +2,6 @@
 
 namespace Kryn\CmsBundle\ContentTypes;
 
-use Kryn\CmsBundle\Model\Content;
-use Core\WebFile;
-
 use Michelf\MarkdownExtra;
 
 class TypeMarkdown extends AbstractType

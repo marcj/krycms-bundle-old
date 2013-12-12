@@ -20,7 +20,7 @@ class ConfigController extends Controller
      *
      * @return array['langs' => array[], 'timeozone' => string[]]
      */
-    public function getLabels()
+    public function getLabelsAction()
     {
         $res['langs'] = LanguageQuery::create()
             ->orderByTitle()
@@ -43,7 +43,7 @@ class ConfigController extends Controller
      *
      * @return array
      */
-    public function getConfig()
+    public function getConfigAction()
     {
         return $this->getKrynCore()->getSystemConfig()->toArray(true);
     }
@@ -59,7 +59,7 @@ class ConfigController extends Controller
      *
      * @return boolean
      */
-    public static function saveConfig()
+    public static function saveConfigAction()
     {
         //todo;
 //        $cfg = include 'Config.php';

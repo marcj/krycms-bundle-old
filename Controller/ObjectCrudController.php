@@ -4,12 +4,8 @@ namespace Kryn\CmsBundle\Controller;
 
 use FOS\RestBundle\Request\ParamFetcher;
 use Kryn\CmsBundle\Admin\ObjectCrud;
-use Kryn\CmsBundle\Configuration\Condition;
 use Kryn\CmsBundle\Configuration\EntryPoint;
-use Kryn\CmsBundle\Core;
-use Kryn\CmsBundle\Exceptions\InvalidArgumentException;
 use Kryn\CmsBundle\Tools;
-use RestService\Server;
 use Symfony\Component\HttpFoundation\Request;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
@@ -352,7 +348,6 @@ class ObjectCrudController extends ObjectCrud
         $obj->initialize();
 
         return $obj;
-
     }
 
     /**

@@ -2,11 +2,10 @@
 
 namespace Kryn\CmsBundle\ORM\Sync;
 
-use Admin\Exceptions\BuildException;
-use Kryn\CmsBundle\Bundle;
+use Kryn\CmsBundle\Configuration\Bundle;
+use \Kryn\CmsBundle\Exceptions\BuildException;
 use Kryn\CmsBundle\Configuration\Field;
 use Kryn\CmsBundle\Configuration\Object;
-use Kryn\CmsBundle\SystemFile;
 
 class Propel implements SyncInterface {
 
@@ -171,8 +170,7 @@ class Propel implements SyncInterface {
             case 'object':
 
                 if ($field['objectRelation'] == 'nTo1' || $field['objectRelation'] == '1ToN') {
-
-                    $rightPrimaries = \Kryn\CmsBundle\Object::getPrimaries($field['object']);
+//                    $rightPrimaries = \Kryn\CmsBundle\Object::getPrimaries($field['object']);
                 }
 
                 break;
@@ -225,8 +223,7 @@ class Propel implements SyncInterface {
                 $foreignObject = \Kryn\CmsBundle\Object::getDefinition($field['object']);
 
                 if (!$foreignObject) {
-                    throw new BuildException(tf('The object `%s` does not exist in field `%s`.', $field['object'], $field['id']));
-                    continue;
+                    throw new BuildException(sprintf('The object `%s` does not exist in field `%s`.', $field['object'], $field['id']));
                 }
 
                 $relationName = ucfirst($field['objectRelationName'] ?: $foreignObject->getId());
@@ -508,7 +505,7 @@ class Propel implements SyncInterface {
 
         $columnsDefined = array();
 
-        $clonedTable = simplexml_load_string($objectTable->asXML());
+//        $clonedTable = simplexml_load_string($objectTable->asXML());
 
         //removed all non-custom foreign-keys
         $foreignKeys = $objectTable->xpath("foreign-key[not(@custom='true')]");
@@ -565,7 +562,6 @@ class Propel implements SyncInterface {
         foreach ($columns as $k => $column) {
             $col = $object->getField(underscore2Camelcase($column['name']));
             if (!$col) {
-                var_dump('unset ' . $column['name']);
                 unset($columns[$k][0]);
             }
         }

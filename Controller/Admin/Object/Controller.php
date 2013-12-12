@@ -77,7 +77,7 @@ class Controller extends KrynController
         $returnKey =filter_var($paramFetcher->get('returnKey'), FILTER_VALIDATE_BOOLEAN);
         $returnKeyAsRequested = filter_var($paramFetcher->get('returnKeyAsRequested'), FILTER_VALIDATE_BOOLEAN);
 
-        list($objectKey, $objectIds, $params) = $this->getObjects()->parseUrl($url);
+        list($objectKey, $objectIds, ) = $this->getObjects()->parseUrl($url);
         //check if we got an id
         if ($objectIds[0] === '') {
             throw new \Exception(sprintf('No id given in uri %s.', $url));
@@ -278,7 +278,7 @@ class Controller extends KrynController
             throw new ObjectMisconfiguration(sprintf('Object %s does not have browser columns.', $objectKey));
         }
 
-        $fields = array_keys($definition['browserColumns']);
+//        $fields = array_keys($definition['browserColumns']);
 
         $options = array(
             'permissionCheck' => true

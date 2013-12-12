@@ -7,7 +7,6 @@ use Kryn\CmsBundle\Model\Content;
 use Kryn\CmsBundle\Exceptions\PluginException;
 use Kryn\CmsBundle\PageResponse;
 use Kryn\CmsBundle\PluginResponse;
-use Propel\Runtime\Exception\LogicException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\GetResponseForControllerResultEvent;

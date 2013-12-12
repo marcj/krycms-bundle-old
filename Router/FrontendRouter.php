@@ -4,23 +4,19 @@ namespace Kryn\CmsBundle\Router;
 
 use Kryn\CmsBundle\Core;
 use Kryn\CmsBundle\Model\Base\Node;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 
-use Kryn\CmsBundle\PluginController;
 use Kryn\CmsBundle\Model\Base\DomainQuery;
 use Kryn\CmsBundle\Model\Content;
 use Kryn\CmsBundle\Model\ContentQuery;
-use Kryn\CmsBundle\Model\NodeQuery;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Symfony\Component\HttpFoundation\ParameterBag;
-use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\Routing\Route as SyRoute;
 use Symfony\Component\EventDispatcher\GenericEvent;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\RouteCollection;
 
-class FrontendRouter {
+class FrontendRouter
+{
 
     /**
      * @var Request
@@ -93,28 +89,28 @@ class FrontendRouter {
         return $this->request;
     }
 
-    public function handle()
-    {
-
-    }
-
     public function loadRoutes(RouteCollection $routes)
     {
         $uri = $this->getRequest()->getPathInfo();
 
         if ($this->getKrynCore()->isAdmin()) {
-            return;
+            return null;
         }
 
         if ($this->searchDomain() && $this->searchPage($uri)) {
+            if ($response = $this->checkPageAccess()) {
+                return $response;
+            }
             $this->routes = $routes;
             $this->registerMainPage();
             $this->registerPluginRoutes();
         }
     }
-    
-    public function checkPageAccess(Node $page, $withRedirect = true)
+
+    public function checkPageAccess()
     {
+        $page = $this->getKrynCore()->getCurrentPage();
+
         $oriPage = $page;
 
         if ($page->getAccessFrom() > 0 && ($page->getAccessFrom() > time())) {
@@ -166,22 +162,23 @@ class FrontendRouter {
             }
         }
 
-        if (!$page && $withRedirect && $oriPage->getAccessNeedVia() == 0) {
-
-            if ($oriPage->getAccessRedirectto() + 0 > 0) {
-                die('todo redirect');
-//                $this->getKrynCore()->redirectToPage($oriPage->getAccessRedirectto());
+        if (!$page && $to = $oriPage->getAccessRedirectto()) {
+            if (intval($to) > 0) {
+                $to = $this->getKrynCore()->getNodeUrl($to);
             }
+            return new RedirectResponse($to);
         }
 
-        if (!$page && $withRedirect && $oriPage->getAccessNeedVia() == 1) {
-            header(
-                'WWW-Authenticate: Basic realm="' .
-                ('Access denied. Maybe you are not logged in or have no access.') . '"'
-            );
-            header('HTTP/1.0 401 Unauthorized');
+        if (!$page && $oriPage->getAccessNeedVia() == 1) {
+            $response = new Response();
+            return $response;
+            //create
+//            header(
+//                'WWW-Authenticate: Basic realm="' .
+//                ('Access denied. Maybe you are not logged in or have no access.') . '"'
+//            );
+//            header('HTTP/1.0 401 Unauthorized');
 
-            exit;
         }
 
         return $page;
@@ -191,7 +188,6 @@ class FrontendRouter {
     {
         $page = $this->getKrynCore()->getCurrentPage();
         $domain = $this->getKrynCore()->getCurrentDomain();
-//        $page = self::checkPageAccess($page);
 
         $clazz = 'Kryn\\CmsBundle\\Controller\\PageController';
         $domainUrl = (!$domain->getMaster()) ? '/' . $domain->getLang() : '';
@@ -200,7 +196,7 @@ class FrontendRouter {
         $id = $page->getId();
         $url = $domainUrl . isset($urls[$id]) ? $urls[$id] : '';
 
-        $controller = $clazz . '::handle';
+        $controller = $clazz . '::handleAction';
 
         if ('' !== $url && '/' !== $url && $domain && $domain->getStartnodeId() == $page->getId()) {
             //This is the start page, so add a redirect controller
@@ -208,7 +204,7 @@ class FrontendRouter {
                 $this->routes->count() + 1,
                 new SyRoute(
                     $url,
-                    array('_controller' => $clazz . '::redirectToStartPage')
+                    array('_controller' => $clazz . '::redirectToStartPageAction')
                 )
             );
 
@@ -223,53 +219,6 @@ class FrontendRouter {
             )
         );
     }
-
-    protected function isEditMode()
-    {
-        return false;
-    }
-
-//    public function firePluginRequest()
-//    {
-//        if (null !== $this->pluginPath) {
-//            //add all router to current router and fire sub-request
-//            $cacheKey = 'core/node/plugins-' . $this->getKrynCore()->getCurrentPage()->getId();
-//            $plugins = $this->getKrynCore()->getDistributedCache($cacheKey);
-//
-//            if (null === $plugins) {
-//                $plugins = ContentQuery::create()
-//                    ->filterByNodeId($this->getKrynCore()->getCurrentPage()->getId())
-//                    ->filterByType('plugin')
-//                    ->find();
-//
-//                $this->getKrynCore()->setDistributedCache($cacheKey, serialize($plugins));
-//            } else {
-//                $plugins = unserialize($plugins);
-//            }
-//
-//            $this->registerPluginRoutes($plugins);
-//
-//            //remove FrontendController of the current routeCollection to prevent endless-loop
-//            $router = $this->getKrynCore()->getRouter();
-//            $routes = $router->getRouteCollection();
-//
-//            $cFrontendController = get_class($this) . '::frontendAction';
-//            $frontendController = 'Kryn\CmsBundle\Controller\FrontendController::frontendAction';
-//            foreach ($routes as $idx => $route) {
-//                /** @var \Symfony\Component\Routing\Route $route */
-//                if ($frontendController == $route->getDefault('_controller') ||
-//                    $cFrontendController == $route->getDefault('_controller')
-//                ) {
-//                    $routes->remove($idx);
-//                }
-//            }
-//
-//            $request = clone $this->getKrynCore()->getRequest();
-//            $request->attributes = new ParameterBag();
-//            $response = $this->getKrynCore()->getKernel()->handle($request, HttpKernelInterface::SUB_REQUEST);
-//            var_dump($response);
-//        }
-//    }
 
     /**
      */
@@ -347,8 +296,7 @@ class FrontendRouter {
                     if (false !== strpos($clazz, '\\')) {
                         $controller = $clazz . '::' . $pluginDefinition->getMethod();
                     } else {
-                        $controller = $clazz . '\\' . $pluginDefinition->getClass(
-                            ) . '::' . $pluginDefinition->getMethod();
+                        $controller = $clazz . '\\' . $pluginDefinition->getClass() . '::' . $pluginDefinition->getMethod();
                     }
 
                     $defaults = array(
@@ -507,6 +455,7 @@ class FrontendRouter {
 
         if (!$domain) {
             $dispatcher->dispatch('core/domain-not-found', new GenericEvent($hostname));
+
             return;
         }
 
@@ -518,7 +467,7 @@ class FrontendRouter {
         return $domain;
     }
 
-    protected function searchPage($path)
+    protected function searchPage()
     {
         $url = self::getRequest()->getPathInfo();
         $stopwatch = $this->getKrynCore()->getStopwatch();
@@ -532,7 +481,6 @@ class FrontendRouter {
         //extract extra url attributes
         $found = $end = false;
         $possibleUrl = $next = $url;
-        $oriUrl = $possibleUrl;
 
         do {
             $id = isset($urls[$possibleUrl]) ? $urls[$possibleUrl] : 0;

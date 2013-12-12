@@ -4,7 +4,7 @@ namespace Kryn\CmsBundle\ORM;
 
 use Kryn\CmsBundle\Configuration\Condition;
 use Kryn\CmsBundle\Configuration\ConditionSubSelect;
-use Kryn\CmsBundle\Configuration\Object as ConfigObject;
+use Kryn\CmsBundle\Exceptions\FileNotFoundException;
 use Kryn\CmsBundle\Exceptions\ObjectNotFoundException;
 use Kryn\CmsBundle\Objects;
 use Kryn\CmsBundle\Tools;
@@ -297,12 +297,12 @@ class Propel extends ORMAbstract
     }
 
     /**
-     * @param       $query
+     * @param ModelCriteria $query
      * @param array $options
      *
-     * @throws \FieldNotFoundException
+     * @throws FieldNotFoundException
      */
-    public function mapOptions($query, $options = array())
+    public function mapOptions(ModelCriteria $query, $options = array())
     {
         if (isset($options['limit'])) {
             $query->limit($options['limit']);
@@ -315,7 +315,7 @@ class Propel extends ORMAbstract
         if (isset($options['order']) && is_array($options['order'])) {
             foreach ($options['order'] as $field => $direction) {
                 if (!$this->tableMap->hasColumnByPhpName(ucfirst($field))) {
-                    throw new \FieldNotFoundException(tf('Field %s in object %s not found', $field, $this->getObjectKey()));
+                    throw new FileNotFoundException(sprintf('Field %s in object %s not found', $field, $this->getObjectKey()));
                 } else {
                     $column = $this->tableMap->getColumnByPhpName(ucfirst($field));
 
@@ -333,7 +333,6 @@ class Propel extends ORMAbstract
      */
     public function getStm(ModelCriteria $query, \Kryn\CmsBundle\Configuration\Condition $condition = null)
     {
-        $condition2 = '';
         $params = [];
         $condition2Params = [];
         $id = (hexdec(uniqid()) / mt_rand()) + mt_rand();
@@ -872,9 +871,9 @@ class Propel extends ORMAbstract
 
                     $name = $pluralizer->getPluralForm(Tools::underscore2Camelcase($fieldName));
                     $setItems = 'set' . $name;
-                    $getItems = 'get' . $name;
+//                    $getItems = 'get' . $name;
                     $clearItems = 'clear' . $name;
-                    $addItem = 'add' . Tools::underscore2Camelcase($fieldName);
+//                    $addItem = 'add' . Tools::underscore2Camelcase($fieldName);
 
                     if ($fieldValue) {
                         $foreignQuery = $this->getQueryClass($field['object']);

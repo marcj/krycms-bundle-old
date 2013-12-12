@@ -61,11 +61,10 @@ class Utils
      * Gets the item from the administration entry points defined in the config.json, by the given code.
      *
      * @param string  $code <bundleName>/news/foo/bar/edit
-     * @param boolean $withChildren
      *
      * @return EntryPoint
      */
-    public function getEntryPoint($code, $withChildren = false)
+    public function getEntryPoint($code)
     {
         if ('/' === $code) return null;
 
@@ -75,7 +74,7 @@ class Utils
         }
 
         $bundleName = $code;
-        if (false !== ($pos = strpos($code, '/'))) {
+        if (false !== (strpos($code, '/'))) {
             $bundleName = substr($code, 0, strpos($code, '/'));
             $path = substr($code, strpos($code, '/') + 1);
         }

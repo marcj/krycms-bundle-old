@@ -2,8 +2,6 @@
 
 namespace Kryn\CmsBundle\Configuration;
 
-use Kryn\CmsBundle\Core;
-
 class Cache extends Model
 {
     protected $docBlock = '

@@ -8,6 +8,8 @@ use Symfony\Component\Finder\Finder;
 
 class Utils extends Controller
 {
+    public static $extractTranslations;
+
     public function getPluralForm($lang, $onlyAlgorithm = false)
     {
         //csv based on (c) http://translate.sourceforge.net/wiki/l10n/pluralforms
@@ -367,9 +369,10 @@ class Utils extends Controller
         );
         //$GLOBALS['moduleTempLangs'][$file] = true;
 
+        \Kryn\CmsBundle\Translation\Utils::$extractTranslations = [];
         $GLOBALS['extractTranslations'] = [];
         foreach ($regExs as $regEx => $val) {
-            $fn = '$GLOBALS[\'extractTranslations\']' . $val . ';';
+            $fn = '\\Kryn\\CmsBundle\\Translation\\Utils::$extractTranslations' . $val . ';';
 
             preg_replace_callback(
                 $regEx . 'mu',
@@ -403,6 +406,5 @@ class Utils extends Controller
         }
         return $result;
     }
-
 
 }

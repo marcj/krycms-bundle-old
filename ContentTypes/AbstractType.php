@@ -3,7 +3,6 @@
 namespace Kryn\CmsBundle\ContentTypes;
 
 use Kryn\CmsBundle\Model\Content;
-use Kryn\CmsBundle\Core;
 
 abstract class AbstractType implements TypeInterface
 {

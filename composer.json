@@ -6,7 +6,7 @@
         "PHP CMS",
         "WCMS"
     ],
-    "license": "GPL",
+    "license": "LGPL-3.0",
     "homepage": "http:\/\/www.kryn.org\/",
     "authors": [
         {
@@ -34,13 +34,13 @@
         "marcj/php-rest-service": ">=0.1.7",
         "sybio/image-workshop": ">=2",
         "michelf/php-markdown": ">=1.3",
-        "composer\/composer": "*",
-        "kryncms\/demotheme-bundle": "*",
-        "kryncms\/publication-bundle": "*",
+        "composer\/composer": "1.0.*@dev",
+        "kryncms\/demotheme-bundle": "dev-master",
+        "kryncms\/publication-bundle": "dev-master",
         "friendsofsymfony/rest-bundle": "1.1.*",
         "jms/serializer-bundle": "0.12.*",
         "willdurand/hateoas": "2.0.*@dev",
-        "nelmio/api-doc-bundle": "@stable"
+        "nelmio/api-doc-bundle": "2.4.*@dev"
     },
     "require-dev": {
         "phpunit\/phpunit": "3.7.*"

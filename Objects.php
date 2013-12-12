@@ -5,7 +5,6 @@ namespace Kryn\CmsBundle;
 use Kryn\CmsBundle\Configuration\Condition;
 use Kryn\CmsBundle\Exceptions\InvalidArgumentException;
 use Kryn\CmsBundle\Exceptions\ObjectNotFoundException;
-use Kryn\CmsBundle\ORM\Propel;
 use Symfony\Component\EventDispatcher\GenericEvent;
 
 class Objects
@@ -60,11 +59,10 @@ class Objects
      * @static
      *
      * @param string $internalUrl
-     * @param int    $pluginContentElementId
      *
      * @return string|bool
      */
-    public function getUrl($internalUrl, $pluginContentElementId)
+    public function getUrl($internalUrl)
     {
         $pos = strpos($internalUrl, '://');
         $objectIds = substr($internalUrl, 0, $pos);
@@ -690,7 +688,7 @@ class Objects
      */
     public function getCountFromUrl($internalUrl)
     {
-        list($objectKey, $objectIds, $params) = $this->parseUrl($internalUrl);
+        list($objectKey, , $params) = $this->parseUrl($internalUrl);
 
         return $this->getCount($objectKey, $params['condition']);
     }
@@ -1009,8 +1007,7 @@ class Objects
      */
     public function removeFromUrl($objectUrl)
     {
-        list($objectKey, $objectIds, $params) = $this->parseUrl($objectUrl);
-        $obj = $this->getClass($objectKey);
+        list($objectKey, $objectIds, ) = $this->parseUrl($objectUrl);
 
         return $this->remove($objectKey, $objectIds[0]);
     }
@@ -1115,6 +1112,10 @@ class Objects
             $obj = $this->getClass($objectKey);
 
             $conditionObject = new Condition(null, $this->getKrynCore());
+
+            if ($condition) {
+                $conditionObject->fromPk($condition, $objectKey);
+            }
 
             if ($options['permissionCheck'] && $aclCondition = $this->getKrynCore()->getACL()->getListingCondition($objectKey)) {
                 $conditionObject->mergeAndBegin($aclCondition);
@@ -1266,9 +1267,9 @@ class Objects
      */
     public function getParentPkFromUrl($objectUrl)
     {
-        list($objectKey, $objectIds, $params) = $this->parseUrl($objectUrl);
+        list($objectKey, $objectIds, ) = $this->parseUrl($objectUrl);
 
-        return $this->getParentId($objectKey, $objectIds[0]);
+        return $this->getParentPk($objectKey, $objectIds[0]);
     }
 
     /**
@@ -1297,7 +1298,7 @@ class Objects
      */
     public function getParentFromUrl($objectUrl)
     {
-        list($objectKey, $objectIds, $params) = $this->parseUrl($objectUrl);
+        list($objectKey, $objectIds, ) = $this->parseUrl($objectUrl);
 
         return $this->getParent($objectKey, $objectIds[0]);
     }
@@ -1310,7 +1311,7 @@ class Objects
      */
     public function getVersionsFromUrl($objectUrl, $options = null)
     {
-        list($objectKey, $objectId) = Object::parseUrl($objectUrl);
+        list($objectKey, $objectId) = Objects::parseUrl($objectUrl);
 
         return $this->getVersions($objectKey, $objectId[0], $options);
     }
@@ -1327,8 +1328,7 @@ class Objects
         $obj = $this->getClass($objectKey);
         $pk2 = $obj->normalizePrimaryKey($pk);
 
-        return $obj->getVersions($pk2);
-
+        return $obj->getVersions($pk2, $options);
     }
 
     /**
@@ -1419,7 +1419,7 @@ class Objects
      */
     public function getParentsFromUrl($objectUrl)
     {
-        list($objectKey, $objectIds, $params) = $this->parseUrl($objectUrl);
+        list($objectKey, $objectIds, ) = $this->parseUrl($objectUrl);
 
         return $this->getParents($objectKey, $objectIds[0]);
     }
@@ -1442,7 +1442,6 @@ class Objects
         $targetPk,
         $position = 'first',
         $targetObjectKey = null,
-        $options = null,
         $overwrite = false
     ) {
         $obj = $this->getClass($objectKey);
@@ -1451,6 +1450,7 @@ class Objects
         $targetPk = $this->normalizePk($targetObjectKey ? $targetObjectKey : $objectKey, $targetPk);
 
         //todo check access
+
         return $obj->move($pk2, $targetPk, $position, $targetObjectKey, $overwrite);
     }
 
@@ -1466,8 +1466,8 @@ class Objects
      */
     public function moveFromUrl($sourceObjectUrl, $targetObjectUrl, $position = 'first', $options = null)
     {
-        list($objectKey, $objectIds, $params) = $this->parseUrl($sourceObjectUrl);
-        list($targetObjectKey, $targetObjectIds, $targetParams) = $this->parseUrl($targetObjectUrl);
+        list($objectKey, $objectIds, ) = $this->parseUrl($sourceObjectUrl);
+        list($targetObjectKey, $targetObjectIds, ) = $this->parseUrl($targetObjectUrl);
 
         return $this->move($objectKey, $objectIds[0], $targetObjectIds[0], $targetObjectKey, $position, $options);
     }
@@ -1506,86 +1506,6 @@ class Objects
         } else if($condition instanceof Condition) {
             return $condition->satisfy($objectItem, $objectKey);
         }
-    }
-
-    /**
-     * Checks a single condition.
-     *
-     * @param  array $objectItem
-     * @param  array $condition
-     * @param  string $objectKey
-     *
-     * @return bool|int
-     */
-    public function checkRule(&$objectItem, $condition, $objectKey = null)
-    {
-        $field = $condition[0];
-        $operator = $condition[1];
-        $value = $condition[2];
-
-        if (is_numeric($field)) {
-            $ovalue = $field;
-        } else {
-            $ovalue = $objectItem[$field];
-            if (null === $ovalue && $objectKey && $definition = $this->getDefinition($objectKey)) {
-                $tableName = substr($field, 0, strpos($field, '.'));
-                $fieldName = substr($field, strpos($field, '.') + 1);
-                if ($tableName === $this->getKrynCore()->getSystemConfig()->getDatabase()->getPrefix().$definition->getTable()) {
-                    $ovalue = $objectItem[$fieldName];
-                }
-            }
-        }
-
-        //'<', '>', '<=', '>=', '=', 'LIKE', 'IN', 'REGEXP'
-        switch (strtoupper($operator)) {
-            case '!=':
-            case 'NOT EQUAL':
-                return ($ovalue != $value);
-
-            case 'LIKE':
-                $value = preg_quote($value, '/');
-                $value = str_replace('%', '.*', $value);
-                $value = str_replace('_', '.', $value);
-                return !!preg_match('/^' . $value . '$/', $ovalue);
-
-            case 'REGEXP':
-                return !!preg_match('/' . preg_quote($value, '/') . '/', $ovalue);
-
-            case 'IN':
-                return strpos(',' . $value . ',', ',' . $ovalue . ',') !== false;
-
-            case '<':
-            case 'LESS':
-                return ($ovalue < $value);
-
-            case '>':
-            case 'GREATER':
-                return ($ovalue > $value);
-
-            case '<=':
-            case '=<':
-            case 'LESSEQUAL':
-                return ($ovalue <= $value);
-
-            case '>=':
-            case '=>':
-            case 'GREATEREQUAL':
-                return ($ovalue >= $value);
-
-            case '= CURRENT_USER':
-            case 'EQUAL CURRENT_USER':
-                return $this->getKrynCore()->getClient() && $ovalue == $this->getKrynCore()->getClient()->getUserId();
-
-            case '!= CURRENT_USER':
-            case 'NOT EQUAL CURRENT_USER':
-                return $this->getKrynCore()->getClient() && $ovalue != $this->getKrynCore()->getClient()->getUserId();
-
-            case '=':
-            case 'EQUAL':
-            default:
-                return ($ovalue == $value);
-        }
-
     }
 
     /**

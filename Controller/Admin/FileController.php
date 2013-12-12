@@ -15,6 +15,7 @@ use FOS\RestBundle\Controller\Annotations as Rest;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
+use Symfony\Component\HttpFoundation\Response;
 
 class FileController extends Controller
 {
@@ -576,21 +577,31 @@ class FileController extends Controller
         $ifModifiedSince = $this->getKrynCore()->getRequest()->headers->get('If-Modified-Since');
         if (isset($ifModifiedSince) && (strtotime($ifModifiedSince) == $file->getModifiedTime())) {
             // Client's cache IS current, so we just respond '304 Not Modified'.
-            header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $file->getModifiedTime()) . ' GMT', true, 304);
-            exit;
+
+            $response = new Response();
+            $response->setStatusCode(304);
+            $response->headers->set('Last-Modified', gmdate('D, d M Y H:i:s', $file->getModifiedTime()).' GMT');
+            return $response;
         }
 
         $image = $this->getKrynCore()->getWebFileSystem()->getResizeMax($path, $width, $height);
 
-        $expires = 3600;
-        header("Pragma: public");
-        header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $file->getModifiedTime()) . ' GMT');
-        header("Cache-Control: maxage=" . $expires);
-        header('Expires: ' . gmdate('D, d M Y H:i:s', time() + $expires) . ' GMT');
-        header('Content-type: image/png');
 
+        $expires = 3600; //1 h
+        $response = new Response();
+        $response->headers->set('Content-Type', 'image/png');
+        $response->headers->set('Pragma', 'public');
+        $response->headers->set('Cache-Control', 'max-age=' . $expires);
+        $response->headers->set('Last-Modified', gmdate('D, d M Y H:i:s', $file->getModifiedTime()) . ' GMT');
+        $response->headers->set('Expires', gmdate('D, d M Y H:i:s', time() + $expires) . ' GMT');
+
+        ob_start();
         imagepng($image->getResult(), null, 8);
-        exit;
+        $imageData = ob_get_contents();
+        ob_end_clean();
+
+        $response->setContent($imageData);
+        return $response;
     }
 
     /**
@@ -624,23 +635,25 @@ class FileController extends Controller
         $ifModifiedSince = $this->getKrynCore()->getRequest()->headers->get('If-Modified-Since');
         if (isset($ifModifiedSince) && (strtotime($ifModifiedSince) == $file->getModifiedTime())) {
             // Client's cache IS current, so we just respond '304 Not Modified'.
-            header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $file->getModifiedTime()) . ' GMT', true, 304);
-            exit;
+            $response = new Response();
+            $response->setStatusCode(304);
+            $response->headers->set('Last-Modified', gmdate('D, d M Y H:i:s', $file->getModifiedTime()).' GMT');
+            return $response;
         }
 
         $content = $this->getKrynCore()->getWebFileSystem()->read($path);
         $mime = $file->getMimeType();
 
-        $expires = 3600;
-        header("Pragma: public");
-        header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $file->getModifiedTime()) . ' GMT');
-        header("Cache-Control: maxage=" . $expires);
-        header('Expires: ' . gmdate('D, d M Y H:i:s', time() + $expires) . ' GMT');
-        header('Content-Type: ' . $mime);
-        header('Content-length: ' . strlen($content));
+        $expires = 3600; //1 h
+        $response = new Response();
+        $response->headers->set('Content-Type', $mime);
+        $response->headers->set('Pragma', 'public');
+        $response->headers->set('Cache-Control', 'max-age=' . $expires);
+        $response->headers->set('Last-Modified', gmdate('D, d M Y H:i:s', $file->getModifiedTime()) . ' GMT');
+        $response->headers->set('Expires', gmdate('D, d M Y H:i:s', time() + $expires) . ' GMT');
 
-        echo $content;
-        exit;
+        $response->setContent($content);
+        return $response;
     }
 
     /**
@@ -701,8 +714,10 @@ class FileController extends Controller
         $ifModifiedSince = $this->getKrynCore()->getRequest()->headers->get('If-Modified-Since');
         if (isset($ifModifiedSince) && (strtotime($ifModifiedSince) == $file->getModifiedTime())) {
             // Client's cache IS current, so we just respond '304 Not Modified'.
-            header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $file->getModifiedTime()) . ' GMT', true, 304);
-            exit;
+            $response = new Response();
+            $response->setStatusCode(304);
+            $response->headers->set('Last-Modified', gmdate('D, d M Y H:i:s', $file->getModifiedTime()).' GMT');
+            return $response;
         }
 
         $content = $this->getKrynCore()->getWebFileSystem()->read($path);
@@ -713,26 +728,27 @@ class FileController extends Controller
         $size = new FileSize();
         $size->setHandleFromBinary($content);
 
-        $expires = 3600;
-        header("Pragma: public");
-        header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $file->getModifiedTime()) . ' GMT');
-        header("Cache-Control: maxage=" . $expires);
-        header('Expires: ' . gmdate('D, d M Y H:i:s', time() + $expires) . ' GMT');
+
+        $expires = 3600; //1 h
+        $response = new Response();
+        $response->headers->set('Content-Type', 'png' == $size->getType() ? 'image/png' : 'image/jpeg');
+        $response->headers->set('Pragma', 'public');
+        $response->headers->set('Cache-Control', 'max-age=' . $expires);
+        $response->headers->set('Last-Modified', gmdate('D, d M Y H:i:s', $file->getModifiedTime()) . ' GMT');
+        $response->headers->set('Expires', gmdate('D, d M Y H:i:s', time() + $expires) . ' GMT');
 
         ob_start();
 
         if ('png' === $size->getType()) {
-            header('Content-Type: image/png');
             imagepng($result, null, 3);
         } else {
-            header('Content-Type: image/jpeg');
             imagejpeg($result, null, 100);
         }
 
-        header("Content-Length: " . ob_get_length());
-        ob_end_flush();
+        $response->setContent(ob_get_contents());
+        ob_end_clean();
 
-        exit;
+        return $response;
     }
 
 }

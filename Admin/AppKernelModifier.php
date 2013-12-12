@@ -125,7 +125,6 @@ class AppKernelModifier
 
         $inBundles = false;
         $inRegisterBundles = false;
-        $bundles = '';
         $inBlockComment = false;
         $inComment = false;
 

@@ -79,7 +79,10 @@ class FrontendRouteListener extends RouterListener
     {
         if (false === $this->loaded) {
             $router = new FrontendRouter($this->getKrynCore(), $event->getRequest());
-            $router->loadRoutes($this->routes);
+            if ($response = $router->loadRoutes($this->routes)) {
+                $event->setResponse($response);
+                return;
+            }
             $this->loaded = true;
         }
 

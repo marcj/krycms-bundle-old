@@ -46,7 +46,7 @@ class Navigation
         $options['id'] = isset($options['id']) ? $options['id'] : false;
         $options['level'] = isset($options['level']) ? $options['level'] : false;
 
-        $withFolders = (isset($options['folders']) && $options['folders'] == 1) ? true : false;
+//        $withFolders = (isset($options['folders']) && $options['folders'] == 1) ? true : false;
 
         $cacheKey = 'core/navigation/' . $kryn->getCurrentPage()->getDomainId() . '.' . $kryn->getCurrentPage()->getId() . '_' . md5(
             json_encode($options)

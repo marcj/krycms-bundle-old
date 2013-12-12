@@ -3,18 +3,13 @@
 namespace Kryn\CmsBundle\Admin;
 
 use Kryn\CmsBundle\Configuration\Condition;
-use Kryn\CmsBundle\Configuration\EntryPoint;
 use Kryn\CmsBundle\Configuration\Field;
 use Kryn\CmsBundle\Configuration\Model;
 use Kryn\CmsBundle\Core;
 use Kryn\CmsBundle\Exceptions\ObjectNotFoundException;
 use Kryn\CmsBundle\Exceptions\Rest\ValidationFailedException;
-use Kryn\CmsBundle\Exceptions\RestException;
-use Kryn\CmsBundle\Form\Form;
 use Kryn\CmsBundle\Tools;
 use Symfony\Component\DependencyInjection\ContainerAware;
-use Symfony\Component\DependencyInjection\ContainerAwareInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 class ObjectCrud extends ContainerAware
@@ -316,7 +311,7 @@ class ObjectCrud extends ContainerAware
     /**
      * Flatten list of fields.
      *
-     * @var array
+     * @var Field[]
      */
     protected $_fields = array();
 
@@ -773,7 +768,7 @@ class ObjectCrud extends ContainerAware
 
         foreach ($this->_fields as $key => $field) {
             if (!$field->isVirtual() && !$field['customValue'] && !$field['startEmpty']) {
-                $fields[] = $field->getId();
+                $fields = array_merge($fields, $field->getFieldType()->getSelection());
             }
         }
 
@@ -997,9 +992,10 @@ class ObjectCrud extends ContainerAware
             $result = $this->getDefaultFieldList();
         }
 
-        if (!$fields && $extraSelects = $this->getExtraSelection()) {
+        if ($extraSelects = $this->getExtraSelection()) {
             $result = $result ? array_merge($result, $extraSelects) : $extraSelects;
         }
+
 
         return $result;
     }
@@ -1027,7 +1023,7 @@ class ObjectCrud extends ContainerAware
 
         $result = [];
         foreach ($fields as $field) {
-            if (!$fieldObj = $this->getObjectDefinition()->getField($field)) {
+            if (!$this->getObjectDefinition()->getField($field)) {
                 continue;
             }
 
@@ -1593,7 +1589,8 @@ class ObjectCrud extends ContainerAware
             $fields2[] = $langField;
         }
 
-        $form = new \Kryn\CmsBundle\Admin\Form\Form($fields2);
+//        $form = new \Kryn\CmsBundle\Admin\Form\Form($fields2);
+        new \Kryn\CmsBundle\Admin\Form\Form($fields2);
 
         foreach ($fields2 as $field) {
             $key = lcfirst($field->getId());

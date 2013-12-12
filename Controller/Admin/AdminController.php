@@ -12,21 +12,10 @@
 
 namespace Kryn\CmsBundle\Controller\Admin;
 
-use FOS\RestBundle\Controller\Annotations\Get;
 use FOS\RestBundle\Request\ParamFetcher;
-use Kryn\CmsBundle\Admin\ObjectCrudController;
-use Kryn\CmsBundle\Configuration\EntryPoint;
 use Kryn\CmsBundle\Core;
-use Kryn\CmsBundle\Exceptions\AccessDeniedException;
-use Kryn\CmsBundle\Exceptions\ClassNotFoundException;
-use Kryn\CmsBundle\Exceptions\ObjectNotFoundException;
 use Kryn\CmsBundle\Model\Content;
-use Kryn\CmsBundle\Model\NodeQuery;
-use Propel\Runtime\Map\TableMap;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\DependencyInjection\ContainerAware;
-use Symfony\Component\HttpFoundation\Response;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 
@@ -37,7 +26,7 @@ class AdminController extends Controller
     /**
      * @return Core
      */
-    public function getKrynCore()
+    protected function getKrynCore()
     {
         return $this->get('kryn_cms');
     }
@@ -45,7 +34,7 @@ class AdminController extends Controller
     /**
      * @return \Kryn\CmsBundle\Admin\Utils
      */
-    public function getUtils()
+    protected function getUtils()
     {
         if (null === $this->utils) {
             $this->utils = new \Kryn\CmsBundle\Admin\Utils($this->getKrynCore());
@@ -71,7 +60,7 @@ class AdminController extends Controller
      *
      * @return array
      */
-    public function getContentTemplate(ParamFetcher $paramFetcher)
+    public function getContentTemplateAction(ParamFetcher $paramFetcher)
     {
         $template = $paramFetcher->get('template');
         $type = $paramFetcher->get('type');
@@ -114,7 +103,7 @@ class AdminController extends Controller
      *
      * @return array
      */
-    public function getContentPreview(ParamFetcher $paramFetcher)
+    public function getContentPreviewAction(ParamFetcher $paramFetcher)
     {
         $template = $paramFetcher->get('template');
         $type = $paramFetcher->get('type');

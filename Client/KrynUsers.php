@@ -2,7 +2,6 @@
 
 namespace Kryn\CmsBundle\Client;
 
-use Kryn\CmsBundle\Model\UserQuery;
 use Propel\Runtime\Propel;
 
 class KrynUsers extends ClientAbstract

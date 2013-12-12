@@ -2,7 +2,6 @@
 
 namespace Kryn\CmsBundle\Configuration;
 
-use Core\Kryn;
 use Symfony\Component\EventDispatcher\GenericEvent;
 
 /**

@@ -6,8 +6,6 @@ class Redis extends AbstractCache
 {
     private $connection;
 
-    private $noServerTest = false;
-
     /**
      * {@inheritdoc}
      */
@@ -19,7 +17,7 @@ class Redis extends AbstractCache
             $this->connection->connect($server['ip'], $server['port'] + 0);
         }
 
-        $this->connection->setOption(Redis::OPT_SERIALIZER, Redis::SERIALIZER_IGBINARY);
+        $this->connection->setOption(\Redis::OPT_SERIALIZER, \Redis::SERIALIZER_IGBINARY);
 
     }
 
@@ -28,11 +26,11 @@ class Redis extends AbstractCache
      */
     public function testConfig($config)
     {
-        if (!$config['servers']) {
+        if (!@$config['servers']) {
             throw new \Exception('No redis servers set.');
         }
 
-        if (!class_exists('Redis')) {
+        if (!class_exists('\Redis')) {
             throw new \Exception('The module Redis is not activated in your PHP environment.');
         }
 

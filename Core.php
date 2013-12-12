@@ -2,14 +2,12 @@
 
 namespace Kryn\CmsBundle;
 
-use Flysystem\Filesystem;
 use Kryn\CmsBundle\Client\ClientAbstract;
 use Kryn\CmsBundle\Configuration\Client;
 use Kryn\CmsBundle\Configuration\Event;
 use Kryn\CmsBundle\Configuration\Model;
 use Kryn\CmsBundle\Configuration\SystemConfig;
 use Kryn\CmsBundle\Exceptions\BundleNotFoundException;
-use Kryn\CmsBundle\Exceptions\NotInAdministrationAreaException;
 use Kryn\CmsBundle\Model\Domain;
 use Kryn\CmsBundle\Model\Node;
 use Kryn\CmsBundle\Propel\PropelHelper;
@@ -110,7 +108,7 @@ class Core extends Controller
         $bundles = 'web/bundles/';
         if (!is_dir($bundles)) {
             if (!@mkdir($bundles)) {
-                die(sprintf('Can not create `%s` directory. Please check permissions.', getcwd() . '/' . $bundles));
+                throw new \Exception(sprintf('Can not create `%s` directory. Please check permissions.', getcwd() . '/' . $bundles));
             }
         }
 
@@ -125,27 +123,6 @@ class Core extends Controller
                 }
             }
         }
-        /*
-         * Move important CodeMirror from vendor to our public available folder
-         */
-        $files = array(
-            'addon',
-            'keymap',
-            'lib',
-            'mode',
-            'theme',
-            'LICENSE',
-            'README.md'
-        );
-
-        $dir = __DIR__ . '/Resources/public/codemirror/';
-
-        if (!file_exists($dir)) {
-            foreach ($files as $file) {
-                $createSymlink('vendor/marijnh/codemirror/' . $file, $dir . $file);
-            }
-        }
-        chdir($cwdir);
     }
 
     /**

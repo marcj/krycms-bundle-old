@@ -4,12 +4,10 @@ namespace Kryn\CmsBundle\Router;
 
 use Kryn\CmsBundle\Configuration\Bundle;
 use Kryn\CmsBundle\Configuration\EntryPoint;
+use Kryn\CmsBundle\Configuration\Field;
 use Kryn\CmsBundle\Configuration\Object;
 use Kryn\CmsBundle\Core;
 use Kryn\CmsBundle\Exceptions\ObjectNotFoundException;
-use Metadata\Driver\FileLocatorInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Routing\AnnotatedRouteControllerLoader;
-use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Loader\Loader;
 use Symfony\Component\Routing\Loader\AnnotationFileLoader;
 use Symfony\Component\Routing\RouteCollection;
@@ -57,7 +55,7 @@ class RestApiLoader extends Loader
 
             foreach ($object->getFields() as $field) {
                 if ($field->isPrimaryKey()) {
-                    $oriPk = $pk = ($withPrefix ? lcfirst($object->getId()) . '_' : ''). $field->getId();
+                    $oriPk = $pk = ($withPrefix ? lcfirst($object->getId()) . '_' : '') . $field->getId();
                     $i = 0;
 
                     while (false !== strpos($path, '{' . $pk . '}')) {
@@ -136,7 +134,7 @@ class RestApiLoader extends Loader
     public function addEntryPointRoutes(RouteCollection $routes, $pattern, Object $object)
     {
         $objectName = $object->getBundle()->getName() . '/' . lcfirst($object->getId());
-        $routeName = 'kryn_cms_entrypoint_' . str_replace('/', '_', $pattern) . strtolower($object->getBundle()->getName() . '_' . $object->getId());
+//        $routeName = 'kryn_cms_entrypoint_' . str_replace('/', '_', $pattern) . strtolower($object->getBundle()->getName() . '_' . $object->getId());
 
         /** @var $route \Symfony\Component\Routing\Route */
         foreach ($routes as $name => $route) {
@@ -200,7 +198,6 @@ class RestApiLoader extends Loader
                 $foreignObject = $this->krynCore->getObjects()->getDefinition($field->getObject());
                 if (!$foreignObject) {
                     continue;
-                    throw new \Exception('ForeignKey ' . $field->getObject() . ' not found.');
                 }
 
                 $this->setupRoutes(
@@ -216,8 +213,15 @@ class RestApiLoader extends Loader
         }
     }
 
-    public function setupRoutes(Bundle $config, $controller, $pattern, $objectSection, Object $object, $relationObject = false, $relationField = false)
-    {
+    public function setupRoutes(
+        Bundle $config,
+        $controller,
+        $pattern,
+        $objectSection,
+        Object $object,
+        Object $relationObject = false,
+        Field $relationField = false
+    ) {
 //        $bundleName = $config->getName();
 //        $routeName = 'kryn_cms_object_' . strtolower($bundleName . '_' . $object->getId());
 

@@ -2,7 +2,6 @@
 
 namespace Kryn\CmsBundle\Configuration;
 
-use Kryn\CmsBundle\Exceptions\ObjectFieldNotFoundException;
 use Kryn\CmsBundle\Tools;
 
 

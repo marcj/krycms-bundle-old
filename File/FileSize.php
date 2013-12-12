@@ -134,7 +134,6 @@ class FileSize
     private function parseSizeForJPEG()
     {
         $state = null;
-        $i = 0;
 
         while (true) {
             switch ($state) {

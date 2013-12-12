@@ -28,14 +28,4 @@ class PluginResponse extends PageResponse
     {
         return $this->controllerRequest;
     }
-
-    /**
-     *
-     */
-    public function send()
-    {
-        echo $this->getContent();
-        exit;
-    }
-
 }

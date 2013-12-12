@@ -3,7 +3,6 @@
 namespace Kryn\CmsBundle\Controller\Windows;
 
 use Kryn\CmsBundle\Controller\WindowController;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 
 /**
  * AUTO-GENERATED THROUGH KRYN WINDOW-EDITOR

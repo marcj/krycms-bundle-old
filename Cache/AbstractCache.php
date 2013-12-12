@@ -197,7 +197,6 @@ abstract class AbstractCache implements CacheInterface
     public function &get($key, $withoutValidationCheck = false)
     {
         if (!isset($this->cache[$key])) {
-            $time = microtime(true);
             $this->cache[$key] = $this->doGet($key);
             //todo, use event dispatcher \Core\Utils::$latency['cache'][] = microtime(true) - $time;
         }
@@ -275,9 +274,7 @@ abstract class AbstractCache implements CacheInterface
     {
         $this->cache['invalidate-' . $key] = $time;
 
-        $time2 = microtime(true);
         $result = $this->doSet('invalidate-' . $key, $time);
-        //todo, use eventDispatcher \Core\Utils::$latency['cache'][] = microtime(true) - $time2;
         return $result;
     }
 
@@ -313,9 +310,7 @@ abstract class AbstractCache implements CacheInterface
 
         $this->cache[$key] = $value;
 
-        $time = microtime(true);
         $result = $this->doSet($key, $value, $lifeTime);
-        //todo, add event dispatcher \Core\Utils::$latency['cache'][] = microtime(true) - $time;
         return $result;
     }
 

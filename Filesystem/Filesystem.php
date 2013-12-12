@@ -2,7 +2,6 @@
 
 namespace Kryn\CmsBundle\Filesystem;
 
-use Kryn\CmsBundle\Core;
 use Kryn\CmsBundle\File\FileInfo;
 use Kryn\CmsBundle\Filesystem\Adapter\AdapterInterface;
 use Kryn\CmsBundle\Model\File;
@@ -10,8 +9,6 @@ use Kryn\CmsBundle\File\FileInfoInterface;
 use Kryn\CmsBundle\Model\FileQuery;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Map\TableMap;
-use Symfony\Component\DependencyInjection\ContainerAwareInterface;
-use Symfony\Component\Finder\Finder;
 
 class Filesystem implements FilesystemInterface
 {
@@ -430,11 +427,11 @@ class Filesystem implements FilesystemInterface
             $ratio = $thumbHeight / ($oriHeight / 100);
             $_width = ceil($oriWidth * $ratio / 100);
 
-            $top = 0;
+//            $top = 0;
             if ($_width < $thumbWidth) {
-                $ratio = $_width / ($thumbWidth / 100);
-                $nHeight = $thumbHeight * $ratio / 100;
-                $top = ($thumbHeight - $nHeight) / 2;
+//                $ratio = $_width / ($thumbWidth / 100);
+//                $nHeight = $thumbHeight * $ratio / 100;
+//                $top = ($thumbHeight - $nHeight) / 2;
                 $_width = $thumbWidth;
             }
 

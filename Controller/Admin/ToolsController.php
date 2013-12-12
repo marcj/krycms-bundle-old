@@ -28,7 +28,7 @@ class ToolsController
      *
      * @return array[items => array[]]
      */
-    public function getLogs(ParamFetcher $paramFetcher)
+    public function getLogsAction(ParamFetcher $paramFetcher)
     {
         $requestId = $paramFetcher->get('requestId');
         $level = $paramFetcher->get('level');
@@ -68,7 +68,7 @@ class ToolsController
      *
      * @return array[items => array[], maxPages => int]
      */
-    public function getLogRequests(ParamFetcher $paramFetcher)
+    public function getLogRequestsAction(ParamFetcher $paramFetcher)
     {
         $page = $paramFetcher->get('page');
 
@@ -98,7 +98,7 @@ class ToolsController
      *
      * @return int count of deleted records
      */
-    public function clearLogs()
+    public function clearLogsAction()
     {
         return LogQuery::create()->deleteAll() + LogRequestQuery::create()->deleteAll();
     }

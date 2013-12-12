@@ -3,7 +3,6 @@
 namespace Kryn\CmsBundle\Controller\Windows;
 
 use Kryn\CmsBundle\Controller\WindowNestedController;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 
 /**
  * AUTO-GENERATED THROUGH KRYN WINDOW-EDITOR
@@ -151,7 +150,7 @@ class NodeCrudController extends WindowNestedController
         ),
     );
 
-    public $extraSelection = 'domainId, layout, content.*';
+    public $extraSelection = 'domainId';
 
     public $columns = array(
         'type' => array(

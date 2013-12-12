@@ -10,4 +10,11 @@ class TypeContent extends AbstractType
 
     protected $sqlDataType = 'LONGVARCHAR';
 
+    /**
+     * @return array
+     */
+    public function getSelection()
+    {
+        return [$this->getFieldDefinition()->getId().'.*', 'layout'];
+    }
 }

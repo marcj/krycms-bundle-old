@@ -4,7 +4,7 @@ namespace Kryn\CmsBundle\Controller\Admin;
 
 use FOS\RestBundle\Request\ParamFetcher;
 use Kryn\CmsBundle\Controller;
-use Kryn\CmsBundle\Controller\Admin\BundleManager\ManagerController;
+use Kryn\CmsBundle\Controller\Admin\BundleManager\Manager;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 
@@ -39,7 +39,7 @@ class LanguageController extends Controller
      */
     protected function getLanguage($bundle, $lang)
     {
-        ManagerController::prepareName($bundle);
+        Manager::prepareName($bundle);
         $utils = $this->getTranslator()->getUtils();
 
         $file = $this->getKrynCore()->getBundleDir($bundle) . "Resources/translations/$lang.po";
@@ -76,7 +76,7 @@ class LanguageController extends Controller
         $lang = $paramFetcher->get('lang');
         $langs = $paramFetcher->get('langs');
 
-        ManagerController::prepareName($bundle);
+        Manager::prepareName($bundle);
         $utils = $this->getTranslator()->getUtils();
         return $utils->saveLanguage($bundle, $lang, $langs);
     }
@@ -98,7 +98,7 @@ class LanguageController extends Controller
     public function getExtractedLanguageAction(ParamFetcher $paramFetcher)
     {
         $bundle = $paramFetcher->get('bundle');
-        ManagerController::prepareName($bundle);
+        Manager::prepareName($bundle);
 
         $utils = $this->getTranslator()->getUtils();
         return $utils->extractLanguage($bundle);
@@ -141,42 +141,6 @@ class LanguageController extends Controller
             'count' => $p100,
             'countTranslated' => $cTranslated
         );
-    }
-
-    /**
-     * not used yet.
-     *
-     * @param string $lang
-     * @return array
-     */
-    public function getAllLanguages($lang = 'en')
-    {
-        if ($lang == '') {
-            $lang = 'en';
-        }
-
-        $res = array();
-        $utils = $this->getTranslator()->getUtils();
-
-        foreach ($this->getKrynCore()->getConfigs() as $key => $mod) {
-
-            $res[$key]['config'] = $mod;
-            $res[$key]['lang'] = $utils->extractLanguage($key);
-
-            if (count($res[$key]['lang']) > 0) {
-                $translate = $this->getLanguage($key, $lang);
-                foreach ($res[$key]['lang'] as $skey => &$lang2) {
-                    if ($translate[$skey] != '') {
-                        $lang2 = $translate[$skey];
-                    } else {
-                        $lang2 = '';
-                    }
-                }
-            }
-        }
-
-        return $res;
-
     }
 
 }

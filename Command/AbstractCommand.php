@@ -10,14 +10,7 @@
 
 namespace Kryn\CmsBundle\Command;
 
-use Propel\Generator\Config\GeneratorConfig;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Finder\Finder;
-use Symfony\Component\Filesystem\Exception\IOException;
-use Symfony\Component\Filesystem\Filesystem;
-use Propel\Generator\Exception\RuntimeException;
 
 abstract class AbstractCommand extends ContainerAwareCommand
 {

@@ -2,8 +2,6 @@
 
 namespace Kryn\CmsBundle;
 
-use Symfony\Component\DependencyInjection\ContainerInterface;
-
 trait ContainerHelperTrait
 {
     /**

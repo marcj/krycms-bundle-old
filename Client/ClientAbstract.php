@@ -458,7 +458,6 @@ abstract class ClientAbstract
      */
     public function createSession()
     {
-        $time = microtime(true);
         for ($i = 1; $i <= 25; $i++) {
             $session = $this->createSessionById($this->generateSessionId());
 
@@ -631,11 +630,7 @@ abstract class ClientAbstract
             return false;
         }
 
-        $time = microtime(true);
-
         $this->loadSessionStore($token);
-
-//        \Core\Utils::$latency['session'][] = microtime(true) - $time;
     }
 
     /**
@@ -647,7 +642,6 @@ abstract class ClientAbstract
      */
     public function loadSessionStore($token)
     {
-        $cacheKey = $this->tokenId . '_' . $token;
         $session = $this->store->get($token);
 
         if (!$session) {

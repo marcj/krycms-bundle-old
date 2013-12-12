@@ -3,10 +3,8 @@
 namespace Kryn\CmsBundle\Propel;
 
 use Kryn\CmsBundle\Configuration\Connection;
-use Kryn\CmsBundle\Exceptions\BundleNotFoundException;
 use Kryn\CmsBundle\Core;
 use Kryn\CmsBundle\Exceptions\FileNotWritableException;
-use Propel\Generator\Command\ConfigConvertXmlCommand;
 use Propel\Generator\Command\MigrationDiffCommand;
 use Propel\Generator\Command\ModelBuildCommand;
 use Propel\Runtime\Connection\ConnectionManagerMasterSlave;
@@ -14,7 +12,6 @@ use Propel\Runtime\Connection\ConnectionManagerSingle;
 use Propel\Runtime\Propel;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\StreamOutput;
 use Symfony\Component\Finder\Finder;
 
@@ -462,8 +459,6 @@ class PropelHelper
         if (!$sql) {
             return "Schema up 2 date.";
         }
-
-        $GLOBALS['sql'] = $sql;
 
         $sql = explode(";\n", $sql);
 

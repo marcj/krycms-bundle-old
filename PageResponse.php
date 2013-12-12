@@ -451,16 +451,23 @@ class PageResponse extends Response
 
         $template = $this->getKrynCore()->getTemplating();
 
-        PageController::setCurrentRenderPage($page->getId());
+        $oldPage = $this->getKrynCore()->getCurrentPage();
+        $this->getKrynCore()->getCurrentPage($page);
 
-        $html = $template->render(
-            $bundleName . ':' . $layoutPath,
-            array(
-                'baseUrl' => $this->getBaseHref(),
-                'themeProperties' => [] //Kryn::$themeProperties
-            )
-        );
+        try {
+            $html = $template->render(
+                $bundleName . ':' . $layoutPath,
+                array(
+                    'baseUrl' => $this->getBaseHref(),
+                    'themeProperties' => [] //Kryn::$themeProperties
+                )
+            );
+        } catch(\Exception $e) {
+            $this->getKrynCore()->setCurrentPage($oldPage);
+            throw new \Exception(sprintf('Cant render view %s.', $bundleName . ':' . $layoutPath), 0, $e);
+        }
 
+        $this->getKrynCore()->setCurrentPage($oldPage);
         $this->getKrynCore()->getStopwatch()->stop('Build PageBody');
 
         return $html;

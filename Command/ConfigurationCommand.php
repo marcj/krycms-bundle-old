@@ -10,15 +10,9 @@
 
 namespace Kryn\CmsBundle\Command;
 
-use Kryn\CmsBundle\Propel\PropelHelper;
-use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Output\Output;
-use Propel\Generator\Config\XmlToArrayConverter;
-use Propel\Generator\Config\ArrayToPhpConverter;
 
 class ConfigurationCommand extends AbstractCommand
 {

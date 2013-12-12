@@ -107,6 +107,7 @@ ka.wm = {
             throw tf('Parent `%d` window not found.', pParentWindowId);
         }
 
+        pEntryPoint = ka.normalizeEntryPointPath(pEntryPoint);
         ka.wm.windows[instance] = new ka.Window(pEntryPoint, pLink, instance, pParams, pInline, pParentWindowId);
         ka.wm.windows[instance].toFront();
         ka.wm.updateWindowBar();

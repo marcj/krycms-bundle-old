@@ -2,11 +2,8 @@
 
 namespace Kryn\CmsBundle\Controller\Admin;
 
-use Kryn\CmsBundle\Extractor\ApiDocExtractor;
 use Kryn\CmsBundle\Formatter\ApiDocFormatter;
-use Nelmio\ApiDocBundle\Formatter\HtmlFormatter;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;

@@ -45,4 +45,11 @@ interface TypeInterface
      * @return mixed
      */
     public function getRequiredRegex();
+
+    /**
+     * Returns the field/s to select from the object model.
+     *
+     * @return array
+     */
+    public function getSelection();
 }

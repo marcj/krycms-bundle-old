@@ -26,6 +26,8 @@ class Tools {
     }
 
     /**
+     * Returns a relative path from $path to $current.
+     *
      * @param string $path
      * @param string $current relative to this
      *
@@ -33,16 +35,8 @@ class Tools {
      */
     public static function resolveRelativePath($path, $current)
     {
-        $path = realpath($path);
-        $current = realpath($current);
-
-        if ('/' === substr($current, -1)) {
-            $current = substr($current, 0, -1);
-        }
-
-        if ('/' === substr($path, -1)) {
-            $path = substr($path, 0, -1);
-        }
+        $path    = '/' . trim($path, '/');
+        $current = '/' . trim($current, '/');
 
         if (0 === $pos = strpos($path, $current)) {
             return substr($path, strlen($current));
@@ -50,17 +44,11 @@ class Tools {
 
         $result = '';
         while ($current && false === strpos($path, $current)) {
-            //not found, go back
             $result .= '../';
             $current = substr($current, 0, strrpos($current, '/'));
         }
 
-        if (!$current) {
-            //we reached root
-            return $result . substr($path, 1);
-        } else {
-            return $result;
-        }
+        return !$current /*we reached root*/ ? $result . substr($path, 1) : $result;
     }
 
     public static function dbQuote($value, $table = '')

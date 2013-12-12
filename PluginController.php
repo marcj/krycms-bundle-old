@@ -3,7 +3,6 @@
 namespace Kryn\CmsBundle;
 
 use Kryn\CmsBundle\Exceptions\FileNotFoundException;
-use Symfony\Component\HttpFoundation\Response;
 
 class PluginController extends Controller
 {

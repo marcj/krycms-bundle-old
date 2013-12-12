@@ -17,8 +17,6 @@ use Kryn\CmsBundle\Model\Content;
 use Kryn\CmsBundle\ContentTypes\TypeNotFoundException;
 use Propel\Runtime\Map\TableMap;
 use Symfony\Component\EventDispatcher\GenericEvent;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 class ContentRender
 {
