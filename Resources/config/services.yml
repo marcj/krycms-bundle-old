@@ -15,7 +15,7 @@ parameters:
 
      kryn_cms.pluginResponse.listener.class: Kryn\CmsBundle\EventListener\PluginResponseListener
      kryn_cms.paramFetcher.listener.class: Kryn\CmsBundle\EventListener\ParamFetcherListener
-     kryn_cms.format.listener.class: Kryn\CmsBundle\EventListener\FormatListener
+     kryn_cms.securityFirewall.listener.class: Kryn\CmsBundle\EventListener\SecurityFirewallListener
      kryn_cms.restException.listener.class: Kryn\CmsBundle\EventListener\RestExceptionListener
      kryn_cms.viewResponse.listener.class: Kryn\CmsBundle\EventListener\ViewResponseListener
      kryn_cms.frontendRoutes.listener.class: Kryn\CmsBundle\EventListener\FrontendRouteListener
@@ -140,8 +140,8 @@ services:
         tags:
             - { name: kernel.event_listener, event: kernel.request, priority: 33 }
 
-     kryn_cms.format.listener:
-        class: %kryn_cms.format.listener.class%
+     kryn_cms.securityFirewall.listener:
+        class: %kryn_cms.securityFirewall.listener.class%
         arguments: ["@service_container"]
         tags:
             - { name: kernel.event_listener, event: kernel.request, priority: 21 }

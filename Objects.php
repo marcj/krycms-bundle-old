@@ -1390,7 +1390,7 @@ class Objects
         $obj = $this->getClass($objectKey);
         $objectIds = $obj->primaryStringToArray($pkString);
 
-        return $objectIds[0];
+        return @$objectIds[0];
     }
 
     /**

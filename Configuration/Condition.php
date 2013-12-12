@@ -532,7 +532,7 @@ class  Condition extends Model
             if (null === $ovalue && $objectKey && $definition = $this->getKrynCore()->getObjects()->getDefinition($objectKey)) {
                 $tableName = substr($field, 0, strpos($field, '.'));
                 $fieldName = substr($field, strpos($field, '.') + 1);
-                if ($tableName === Kryn::getSystemConfig()->getDatabase()->getPrefix().$definition->getTable()) {
+                if ($tableName === $this->getKrynCore()->getSystemConfig()->getDatabase()->getPrefix().$definition->getTable()) {
                     $ovalue = $objectItem[$fieldName];
                 }
             }

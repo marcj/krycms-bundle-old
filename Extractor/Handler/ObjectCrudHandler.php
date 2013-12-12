@@ -31,58 +31,115 @@ class ObjectCrudHandler implements HandlerInterface
 //            $entryPoint = $this->krynCore->
             $adminUtils = new \Kryn\CmsBundle\Admin\Utils($this->krynCore);
             $entryPoint = $adminUtils->getEntryPoint($entryPointPath);
-            $annotation->setSection(sprintf('Entrypoint: %s %s',
-                $entryPoint->getLabel() ?: $entryPoint->getPath(),
-                $entryPoint->isFrameworkWindow() ? '(Framework Window) ' : ''
-            ));
+            $annotation->setSection(
+                sprintf(
+                    'Entrypoint: %s %s',
+                    $entryPoint->getLabel() ? : $entryPoint->getPath(),
+                    $entryPoint->isFrameworkWindow() ? '(Framework Window) ' : ''
+                )
+            );
         } else {
-            $object = $this->krynCore->getObjects()->getDefinition($route->getDefault('_kryn_object'));
-            $annotation->setSection(sprintf('Object %s -> %s (%s)',
-                $object->getBundle()->getBundleName(),
-                $object->getLabel() ?: $object->getId(),
-                $route->getDefault('_kryn_object')
-            ));
+            $objectKey = $route->getDefault('_kryn_object_section') ? : $route->getDefault('_kryn_object');
+            $objectSection = $this->krynCore->getObjects()->getDefinition($objectKey);
+            $annotation->setSection(
+                sprintf(
+                    'Object %s -> %s (%s)',
+                    $objectSection->getBundle()->getBundleName(),
+                    $objectSection->getLabel() ? : $objectSection->getId(),
+                    $objectKey
+                )
+            );
         }
 
-        $method = explode('::', $route->getDefault('_controller'))[1];
+        $filters = $annotation->getFilters();
+        if (@$filters['fields']) {
 
-        if ($route->hasRequirement('pk')) {
-
-            $requirement = [];
-            $description = [];
-
+            $fields = [];
             foreach ($object->getFields() as $field) {
-                if ($field->isPrimaryKey()) {
-                    $requirement[] = $field->getRequiredRegex();
-                    $description[] = $field->getId(). ($field->getDesc() ? '('.$field->getDesc().')' : '');
+                if ('object' === $field->getId()) {
+                    $foreignObject = $this->krynCore->getObjects()->getDefinition($field->getObject());
+                    foreach ($foreignObject->getFields() as $fField) {
+                        $filters[] = $field->getId().'.'.$fField->getId();
+                    }
+                } else {
+                    $fields[] = $field->getId();
                 }
             }
 
-            $annotation->addRequirement('pk', [
-                    'requirement'   => implode("/", $requirement),
-                    'dataType'      => 'string',
-                    'description'   => "UrlEncoded. Fields of the primaryKey: \n" . implode("\n", $description),
-                ]);
+            $annotation->addFilter('fields', [
+                'requirement' => '.*',
+                'description' => "Comma separated list of fields. Possible fields to select: \n" . implode(', ', $fields)
+            ]);
         }
 
-        //add all required fields to addAction
+        $annotation->setDescription(
+            str_replace('%object%', $object->getBundle()->getBundleName() . ':' . lcfirst($object->getId()), $annotation->getDescription())
+        );
+
+        $isRelationRoute = $route->getDefault('_kryn_object_relation');
+        $requirePk = $route->getDefault('_kryn_object_requirePk');
+
+        $method = explode('::', $route->getDefault('_controller'))[1];
+
+//        maybe in version 1.1
+//        if ($isRelationRoute) {
+//            $objectKey = $route->getDefault('_kryn_object_section') ? : $route->getDefault('_kryn_object');
+//            $objectParent = $this->krynCore->getObjects()->getDefinition($objectKey);
+//
+//            foreach ($objectParent->getFields() as $field) {
+//                if ($field->isPrimaryKey()) {
+//                    $annotation->addRequirement(
+//                        $field->getId(),
+//                        [
+//                            'requirement' => $field->getRequiredRegex(),
+//                            'dataType' => $field->getPhpDataType(),
+//                            'description' => '(' . $objectParent->getId() . ') ' . $field->getDesc()
+//                        ]
+//                    );
+//                }
+//            }
+//        }
+
+        if ($requirePk) {
+            foreach ($object->getFields() as $field) {
+                if ($field->isPrimaryKey()) {
+
+                    $annotation->addRequirement(
+                        ($isRelationRoute ? lcfirst($object->getId()) . '_' : '') . $field->getId(),
+                        [
+                            'requirement' => $field->getRequiredRegex(),
+                            'dataType' => $field->getPhpDataType(),
+                            'description' => ($isRelationRoute ? '(' . $object->getId() . ') ' : '') . $field->getDesc()
+                        ]
+                    );
+                }
+            }
+        }
+
+        //add all fields to some actions
         if (in_array($method, ['addItemAction', 'patchItemAction', 'updateItemAction'])) {
             foreach ($object->getFields() as $field) {
                 if ($field->isRequired() && !$field->getDefault()) {
-                    $annotation->addRequirement($field->getId(), array(
-                        'requirement'   => $field->getRequiredRegex(),
-                        'dataType'      => $field->getPhpDataType(),
-                        'description'   => $field->getLabel(),
-                    ));
+                    $annotation->addRequirement(
+                        $field->getId(),
+                        array(
+                            'requirement' => $field->getRequiredRegex(),
+                            'dataType' => $field->getPhpDataType(),
+                            'description' => ($isRelationRoute ? '(' . $object->getId() . ') ' : '') . $field->getLabel() . ' ' . $field->getDesc(),
+                        )
+                    );
                 } else {
-                    $annotation->addParameter($field->getId(), array(
-                        'format'        => $field->getRequiredRegex(),
-                        'dataType'      => $field->getPhpDataType(),
-                        'default'       => $field->getDefault(),
-                        'description'   => $field->getLabel() . ($field->isAutoIncrement() ? ' (autoIncremented)':''),
-                        'readonly'      => false,
-                        'required'      => false,
-                    ));
+                    $annotation->addParameter(
+                        $field->getId(),
+                        array(
+                            'format' => $field->getRequiredRegex(),
+                            'dataType' => $field->getPhpDataType(),
+                            'default' => $field->getDefault(),
+                            'description' => $field->getLabel() . ($field->isAutoIncrement() ? ' (autoIncremented)' : ''),
+                            'readonly' => false,
+                            'required' => false,
+                        )
+                    );
                 }
             }
         }

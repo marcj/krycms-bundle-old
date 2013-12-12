@@ -55,7 +55,7 @@ class ObjectCrud extends ContainerAware
     protected $request;
 
     /**
-     * Defines your primary fiels as a array.
+     * Defines your primary fields as a array.
      * Example: $primary = array('id');
      * Example: $primary = array('id', 'name');
      *
@@ -1062,7 +1062,7 @@ class ObjectCrud extends ContainerAware
                     $condition[] = 'and';
                 }
 
-                $k = Tools::camelcase2Underscore(substr($k, 1));
+                $k = Tools::camelcase2Underscore($k);
 
                 if (strpos($v, '*') !== false) {
                     $condition[] = array($k, 'LIKE', str_replace('*', '%', $v));
@@ -1126,6 +1126,7 @@ class ObjectCrud extends ContainerAware
      * @param  int $depth
      * @param  int $limit
      * @param  int $offset
+     * @param  bool $withAcl
      *
      * @return mixed
      */
@@ -1136,7 +1137,8 @@ class ObjectCrud extends ContainerAware
         $scope = null,
         $depth = 1,
         $limit = null,
-        $offset = null
+        $offset = null,
+        $withAcl = false
     ) {
         $options = array();
         $options['permissionCheck'] = $this->getPermissionCheck();
@@ -1197,7 +1199,7 @@ class ObjectCrud extends ContainerAware
         );
 
 
-        if (is_array($items)) {
+        if ($withAcl && is_array($items)) {
             foreach ($items as &$item) {
                 $this->prepareRow($item);
             }
@@ -1378,7 +1380,7 @@ class ObjectCrud extends ContainerAware
      *
      * @return array|mixed
      */
-    public function addMultiple()
+    public function addMultiple(Request $request)
     {
         $inserted = array();
 
@@ -1387,7 +1389,7 @@ class ObjectCrud extends ContainerAware
         $fixedData = array();
 
         if ($fixedFields) {
-            $fixedData = $this->collectData($fixedFields);
+            $fixedData = $this->collectData($request, $fixedFields);
         }
 
         $fields = $this->getAddMultipleFields();
@@ -1405,10 +1407,11 @@ class ObjectCrud extends ContainerAware
         foreach ($items as $item) {
 
             $data = $fixedData;
-            $data += $this->collectData($fields, $item);
+            $data += $this->collectData($request, $fields, $item);
 
             try {
                 $inserted[] = $this->add(
+                    $request,
                     $data,
                     $this->getRequest()->request->get('_pk'),
                     $position,
@@ -1436,13 +1439,13 @@ class ObjectCrud extends ContainerAware
      *
      * @return mixed      False if some went wrong or a array with the new primary keys.
      */
-    public function add($data = null, $pk = null, $position = null, $targetObjectKey = null)
+    public function add(Request $request, $data = null, $pk = null, $position = null, $targetObjectKey = null)
     {
         //collect values
         if ($data) {
             $data2 = $data;
         } else {
-            $data2 = $this->collectData();
+            $data2 = $this->collectData($request);
         }
 
         //do normal add through Core\Object
@@ -1487,7 +1490,7 @@ class ObjectCrud extends ContainerAware
      *
      * @return bool
      */
-    public function update($pk)
+    public function update($pk, Request $request)
     {
         $this->primaryKey = $pk;
 
@@ -1495,7 +1498,7 @@ class ObjectCrud extends ContainerAware
         $options['permissionCheck'] = $this->getPermissionCheck();
 
         //collect values
-        $data = $this->collectData();
+        $data = $this->collectData($request);
 
         //check against additionally our own custom condition
         if (($condition = $this->getCondition()) && $condition->hasRules()) {
@@ -1520,11 +1523,12 @@ class ObjectCrud extends ContainerAware
      * Patches a object entry. This means, only defined fields will be saved. Fields which are not defined will
      * not be overwritten.
      *
+     * @param  Request $request
      * @param  array $pk
      *
      * @return bool
      */
-    public function patch($pk)
+    public function patch(Request $request, $pk)
     {
         $this->primaryKey = $pk;
 
@@ -1534,7 +1538,7 @@ class ObjectCrud extends ContainerAware
         $item = $this->getKrynCore()->getObjects()->get($this->getObject(), $pk, $options);
 
         //collect values
-        $allData = $this->collectData(null, $item);
+        $allData = $this->collectData($request, null, $item);
         $data = [];
 
         foreach ($allData as $k => $v) {
@@ -1565,13 +1569,14 @@ class ObjectCrud extends ContainerAware
      * Collects all data from GET/POST that has to be saved.
      * Iterates only through all defined fields in $fields.
      *
+     * @param  Request $request
      * @param  \Kryn\CmsBundle\Configuration\Field[] $fields The fields definition. If empty we use $this->fields.
      * @param  mixed $data Default data. Is used if a field is not defined through _POST or _GET
      *
      * @return array
      * @throws \Kryn\CmsBundle\Exceptions\InvalidFieldValueException
      */
-    public function collectData($fields = null, $data = null)
+    public function collectData(Request $request, $fields = null, $data = null)
     {
         $data2 = array();
 
@@ -1592,7 +1597,7 @@ class ObjectCrud extends ContainerAware
 
         foreach ($fields2 as $field) {
             $key = lcfirst($field->getId());
-            $value = (@$_POST[$key] ? : @$_GET[$key]);
+            $value = $request->request->get($key);
             if (null == $value && $data) {
                 $value = @$data[$key];
             }
@@ -1626,7 +1631,7 @@ class ObjectCrud extends ContainerAware
                     'Field `%s` has a invalid value.',
                     $key
                 ), 420);
-                $restException->setdata($errors);
+                $restException->setData($errors);
                 throw $restException;
             }
         }
@@ -1658,6 +1663,21 @@ class ObjectCrud extends ContainerAware
     }
 
     /**
+     *
+     * The primary key of the current object.
+     * If the class created a item through addItem(),
+     * it contains the primary key of the newly created
+     * item.
+     *
+     * array(
+     *    'id' => 1234
+     * )
+     *
+     * array(
+     *     'id' => 1234,
+     *     'subId' => 5678
+     * )
+     *
      * @return array
      */
     public function getPrimaryKey()

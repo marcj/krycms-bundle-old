@@ -28,9 +28,19 @@ class KernelAwareTestCase extends WebTestCase
         \Kryn\CmsBundle\Configuration\Model::$serialisationKrynCore = $this->getKrynCore();
     }
 
+    public function login()
+    {
+        //login as admin
+        $loggedIn = $this->restCall('/kryn/admin/logged-in');
+
+        if (!$loggedIn || !$loggedIn['data']) {
+            $this->restCall('/kryn/admin/login', 'POST', ['username' => 'admin', 'password' => 'admin']);
+        }
+    }
+
     protected function getRoot()
     {
-        return realpath($this->getKernel()->getRootDir().'/..') . '/';
+        return realpath($this->getKernel()->getRootDir() . '/..') . '/';
     }
 
     public function restCall($path = '/', $method = 'GET', $postData = null, $failOnError = true)
@@ -41,7 +51,7 @@ class KernelAwareTestCase extends WebTestCase
 
         if ($failOnError && (!is_array($data) || @$data['error'])) {
             $this->fail(
-                "path $path, method: $method:\n".
+                "path $path, method: $method:\n" .
                 var_export($content, true)
             );
         }
@@ -49,23 +59,14 @@ class KernelAwareTestCase extends WebTestCase
         return !json_last_error() ? $data : $content;
     }
 
-    public function call($path = '/', $method = 'GET', $postData = null)
+    public function call($path = '/', $method = 'GET', $parameters = [])
     {
         $client = static::createClient();
 
-//        $server['HTTP_X-REQUEST'] = 'JSON';
         $server = [];
 
-        $pos = strpos($path, '?');
-        $parameters = [];
-        if (false !== $pos) {
-            $queryString = substr($path, $pos + 1);
-            parse_str($queryString, $parameters);
-            $path = substr($path, 0, $pos);
-        }
-
-        if (is_array($postData)) {
-            $parameters = array_merge($parameters, $postData);
+        if (!$parameters) {
+            $parameters = [];
         }
 
         if ($this->allCookies) {
@@ -74,10 +75,10 @@ class KernelAwareTestCase extends WebTestCase
             }
         }
 
-        echo "$method $path\n";
         $client->request($method, $path, $parameters, $files = array(), $server);
 
         $this->allCookies = $client->getCookieJar()->all();
+
         return $client->getInternalResponse()->getContent();
     }
 

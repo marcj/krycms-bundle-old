@@ -626,6 +626,9 @@ class Object extends Model
         return $fields;
     }
 
+    /**
+     * @return Field[]
+     */
     public function getPrimaryKeys()
     {
         if (null === $this->primaryKeys) {

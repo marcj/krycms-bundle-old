@@ -13,11 +13,11 @@ use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 use Symfony\Component\HttpFoundation\Response;
 
-class UIAssetsController extends Controller
+class UITranslationsController extends Controller
 {
     /**
      * @ApiDoc(
-     *  section="Interface assets",
+     *  section="Interface i18n",
      *  description="Prints all possible language codes"
      * )
      *
@@ -54,7 +54,7 @@ class UIAssetsController extends Controller
 
     /**
      * @ApiDoc(
-     *  section="Interface assets",
+     *  section="Interface i18n",
      *  description="Prints the language plural form"
      * )
      *
@@ -80,7 +80,7 @@ class UIAssetsController extends Controller
 
     /**
      * @ApiDoc(
-     *  section="Interface assets",
+     *  section="Interface i18n",
      *  description="Prints all language messages"
      * )
      *

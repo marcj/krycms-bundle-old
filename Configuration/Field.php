@@ -283,7 +283,11 @@ class Field extends Model
                 $field = $object->getField($this->getField());
                 $type = $field->getType();
             }
-            $this->fieldType = $this->getKrynCore()->getFieldTypes()->newType($type);
+            try {
+                $this->fieldType = $this->getKrynCore()->getFieldTypes()->newType($type);
+            } catch (\Exception $e) {
+                throw new TypeNotFoundException(sprintf('FieldType `%s` for field `%s` not found.', $type, $this->getId()), 0, $e);
+            }
             $this->fieldType->setFieldDefinition($this);
         }
 
@@ -859,6 +863,9 @@ class Field extends Model
      */
     public function validate()
     {
+        if ($this->isVirtual()) {
+            return [];
+        }
         return $this->getFieldType()->validate();
     }
 

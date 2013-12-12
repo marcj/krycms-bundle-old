@@ -24,4 +24,4 @@ trait WindowControllerTrait {
 
         return $info;
     }
-} 
+}

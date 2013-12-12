@@ -1034,7 +1034,7 @@ ka.Select = new Class({
 
                 } else if (this.options.object) {
                     this.lastLabelRequest = new Request.JSON({
-                        url: _pathAdmin + 'admin/object/' + ka.urlEncode(this.options.object) + '/' + ka.urlEncode(pId),
+                        url: _pathAdmin + 'admin/object/' + ka.normalizeObjectKey(this.options.object) + '/' + ka.urlEncode(pId),
                         onComplete: function(response) {
 
                             if (!response.error) {

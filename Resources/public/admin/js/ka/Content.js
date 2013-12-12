@@ -177,8 +177,11 @@ ka.Content = new Class({
 
         var req = Object.toQueryString({
             template: this.value.template,
-            type: this.value.type
+            type: this.value.type,
+            nodeId: this.getEditor().getNodeId(),
+            domainId: this.getEditor().getDomainId()
         });
+
         this.lastRq = new Request.JSON({url: _pathAdmin + 'admin/content/preview?' + req, noCache: true,
             onFailure: function() {
                 progressWatch.error();
@@ -189,9 +192,7 @@ ka.Content = new Class({
                 this.main.set('html', pResponse.data);
                 progressWatch.done();
             }.bind(this)}).post({
-                content: this.value.content,
-                nodeId: this.getEditor().getNodeId(),
-                domainId: this.getEditor().getDomainId()
+                content: this.value.content
             });
     },
 

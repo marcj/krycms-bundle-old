@@ -6,7 +6,7 @@ use Kryn\CmsBundle\Controller\WindowNestedController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 
 /**
- * Class NodeCrudController
+ * AUTO-GENERATED THROUGH KRYN WINDOW-EDITOR
  */
 class NodeCrudController extends WindowNestedController
 {

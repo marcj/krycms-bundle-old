@@ -961,6 +961,12 @@ ka.loadSettings = function (keyLimitation, cb) {
     ka.adminInterface.loadSettings(keyLimitation, cb);
 }
 
+/**
+ * Returns the bundle configuration array.
+ *
+ * @param {String} bundleName
+ * @returns {Array}
+ */
 ka.getConfig = function(bundleName) {
     if (!bundleName) return;
     return ka.settings.configs[bundleName]
@@ -968,6 +974,10 @@ ka.getConfig = function(bundleName) {
         || ka.settings.configsAlias[bundleName]
         || ka.settings.configsAlias[bundleName.toLowerCase()];
 }
+
+ka.getShortBundleName = function(bundleName) {
+    return bundleName.toLowerCase().replace(/bundle$/, '');
+};
 
 ka.loadMenu = function () {
     ka.adminInterface.loadMenu();

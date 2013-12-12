@@ -50,6 +50,7 @@ class RestExceptionListener
 
 
                 $response = new Response(json_encode($view, JSON_PRETTY_PRINT));
+                $response->headers->set('Content-Type', 'application/json');
                 $event->setResponse($response);
             }
         }

@@ -4,9 +4,11 @@ namespace Kryn\CmsBundle\Controller;
 
 use FOS\RestBundle\Request\ParamFetcher;
 use Kryn\CmsBundle\Admin\ObjectCrud;
+use Kryn\CmsBundle\Configuration\Condition;
 use Kryn\CmsBundle\Configuration\EntryPoint;
 use Kryn\CmsBundle\Core;
 use Kryn\CmsBundle\Exceptions\InvalidArgumentException;
+use Kryn\CmsBundle\Tools;
 use RestService\Server;
 use Symfony\Component\HttpFoundation\Request;
 use FOS\RestBundle\Controller\Annotations as Rest;
@@ -41,15 +43,39 @@ class ObjectCrudController extends ObjectCrud
 
     public function detectObjectKeyFromPathInfo()
     {
-        $path =$this->getRequest()->getPathInfo();
-        preg_match('|/object/([^/]+)/([^/]+)|', $path, $matches);
-        if (!isset($matches[1]) || !$matches[2]) {
-            throw new InvalidArgumentException(sprintf('Object key not detectable in uri `%s`.', $path));
-        }
-        $bundleName = $matches[1];
-        $objectName = $matches[2];
-        return $bundleName.'/'.$objectName;
+        $request = $this->getRequest();
+
+        Return $request ? $request->attributes->get('_kryn_object') : '';
     }
+
+//    maybe in v1.1
+//    public function getCondition()
+//    {
+//        $request = $this->getRequest();
+//
+//        //when we are in a relation section we need to filter by the first PK per default
+//        if ($request && $section = $request->attributes->get('_kryn_object_section')) {
+//            if ($relationFieldName = $request->attributes->get('_kryn_object_relation')) {
+//                $sectionObject = $this->getKrynCore()->getObjects()->getDefinition($section);
+//
+//                $relationField = $sectionObject->getField($relationFieldName);
+//
+//                $condition = new Condition(null, $this->getKrynCore());
+//                $primaryKeys = $sectionObject->getPrimaryKeys();
+//                if (1 < count($primaryKeys)) {
+//                    foreach ($sectionObject->getPrimaryKeys() as $field) {
+//                        $id = lcfirst($sectionObject->getId()) . '_' . lcfirst($field->getId());
+//                        $condition->addAnd([$field->getId(), '=', $request->attributes->get($id)]);
+//                    }
+//                } else {
+//                    $field = current($primaryKeys);
+//                    $id = lcfirst($sectionObject->getId()) . '_' . lcfirst($field->getId());
+//                    $condition->addAnd([$field->getId(), '=', $request->attributes->get($id)]);
+//                }
+//                return $condition;
+//            }
+//        }
+//    }
 
     /**
      * @return \Symfony\Component\HttpFoundation\Request
@@ -83,46 +109,52 @@ class ObjectCrudController extends ObjectCrud
     }
 
     /**
+     * @param Request $request
+     *
+     * @return array
+     */
+    public function extractPrimaryKey(Request $request)
+    {
+        $primaryKey = [];
+
+        $obj = $this->getObj();
+        foreach ($obj->getPrimary() as $pk) {
+            $primaryKey[$pk] = Tools::urlDecode($request->attributes->get($pk));
+        }
+
+        return $primaryKey;
+    }
+
+    /**
      * @ApiDoc(
-     *    description="Returns a single object item"
+     *    description="Returns a single %object% item"
      * )
      *
      * @Rest\QueryParam(name="fields", requirements=".+", description="Fields to select")
      * @Rest\QueryParam(name="withAcl", requirements=".+", default=false, description="With ACL information")
      *
      * @Rest\View()
-     * @Rest\Get("/{pk}", requirements={"pk" = ".+"})
+     * @Rest\Get("/{pk}")
      *
-     * @param string $pk
+     * @param Request $request
      * @param string $fields
      * @param boolean $withAcl
      *
      * @return array
      */
-    public function getItemAction($pk, $fields = null, $withAcl = null)
+    public function getItemAction(Request $request, $fields = null, $withAcl = null)
     {
         $obj = $this->getObj();
 
-        $primaryKeys = $this->getKrynCore()->getObjects()->parsePk($obj->getObject(), $pk);
+        $primaryKey = $this->extractPrimaryKey($request);
         $withAcl = filter_var($withAcl, FILTER_VALIDATE_BOOLEAN);
 
-        if (count($primaryKeys) == 1) {
-            return $obj->getItem($primaryKeys[0], $fields, $withAcl);
-        } else {
-            $items = [];
-            foreach ($primaryKeys as $primaryKey) {
-                if ($item = $obj->getItem($primaryKey, $fields, $withAcl)) {
-                    $items[] = $item;
-                }
-            }
-
-            return $items;
-        }
+        return $obj->getItem($primaryKey, $fields, $withAcl);
     }
 
     /**
      * @ApiDoc(
-     *    description="Returns object items with additional information"
+     *    description="Returns %object% items with additional information"
      * )
      *
      * @Rest\QueryParam(name="fields", requirements=".+", description="Comma separated list of field names")
@@ -144,7 +176,8 @@ class ObjectCrudController extends ObjectCrud
     {
         $obj = $this->getObj();
 
-        return $obj->getItems($paramFetcher->get('filter'),
+        return $obj->getItems(
+            $paramFetcher->get('filter'),
             $paramFetcher->get('limit'),
             $paramFetcher->get('offset'),
             $paramFetcher->get('q'),
@@ -156,49 +189,47 @@ class ObjectCrudController extends ObjectCrud
 
     /**
      * @ApiDoc(
-     *    description="Updates a object item"
+     *    description="Updates a %object% item"
      * )
      *
      * @Rest\View()
      * @Rest\Put("/{pk}")
      *
-     * @param string $pk
-     *
      * @return mixed
      */
-    public function updateItemAction($pk)
+    public function updateItemAction(Request $request)
     {
         $obj = $this->getObj();
 
-        $primaryKeys = $this->getKrynCore()->getObjects()->parsePk($obj->getObject(), $pk);
+        $primaryKey = $this->extractPrimaryKey($request);
 
-        return $obj->update($primaryKeys[0]);
+        return $obj->update($primaryKey, $request);
     }
 
     /**
      * @ApiDoc(
-     *    description="Updates/Patches a object item"
+     *    description="Updates/Patches a %object% item"
      * )
      *
      * @Rest\View()
      * @Rest\Patch("/{pk}")
      *
-     * @param string $pk
+     * @param Request $request
      *
      * @return mixed
      */
-    public function patchItemAction($pk)
+    public function patchItemAction(Request $request)
     {
         $obj = $this->getObj();
 
-        $primaryKeys = $this->getKrynCore()->getObjects()->parsePk($obj->getObject(), $pk);
+        $primaryKey = $this->extractPrimaryKey($request);
 
-        return $obj->patch($primaryKeys[0]);
+        return $obj->patch($request, $primaryKey);
     }
 
     /**
      * @ApiDoc(
-     *    description="Returns object items count"
+     *    description="Returns %object% items count"
      * )
      *
      * @Rest\QueryParam(name="filter", array=true, requirements=".*", description="Simple filtering per field")
@@ -221,56 +252,45 @@ class ObjectCrudController extends ObjectCrud
 
     /**
      * @ApiDoc(
-     *    description="Delete a object item"
+     *    description="Deletes a %object% item"
      * )
      *
      * @Rest\View()
      * @Rest\Delete("/{pk}")
      *
-     * @param string $pk
+     * @param Request $request
      *
      * @return boolean
      */
-    public function removeItemAction($pk = null)
+    public function removeItemAction(Request $request)
     {
         $obj = $this->getObj();
 
-        if ($pk) {
-            $primaryKeys = $this->getKrynCore()->getObjects()->parsePk($obj->getObject(), $pk);
-            return $obj->remove($primaryKeys[0]);
-        } else {
-            return $obj->removeRoot();
-        }
-//
-//        if (count($primaryKeys) > 0) {
-//            $result = false;
-//            foreach ($pk as $item) {
-//                $result |= $this->removeItem($item);
-//            }
-//
-//            return (boolean)$result;
-//        }
+        $primaryKey = $this->extractPrimaryKey($request);
+
+        return $obj->remove($primaryKey);
     }
 
     /**
      * @ApiDoc(
-     *    description="Adds a new item"
+     *    description="Adds a new %object% item"
      * )
      *
      * @Rest\View()
      * @Rest\Post("/")
      *
+     * @param Request $request
      * @param ParamFetcher $paramFetcher
-     * Proxy method for REST POST to add().
      *
      * @return mixed
      */
-    public function addItemAction(ParamFetcher $paramFetcher)
+    public function addItemAction(Request $request, ParamFetcher $paramFetcher)
     {
         $obj = $this->getObj();
 
         $data = null;
-        return $obj->add($data);
+
+        return $obj->add($request, $data);
     }
 
     /**
@@ -281,38 +301,41 @@ class ObjectCrudController extends ObjectCrud
 
     /**
      * @ApiDoc(
-     *    description="Adds multiple items #todo-doc"
+     *    description="Adds multiple %object% items #todo-doc"
      * )
      *
      * @Rest\View()
      * @Rest\Post("/:multiple")
      *
+     * @param Request $request
+     *
      * @return mixed
      */
-    public function addMultipleItemAction()
+    public function addMultipleItemAction(Request $request)
     {
         $obj = $this->getObj();
 
-        return $obj->addMultiple();
+        return $obj->addMultiple($request);
     }
 
     /**
      * @ApiDoc(
-     *    description="Returns the position in the object items list of $pk"
+     *    description="Returns the position in the %object% list of selected item"
      * )
      *
      * @Rest\View()
      * @Rest\Get("/{pk}/:position")
      *
-     * @param string $pk
+     * @param Request $request
      * @return array
      */
-    public function getItemPositionAction($pk)
+    public function getItemPositionAction(Request $request)
     {
         $obj = $this->getObj();
-        $primaryKeys = $this->getKrynCore()->getObjects()->parsePk($obj->getObject(), $pk);
 
-        return $obj->getPosition($primaryKeys[0]);
+        $primaryKey = $this->extractPrimaryKey($request);
+
+        return $obj->getPosition($primaryKey);
     }
 
     /**

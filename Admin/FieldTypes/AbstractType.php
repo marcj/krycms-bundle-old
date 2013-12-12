@@ -43,11 +43,14 @@ abstract class AbstractType implements TypeInterface
             return $result;
         }
 
-        if ($field->getRequired() && ($field->getValue() === '' || $field->getValue() === '')) {
+        $required = $this->getFieldDefinition()->isRequired()
+            || ($this->getFieldDefinition()->isPrimaryKey() && !$this->getFieldDefinition()->isAutoIncrement());
+
+        if ($required && ($field->getValue() === '' || $field->getValue() === '')) {
             $result[] = 'Value is empty, but required.';
         }
 
-        if ($regex = $this->getRequiredRegex()) {
+        if ($required && $regex = $this->getRequiredRegex()) {
             $value = (string)$field->getValue();
             if (!preg_match('/' . addslashes($regex) . '/', $value)) {
 
@@ -71,16 +74,16 @@ abstract class AbstractType implements TypeInterface
     public function getRequiredRegex()
     {
         if ('string' === $this->getPhpDataType()) {
-            return $this->getFieldDefinition()->isRequired() ? '.+' : '.*';
+            return '.+';
 
         } else if ($this->isInteger()) {
-            return $this->getFieldDefinition()->isRequired() ? '[-+]?\d+' : '[-+]?\d*';
+            return '[-+]?\d+';
 
         } else if ($this->isFloat()) {
-            return $this->getFieldDefinition()->isRequired() ? '[-+]?(\d*[.])?\d+' : '[-+]?(\d*[.])?\d*';
+            return '[-+]?(\d*[.])?\d+';
 
         } else if ($this->isBoolean()) {
-            return $this->getFieldDefinition()->isRequired() ? 'false|true|1|0' : 'false|true|1|0|';
+            return 'false|true|1|0';
         }
     }
 

@@ -35,53 +35,6 @@ class AdminController extends Controller
     protected $utils;
 
     /**
-     * Checks the access to the administration URLs and redirect to administration login if no access.
-     *
-     * @internal
-     * @static
-     */
-    public function checkAccess($url)
-    {
-        $whitelist = [
-            '/',
-            '/admin/backend/style',
-            '/admin/backend/script',
-            '/admin/ui/languages',
-            '/admin/ui/language',
-            '/admin/ui/language-plural',
-            '/admin/login',
-            '/admin/logged-in'
-        ];
-
-        if (in_array($url, $whitelist)) {
-            return;
-        }
-
-        if (!$this->getKrynCore()->getAdminClient()->getUser()) {
-            return $response = new Response(json_encode(
-                [
-                    'status' => 403,
-                    'error' => 'AccessDeniedException',
-                    'message' => 'Access denied. No access or login first.'
-                ],
-                JSON_PRETTY_PRINT
-            ), 403);
-        }
-
-        #$access = Permission::check('KrynCmsBundle:EntryPoint', $url);
-        if (!true) {
-            #throw new AccessDeniedException(tf('Access denied.'));
-        }
-    }
-
-    public function exceptionHandler($exception)
-    {
-        if (get_class($exception) != 'AccessDeniedException') {
-            throw $exception;
-        }
-    }
-
-    /**
      * @return Core
      */
     public function getKrynCore()
@@ -89,6 +42,9 @@ class AdminController extends Controller
         return $this->get('kryn_cms');
     }
 
+    /**
+     * @return \Kryn\CmsBundle\Admin\Utils
+     */
     public function getUtils()
     {
         if (null === $this->utils) {
@@ -96,143 +52,6 @@ class AdminController extends Controller
         }
 
         return $this->utils;
-    }
-
-    /**
-     * @ Route("/123{url}", requirements={"url" = ".+"})
-     */
-    public function mainAction($url = '/')
-    {
-        return;
-        @header('Expires:');
-
-        $exceptionHandler = array($this, 'exceptionHandler');
-        $debugMode = false;
-        if ($this->getKrynCore()->getKernel()->isDebug()) {
-            $debugMode = true;
-        }
-
-        if ('JSON' === $this->getRequest()->headers->get('x-request')) {
-            $exceptionHandler = null;
-        }
-
-        if ('/' !== substr($url, 0, 1)) {
-            $url = '/' . $url;
-        }
-
-        $response = $this->getKrynCore()->getPageResponse();
-        $request = $this->getKrynCore()->getRequest();
-
-//        if ('/' !== substr($url, -1)) {
-//            $url .= '/'; //substr($url, 0, -1);
-//        }
-
-        if ($adminUrl = $this->getKrynCore()->getSystemConfig()->getAdminUrl()) {
-            if (0 === strpos($url, $adminUrl)) {
-                $url = substr($url, strlen($adminUrl) - 1) ? : '/';
-            }
-        }
-
-        $getArgv = function ($id) use ($url) {
-            $exploded = explode('/', $url);
-
-            return isset($exploded[$id]) ? $exploded[$id] : null;
-        };
-
-        //checkAccess
-        if ($checkAccessResponse = $this->checkAccess($url)) {
-            return $checkAccessResponse;
-        }
-        $entryPoint = $this->getUtils()->getEntryPoint($url);
-
-        if ($entryPoint) {
-            //is window entry point?
-            $objectWindowTypes = array('list', 'edit', 'add', 'combine');
-
-            if (in_array($entryPoint->getType(), $objectWindowTypes)) {
-                $epc = new ObjectCrudController('/' . $getArgv(1) . '/' . $entryPoint->getFullPath());
-                $epc->setKrynCore($this->getKrynCore());
-                $epc->setRequest($this->getKrynCore()->getRequest());
-                $epc->setExceptionHandler($exceptionHandler);
-                $epc->setDebugMode($debugMode);
-                $epc->setEntryPoint($entryPoint);
-                $symfonyClient = new SymfonyClient($epc);
-                $symfonyClient->setResponse($response);
-                $symfonyClient->setRequest($request);
-                $epc->setClient($symfonyClient);
-                $epc->getClient()->setUrl($url);
-
-                return $epc->run();
-            }
-        }
-
-        $_GET = $this->getRequest()->query->all();
-        $_POST = $this->getRequest()->request->all();
-
-        if ($this->getKrynCore()->isActiveBundle($getArgv(2)) && $getArgv(2) != 'admin') {
-
-            $bundle = $this->getKrynCore()->getBundle($getArgv(2));
-            $namespace = $bundle->getNamespace();
-
-            $clazz = $namespace . '\\Controller\\AdminController';
-
-            if (get_parent_class($clazz) == 'RestService\Server') {
-                $obj = new $clazz($this->getKrynCore()->getAdminPrefix() . '/' . $getArgv(2));
-                $obj->setExceptionHandler($exceptionHandler);
-                $symfonyClient = new SymfonyClient($obj);
-                $symfonyClient->setResponse($response);
-                $symfonyClient->setRequest($request);
-                $obj->setClient($symfonyClient);
-                $obj->getClient()->setUrl(substr($this->getKrynCore()->getRequest()->getPathInfo(), 1));
-                $obj->setDebugMode($debugMode);
-            } else {
-                $obj = new $clazz();
-            }
-
-            $response = $obj->run();
-            if ($response instanceof Response) {
-                return $response;
-            } else {
-                die($response);
-            }
-
-        } else {
-            if ($getArgv(2) == 'object') {
-
-                $entryPoint = new EntryPoint(null, $this->getKrynCore());
-                $entryPoint->setFullPath('admin/object/' . $getArgv(3));
-                $entryPoint->setType('combine');
-
-                $objectKey = rawurldecode($getArgv(3));
-                $definition = $this->getKrynCore()->getObjects()->getDefinition($objectKey);
-
-                if (!$definition) {
-                    throw new ObjectNotFoundException(sprintf('Object `%s` not found.', $objectKey));
-                }
-
-                $object = new ObjectCrudController();
-                $object->setObject($objectKey);
-                $object->setKrynCore($this->getKrynCore());
-                $object->setRequest($this->getKrynCore()->getRequest());
-                $object->setAllowCustomSelectFields(true);
-
-                $object->initialize();
-
-                $epc = new ObjectCrudController('/' . $entryPoint->getFullPath());
-                $symfonyClient = new SymfonyClient($epc);
-                $symfonyClient->setResponse($response);
-                $symfonyClient->setRequest($request);
-                $epc->setClient($symfonyClient);
-                $epc->setObj($object);
-                $epc->setKrynCore($this->getKrynCore());
-                $epc->setRequest($this->getKrynCore()->getRequest());
-                $epc->getClient()->setUrl($url);
-                $epc->setExceptionHandler($exceptionHandler);
-                $epc->setDebugMode($debugMode);
-
-                return $epc->run($entryPoint);
-            }
-        }
     }
 
     /**
@@ -287,9 +106,9 @@ class AdminController extends Controller
      * @Rest\QueryParam(name="domainId", requirements="[0-9]+", strict=true,
      *      description="The domain id in which context this content should be rendered")
      *
-     * @Rest\RequestParam(name="content", requirements=".?", strict=true, description="The actual content")
+     * @Rest\RequestParam(name="content", requirements=".*", strict=true, description="The actual content")
      *
-     * @Rest\Get("/admin/content/preview")
+     * @Rest\Post("/admin/content/preview")
      *
      * @param ParamFetcher $paramFetcher
      *

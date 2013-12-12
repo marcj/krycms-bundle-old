@@ -13,8 +13,7 @@ class LanguageController extends Controller
 
     /**
      * @ApiDoc(
-     *  section="Language",
-     *  section="Language",
+     *  section="Language Editor",
      *  description="Returns all language messages + pluralCount and pluralForm"
      * )
      *
@@ -57,7 +56,7 @@ class LanguageController extends Controller
 
     /**
      * @ApiDoc(
-     *  section="Language",
+     *  section="Language Editor",
      *  description="Saves language messages"
      * )
      *
@@ -84,7 +83,7 @@ class LanguageController extends Controller
 
     /**
      * @ApiDoc(
-     *  section="Language",
+     *  section="Language Editor",
      *  description="Extracts all language messages in the given bundle"
      * )
      *
@@ -107,7 +106,7 @@ class LanguageController extends Controller
 
     /**
      * @ApiDoc(
-     *  section="Language",
+     *  section="Language Editor",
      *  description="Gets a overview of translated messages"
      * )
      *

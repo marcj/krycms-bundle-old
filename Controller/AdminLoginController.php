@@ -92,7 +92,6 @@ class AdminLoginController extends PluginController
         $options['noJs'] = isset($options['noJs']) ? $options['noJs'] : false;
 
         $prefix = substr($this->getKernel()->getContainer()->getParameter('kryn_admin_prefix'), 1);
-//        $prefix = $this->getKernel()->getContainer()->getParameter('kryn_admin_prefix');
 
         $response->addJs(
             '

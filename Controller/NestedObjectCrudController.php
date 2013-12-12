@@ -1,16 +1,10 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: marc
- * Date: 09.12.13
- * Time: 16:42
- */
-
 namespace Kryn\CmsBundle\Controller;
 
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 use FOS\RestBundle\Request\ParamFetcher;
+use Symfony\Component\HttpFoundation\Request;
 
 class NestedObjectCrudController extends ObjectCrudController
 {
@@ -25,15 +19,14 @@ class NestedObjectCrudController extends ObjectCrudController
      * @Rest\View()
      * @Rest\Post("/")
      *
+     * @param Request $request
      * @param ParamFetcher $paramFetcher
-     * Proxy method for REST POST to add().
      *
      * @return mixed
      */
-    public function addItemAction(ParamFetcher $paramFetcher)
+    public function addItemAction(Request $request, ParamFetcher $paramFetcher)
     {
         $obj = $this->getObj();
-
         $data = null;
 
         return $obj->add($data, $paramFetcher->get('targetPk'));
@@ -115,34 +108,37 @@ class NestedObjectCrudController extends ObjectCrudController
      * @Rest\QueryParam(name="offset", requirements="[0-9]+", description="Offsets the result")
      * @Rest\QueryParam(name="scope", requirements=".*", description="Nested set scope")
      * @Rest\QueryParam(name="depth", requirements="[0-9]+", default=1, description="Max depth")
+     * @Rest\QueryParam(name="withAcl", requirements=".+", default=false, description="With ACL information")
      *
      * @Rest\View()
      * @Rest\Get("/{pk}/:branch")
      *
-     * @param string $pk
+     * @param Request $request
      * @param string $fields
      * @param string $scope
      * @param integer $depth
      * @param string $limit
      * @param string $offset
      * @param string $filter
+     * @param bool $withAcl
      *
      * @return array
      */
     public function getBranchItemsAction(
+        Request $request,
         $pk = null,
         $fields = null,
         $scope = null,
         $depth = null,
         $limit = null,
         $offset = null,
-        $filter = null
+        $filter = null,
+        $withAcl = null
     ) {
         $obj = $this->getObj();
 
-        $primaryKeys = $this->getKrynCore()->getObjects()->normalizePkString($obj->getObject(), $pk);
-
-        return $obj->getBranchItems($primaryKeys, $filter, $fields, $scope, $depth, $limit, $offset);
+        $primaryKey = $this->extractPrimaryKey($request);
+        return $obj->getBranchItems($primaryKey, $filter, $fields, $scope, $depth, $limit, $offset, $withAcl);
     }
 
     /**
@@ -157,20 +153,20 @@ class NestedObjectCrudController extends ObjectCrudController
      * @Rest\Get("/{pk}/:children-count")
      * @Rest\Get("/:children-count")
      *
-     * @param string $pk
+     * @param Request $request
      * @param string $scope
      * @param string $filter
      *
      * @return array
      */
-    public function getBranchChildrenCountAction($pk = null, $scope = null, $filter = null)
+    public function getBranchChildrenCountAction(Request $request, $scope = null, $filter = null)
     {
         $obj = $this->getObj();
 
-        if ($pk) {
-            $primaryKeys = $this->getKrynCore()->getObjects()->normalizePkString($obj->getObject(), $pk);
+        $primaryKey = $this->extractPrimaryKey($request);
 
-            return $obj->getBranchChildrenCount($primaryKeys[0], $scope, $filter);
+        if ($primaryKey) {
+            return $obj->getBranchChildrenCount($primaryKey, $scope, $filter);
         } else {
             return $obj->getBranchChildrenCount(null, $scope, $filter);
         }
@@ -189,7 +185,7 @@ class NestedObjectCrudController extends ObjectCrudController
      * @Rest\View()
      * @Rest\Post("/{pk}/:move")
      *
-     * @param string $source
+     * @param Request $request
      * @param string $target
      * @param string $position
      * @param string $targetObjectKey
@@ -197,12 +193,14 @@ class NestedObjectCrudController extends ObjectCrudController
      *
      * @return boolean
      */
-    public function moveItemAction($source, $target, $position = 'first', $targetObjectKey = '', $overwrite = false)
+    public function moveItemAction(Request $request, $target, $position = 'first', $targetObjectKey = '', $overwrite = false)
     {
         $obj = $this->getObj();
 
+        $primaryKey = $this->extractPrimaryKey($request);
+
         return $obj->moveItem(
-            $source,
+            $primaryKey,
             $target,
             $position,
             $targetObjectKey,
@@ -257,17 +255,17 @@ class NestedObjectCrudController extends ObjectCrudController
      * @Rest\View()
      * @Rest\Get("/{pk}/:parent")
      *
-     * @param string $pk
+     * @param Request $request
      *
      * @return boolean
      */
-    public function getParentAction($pk)
+    public function getParentAction(Request $request)
     {
         $obj = $this->getObj();
 
-        $primaryKeys = $this->getKrynCore()->getObjects()->parsePk($obj->getObject(), $pk);
+        $primaryKey = $this->extractPrimaryKey($request);
 
-        return $obj->getParent($primaryKeys[0]);
+        return $obj->getParent($primaryKey);
     }
 
     /**
@@ -278,17 +276,17 @@ class NestedObjectCrudController extends ObjectCrudController
      * @Rest\View()
      * @Rest\Get("/{pk}/:parents")
      *
-     * @param string $pk
+     * @param Request $request
      *
      * @return boolean
      */
-    public function getParentsAction($pk)
+    public function getParentsAction(Request $request)
     {
         $obj = $this->getObj();
 
-        $primaryKeys = $this->getKrynCore()->getObjects()->parsePk($obj->getObject(), $pk);
+        $primaryKey = $this->extractPrimaryKey($request);
 
-        return $obj->getParents($primaryKeys[0]);
+        return $obj->getParents($primaryKey);
     }
 
 } 

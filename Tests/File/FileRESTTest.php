@@ -10,19 +10,13 @@ class FileRESTTest extends KernelAwareTestCase
     {
         parent::setUp();
 
-        //login as admin
-        $loggedIn = $this->restCall('/kryn/admin/logged-in');
-
-        if (!$loggedIn || !$loggedIn['data']) {
-            $this->restCall('/kryn/admin/login', 'POST', ['username' => 'admin', 'password' => 'admin']);
-        }
+        $this->login();
     }
 
     public function testListing()
     {
         $response = $this->restCall('/kryn/admin/file?path=/');
         $bundle = null;
-        var_dump($response);
         foreach ($response['data'] as $file) {
             if ('/bundles' === $file['path']) {
                 $bundle = $file;
@@ -88,7 +82,7 @@ class FileRESTTest extends KernelAwareTestCase
     {
         $id = dechex(time() / mt_rand(100, 500));
         $testPath = '/test_' . $id;
-        $response = $this->restCall('/kryn/admin/file/folder?path=' . $testPath, 'POST');
+        $response = $this->restCall('/kryn/admin/file/dir?path=' . $testPath, 'PUT');
         $this->assertEquals(true, $response['data']);
 
         $response = $this->restCall('/kryn/admin/file/single?path=' . $testPath);
@@ -111,7 +105,7 @@ class FileRESTTest extends KernelAwareTestCase
     {
         $id = dechex(time() / mt_rand(100, 500));
         $testPath = '/test_' . $id . '.txt';
-        $response = $this->restCall('/kryn/admin/file?path=' . $testPath, 'POST');
+        $response = $this->restCall('/kryn/admin/file?path=' . $testPath, 'PUT');
         $this->assertEquals(true, $response['data']);
 
         $response = $this->restCall('/kryn/admin/file/single?path=' . $testPath);
@@ -134,7 +128,7 @@ class FileRESTTest extends KernelAwareTestCase
     {
         $id = dechex(time() / mt_rand(100, 500));
         $testPath = '/test_' . $id . '.txt';
-        $response = $this->restCall('/kryn/admin/file?path=' . $testPath, 'POST');
+        $response = $this->restCall('/kryn/admin/file?path=' . $testPath, 'PUT');
         $this->assertEquals(true, $response['data']);
 
         $response = $this->restCall('/kryn/admin/file/single?path=' . $testPath);
@@ -151,11 +145,12 @@ class FileRESTTest extends KernelAwareTestCase
 
         $id = dechex(time() / mt_rand(100, 500));
         $testDirPath = '/test_' . $id;
-        $response = $this->restCall('/kryn/admin/file/folder?path=' . $testDirPath, 'POST');
+        $response = $this->restCall('/kryn/admin/file/dir?path=' . $testDirPath, 'PUT');
         $this->assertEquals(true, $response['data']);
 
-        $response = $this->restCall('/kryn/admin/file/paste?target=' . $testDirPath . '/', 'POST', [
+        $response = $this->restCall('/kryn/admin/file/paste', 'POST', [
             'files' => [$testPath],
+            'target' => $testDirPath . '/',
             'move' => true
         ]);
         $this->assertEquals(true, $response['data']);
@@ -178,7 +173,7 @@ class FileRESTTest extends KernelAwareTestCase
     {
         $id = dechex(time() / mt_rand(100, 500));
         $testPath = '/test_' . $id . '.txt';
-        $response = $this->restCall('/kryn/admin/file?path=' . $testPath, 'POST');
+        $response = $this->restCall('/kryn/admin/file?path=' . $testPath, 'PUT');
         $this->assertEquals(true, $response['data']);
 
         $response = $this->restCall('/kryn/admin/file/single?path=' . $testPath);
@@ -195,11 +190,12 @@ class FileRESTTest extends KernelAwareTestCase
 
         $id = dechex(time() / mt_rand(100, 500));
         $testDirPath = '/test_' . $id;
-        $response = $this->restCall('/kryn/admin/file/folder?path=' . $testDirPath, 'POST');
+        $response = $this->restCall('/kryn/admin/file/dir?path=' . $testDirPath, 'PUT');
         $this->assertEquals(true, $response['data']);
 
-        $response = $this->restCall('/kryn/admin/file/paste?target=' . $testDirPath . '/', 'POST', [
+        $response = $this->restCall('/kryn/admin/file/paste', 'POST', [
             'files' => [$testPath],
+            'target' => $testDirPath . '/',
             'move' => false
         ]);
         $this->assertEquals(true, $response['data']);

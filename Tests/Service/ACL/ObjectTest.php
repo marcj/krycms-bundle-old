@@ -34,7 +34,7 @@ class ObjectTest extends KernelAwareTestCase
         ]);
 
         $params = [];
-        $sql = $condition->toSql($params, 'KrynCmsBundle:Node');
+        $sql = $condition->toSql($params, 'kryncms/node');
 
         $expectedArray = [
             [
@@ -53,7 +53,7 @@ class ObjectTest extends KernelAwareTestCase
     public function testNestedSubPermission()
     {
         $this->getACL()->setCaching(false);
-        $this->getACL()->removeObjectRules('KrynCmsBundle:Node');
+        $this->getACL()->removeObjectRules('kryncms/node');
 
         $this->getKrynCore()->getClient()->login('admin', 'admin');
 
@@ -76,7 +76,7 @@ class ObjectTest extends KernelAwareTestCase
         //make access for all
         $rule = new Acl();
         $rule->setAccess(true);
-        $rule->setObject('KrynCmsBundle:Node');
+        $rule->setObject('kryncms/node');
         $rule->setTargetType(\Kryn\CmsBundle\ACL::USER);
         $rule->setTargetId($user->getId());
         $rule->setMode(\Kryn\CmsBundle\ACL::ALL);
@@ -87,7 +87,7 @@ class ObjectTest extends KernelAwareTestCase
         //revoke access for all children of `TestNode tree`
         $rule2 = new Acl();
         $rule2->setAccess(false);
-        $rule2->setObject('KrynCmsBundle:Node');
+        $rule2->setObject('kryncms/node');
         $rule2->setTargetType(\Kryn\CmsBundle\ACL::USER);
         $rule2->setTargetId($user->getId());
         $rule2->setMode(\Kryn\CmsBundle\ACL::ALL);
@@ -99,7 +99,7 @@ class ObjectTest extends KernelAwareTestCase
         $rule2->setSub(true);
         $rule2->save();
 
-        $items = $this->getObjects()->getBranch('KrynCmsBundle:Node', $subNode->getId(), null, 1, null, [
+        $items = $this->getObjects()->getBranch('kryncms/node', $subNode->getId(), null, 1, null, [
             'permissionCheck' => true
         ]);
         $this->assertNull($items, 'rule2 revokes the access to all elements');
@@ -107,7 +107,7 @@ class ObjectTest extends KernelAwareTestCase
 
         $rule2->setSub(false);
         $rule2->save();
-        $items = $this->getObjects()->getBranch('KrynCmsBundle:Node', $subNode->getId(), null, 1, null, [
+        $items = $this->getObjects()->getBranch('kryncms/node', $subNode->getId(), null, 1, null, [
             'permissionCheck' => true
         ]);
         $this->assertEquals('TestNode sub', $items[0]['title'], 'We got TestNode sub');
@@ -115,7 +115,7 @@ class ObjectTest extends KernelAwareTestCase
 
         $rule2->setAccess(true);
         $rule2->save();
-        $items = $this->getObjects()->getBranch('KrynCmsBundle:Node', $subNode->getId(), null, 1, null, [
+        $items = $this->getObjects()->getBranch('kryncms/node', $subNode->getId(), null, 1, null, [
             'permissionCheck' => true
         ]);
         $this->assertEquals('TestNode sub', $items[0]['title'], 'We got TestNode sub');
@@ -135,9 +135,9 @@ class ObjectTest extends KernelAwareTestCase
         $item->save();
 
         debugPrint('start');
-        $objectItem = $this->getObjects()->get('test:item', ['id' => $item->getId()]);
+        $objectItem = $this->getObjects()->get('test/item', ['id' => $item->getId()]);
         debugPrint('---');
-        $objectItem = $this->getObjects()->get('test:item', ['id' => $item->getId()]);
+        $objectItem = $this->getObjects()->get('test/item', ['id' => $item->getId()]);
         debugPrint('done');
 
         $item->delete();
@@ -149,7 +149,7 @@ class ObjectTest extends KernelAwareTestCase
         ItemQuery::create()->deleteAll();
         TestQuery::create()->deleteAll();
         $this->getACL()->setCaching(true);
-        $this->getACL()->removeObjectRules('Test\\Item');
+        $this->getACL()->removeObjectRules('test/item');
 
         $user = new User();
         $user->setUsername('testuser');
@@ -165,7 +165,7 @@ class ObjectTest extends KernelAwareTestCase
 
         $rule = new Acl();
         $rule->setAccess(true);
-        $rule->setObject('test:item');
+        $rule->setObject('test/item');
         $rule->setTargetType(\Kryn\CmsBundle\ACL::USER);
         $rule->setTargetId($user->getId());
         $rule->setMode(\Kryn\CmsBundle\ACL::ALL);
@@ -175,7 +175,7 @@ class ObjectTest extends KernelAwareTestCase
 
         $rule = new Acl();
         $rule->setAccess(false);
-        $rule->setObject('test:item');
+        $rule->setObject('test/item');
         $rule->setTargetType(\Kryn\CmsBundle\ACL::USER);
         $rule->setTargetId($user->getId());
         $rule->setMode(\Kryn\CmsBundle\ACL::ALL);
@@ -187,14 +187,14 @@ class ObjectTest extends KernelAwareTestCase
         $rule->save();
 
         $access1 = $this->getACL()->checkListExact(
-            'test:item',
+            'test/item',
             $item1->getId(),
             \Kryn\CmsBundle\ACL::USER,
             $user->getId()
         );
 
         $access2 = $this->getACL()->checkListExact(
-            'test:item',
+            'test/item',
             $item2->getId(),
             \Kryn\CmsBundle\ACL::USER,
             $user->getId()
@@ -206,7 +206,7 @@ class ObjectTest extends KernelAwareTestCase
         $user->delete();
 
         $this->getACL()->setCaching(true);
-        $this->getACL()->removeObjectRules('Test\\Item');
+        $this->getACL()->removeObjectRules('test/item');
     }
 
     public function testRulesWithFields()
@@ -215,7 +215,7 @@ class ObjectTest extends KernelAwareTestCase
         ItemQuery::create()->deleteAll();
         TestQuery::create()->deleteAll();
         $this->getACL()->setCaching(false);
-        $this->getACL()->removeObjectRules('Test\\Item');
+        $this->getACL()->removeObjectRules('test/item');
 
         $user = new User();
         $user->setUsername('TestUser');
@@ -242,7 +242,7 @@ class ObjectTest extends KernelAwareTestCase
         $item2->addItemCategory($cat2);
         $item2->save();
 
-        $this->getACL()->removeObjectRules('Test\\Item');
+        $this->getACL()->removeObjectRules('test/item');
         $fields = array(
             'oneCategory' => array(
                 array(
@@ -251,11 +251,11 @@ class ObjectTest extends KernelAwareTestCase
                 )
             )
         );
-        $this->getACL()->setObjectUpdate('Test\\Item', \Kryn\CmsBundle\ACL::USER, $user->getId(), true, $fields);
+        $this->getACL()->setObjectUpdate('test/item', \Kryn\CmsBundle\ACL::USER, $user->getId(), true, $fields);
 
         $this->assertFalse(
             $this->getACL()->checkUpdate(
-                'Test\\Item',
+                'test/item',
                 array('oneCategory' => $cat2->getId()),
                 \Kryn\CmsBundle\ACL::USER,
                 $user->getId()
@@ -263,14 +263,14 @@ class ObjectTest extends KernelAwareTestCase
         );
         $this->assertTrue(
             $this->getACL()->checkUpdate(
-                'Test\\Item',
+                'test/item',
                 array('oneCategory' => $cat1->getId()),
                 \Kryn\CmsBundle\ACL::USER,
                 $user->getId()
             )
         );
 
-        $this->getACL()->removeObjectRules('Test\\Item');
+        $this->getACL()->removeObjectRules('test/item');
         $fields = array(
             'oneCategory' => array(
                 array(
@@ -280,11 +280,11 @@ class ObjectTest extends KernelAwareTestCase
             )
         );
 
-        $this->getACL()->setObjectUpdate('Test\\Item', \Kryn\CmsBundle\ACL::USER, $user->getId(), true, $fields);
+        $this->getACL()->setObjectUpdate('test/item', \Kryn\CmsBundle\ACL::USER, $user->getId(), true, $fields);
 
         $this->assertTrue(
             $this->getACL()->checkUpdate(
-                'Test\\Item',
+                'test/item',
                 array('oneCategory' => $cat2->getId()),
                 \Kryn\CmsBundle\ACL::USER,
                 $user->getId()
@@ -292,14 +292,14 @@ class ObjectTest extends KernelAwareTestCase
         );
         $this->assertFalse(
             $this->getACL()->checkUpdate(
-                'Test\\Item',
+                'test/item',
                 array('oneCategory' => $cat1->getId()),
                 \Kryn\CmsBundle\ACL::USER,
                 $user->getId()
             )
         );
 
-        $this->getACL()->removeObjectRules('Test\\Item');
+        $this->getACL()->removeObjectRules('test/item');
 
         $fields = array(
             'title' => array(
@@ -309,45 +309,45 @@ class ObjectTest extends KernelAwareTestCase
                 )
             )
         );
-        $this->getACL()->setObjectUpdate('Test\\Item', \Kryn\CmsBundle\ACL::USER, $user->getId(), true, $fields);
+        $this->getACL()->setObjectUpdate('test/item', \Kryn\CmsBundle\ACL::USER, $user->getId(), true, $fields);
 
         $this->assertTrue(
-            $this->getACL()->checkUpdate('Test\\Item', array('title' => 'Heidenau'), \Kryn\CmsBundle\ACL::USER, $user->getId())
+            $this->getACL()->checkUpdate('test/item', array('title' => 'Heidenau'), \Kryn\CmsBundle\ACL::USER, $user->getId())
         );
         $this->assertTrue(
-            $this->getACL()->checkUpdate('Test\\Item', array('title' => 'peter'), \Kryn\CmsBundle\ACL::USER, $user->getId())
+            $this->getACL()->checkUpdate('test/item', array('title' => 'peter'), \Kryn\CmsBundle\ACL::USER, $user->getId())
         );
         $this->assertFalse(
-            $this->getACL()->checkUpdate('Test\\Item', array('title' => 'peter 2'), \Kryn\CmsBundle\ACL::USER, $user->getId())
+            $this->getACL()->checkUpdate('test/item', array('title' => 'peter 2'), \Kryn\CmsBundle\ACL::USER, $user->getId())
         );
         $this->assertFalse(
-            $this->getACL()->checkUpdate('Test\\Item', array('title' => 'peter asdad'), \Kryn\CmsBundle\ACL::USER, $user->getId())
+            $this->getACL()->checkUpdate('test/item', array('title' => 'peter asdad'), \Kryn\CmsBundle\ACL::USER, $user->getId())
         );
 
-        $this->getACL()->removeObjectRules('Test\\Item');
+        $this->getACL()->removeObjectRules('test/item');
 
         $fields = array('title' => array(array('access' => false, 'condition' => array(array('title', '=', 'peter')))));
-        $this->getACL()->setObjectUpdate('Test\\Item', \Kryn\CmsBundle\ACL::USER, $user->getId(), true, $fields);
+        $this->getACL()->setObjectUpdate('test/item', \Kryn\CmsBundle\ACL::USER, $user->getId(), true, $fields);
 
         $this->assertTrue(
-            $this->getACL()->checkUpdate('Test\\Item', array('title' => 'Heidenau'), \Kryn\CmsBundle\ACL::USER, $user->getId())
+            $this->getACL()->checkUpdate('test/item', array('title' => 'Heidenau'), \Kryn\CmsBundle\ACL::USER, $user->getId())
         );
         $this->assertFalse(
-            $this->getACL()->checkUpdate('Test\\Item', array('title' => 'peter'), \Kryn\CmsBundle\ACL::USER, $user->getId())
+            $this->getACL()->checkUpdate('test/item', array('title' => 'peter'), \Kryn\CmsBundle\ACL::USER, $user->getId())
         );
         $this->assertTrue(
-            $this->getACL()->checkUpdate('Test\\Item', array('title' => 'peter2'), \Kryn\CmsBundle\ACL::USER, $user->getId())
+            $this->getACL()->checkUpdate('test/item', array('title' => 'peter2'), \Kryn\CmsBundle\ACL::USER, $user->getId())
         );
 
         $this->getACL()->setCaching(true);
-        $this->getACL()->removeObjectRules('Test\\Item');
+        $this->getACL()->removeObjectRules('test/item');
     }
 
     public function texxstObjectGeneral()
     {
         ItemQuery::create()->deleteAll();
         TestQuery::create()->deleteAll();
-        $this->getACL()->removeObjectRules('Test\\Item');
+        $this->getACL()->removeObjectRules('test/item');
         $this->getACL()->setCaching(false);
 
         $user = new User();
@@ -372,46 +372,46 @@ class ObjectTest extends KernelAwareTestCase
         $test1->save();
 
         $this->assertFalse(
-            $this->getACL()->checkList('Test\\Item', $item1->getId(), $this->getACL()->GROUP, $group->getId()),
+            $this->getACL()->checkList('test/item', $item1->getId(), $this->getACL()->GROUP, $group->getId()),
             'we have no rules, so everyone except admin user and admin group has no access.'
         );
 
         $this->assertTrue(
-            $this->getACL()->checkList('Test\\Item', $item1->getId(), $this->getACL()->GROUP, 1),
+            $this->getACL()->checkList('test/item', $item1->getId(), $this->getACL()->GROUP, 1),
             'we have no rules, so only group admin has access.'
         );
 
         $this->assertTrue(
-            $this->getACL()->checkList('Test\\Item', $item1->getId(), \Kryn\CmsBundle\ACL::USER, 1),
+            $this->getACL()->checkList('test/item', $item1->getId(), \Kryn\CmsBundle\ACL::USER, 1),
             'we have no rules, so only user admin has access.'
         );
 
-        $this->getACL()->setObjectList('Test\\Item', $this->getACL()->GROUP, $group->getId(), true);
+        $this->getACL()->setObjectList('test/item', $this->getACL()->GROUP, $group->getId(), true);
         $this->assertTrue(
-            $this->getACL()->checkList('Test\\Item', $item1->getId(), $this->getACL()->GROUP, $group->getId()),
-            'testGroup got list access to all test\\item objects.'
+            $this->getACL()->checkList('test/item', $item1->getId(), $this->getACL()->GROUP, $group->getId()),
+            'testGroup got list access to all test/item objects.'
         );
 
-        $this->getACL()->setObjectListExact('Test\\Item', $item1->getId(), $this->getACL()->GROUP, $group->getId(), false);
+        $this->getACL()->setObjectListExact('test/item', $item1->getId(), $this->getACL()->GROUP, $group->getId(), false);
         $this->assertFalse(
-            $this->getACL()->checkList('Test\\Item', $item1->getId(), $this->getACL()->GROUP, $group->getId()),
+            $this->getACL()->checkList('test/item', $item1->getId(), $this->getACL()->GROUP, $group->getId()),
             'testGroup got list access-denied to item 1.'
         );
 
         $this->assertTrue(
-            $this->getACL()->checkList('Test\\Item', $item2->getId(), $this->getACL()->GROUP, $group->getId()),
+            $this->getACL()->checkList('test/item', $item2->getId(), $this->getACL()->GROUP, $group->getId()),
             'testGroup still have access to item2.'
         );
 
-        $this->getACL()->setObjectListExact('Test\\Item', $item2->getId(), $this->getACL()->GROUP, $group->getId(), false);
+        $this->getACL()->setObjectListExact('test/item', $item2->getId(), $this->getACL()->GROUP, $group->getId(), false);
         $this->assertFalse(
-            $this->getACL()->checkList('Test\\Item', $item2->getId(), $this->getACL()->GROUP, $group->getId()),
+            $this->getACL()->checkList('test/item', $item2->getId(), $this->getACL()->GROUP, $group->getId()),
             'testGroup does not have access to item2 anymore.'
         );
 
-        $acl = $this->getACL()->setObjectListExact('Test\\Item', $item2->getId(), \Kryn\CmsBundle\ACL::USER, $user->getId(), true);
+        $acl = $this->getACL()->setObjectListExact('test/item', $item2->getId(), \Kryn\CmsBundle\ACL::USER, $user->getId(), true);
         $this->assertTrue(
-            $this->getACL()->checkList('Test\\Item', $item2->getId(), \Kryn\CmsBundle\ACL::USER, $user->getId()),
+            $this->getACL()->checkList('test/item', $item2->getId(), \Kryn\CmsBundle\ACL::USER, $user->getId()),
             'testUser got access through a rule for only him.'
         );
 
@@ -419,22 +419,22 @@ class ObjectTest extends KernelAwareTestCase
         $acl->save();
         $this->getACL()->clearCache();
         $this->assertFalse(
-            $this->getACL()->checkList('Test\\Item', $item2->getId(), \Kryn\CmsBundle\ACL::USER, $user->getId()),
+            $this->getACL()->checkList('test/item', $item2->getId(), \Kryn\CmsBundle\ACL::USER, $user->getId()),
             'testUser got no-access through a rule for only him.'
         );
 
         //access to every item
-        $acl = $this->getACL()->setObjectList('Test\\Item', $this->getACL()->GROUP, $group->getId(), true);
+        $acl = $this->getACL()->setObjectList('test/item', $this->getACL()->GROUP, $group->getId(), true);
         $this->assertTrue(
-            $this->getACL()->checkList('Test\\Item', $item2->getId(), \Kryn\CmsBundle\ACL::USER, $user->getId()),
+            $this->getACL()->checkList('test/item', $item2->getId(), \Kryn\CmsBundle\ACL::USER, $user->getId()),
             'testUser has now access to all items through his group.'
         );
         $this->assertTrue(
-            $this->getACL()->checkList('Test\\Item', $item1->getId(), $this->getACL()->GROUP, $group->getId()),
+            $this->getACL()->checkList('test/item', $item1->getId(), $this->getACL()->GROUP, $group->getId()),
             'testGroup has now access to all items.'
         );
         $this->assertTrue(
-            $this->getACL()->checkList('Test\\Item', $item2->getId(), $this->getACL()->GROUP, $group->getId()),
+            $this->getACL()->checkList('test/item', $item2->getId(), $this->getACL()->GROUP, $group->getId()),
             'testGroup has now access to all items.'
         );
 
@@ -442,58 +442,58 @@ class ObjectTest extends KernelAwareTestCase
         $acl->delete();
         $this->getACL()->clearCache();
         $this->assertFalse(
-            $this->getACL()->checkList('Test\\Item', $item2->getId(), \Kryn\CmsBundle\ACL::USER, $user->getId()),
+            $this->getACL()->checkList('test/item', $item2->getId(), \Kryn\CmsBundle\ACL::USER, $user->getId()),
             'testUser has no access anymore, since we deleted the access-for-all rule.'
         );
         $this->assertFalse(
-            $this->getACL()->checkList('Test\\Item', $item1->getId(), $this->getACL()->GROUP, $group->getId()),
+            $this->getACL()->checkList('test/item', $item1->getId(), $this->getACL()->GROUP, $group->getId()),
             'testGroup has no access anymore to all items (item1).'
         );
         $this->assertFalse(
-            $this->getACL()->checkList('Test\\Item', $item2->getId(), $this->getACL()->GROUP, $group->getId()),
+            $this->getACL()->checkList('test/item', $item2->getId(), $this->getACL()->GROUP, $group->getId()),
             'testGroup has no access anymore to all items (item2).'
         );
 
         //check checkListCondition
         $this->getACL()->setObjectListCondition(
-            'Test\\Item',
+            'test/item',
             array(array('id', '>', $item1->getId())),
             $this->getACL()->GROUP,
             $group->getId(),
             true
         );
         $this->assertTrue(
-            $this->getACL()->checkList('Test\\Item', $item2->getId(), $this->getACL()->GROUP, $group->getId()),
+            $this->getACL()->checkList('test/item', $item2->getId(), $this->getACL()->GROUP, $group->getId()),
             'testGroup has access to all items after item1'
         );
 
         $this->assertFalse(
-            $this->getACL()->checkList('Test\\Item', $item1->getId(), $this->getACL()->GROUP, $group->getId()),
+            $this->getACL()->checkList('test/item', $item1->getId(), $this->getACL()->GROUP, $group->getId()),
             'testGroup has access to all items after item1, but only > , so not item1 itself.'
         );
 
         //revoke anything to object 'test\item'
-        $this->getACL()->setObjectList('Test\\Item', $this->getACL()->GROUP, $group->getId(), false);
+        $this->getACL()->setObjectList('test/item', $this->getACL()->GROUP, $group->getId(), false);
         $this->assertFalse(
-            $this->getACL()->checkList('Test\\Item', $item2->getId(), $this->getACL()->GROUP, $group->getId()),
+            $this->getACL()->checkList('test/item', $item2->getId(), $this->getACL()->GROUP, $group->getId()),
             'testGroup has no access to all items after item1'
         );
 
         //check against object test
-        $this->getACL()->setObjectListExact('Test\\Test', $test1->getId(), $this->getACL()->GROUP, $group->getId(), true);
+        $this->getACL()->setObjectListExact('test/test', $test1->getId(), $this->getACL()->GROUP, $group->getId(), true);
         $this->assertTrue(
-            $this->getACL()->checkList('Test\\Test', $test1->getId(), $this->getACL()->GROUP, $group->getId()),
+            $this->getACL()->checkList('test/test', $test1->getId(), $this->getACL()->GROUP, $group->getId()),
             'testGroup has access test1.'
         );
 
-        $this->getACL()->setObjectList('Test\\Test', $this->getACL()->GROUP, $group->getId(), false);
+        $this->getACL()->setObjectList('test/test', $this->getACL()->GROUP, $group->getId(), false);
         $this->assertFalse(
-            $this->getACL()->checkList('Test\\Test', $test1->getId(), $this->getACL()->GROUP, $group->getId()),
+            $this->getACL()->checkList('test/test', $test1->getId(), $this->getACL()->GROUP, $group->getId()),
             'testGroup has no access test1.'
         );
 
         $this->getACL()->setCaching(true);
-        $this->getACL()->removeObjectRules('Test\\Item');
+        $this->getACL()->removeObjectRules('test/item');
     }
 
 }

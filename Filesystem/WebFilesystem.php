@@ -245,6 +245,7 @@ class WebFilesystem extends Filesystem
                         $file->save();
                     }
                 }
+                $result = true;
             }
             if ('move' === $action) {
                 $file = $this->wrap($file);

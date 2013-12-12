@@ -13,11 +13,10 @@ class ConfigController extends Controller
     /**
      * @ApiDoc(
      *  section="System configuration",
-     *  section="System configuration",
      *  description="Returns labels for the settings window"
      * )
      *
-     * @Rest\Get("/system/config/labels")
+     * @Rest\Get("/admin/system/config/labels")
      *
      * @return array['langs' => array[], 'timeozone' => string[]]
      */
@@ -40,7 +39,7 @@ class ConfigController extends Controller
      * )
      *
      *
-     * @Rest\Get("/system/config")
+     * @Rest\Get("/admin/system/config")
      *
      * @return array
      */
@@ -56,7 +55,7 @@ class ConfigController extends Controller
      * )
      *
      *
-     * @Rest\Put("/system/config")
+     * @Rest\Put("/admin/system/config")
      *
      * @return boolean
      */

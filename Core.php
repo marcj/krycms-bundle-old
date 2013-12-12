@@ -578,8 +578,8 @@ class Core extends Controller
             }
         }
         $current = realpath($this->getKernel()->getRootDir() . '/../');
-        $path = substr($path, strlen($current) + 1);
         if ($path) {
+            $path = Tools::resolveRelativePath($path, $current);
             if ('/' !== substr($path, -1)) {
                 $path .= '/';
             }
@@ -610,7 +610,6 @@ class Core extends Controller
         if (file_exists($path . 'kryn.xml')) {
             return true;
         }
-
 
         $files = glob($path . 'kryn.*.xml');
 
@@ -675,6 +674,30 @@ class Core extends Controller
         }
 
         return $url;
+    }
+
+    /**
+     * Returns the normalize kryn_admin_prefix parameter.
+     *
+     * @return string
+     */
+    public function getAdminPrefix()
+    {
+        $prefix = $this->container->getParameter('kryn_admin_prefix');
+
+        if (!$prefix) {
+            return '/kryn';
+        }
+
+        if ('/' !== $prefix[0]) {
+            $prefix = '/' . $prefix;
+        }
+
+        if ('/' === substr($prefix, -1)) {
+            $prefix = substr($prefix, 0, -1);
+        }
+
+        return $prefix;
     }
 
     /**

@@ -72,7 +72,7 @@
                                 <td>{{ name }}</td>
                                 <td>{{ infos.dataType is defined ? infos.dataType : ''}}</td>
                                 <td>{{ infos.requirement is defined ? infos.requirement : ''}}</td>
-                                <td style="white-space: pre;">{{ infos.description is defined ? infos.description : ''}}</td>
+                                <td style="white-space: pre-wrap;">{{ infos.description is defined ? infos.description : ''}}</td>
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -99,7 +99,7 @@
                             <td>{{ infos.dataType is defined ? infos.dataType : ''}}</td>
                             <td>{{ infos.requirement is defined ? infos.requirement : ''}}</td>
                             <td>{{ infos.required is defined and infos.required ? 'Yes' : '' }}</td>
-                            <td style="white-space: pre;">{{ infos.description is defined ? infos.description : ''}}</td>
+                            <td style="white-space: pre-wrap;">{{ infos.description is defined ? infos.description : ''}}</td>
                         </tr>
                     {% endfor %}
                     </tbody>

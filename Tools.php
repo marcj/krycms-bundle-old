@@ -25,6 +25,44 @@ class Tools {
         return strtolower(preg_replace('/([a-z])([A-Z])/', '$1_$2', $value));
     }
 
+    /**
+     * @param string $path
+     * @param string $current relative to this
+     *
+     * @return string relative path with trailing slash
+     */
+    public static function resolveRelativePath($path, $current)
+    {
+        $path = realpath($path);
+        $current = realpath($current);
+
+        if ('/' === substr($current, -1)) {
+            $current = substr($current, 0, -1);
+        }
+
+        if ('/' === substr($path, -1)) {
+            $path = substr($path, 0, -1);
+        }
+
+        if (0 === $pos = strpos($path, $current)) {
+            return substr($path, strlen($current));
+        }
+
+        $result = '';
+        while ($current && false === strpos($path, $current)) {
+            //not found, go back
+            $result .= '../';
+            $current = substr($current, 0, strrpos($current, '/'));
+        }
+
+        if (!$current) {
+            //we reached root
+            return $result . substr($path, 1);
+        } else {
+            return $result;
+        }
+    }
+
     public static function dbQuote($value, $table = '')
     {
         if (is_array($value)) {

@@ -52,9 +52,10 @@
 
 $(document).ready(function() {
     var elem = $(window.location.hash);
-    console.log(elem, $(elem).position().top);
     if (elem) {
-        $('body').scrollTop($(elem).position().top);
+        setTimeout(function(){
+            $('body').scrollTop($(elem).position().top);
+        });
         elem.find('a.toggler').click();
     }
 });

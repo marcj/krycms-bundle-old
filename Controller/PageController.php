@@ -9,6 +9,9 @@ use Kryn\CmsBundle\Model\Node;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * FrontEnd - Page controller
+ */
 class PageController extends PluginController
 {
     /**

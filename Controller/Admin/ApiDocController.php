@@ -28,17 +28,13 @@ class ApiDocController extends Controller
         $commentExtractor = new \Nelmio\ApiDocBundle\Util\DocCommentExtractor;
 
         $handlers = [
-            new \Kryn\CmsBundle\Extractor\Handler\ObjectCrudHandler($this->get('kryn_cms')),
             new \Nelmio\ApiDocBundle\Extractor\Handler\FosRestHandler,
             new \Nelmio\ApiDocBundle\Extractor\Handler\JmsSecurityExtraHandler,
             new \Nelmio\ApiDocBundle\Extractor\Handler\SensioFrameworkExtraHandler,
-//            new \Nelmio\ApiDocBundle\Extractor\Handler\ClassicPhpDocHandler($commentExtractor),
+            new \Kryn\CmsBundle\Extractor\Handler\ObjectCrudHandler($this->get('kryn_cms')),
+//            new \Nelmio\ApiDocBundle\Extractor\Handler\PhpDocHandler($commentExtractor),
         ];
 
-//        var_dump(iterator_to_array($this->container->get('router')->getRouteCollection()));
-//        exit;
-
-        //$extractor = new ApiDocExtractor(
         $extractor = new \Nelmio\ApiDocBundle\Extractor\ApiDocExtractor(
             $this->container,
             $this->container->get('router'),
@@ -47,13 +43,7 @@ class ApiDocController extends Controller
             $handlers
         );
 
-//        var_dump($this->container->get('annotation_reader'));
-//        exit;
-
         $extractedDoc = $extractor->all();
-
-//        var_dump($extractedDoc);
-//        exit;
 
         $formatter = new ApiDocFormatter();
         $formatter->setTemplatingEngine($this->get('templating'));

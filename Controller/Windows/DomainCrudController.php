@@ -6,7 +6,7 @@ use Kryn\CmsBundle\Controller\WindowController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 
 /**
- * Class DomainCrudController
+ * AUTO-GENERATED THROUGH KRYN WINDOW-EDITOR
  */
 class DomainCrudController extends WindowController
 {

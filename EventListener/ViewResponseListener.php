@@ -38,7 +38,9 @@ class ViewResponseListener extends FOSViewResponseListener
                 'data' => $view
             ];
             try {
-                $response = new Response(json_encode($view, JSON_PRETTY_PRINT));
+                $response = $this->container->get('kryn_cms')->getPageResponse();
+                $response->setContent(json_encode($view, JSON_PRETTY_PRINT));
+                $response->headers->set('Content-Type', 'application/json');
                 $event->setResponse($response);
             } catch (\Exception $e) {
                 throw new \Exception('Can not serialize data. You controller probably return something that contains a resource or object.', 0, $e);
@@ -49,7 +51,7 @@ class ViewResponseListener extends FOSViewResponseListener
     public function onKernelController(FilterControllerEvent $event)
     {
         if ($this->container->get('kryn_cms')->isAdmin()) {
-            parent::onKernelController($event);
+            //parent::onKernelController($event);
         }
     }
 

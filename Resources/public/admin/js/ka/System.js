@@ -24,6 +24,7 @@ ka.System = new Class({
 
     addSection: function(bundleName) {
         var config = ka.getConfig(bundleName);
+        bundleName = ka.getShortBundleName(bundleName);
         var container, subContainer;
 
         if (config.entryPoints) {

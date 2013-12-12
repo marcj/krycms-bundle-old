@@ -49,7 +49,7 @@ class FileController extends Controller
      * )
      *
      * @Rest\QueryParam(name="path", requirements=".+", strict=true, description="The file path")
-     * @Rest\RequestParam(name="content", requirements=".*", description="The file content")
+     * @Rest\RequestParam(name="content", requirements=".*", strict=false, description="The file content")
      *
      * @Rest\Put("/admin/file")
      *
@@ -104,10 +104,10 @@ class FileController extends Controller
      *  description="Moves or copies files in /web to $target in /web"
      * )
      *
-     * @Rest\QueryParam(name="files", requirements=".*", array=true, strict=true, description="The file paths")
-     * @Rest\QueryParam(name="target", requirements=".*", strict=true, description="The target file path")
-     * @Rest\QueryParam(name="overwrite", requirements=".*", default="false", description="If the target should be overwritten")
-     * @Rest\QueryParam(name="move", requirements=".*", default="false", description="If files should be moved (cut&paste) or copied (copy&paste)")
+     * @Rest\RequestParam(name="files", requirements=".*", array=true, strict=true, description="The file paths")
+     * @Rest\RequestParam(name="target", requirements=".*", strict=true, description="The target file path")
+     * @Rest\RequestParam(name="overwrite", requirements=".*", strict=true, default="false", description="If the target should be overwritten")
+     * @Rest\RequestParam(name="move", requirements=".*", strict=true, default="false", description="If files should be moved (cut&paste) or copied (copy&paste)")
      *
      * @Rest\Post("/admin/file/paste")
      *
@@ -142,9 +142,8 @@ class FileController extends Controller
      * )
      *
      * @Rest\QueryParam(name="path", requirements=".+", strict=true, description="The file path")
-     * @Rest\RequestParam(name="content", requirements=".*", description="The file content")
      *
-     * @Rest\Post("/admin/file/dir")
+     * @Rest\Put("/admin/file/dir")
      *
      * @param ParamFetcher $paramFetcher
      *
@@ -373,14 +372,13 @@ class FileController extends Controller
      *
      * @Rest\Get("/admin/file")
      *
-     * @param ParamFetcher $paramFetcher
+     * @param string $path
      *
      * @return array|null|string array for directory, string for file content, null if not found.
      */
-    public function getContentAction(ParamFetcher $paramFetcher)
+    public function getContentAction($path)
     {
-        $path = $paramFetcher->get('path');
-        if (!$file = self::getFile($path)) {
+        if (!$file = $this->getFile($path)) {
             return null;
         }
 
