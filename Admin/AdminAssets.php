@@ -47,7 +47,7 @@ class AdminAssets {
         $session['sessionid'] = $client->getToken();
         $session['tokenid'] = $client->getTokenId();
         $session['lang'] = $client->getSession()->getLanguage();
-        $session['access'] = $this->get('kryn_cms.acl')->check('KrynCmsBundle:EntryPoint', '/admin');
+        $session['access'] = $this->getKrynCore()->getACL()->check('KrynCmsBundle:EntryPoint', '/admin');
         if ($client->getUserId()) {
             $session['username'] = $client->getUser()->getUsername();
             $session['lastLogin'] = $client->getUser()->getLastlogin();
@@ -62,7 +62,7 @@ class AdminAssets {
     public function addLanguageResources()
     {
         $response = $this->getKrynCore()->getPageResponse();
-        $prefix = substr($this->getKernel()->getContainer()->getParameter('kryn_admin_prefix'), 1);
+        $prefix = substr($this->getKrynCore()->getAdminPrefix(), 1);
 
         $response->addJsFile($prefix . '/admin/ui/languages?noCache=978699877');
         $response->addJsFile($prefix . '/admin/ui/language?lang=en&javascript=1');
@@ -72,14 +72,15 @@ class AdminAssets {
     public function addMainResources($options = array())
     {
         $response = $this->getKrynCore()->getPageResponse();
+        $request = $this->getKrynCore()->getRequest();
         $options['noJs'] = isset($options['noJs']) ? $options['noJs'] : false;
 
-        $prefix = substr($this->getKernel()->getContainer()->getParameter('kryn_admin_prefix'), 1);
+        $prefix = substr($this->getKrynCore()->getAdminPrefix(), 1);
 
         $response->addJs(
             '
-        window._path = window._baseUrl = ' . json_encode($this->getRequest()->getBasePath() . '/') . '
-        window._pathAdmin = ' . json_encode($this->getRequest()->getBaseUrl() .'/' . $prefix . '/')
+        window._path = window._baseUrl = ' . json_encode($request->getBasePath() . '/') . '
+        window._pathAdmin = ' . json_encode($request->getBaseUrl() .'/' . $prefix . '/')
         );
 
         if ($this->getKrynCore()->getKernel()->isDebug()) {

@@ -16,26 +16,7 @@ use Nelmio\ApiDocBundle\Annotation\ApiDoc;
  */
 class ObjectCrudController extends ObjectCrud
 {
-    /**
-     * @var EntryPoint
-     */
-    public $entryPoint;
-
-
     protected $obj;
-
-    /**
-     * @var Request
-     */
-    protected $request;
-
-    /**
-     * @param \Symfony\Component\HttpFoundation\Request $request
-     */
-    public function setRequest($request)
-    {
-        $this->request = $request;
-    }
 
     protected function detectObjectKeyFromPathInfo()
     {
@@ -71,14 +52,6 @@ class ObjectCrudController extends ObjectCrud
 //            }
 //        }
 //    }
-
-    /**
-     * @return \Symfony\Component\HttpFoundation\Request
-     */
-    public function getRequest()
-    {
-        return $this->request;
-    }
 
     public function setEntryPoint(EntryPoint $entryPoint)
     {

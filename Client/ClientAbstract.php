@@ -674,6 +674,7 @@ abstract class ClientAbstract
     public function getClientToken()
     {
         $request = $this->getKrynCore()->getRequest();
+        if (!$request) return null;
 
         if ($value = $request->cookies->get($this->tokenId)) {
             return $value;
