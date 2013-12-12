@@ -386,7 +386,7 @@ class Core extends Controller
             }
 
             if (!$this->systemConfig->getDatabase()) {
-                $database = $this->container->get('kryn.configuration.database');
+                $database = $this->container->get('kryn_cms.configuration.database');
                 $this->systemConfig->setDatabase($database);
             }
 

@@ -10,6 +10,8 @@ A end-user zip package can be downloaded at http://kryn.org when we've released 
 
 Download all php files:
 
+Check first that you have `"minimum-stability": "dev",` in your `composer.json`.
+
 ```bash
 ./composer.phar require kryncms/kryncms-bundle
 ```
@@ -25,8 +27,13 @@ public function registerBundles()
     $bundles = array(
         // ...
         new Kryn\CmsBundle\KrynCmsBundle(),
-        new Kryn\DemoTheme\KrynDemoThemeBundle(), # needed if you've installed the demo data
-        new Kryn\Publication\KrynPublicationBundle(), # needed if you've installed the demo data
+        new Kryn\DemoTheme\KrynDemoThemeBundle(),
+        new Kryn\Publication\KrynPublicationBundle(),
+
+        // our dependencies
+        new FOS\RestBundle\FOSRestBundle(),
+        new JMS\SerializerBundle\JMSSerializerBundle(),
+        new Nelmio\ApiDocBundle\NelmioApiDocBundle(),
     );
 }
 ```
@@ -162,6 +169,15 @@ kryn_cms:
     resource: "@KrynCmsBundle/Resources/config/routing.yml"
 ```
 
-You have a parameter `kryn_admin_prefix: /kryn` to define your own administration path prefix.
+Define the `kryn_admin_prefix` parameter:
+
+```yaml
+# app/config/parameters.yml
+parameters:
+    # ...
+    kryn_admin_prefix: /kryn
+```
+
+
 
 The frontend routes are loaded automatically.

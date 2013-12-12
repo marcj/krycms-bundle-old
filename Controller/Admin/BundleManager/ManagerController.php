@@ -246,14 +246,12 @@ This is the bundle $bundleClassName.
      *
      * @Rest\Get("/system/bundle/manager/info")
      *
-     * @param ParamFetcher $paramFetcher
+     * @param string $name
      *
      * @return array
      */
-    public function getInstalledInfo(ParamFetcher $paramFetcher)
+    public function getInstalledInfo($name)
     {
-        $name = $paramFetcher->get('name');
-
         $fs = $this->getKrynCore()->getFileSystem();
         if ($fs->has('composer.lock')) {
             $composerLock = $fs->read('composer.lock');
@@ -281,7 +279,7 @@ This is the bundle $bundleClassName.
      *
      * @return array
      */
-    public function getInstalledAction()
+    public function getInstalled()
     {
         $packages = [];
         $bundles = [];
@@ -457,7 +455,7 @@ This is the bundle $bundleClassName.
      *
      * @return array
      */
-    public function getLocalAction()
+    public function getLocal()
     {
         $finder = new \Symfony\Component\Finder\Finder();
         $root = $this->getKrynCore()->getKernel()->getRootDir();
@@ -588,7 +586,7 @@ This is the bundle $bundleClassName.
      *
      * @return array
      */
-    public function installAction(ParamFetcher $paramFetcher)
+    public function install(ParamFetcher $paramFetcher)
     {
         $bundle = $paramFetcher->get('bundle');
         $ormUpdate = filter_var($paramFetcher->get('ormUpdate'), FILTER_VALIDATE_BOOLEAN);
@@ -632,7 +630,7 @@ This is the bundle $bundleClassName.
      * @throws BundleNotFoundException
      * @return bool
      */
-    public function uninstallAction(ParamFetcher $paramFetcher)
+    public function uninstall(ParamFetcher $paramFetcher)
     {
         $bundle = $paramFetcher->get('bundle');
         $ormUpdate = filter_var($paramFetcher->get('ormUpdate'), FILTER_VALIDATE_BOOLEAN);
