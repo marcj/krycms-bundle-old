@@ -598,7 +598,7 @@ class Propel implements SyncInterface {
         $dom->preserveWhiteSpace = false;
         $dom->loadXML($xml->asXML());
         $dom->formatOutput = true;
-        SystemFile::setContent($path, $dom->saveXml());
+        $this->getKrynCore()->getFilesystem()->write($path, $dom->saveXml());
 
         return true;
     }

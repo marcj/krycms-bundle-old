@@ -134,7 +134,7 @@ class Controller extends KrynController
                         if ($c > 1) {
                             $keys = array();
                             foreach ($primaryKeys as $key => &$field) {
-                                $keys[] = Kryn::urlEncode($item[$key]);
+                                $keys[] = Tools::urlEncode($item[$key]);
                             }
                             $res[implode(',', $keys)] = $item;
                         } else {

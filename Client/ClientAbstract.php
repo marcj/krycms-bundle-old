@@ -515,8 +515,7 @@ abstract class ClientAbstract
         $session->setId($id)
             ->setTime(time())
             ->setPage($this->getKrynCore()->getRequest() ? $this->getKrynCore()->getRequest()->getRequestUri() : '')
-            ->setRefreshed(0)
-            ->setUseragent(@$_SERVER['HTTP_USER_AGENT']);
+            ->setRefreshed(0);
 
         //in some countries it's not allowed to store the IP per default
         if (!isset($this->config['noIPStorage']) && $this->getKrynCore()->getRequest()) {
@@ -674,20 +673,17 @@ abstract class ClientAbstract
      */
     public function getClientToken()
     {
-        if ($this->getKrynCore()->getRequest() && $value = $this->getKrynCore()->getRequest()->cookies->get($this->tokenId)) {
+        $request = $this->getKrynCore()->getRequest();
+
+        if ($value = $request->cookies->get($this->tokenId)) {
             return $value;
         }
 
-        if (isset($_COOKIE[$this->tokenId])) {
-            return $_COOKIE[$this->tokenId];
+        if ($value = $request->query->get($this->tokenId)) {
+            return $value;
         }
-        if (isset($_GET[$this->tokenId])) {
-            return $_GET[$this->tokenId];
-        }
-        if (isset($_POST[$this->tokenId])) {
-            return $_POST[$this->tokenId];
-        }
-        return false;
+
+        return null;
     }
 
     /**

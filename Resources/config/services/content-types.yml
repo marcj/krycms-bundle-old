@@ -1,6 +1,7 @@
 parameters:
      kryn_cms.content.types.class: Kryn\CmsBundle\ContentTypes\ContentTypes
      kryn_cms.content.types.text.class: Kryn\CmsBundle\ContentTypes\TypeText
+     kryn_cms.content.types.image.class: Kryn\CmsBundle\ContentTypes\TypeImage
      kryn_cms.content.types.plugin.class: Kryn\CmsBundle\ContentTypes\TypePlugin
      kryn_cms.content.types.markdown.class: Kryn\CmsBundle\ContentTypes\TypeMarkdown
 
@@ -12,6 +13,12 @@ services:
          class: %kryn_cms.content.types.text.class%
          tags:
              - { name: kryn_cms.content.type, alias: text }
+
+     kryn_cms.content.types.image:
+         class: %kryn_cms.content.types.image.class%
+         arguments: ["@kryn_cms"]
+         tags:
+             - { name: kryn_cms.content.type, alias: image }
 
      kryn_cms.content.types.plugin:
          class: %kryn_cms.content.types.plugin.class%

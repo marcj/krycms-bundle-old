@@ -8,18 +8,6 @@ use Kryn\CmsBundle\Tools;
 
 class BasicTest extends KernelAwareTestCase
 {
-    public function xtestTools()
-    {
-        $path = "/Users/marc/bude/symfony-24/src/Kryn/CmsBundle";
-        $current = "/Users/marc/bude/symfony-24/src/Kryn/CmsBundle/Tests/Integration/skeletion";
-
-        $relative = Tools::resolveRelativePath($path, $current);
-
-        var_dump($path);
-        var_dump($current);
-        var_dump($relative);
-    }
-
     public function testGeneral()
     {
         $this->assertTrue($this->getKrynCore()->isActiveBundle('KrynCmsBundle'));

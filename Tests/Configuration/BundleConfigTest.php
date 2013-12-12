@@ -619,8 +619,6 @@ class BundleConfigTest extends KernelAwareTestCase
 
     public function testObjectFromArray()
     {
-        $GLOBALS['test'] = 1;
-
         $entryPointsArray = array(
             0 =>
                 array(

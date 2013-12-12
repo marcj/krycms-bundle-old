@@ -339,9 +339,9 @@ class PageResponse extends Response
         $this->getKrynCore()->getEventDispatcher()->dispatch('core/page-response-send-pre');
 
         //search engine, todo
-        if (false && Kryn::$disableSearchEngine == false) {
-            SearchEngine::createPageIndex($this->getContent());
-        }
+//        if (false && Kryn::$disableSearchEngine == false) {
+//            SearchEngine::createPageIndex($this->getContent());
+//        }
 
         return parent::send();
     }
@@ -799,7 +799,7 @@ class PageResponse extends Response
                         if (file_exists($file) && $modifiedTime = filemtime($file)) {
                             $cssCode .= $file . '_' . $modifiedTime;
                         } else {
-                            Kryn::getLogger()->addError(tf('CSS file `%s` [%s] not found.', $file, $css['path']));
+                            $this->getKrynCore()->getLogger()->error(sprintf('CSS file `%s` [%s] not found.', $file, $css['path']));
                         }
                     }
                 } else {

@@ -12,6 +12,7 @@ namespace Kryn\CmsBundle\Command;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 
 class DemoDataCommand extends AbstractCommand
 {

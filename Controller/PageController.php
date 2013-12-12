@@ -26,8 +26,7 @@ class PageController extends PluginController
         if ($page->getType() == 1) {
             $to = $page->getLink();
             if (!$to) {
-                die(
-                    'Redirect failed: ' .
+                throw new \Exception('Redirect failed: ' .
                     sprintf('Current page with title %s has no target link.', $page->getTitle())
                 );
             }

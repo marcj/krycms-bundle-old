@@ -582,11 +582,13 @@ class  Condition extends Model
 
             case '= CURRENT_USER':
             case 'EQUAL CURRENT_USER':
-                return Kryn::getClient() && $ovalue == Kryn::getClient()->getUserId();
+                return $this->getKrynCore()->getClient()
+                && $ovalue == $this->getKrynCore()->getClient()->getUserId();
 
             case '!= CURRENT_USER':
             case 'NOT EQUAL CURRENT_USER':
-                return Kryn::getClient() && $ovalue != Kryn::getClient()->getUserId();
+                return $this->getKrynCore()->getClient()
+                && $ovalue != $this->getKrynCore()->getClient()->getUserId();
 
             case '=':
             case 'EQUAL':

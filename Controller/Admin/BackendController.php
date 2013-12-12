@@ -268,7 +268,7 @@ class BackendController extends Controller
      *
      * @return string CCS
      */
-    public function loadCss()
+    public function loadCssAction()
     {
 
         $oFile = $this->getKrynCore()->getKernel()->getRootDir(). '/../web/cache/admin.style-compiled.css';

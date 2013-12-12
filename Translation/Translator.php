@@ -56,7 +56,7 @@ class Translator implements TranslationInterface
             return;
         }
 
-        $code = 'cacheLang_' . $lang;
+        $code = 'core/lang/' . $lang;
         $this->messages =& $this->krynCore->getFastCache()->get($code);
 
         $md5 = '';

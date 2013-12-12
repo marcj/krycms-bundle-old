@@ -872,7 +872,7 @@ This is the bundle $bundleClassName.
     private function getComposer()
     {
         putenv('COMPOSER_HOME=./');
-        putenv('COMPOSER_CACHE_DIR=' . Kryn::getTempFolder());
+        putenv('COMPOSER_CACHE_DIR=' . $this->getKrynCore()->getKernel()->getCacheDir());
 
         $this->composerIO = new BufferIO();
         $this->composer = Factory::create($this->composerIO);

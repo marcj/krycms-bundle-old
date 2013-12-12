@@ -130,11 +130,11 @@ class FrontendRouter
             if ($page['access_need_via'] == 0) {
 //                $cgroups =& $this->getKrynCore()->getClient()->getUser()->getGroups();
             } else {
-                $htuser = $this->getKrynCore()->getClient()->login($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']);
-
-                if ($htuser['id'] > 0) {
-                    $cgroups =& $htuser['groups'];
-                }
+//                $htuser = $this->getKrynCore()->getClient()->login($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']);
+//
+//                if ($htuser['id'] > 0) {
+//                    $cgroups =& $htuser['groups'];
+//                }
             }
 
             if ($cgroups) {
@@ -374,7 +374,7 @@ class FrontendRouter
         $request = $this->getRequest();
         $dispatcher = $this->getKrynCore()->getEventDispatcher();
 
-        if ($this->isEditMode() && $domainId = $request->get('_kryn_editor_domain')) {
+        if ($this->getKrynCore()->isEditMode() && $domainId = $request->get('_kryn_editor_domain')) {
             $hostname = DomainQuery::create()->select('domain')->findPk($domainId);
         } else {
             $hostname = $request->get('_kryn_domain') ? : $request->getHost();
@@ -488,15 +488,15 @@ class FrontendRouter
             if ($id > 0 || $possibleUrl == '') {
                 $found = true;
             } elseif (!$found) {
-                $id = isset($urls['alias']) && isset($urls['alias'][$possibleUrl]) ? $urls['alias'][$possibleUrl] : 0;
-                if ($id > 0) {
-                    $found = true;
-                    //we found a alias
-                    die('redirect to ' . $id);
-                    //$this->getKrynCore()->redirectToPage($id);
-                } else {
-                    $possibleUrl = $next;
-                }
+//                $id = isset($urls['alias']) && isset($urls['alias'][$possibleUrl]) ? $urls['alias'][$possibleUrl] : 0;
+//                if ($id > 0) {
+//                    $found = true;
+//                    //we found a alias
+//                    $url =
+//                    $this->getKrynCore()->redirectToPage($id);
+//                } else {
+//                    $possibleUrl = $next;
+//                }
             }
 
             if ($next == false) {
@@ -541,12 +541,6 @@ class FrontendRouter
             $diff = '/' . $diff;
         }
 
-        $extras = explode("/", $diff);
-        if (count($extras) > 0) {
-            foreach ($extras as $nr => $extra) {
-                $_REQUEST['e' . $nr] = $extra;
-            }
-        }
         $url = $possibleUrl;
 
 //        $this->getKrynCore()->$isStartpage = false;

@@ -206,7 +206,7 @@ class Utils extends Controller
         }
         fclose($fh);
 
-        Kryn::clearLanguageCache($lang);
+        $this->getKrynCore()->invalidateCache('core/lang');
 
         return true;
 
@@ -229,7 +229,6 @@ class Utils extends Controller
 
         $translations = [];
         $translations = array_merge($translations, $this->readDirectory($bundleDir. 'Resources/views'));
-//        self::readConfig($bundleObject);
 
         $files = Finder::create()
             ->files()
@@ -263,19 +262,6 @@ class Utils extends Controller
         unset($translations['']);
 
         return $translations;
-    }
-
-    public static function readConfig(Bundle $bundle)
-    {
-        $files = $bundle->getConfigFiles();
-        foreach ($files as $file) {
-            $xml = simplexml_load_file($file);
-            $labels = $xml->xpath("//label");
-            foreach ($labels as $label) {
-                /** @var \SimpleXMLElement $label */
-                $GLOBALS['moduleTempLangs'][(string)$label] = (string)$label;
-            }
-        }
     }
 
     public static function extractFrameworkFields($fields)
@@ -370,7 +356,6 @@ class Utils extends Controller
         //$GLOBALS['moduleTempLangs'][$file] = true;
 
         \Kryn\CmsBundle\Translation\Utils::$extractTranslations = [];
-        $GLOBALS['extractTranslations'] = [];
         foreach ($regExs as $regEx => $val) {
             $fn = '\\Kryn\\CmsBundle\\Translation\\Utils::$extractTranslations' . $val . ';';
 
@@ -384,7 +369,7 @@ class Utils extends Controller
             );
         }
 
-        return $GLOBALS['extractTranslations'];
+        return \Kryn\CmsBundle\Translation\Utils::$extractTranslations;
     }
 
     public function readDirectory($path)

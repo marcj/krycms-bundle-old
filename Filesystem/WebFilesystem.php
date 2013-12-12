@@ -6,6 +6,7 @@ use Kryn\CmsBundle\Core;
 use Kryn\CmsBundle\File\FileInfo;
 use Kryn\CmsBundle\Filesystem\Adapter\AdapterInterface;
 use Propel\Runtime\Propel;
+use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\Finder\Finder;
 
 class WebFilesystem extends Filesystem

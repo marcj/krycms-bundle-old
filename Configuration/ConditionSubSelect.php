@@ -123,7 +123,7 @@ class ConditionSubSelect extends Condition
         );
 
         if ($w = parent::toSql($params, $objectKey, $usedFieldNames)) {
-            $sql .= ' WHERE ' . $w;
+            $sql .= sprintf(' WHERE %s', $w);
         }
 
         if ($this->order) {

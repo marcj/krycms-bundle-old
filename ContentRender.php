@@ -150,7 +150,7 @@ class ContentRender
                 $access = false;
                 $groups = ',' . $content->getAccessFromGroups() . ',';
 
-                $userGroups = Kryn::getClient()->getUser()->getUserGroups();
+                $userGroups = $this->getKrynCore()->getClient()->getUser()->getUserGroups();
 
                 foreach ($userGroups as $group) {
                     if (strpos($groups, ',' . $group->getGroupId() . ',') !== false) {
@@ -160,7 +160,7 @@ class ContentRender
                 }
 
                 if (!$access) {
-                    $adminGroups = Kryn::getClient()->getUser()->getUserGroups();
+                    $adminGroups = $this->getKrynCore()->getClient()->getUser()->getUserGroups();
                     foreach ($adminGroups as $group) {
                         if (strpos($groups, ',' . $group->getGroupId() . ',') !== false) {
                             $access = true;

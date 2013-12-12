@@ -150,19 +150,22 @@ class AdminAssets {
         $response->setResourceCompression(false);
         $response->setDomainHandling(false);
 
+        $request = $this->getKrynCore()->getRequest();
+
         $nodeArray['id'] = $page->getId();
         $nodeArray['title'] = $page->getTitle();
         $nodeArray['domainId'] = $page->getDomainId();
 
         $options = [
-            'id' => @$_GET['_kryn_editor_id'],
+            'id' => $request->query->get('_kryn_editor_id'),
             'node' => $nodeArray
         ];
 
-        if (is_array(@$_GET['_kryn_editor_options'])) {
-            $options = array_merge($options, $_GET['_kryn_editor_options']);
+        if (is_array($options = $request->query->get('_kryn_editor_options'))) {
+            $options = array_merge($options, $options);
             $options['standalone'] = filter_var($options['standalone'], FILTER_VALIDATE_BOOLEAN);
         }
+
         $response->addJs(
             'window.editor = new parent.ka.Editor(' . json_encode($options) . ', document.documentElement);',
             'bottom'

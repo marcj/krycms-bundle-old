@@ -94,12 +94,12 @@ class ObjectCrudController extends ObjectCrud
         $this->entryPoint = $entryPoint;
     }
 
-    public function getVersion($pk, $id)
+    public function getVersionAction($pk, $id)
     {
         //todo
     }
 
-    public function getVersions($pk)
+    public function getVersionsAction($pk)
     {
         //todo
     }
@@ -109,7 +109,7 @@ class ObjectCrudController extends ObjectCrud
      *
      * @return array
      */
-    public function extractPrimaryKey(Request $request)
+    protected function extractPrimaryKey(Request $request)
     {
         $primaryKey = [];
 

@@ -7,15 +7,7 @@ use Kryn\CmsBundle\Exceptions\FileNotFoundException;
 class PluginController extends Controller
 {
 
-    /**
-     * @return PageResponse
-     */
-    public function getPageResponse()
-    {
-        return $this->getKrynCore()->getPageResponse();
-    }
-
-    public function setOptions(&$values, $defaults)
+    protected function setOptions(&$values, $defaults)
     {
         $values = array_merge($defaults, $values);
     }
@@ -47,7 +39,7 @@ class PluginController extends Controller
 //    public function renderView($view, array $data = array(), $translate = true)
 //    {
 //        $engine = $this->getKrynCore()->getTemplateEngineForFileName($view);
-//
+//f
 //        $view = $this->getKrynCore()->resolvePath($view, 'Resources/views/');
 //
 //        $html = (string)$engine->render($view, $data ? array_merge($this->viewData, $data) : $this->viewData, $this);
@@ -55,18 +47,7 @@ class PluginController extends Controller
 //        return $translate ? $this->getKrynCore()->translate($html) : $html;
 //    }
 
-    public function getViewDir()
-    {
-        $dir = __DIR__;
-        $parts = explode('\\', __NAMESPACE__);
-        for ($i = count($parts); $i > 1; $i--) {
-            $dir .= '/..';
-        }
-
-        return $dir . '/Resources/views';
-    }
-
-    public function getViewMTime($view)
+    protected function getViewMTime($view)
     {
         $view = $this->getKrynCore()->resolvePath($view, 'Resources/views/');
 
@@ -84,7 +65,7 @@ class PluginController extends Controller
      *
      * @return boolean
      */
-    public function isValidCache($cacheKey)
+    protected function isValidCache($cacheKey)
     {
         return $this->getKrynCore()->getDistributedCache($cacheKey) !== null;
     }
@@ -111,7 +92,7 @@ class PluginController extends Controller
      *
      * @return string
      */
-    public function renderCached($cacheKey, $view, $data = null)
+    protected function renderCached($cacheKey, $view, $data = null)
     {
         $cache = $this->getKrynCore()->getDistributedCache($cacheKey);
         $mTime = $this->getViewMTime($view);
@@ -163,7 +144,7 @@ class PluginController extends Controller
      *
      * @return string
      */
-    public function renderFullCached($cacheKey, $view, $data = null, $force = false)
+    protected function renderFullCached($cacheKey, $view, $data = null, $force = false)
     {
         $cache = $this->getKrynCore()->getDistributedCache($cacheKey);
         $mTime = $this->getViewMTime($view);

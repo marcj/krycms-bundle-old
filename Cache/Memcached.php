@@ -53,7 +53,7 @@ class Memcached extends AbstractCache
      */
     protected function doSet($key, $value, $timeout = null)
     {
-        if ($this->connection instanceof Memcache) {
+        if ($this->connection instanceof \Memcache) {
             return $this->connection->set($key, $value, 0, $timeout);
         } else {
             return $this->connection->set($key, $value, $timeout);
