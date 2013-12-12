@@ -53,11 +53,6 @@ class ObjectCrudController extends ObjectCrud
 //        }
 //    }
 
-    public function setEntryPoint(EntryPoint $entryPoint)
-    {
-        $this->entryPoint = $entryPoint;
-    }
-
     public function getVersionAction($pk, $id)
     {
         //todo

@@ -298,7 +298,7 @@ class ACL
             if ($rule['constraint_type'] == '1') {
                 //todo $rule['constraint_code'] can be a (urlencoded) composite pk
                 //todo constraint_code is always urlencoded;
-                $condition = Condition::create(array($primaryKey, '=', $this->getKrynCore()->urlDecode($rule['constraint_code'])), $this->getKrynCore());
+                $condition = Condition::create(array($primaryKey, '=', Tools::urlDecode($rule['constraint_code'])), $this->getKrynCore());
             }
 
             if ($rule['constraint_type'] == '2') {
