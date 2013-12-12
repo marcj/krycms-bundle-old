@@ -219,8 +219,8 @@ class RestApiLoader extends Loader
         $pattern,
         $objectSection,
         Object $object,
-        Object $relationObject = false,
-        Field $relationField = false
+        Object $relationObject = null,
+        Field $relationField = null
     ) {
 //        $bundleName = $config->getName();
 //        $routeName = 'kryn_cms_object_' . strtolower($bundleName . '_' . $object->getId());

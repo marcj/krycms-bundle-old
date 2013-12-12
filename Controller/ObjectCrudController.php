@@ -37,10 +37,9 @@ class ObjectCrudController extends ObjectCrud
         $this->request = $request;
     }
 
-    public function detectObjectKeyFromPathInfo()
+    protected function detectObjectKeyFromPathInfo()
     {
         $request = $this->getRequest();
-
         Return $request ? $request->attributes->get('_kryn_object') : '';
     }
 
@@ -79,14 +78,6 @@ class ObjectCrudController extends ObjectCrud
     public function getRequest()
     {
         return $this->request;
-    }
-
-    /**
-     * @return \Kryn\CmsBundle\Core
-     */
-    public function getKrynCore()
-    {
-        return $this->container->get('kryn_cms');
     }
 
     public function setEntryPoint(EntryPoint $entryPoint)
