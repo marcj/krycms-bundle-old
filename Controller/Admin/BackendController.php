@@ -306,7 +306,7 @@ class BackendController extends Controller
         }
 
         if (!$fileUpToDate) {
-            $content = $this->getKrynCore()->getUtils()->compressCss($files, substr($this->getKrynCore()->getSystemConfig()->getAdminUrl(), 1) . 'admin/backend/');
+            $content = $this->getKrynCore()->getUtils()->compressCss($files, substr($this->getKrynCore()->getAdminPrefix(), 1) . 'admin/backend/');
             $content = $md5Line . $content;
             file_put_contents($oFile, $content);
         }
