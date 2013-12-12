@@ -81,6 +81,11 @@
                 <method>latencies</method>
             </stream>
 
+            <stream path="apc">
+                <class>Kryn\CmsBundle\Controller\Admin\DashboardWidgets</class>
+                <method>apc</method>
+            </stream>
+
         </streams>
     </bundle>
 </config>

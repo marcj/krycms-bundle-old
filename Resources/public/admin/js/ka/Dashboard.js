@@ -35,7 +35,8 @@ ka.Dashboard = new Class({
             'ka.DashboardWidgets.LatencyChart',
             'ka.DashboardWidgets.Uptime',
             'ka.DashboardWidgets.Load',
-            'ka.DashboardWidgets.Space'
+            'ka.DashboardWidgets.Space',
+            'ka.DashboardWidgets.Apc'
         ].each(function (clazz) {
                 clazz = ka.getClass(clazz);
                 this.widgets.push(new clazz(this.main));

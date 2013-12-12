@@ -94,7 +94,7 @@ class ToolsController
      *  description="Deletes all stored log entries and log requests"
      * )
      *
-     * @Rest\Delete("admin/system/tools/requests")
+     * @Rest\Delete("admin/system/tools/logs")
      *
      * @return int count of deleted records
      */

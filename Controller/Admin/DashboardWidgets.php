@@ -30,6 +30,12 @@ class DashboardWidgets extends Controller
         $response['KrynCmsBundle/space'] = self::getSpace();
     }
 
+    public function apc(&$response)
+    {
+        $res = function_exists('apc_sma_info') ? apc_sma_info(true) : false;
+        $response['KrynCmsBundle/apc'] = $res;
+    }
+
     public function uptime(&$response)
     {
         $uptime = `uptime`;
