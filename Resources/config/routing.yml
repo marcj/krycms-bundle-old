@@ -7,10 +7,6 @@ kryn_cms_admin:
     resource: "@KrynCmsBundle/Controller/Admin/"
     type:     annotation
 
-kryn_cms_admin_doc:
-    resource: "@NelmioApiDocBundle/Resources/config/routing.yml"
-    prefix:   /kryn/doc2
-
 kryn_cms_objects:
     resource: .
     type: kryn_rest

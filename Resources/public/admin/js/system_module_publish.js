@@ -24,7 +24,7 @@ var kryncms_system_module_publish = new Class({
     loadInfo: function () {
 
         new Request.JSON({url: _pathAdmin +
-            'admin/system/module/getPublishInfo', noCache: 1, onComplete: function (res) {
+            'admin/system/bundle/getPublishInfo', noCache: 1, onComplete: function (res) {
             this.loader.hide();
             this.info = res;
             this.renderInfo();
@@ -39,7 +39,7 @@ var kryncms_system_module_publish = new Class({
         this.loader = new ka.Loader().inject(this.win.content);
         this.loader.show();
 
-        new Request.JSON({url: _pathAdmin + 'admin/system/module/getPackage', noCache: 1, onComplete: function (res) {
+        new Request.JSON({url: _pathAdmin + 'admin/system/bundle/getPackage', noCache: 1, onComplete: function (res) {
             this.loader.hide();
             if (res) {
                 this.downloadUrl.set('html',
@@ -104,7 +104,7 @@ var kryncms_system_module_publish = new Class({
             return;
         }
         this.loader.show();
-        new Request.JSON({url: _pathAdmin + 'admin/system/module/publish', noCache: 1, onComplete: function (res) {
+        new Request.JSON({url: _pathAdmin + 'admin/system/bundle/publish', noCache: 1, onComplete: function (res) {
             this.loader.hide();
             if (res == 0) {
                 this.askPw(_('Access denied'));

@@ -99,7 +99,7 @@ class FrontendRouter
 
         if ($this->searchDomain() && $this->searchPage($uri)) {
             if ($response = $this->checkPageAccess()) {
-                return $response;
+                //return $response;
             }
             $this->routes = $routes;
             $this->registerMainPage();
@@ -181,7 +181,7 @@ class FrontendRouter
 
         }
 
-        return $page;
+//        return $page;
     }
 
     public function registerMainPage()
@@ -479,48 +479,18 @@ class FrontendRouter
         $urls = $this->getKrynCore()->getUtils()->getCachedUrlToPage($domain);
 
         //extract extra url attributes
-        $found = $end = false;
+        $end = false;
         $possibleUrl = $next = $url;
 
         do {
             $id = isset($urls[$possibleUrl]) ? $urls[$possibleUrl] : 0;
 
-            if ($id > 0 || $possibleUrl == '') {
-                $found = true;
-            } elseif (!$found) {
-//                $id = isset($urls['alias']) && isset($urls['alias'][$possibleUrl]) ? $urls['alias'][$possibleUrl] : 0;
-//                if ($id > 0) {
-//                    $found = true;
-//                    //we found a alias
-//                    $url =
-//                    $this->getKrynCore()->redirectToPage($id);
-//                } else {
-//                    $possibleUrl = $next;
-//                }
-            }
+//            if ($id > 0 || $possibleUrl == '') {
+////                $found = true;
+//            }
 
             if ($next == false) {
                 $end = true;
-            } else {
-                /*
-                //maybe we found a alias in the parens with have a alias with "withsub"
-                $aliasId = $this->getKrynCore()->$urls['alias'][$next . '/%'];
-
-                if ($aliasId) {
-
-                    //links5003/test => links5003_5/test
-
-                    $aliasPageUrl = $this->getKrynCore()->$urls['id']['id=' . $aliasId];
-
-                    $urlAddition = str_replace($next, $aliasPageUrl, $url);
-
-                    $toUrl = $urlAddition;
-
-                    //go out, and redirect the user to this url
-                    $this->getKrynCore()->redirect($urlAddition);
-                    $end = true;
-                }
-                */
             }
 
             $pos = strrpos($next, '/');
@@ -532,27 +502,17 @@ class FrontendRouter
 
         } while (!$end);
 
-        $diff = substr($url, strlen($possibleUrl), strlen($url));
-
         $this->foundPageUrl = $possibleUrl;
-//        $this->pluginPath = '/' !== $diff ? substr($diff, 1) : null;
-
-        if (substr($diff, 0, 1) != '/') {
-            $diff = '/' . $diff;
-        }
 
         $url = $possibleUrl;
 
-//        $this->getKrynCore()->$isStartpage = false;
-
-        if ($url == '') {
+        if ($url == '/') {
             $pageId = $this->getKrynCore()->getCurrentDomain()->getStartnodeId();
 
             if (!$pageId > 0) {
                 $this->getKrynCore()->getEventDispatcher()->dispatch('core/domain-no-start-page');
             }
 
-//            $this->getKrynCore()->$isStartpage = true;
         } else {
             $pageId = $id;
         }

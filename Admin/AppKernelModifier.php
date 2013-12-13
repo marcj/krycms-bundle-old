@@ -100,8 +100,10 @@ class AppKernelModifier
     {
         if (in_array($bundleClass, $this->bundles)) {
             $this->removeBundles[] = $bundleClass;
-            true;
+
+            return true;
         }
+
         return false;
     }
 
@@ -109,6 +111,7 @@ class AppKernelModifier
     {
         if (!in_array($bundleClass, $this->bundles)) {
             $this->addBundles[] = $bundleClass;
+
             return true;
         }
 
@@ -117,7 +120,9 @@ class AppKernelModifier
 
     public function save()
     {
-        if (!$this->addBundles && $this->removeBundles) return;
+        if (!$this->addBundles && !$this->removeBundles) {
+            return false;
+        }
 
         $appKernelPath = new \ReflectionClass('AppKernel');
         $file = $appKernelPath->getFileName();
@@ -127,6 +132,15 @@ class AppKernelModifier
         $inRegisterBundles = false;
         $inBlockComment = false;
         $inComment = false;
+
+        $bundles = $this->bundles;
+        foreach ($this->addBundles as $bundle) {
+            $bundles[] = $bundle;
+        }
+        foreach ($this->removeBundles as $bundle) {
+            $pos = array_search($bundle, $bundles);
+            unset($bundles[$pos]);
+        }
 
         $this->length = strlen($this->script);
         for ($this->position = 0; $this->position < $this->length; $this->position++) {
@@ -153,62 +167,44 @@ class AppKernelModifier
             }
 
             if (!$inBundles) {
-                if ($this->expect('$')) {
-                    if ($this->eat('$bundles')) {
-                        $inBundles = true;
-                    }
-                }
-
                 if (!$inRegisterBundles) {
                     if ($this->expect('function registerBundles')) {
                         $inRegisterBundles = true;
                     }
                 } else {
-                    if ($this->expect('$')) {
-                        if ($this->eat('$bundles')) {
-                            $inBundles = true;
-                        }
+                    if ($this->expect('$bundles')) {
+                        $inBundles = true;
                     }
                 }
-            } else {
-                if ($this->expect('new ')) {
-                    //remove bundles
-                    foreach ($this->removeBundles as $bundleClass) {
-                        if ($this->expect('new ' . $bundleClass)) {
-                            while (!$this->expect(',') && !$this->expect(');')) {
-                                $this->remove(1);
-                            }
 
-                            if ($this->expect(',')) {
-                                $this->remove(1);
-                            }
+            }
 
-                            if ($this->expect("\n")) {
-                                $this->remove(1);
-                            }
-                            $this->eatBackUntil("\n");
-                        }
+            if ($inBundles) {
+
+                if ($this->expect(');')) {
+                    $this->remove(2);
+
+                    $code = "\$bundles = array(\n";
+                    foreach ($bundles as $bundle) {
+                        $code .= "            new $bundle(),\n";
                     }
-                } else if ($this->expect(');')) {
-                    $count = $this->eatBackUntil("\n");
 
-                    //add bundles
-                    foreach ($this->addBundles as $bundleClass) {
-                        $this->write("            new $bundleClass(),\n");
-                    }
-                    $this->write($count ? str_repeat(' ', $count) : '        ');
+                    $code .= "        );";
 
+                    $this->write($code);
                     break;
+
+                } else {
+                    $this->remove(1);
                 }
             }
         }
-
-        file_put_contents($file, $this->script);
+        return !!file_put_contents($file, $this->script);
     }
 
     public function write($string)
     {
-        $this->script = substr($this->script, 0, $this->position) . $string . substr($this->script, $this->position);
+        $this->script = substr($this->script, 0, $this->position + 1) . $string . substr($this->script, $this->position);
         $this->position += strlen($string);
         $this->length += strlen($string);
     }
@@ -217,7 +213,8 @@ class AppKernelModifier
     {
         $this->script = substr($this->script, 0, $this->position)
             . substr($this->script, $this->position + (is_string($string) ? strlen($string) : $string));
-        $this->length -= strlen($string);
+        $this->position -= 1;
+        $this->length -= (is_string($string) ? strlen($string) : $string);
     }
 
     public function eatBackUntil($string)

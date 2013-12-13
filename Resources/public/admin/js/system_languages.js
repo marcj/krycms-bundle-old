@@ -95,7 +95,7 @@ var kryncms_system_languages = new Class({
 
     loadExtensionOverview: function (pExtensionId) {
 
-        this.lastRequests = new Request.JSON({url: _pathAdmin + 'admin/system/module/editor/language/overview', noCache: 1,
+        this.lastRequests = new Request.JSON({url: _pathAdmin + 'admin/system/bundle/editor/language/overview', noCache: 1,
             onComplete: function (pResponse) {
 
                 if (!pResponse.data) {

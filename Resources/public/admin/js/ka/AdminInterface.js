@@ -1868,7 +1868,7 @@ ka.AdminInterface = new Class({
             return;
         }
         new Request.JSON({url: _pathAdmin +
-            'admin/system/module/manager/check-updates', noCache: 1, onComplete: function(res) {
+            'admin/system/bundle/manager/check-updates', noCache: 1, onComplete: function(res) {
             if (res && res.found) {
                 this.displayNewUpdates(res.modules);
             }

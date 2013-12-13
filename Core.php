@@ -539,6 +539,21 @@ class Core extends Controller
     }
 
     /**
+     * Returns the bundle name.
+     *
+     * Kryn\CmsBundle\KrynCmsBundle => KrynCmsBundle
+     *
+     * @param string $bundleClass
+     * @return string
+     */
+    public function getBundleName($bundleClass)
+    {
+        $lastSlash = strrpos($bundleClass, '\\');
+
+        return $lastSlash ? substr($bundleClass, $lastSlash + 1) : $bundleClass;
+    }
+
+    /**
      * @param string $bundleName full className or bundleName or short bundleName
      * @return string with leading / relative to root folder
      */
@@ -554,9 +569,9 @@ class Core extends Controller
                 $path = dirname($reflection->getFileName());
             }
         }
-        $current = realpath($this->getKernel()->getRootDir() . '/../');
+        $current = realpath($this->getKernel()->getRootDir() . '/..');
         if ($path) {
-            $path = Tools::resolveRelativePath($path, $current);
+            $path = Tools::getRelativePath($path, $current);
             if ('/' !== substr($path, -1)) {
                 $path .= '/';
             }
@@ -681,7 +696,7 @@ class Core extends Controller
      * @param string $path
      * @param string $suffix
      * @param bool $relativePath
-     * @return string
+     * @return string without trailing slash when relative
      * @throws Exceptions\BundleNotFoundException
      */
     public function resolvePath($path, $suffix = '', $relativePath = false)
@@ -700,6 +715,7 @@ class Core extends Controller
                     $path
                 ), 0, $e);
             }
+
             if ($suffix && '/' !== $suffix[0]) {
                 $suffix = '/' . $suffix;
             }
@@ -711,9 +727,6 @@ class Core extends Controller
             }
 
             $bundlePath = $bundle->getPath();
-            if ('/' !== substr($bundlePath, -1)) {
-                $bundlePath .= '/';
-            }
 
             $path = $bundlePath . $suffix . $path;
         } else {
@@ -721,7 +734,7 @@ class Core extends Controller
         }
 
         if ($relativePath) {
-            return substr($path, strlen($root) + 1);
+            return Tools::getRelativePath($path, $root);
         }
 
         return $path;
@@ -754,7 +767,7 @@ class Core extends Controller
                     $path
                 ), 0, $e);
             }
-            $targetDir = 'bundles/' . preg_replace('/bundle$/', '', strtolower($bundle->getName()));
+            $targetDir = 'bundles/' . $this->getShortBundleName($bundle->getName());
 
             return $targetDir . substr($path, strlen($matches[0]));
         }

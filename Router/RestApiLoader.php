@@ -156,6 +156,7 @@ class RestApiLoader extends Loader
         $resourceNested = '@KrynCmsBundle/Controller/AutomaticNestedObjectCrudController.php';
 
         foreach ($this->krynCore->getBundles() as $bundleName => $bundle) {
+
             if ($this->krynCore->isKrynBundle($bundleName)) {
                 if (!$config = $this->krynCore->getConfig($bundleName)) {
                     continue;

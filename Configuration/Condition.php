@@ -401,7 +401,7 @@ class  Condition extends Model
                         if ($cGroup) {
                             $cGroup[] = 'and';
                         }
-                        $cGroup[] = array(dbQuote($primKey, $pTable), '=', $primValue);
+                        $cGroup[] = array($primKey, '=', $primValue);
                     }
                 } else {
 
@@ -413,7 +413,7 @@ class  Condition extends Model
                     if ($cGroup) {
                         $cGroup[] = 'and';
                     }
-                    $cGroup[] = array(dbQuote($primKey, $pTable), '=', $group);
+                    $cGroup[] = array($primKey, '=', $group);
                 }
                 if ($result) {
                     $result[] = 'or';
@@ -429,7 +429,7 @@ class  Condition extends Model
                 if ($group) {
                     $group[] = 'and';
                 }
-                $group[] = array(dbQuote($primKey, $pTable), '=', $primValue);
+                $group[] = array($primKey, '=', $primValue);
             }
             $result[] = $group;
         }

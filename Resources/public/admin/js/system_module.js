@@ -145,7 +145,7 @@ var kryncms_system_module = new Class({
 
         var lang = ka.settings['user']['adminLanguage'];
 
-        this.llir = new Request.JSON({url: _pathAdmin + 'admin/system/module/manager/installed', noCache: 1,
+        this.llir = new Request.JSON({url: _pathAdmin + 'admin/system/bundle/manager/installed', noCache: 1,
             onComplete: function (pResult) {
                 var bundles = pResult.data.bundles;
                 var packages = pResult.data.packages;
@@ -250,7 +250,7 @@ var kryncms_system_module = new Class({
         }
 
         this.win.setLoading(true, t('Install composer package ...'));
-        this.setBundleRequest = new Request.JSON({url: _pathAdmin + 'admin/system/module/manager/composer/install', noCache: 1,
+        this.setBundleRequest = new Request.JSON({url: _pathAdmin + 'admin/system/bundle/manager/composer/install', noCache: 1,
             onComplete: function () {
                 this.loadInstalled();
             }.bind(this)}).post({name: name, version: version, withBundles: withBundles});
@@ -273,7 +273,7 @@ var kryncms_system_module = new Class({
         }
 
         this.win.setLoading(true, t('Remove composer package ...'));
-        this.setBundleRequest = new Request.JSON({url: _pathAdmin + 'admin/system/module/manager/composer/uninstall', noCache: 1,
+        this.setBundleRequest = new Request.JSON({url: _pathAdmin + 'admin/system/bundle/manager/composer/uninstall', noCache: 1,
             onComplete: function () {
                 this.loadInstalled();
             }.bind(this)}).post({name: name});
@@ -308,7 +308,7 @@ var kryncms_system_module = new Class({
         }
 
         this.win.setLoading(true, activate ? t('Install bundle ...') : t('Uninstall bundle ...'));
-        this.setBundleRequest = new Request.JSON({url: _pathAdmin + 'admin/system/module/manager/'+uri, noCache: 1,
+        this.setBundleRequest = new Request.JSON({url: _pathAdmin + 'admin/system/bundle/manager/'+uri, noCache: 1,
             onComplete: function () {
                 this.loadInstalled();
                 ka.loadSettings();
@@ -323,7 +323,7 @@ var kryncms_system_module = new Class({
         this.win.setLoading(true);
 
         this.lc = new Request.JSON({url: _pathAdmin +
-            'admin/system/module/manager/local', noCache: 1, onComplete: function (res) {
+            'admin/system/bundle/manager/local', noCache: 1, onComplete: function (res) {
             this.win.setLoading(false);
             this.renderLocal(res.data);
         }.bind(this)}).get();
@@ -363,7 +363,7 @@ var kryncms_system_module = new Class({
                 prompt.getApplyButton().startLoading(t('Creating ...'));
 
                 this.lastAddModuleRq = new Request.JSON({
-                    url: _pathAdmin + 'admin/system/module/manager',
+                    url: _pathAdmin + 'admin/system/bundle/manager',
                     noCache: true,
                     onComplete: function(response) {
                         if (response.data) {
@@ -551,7 +551,7 @@ var kryncms_system_module = new Class({
                     deactivate.addEvent('click', function () {
                         deactivate.startLoading(t('Deactivating ...'));
                         new Request.JSON({url: _pathAdmin +
-                            'admin/system/module/manager/deactivate', noCache: 1,
+                            'admin/system/bundle/manager/deactivate', noCache: 1,
                             onComplete: function (response) {
                                 if (response.error) {
                                 deactivate.failedLoading(t('Failed'));
@@ -569,7 +569,7 @@ var kryncms_system_module = new Class({
                     activate.addEvent('click', function () {
                         activate.startLoading(t('Activating ...'));
                         new Request.JSON({url: _pathAdmin +
-                            'admin/system/module/manager/activate', noCache: 1,
+                            'admin/system/bundle/manager/activate', noCache: 1,
                             onComplete: function (response) {
                                 if (response.error) {
                                     activate.failedLoading(t('Failed'));
@@ -592,15 +592,11 @@ var kryncms_system_module = new Class({
                 ka.wm.open('kryncmsbundle/system/module/edit', {name: key});
             }.bind(this)).inject(actions);
 
-            new ka.Button(_('Share')).addEvent('click', function () {
-                ka.wm.open('kryncmsbundle/system/module/publish', {name: key});
-            }).inject(actions)
-
             var activeIcon = new Element('span', {
                 'class': item.activated ? 'icon-checkmark-6' : 'icon-cancel-6',
                 'styles': {color: item.activated ? 'green' : 'red'}
             });
-            var value = [key + ' <span style="color: gray;">(' + title + ')</span>',
+            var value = [item._bundleName + ' <span style="color: gray;">(' + title + ')</span>',
                 activeIcon,
                 item._installed.version ? item._installed.version : (item.version ? item.version : t('VCS')),
                 bActions,
@@ -719,7 +715,7 @@ var kryncms_system_module = new Class({
         this.mainPane.set('html', '<center><img src="' + _path + 'bundles/kryncms/admin/images/loading.gif" /></center>');
 
         new Request.JSON({url: _pathAdmin +
-            'admin/system/module/managerSearch', noCache: 1, onComplete: function (res) {
+            'admin/system/bundle/managerSearch', noCache: 1, onComplete: function (res) {
             this.mainPane.set('html', '');
 
             if (res && res['status'] == 'ok') {
@@ -761,7 +757,7 @@ var kryncms_system_module = new Class({
 //        }).inject(this.mainPane);
 //
 //        new Request.JSON({url: _pathAdmin +
-//            'admin/system/module/managerGetCategoryItems', noCache: 1, onComplete: function (res) {
+//            'admin/system/bundle/managerGetCategoryItems', noCache: 1, onComplete: function (res) {
 //            content.set('html', '');
 //
 //            if (res) {
@@ -845,7 +841,7 @@ var kryncms_system_module = new Class({
 //            }
 //
 //            this.oldGetbox = new Request.JSON({url: _pathAdmin +
-//                'admin/system/module/managerGetBox/', noCache: 1, onComplete: function (res) {
+//                'admin/system/bundle/managerGetBox/', noCache: 1, onComplete: function (res) {
 //                if (res) {
 //                    if (opts.render) {
 //                        opts.render(res, content, title);

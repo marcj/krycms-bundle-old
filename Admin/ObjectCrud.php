@@ -1307,7 +1307,7 @@ class ObjectCrud extends ContainerAware
     {
         $options['permissionCheck'] = $this->getPermissionCheck();
 
-        return $this->getKrynCore()->getObjects()->getRoots($this->getObject(), $options);
+        return $this->getKrynCore()->getObjects()->getRoots($this->getObject(), null, $options);
 
     }
 

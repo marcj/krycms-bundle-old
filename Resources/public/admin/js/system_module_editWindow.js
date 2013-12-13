@@ -850,7 +850,7 @@ var kryncms_system_module_editWindow = new Class({
             this.lastSaveReq.cancel();
         }
 
-        this.lastSaveReq = new Request.JSON({url: _pathAdmin + 'admin/system/module/editor/window?class=' +
+        this.lastSaveReq = new Request.JSON({url: _pathAdmin + 'admin/system/bundle/editor/window?class=' +
             req.general['class'], noCache: 1,
             onComplete: function (pResponse) {
 
@@ -944,7 +944,7 @@ var kryncms_system_module_editWindow = new Class({
             this.lastSaveReq.cancel();
         }
 
-        this.lastSaveReq = new Request.JSON({url: _pathAdmin + 'admin/system/module/saveWindowClass', noCache: 1,
+        this.lastSaveReq = new Request.JSON({url: _pathAdmin + 'admin/system/bundle/saveWindowClass', noCache: 1,
 
             noErrorReporting: true,
             onComplete: function (res) {
@@ -977,7 +977,7 @@ var kryncms_system_module_editWindow = new Class({
 
         this.win.setLoading(true);
 
-        this.lr = new Request.JSON({url: _pathAdmin + 'admin/system/module/editor/window', noCache: 1,
+        this.lr = new Request.JSON({url: _pathAdmin + 'admin/system/bundle/editor/window', noCache: 1,
             onComplete: this.renderWindowDefinition.bind(this)}).get({
                 'class': this.win.params.className
             });

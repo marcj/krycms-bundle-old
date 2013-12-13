@@ -278,15 +278,16 @@ class Utils
             "border-radius",
         );
 
+        $webDir = realpath($this->getKrynCore()->getKernel()->getRootDir().'/../web') .'/';
         $content = '';
         foreach ($files as $assetPath) {
 
-            $cssFile = $this->getKrynCore()->resolveWebPath($assetPath); //admin/css/style.css
+            $cssFile = $this->getKrynCore()->resolveWebPath($assetPath); //bundles/kryncms/css/style.css
             $cssDir = dirname($cssFile) . '/'; //admin/css/...
             $cssDir = str_repeat('../', substr_count($includePath, '/')) . $cssDir;
 
             $content .= "\n\n/* file: $assetPath */\n\n";
-            if (file_exists($file = $cssFile)) {
+            if (file_exists($file = $webDir . $cssFile)) {
                 $h = fopen($file, "r");
                 if ($h) {
                     while (!feof($h) && $h) {
@@ -312,8 +313,8 @@ class Utils
                     fclose($h);
                 }
             } else {
-                $content .= '/* File `' . $cssFile . '` not exist. */';
-                $this->getKrynCore()->getLogger()->addError(
+                $content .= '/* => `' . $cssFile . '` not exist. */';
+                $this->getKrynCore()->getLogger()->error(
                     sprintf('Can not find css file `%s` [%s]', $file, $assetPath)
                 );
             }

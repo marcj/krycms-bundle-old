@@ -22,7 +22,7 @@ var kryncms_system_module_view = new Class({
         this.loading.show();
 
         new Request.JSON({url: _pathAdmin +
-            'admin/system/module/manager/info', noCache: 1, onComplete: function (res) {
+            'admin/system/bundle/manager/info', noCache: 1, onComplete: function (res) {
             this.loading.hide();
 
             this.currentValues = res;
@@ -274,7 +274,7 @@ var kryncms_system_module_view = new Class({
 
         //this.boxNavi.hide();
         new Request.JSON({url: _pathAdmin +
-            'admin/system/module/getPrepareInstall/', noCache: 1, onComplete: function (res) {
+            'admin/system/bundle/getPrepareInstall/', noCache: 1, onComplete: function (res) {
             _this.loading.hide();
 
             //todo re comment out in kryn.cms 0.9
@@ -317,7 +317,7 @@ var kryncms_system_module_view = new Class({
         this.loading.show();
 
         new Request.JSON({url: _pathAdmin +
-            'admin/system/module/installModule/', noCache: 1, onComplete: function (res) {
+            'admin/system/bundle/installModule/', noCache: 1, onComplete: function (res) {
 
             if (this.currentValues && this.currentValues.module.category == 13 && this.installMode)//layout
             {
@@ -326,7 +326,7 @@ var kryncms_system_module_view = new Class({
                     30000);//30sec
             }
 
-            new Request.JSON({url: _pathAdmin + 'admin/system/module/dbInit/', noCache: 1, onComplete: function (res) {
+            new Request.JSON({url: _pathAdmin + 'admin/system/bundle/dbInit/', noCache: 1, onComplete: function (res) {
                 this.loading.hide();
                 ka.check4Updates();
                 ka.loadMenu();
@@ -354,7 +354,7 @@ var kryncms_system_module_view = new Class({
         this.loading.show();
 
         new Request.JSON({url: _pathAdmin +
-            'admin/system/module/getPrepareInstall/', noCache: 1, onComplete: function (res) {
+            'admin/system/bundle/getPrepareInstall/', noCache: 1, onComplete: function (res) {
             _this.loading.hide();
 
             if (res.needPackages) {
@@ -584,7 +584,7 @@ var kryncms_system_module_view = new Class({
         this.dependsGoNext.hide();
 
         new Request.JSON({url: _pathAdmin +
-            'admin/system/module/getPrepareInstall/', noCache: 1, onComplete: function (res) {
+            'admin/system/bundle/getPrepareInstall/', noCache: 1, onComplete: function (res) {
             this.dependsGoNext.show();
 
             pDiv.empty();
@@ -602,7 +602,7 @@ var kryncms_system_module_view = new Class({
 
         return;
         /*
-         new Request.JSON({url: _path+'admin/system/module/getDependExtension', noCache: 1, onComplete: function( pRes ){
+         new Request.JSON({url: _path+'admin/system/bundle/getDependExtension', noCache: 1, onComplete: function( pRes ){
 
          //this.dependsQueue.include( extKey );
 
@@ -689,7 +689,7 @@ var kryncms_system_module_view = new Class({
 
      this.checkDepends.erase(extKey);
 
-     new Request.JSON({url: _path+'admin/system/module/getDependExtension', noCache: 1, onComplete: function( pRes ){
+     new Request.JSON({url: _path+'admin/system/bundle/getDependExtension', noCache: 1, onComplete: function( pRes ){
 
      this.dependsQueue.include( extKey );
      if( pRes.ok == true ){
@@ -742,7 +742,7 @@ var kryncms_system_module_view = new Class({
             div.set('html', _('Check dependency ...'));
 
             new Request.JSON({url: _pathAdmin +
-                'admin/system/module/getDependExtension', noCache: 1, onComplete: function (pRes) {
+                'admin/system/bundle/getDependExtension', noCache: 1, onComplete: function (pRes) {
 
                 if (pRes.ok == true) {
 
@@ -897,7 +897,7 @@ var kryncms_system_module_view = new Class({
                 files.include(file, (item.checked) ? 1 : 0);
             });
             files = JSON.encode(files);
-            new Request.JSON({url: _pathAdmin + 'admin/system/module/remove', noCache: 1, onComplete: function (res) {
+            new Request.JSON({url: _pathAdmin + 'admin/system/bundle/remove', noCache: 1, onComplete: function (res) {
                 ka.loadMenu();
                 ka.wm.sendSoftReload('admin/system/module');
                 this.win.close();
@@ -937,7 +937,7 @@ var kryncms_system_module_view = new Class({
         this.removeCheckboxes = new Hash();
 
         new Request.JSON({url: _pathAdmin +
-            'admin/system/module/getChangedFiles', noCache: 1, onComplete: function (res) {
+            'admin/system/bundle/getChangedFiles', noCache: 1, onComplete: function (res) {
 
             if (res.modifiedFiles.length > 0) {
                 this.loader.hide();

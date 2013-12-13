@@ -103,7 +103,7 @@ var kryncms_system_module_edit = new Class({
         this.saveBtn.setButtonStyle('blue');
 
         this.lr = new Request.JSON({url: _pathAdmin +
-            'admin/system/module/editor/plugins', noCache: 1, onComplete: function(res) {
+            'admin/system/bundle/editor/plugins', noCache: 1, onComplete: function(res) {
 
             if (res) {
                 Object.each(res.data, function(item, key) {
@@ -141,7 +141,7 @@ var kryncms_system_module_edit = new Class({
         req.plugins = JSON.encode(req.plugins);
         req.bundle = this.mod;
         this.lr = new Request.JSON({url: _pathAdmin +
-            'admin/system/module/editor/plugins', noCache: 1, onComplete: function(res) {
+            'admin/system/bundle/editor/plugins', noCache: 1, onComplete: function(res) {
             this.saveBtn.stopTip(t('Saved'));
             ka.loadSettings();
         }.bind(this)}).post(req);
@@ -364,7 +364,7 @@ var kryncms_system_module_edit = new Class({
         }
         this.win.setLoading(true, t('Saving ...'));
         this.lr = new Request.JSON({url: _pathAdmin +
-            'admin/system/module/editor/docu', noCache: 1, onComplete: function(res) {
+            'admin/system/bundle/editor/docu', noCache: 1, onComplete: function(res) {
             this.win.setLoading(false);
         }.bind(this)}).post({text: this.text.getValue(), bundle: this.mod});
     },
@@ -396,7 +396,7 @@ var kryncms_system_module_edit = new Class({
         this.text.setValue(t('Loading ...'));
 
         this.lr = new Request.JSON({url: _pathAdmin +
-            'admin/system/module/editor/docu', noCache: 1, onComplete: function(response) {
+            'admin/system/bundle/editor/docu', noCache: 1, onComplete: function(response) {
             this.text.setValue(response.data || '');
         }.bind(this)}).get({bundle: this.mod});
 
@@ -411,7 +411,7 @@ var kryncms_system_module_edit = new Class({
         if (this.lr) {
             this.lr.cancel();
         }
-        this.lr = new Request.JSON({url: _pathAdmin + 'admin/system/module/editor/windows', noCache: 1,
+        this.lr = new Request.JSON({url: _pathAdmin + 'admin/system/bundle/editor/windows', noCache: 1,
             onComplete: function(pResult) {
                 this.win.setLoading(false);
                 this._renderWindows(pResult.data);
@@ -511,7 +511,7 @@ var kryncms_system_module_edit = new Class({
                 this.newWindowDialogApplyBtn.deactivate();
                 this.newWindowDialogApplyBtn.startTip(t('Please wait ...'));
 
-                new Request.JSON({url: _pathAdmin + 'admin/system/module/editor/window', noCache: 1,
+                new Request.JSON({url: _pathAdmin + 'admin/system/bundle/editor/window', noCache: 1,
                     noErrorReporting: ['FileAlreadyExistException'],
                     onComplete: function(pResponse) {
 
@@ -586,7 +586,7 @@ var kryncms_system_module_edit = new Class({
             this.lr.cancel();
         }
         this.lr = new Request.JSON({url: _pathAdmin +
-            'admin/system/module/editor/model', noCache: 1, onComplete: function(res) {
+            'admin/system/bundle/editor/model', noCache: 1, onComplete: function(res) {
             this.win.setLoading(false);
             this._renderDb(res.data);
         }.bind(this)}).get({bundle: this.mod});
@@ -603,7 +603,7 @@ var kryncms_system_module_edit = new Class({
             this.lr.cancel();
         }
 
-        this.lr = new Request.JSON({url: _pathAdmin + 'admin/system/module/editor/model', noCache: 1, onComplete: function() {
+        this.lr = new Request.JSON({url: _pathAdmin + 'admin/system/bundle/editor/model', noCache: 1, onComplete: function() {
             this.saveButton.stopTip(t('Saved'));
 
             if (true === andUpdate) {
@@ -665,7 +665,7 @@ var kryncms_system_module_edit = new Class({
         }
 
         this.lr =
-            new Request.JSON({url: _pathAdmin + 'admin/system/module/getHelp', noCache: 1, onComplete: function(res) {
+            new Request.JSON({url: _pathAdmin + 'admin/system/bundle/getHelp', noCache: 1, onComplete: function(res) {
                 this.win.setLoading(false);
                 this._renderHelp(res);
 
@@ -711,7 +711,7 @@ var kryncms_system_module_edit = new Class({
         this.win.setLoading(true, t('Saving ...'));
 
         this.lr =
-            new Request.JSON({url: _pathAdmin + 'admin/system/module/saveHelp', noCache: 1, onComplete: function() {
+            new Request.JSON({url: _pathAdmin + 'admin/system/bundle/saveHelp', noCache: 1, onComplete: function() {
                 this.win.setLoading(false);
             }.bind(this)}).post(req);
     },
@@ -772,7 +772,7 @@ var kryncms_system_module_edit = new Class({
         }
 
         this.lr = new Request.JSON({url: _pathAdmin +
-            'admin/system/module/editor/entry-points', noCache: 1, onComplete: function(res) {
+            'admin/system/bundle/editor/entry-points', noCache: 1, onComplete: function(res) {
             this.win.setLoading(false);
             this._renderLinks(res.data);
         }.bind(this)}).get({bundle: this.mod});
@@ -1187,7 +1187,7 @@ var kryncms_system_module_edit = new Class({
 
         this.entryPointsSaveButton.startTip(t('Saving ...'));
 
-        this.lr = new Request.JSON({url: _pathAdmin + 'admin/system/module/editor/entry-points?bundle=' + decodeURIComponent(this.mod),
+        this.lr = new Request.JSON({url: _pathAdmin + 'admin/system/bundle/editor/entry-points?bundle=' + decodeURIComponent(this.mod),
             noCache: 1, onComplete: function() {
                 this.entryPointsSaveButton.stopTip(t('Saved'));
                 ka.loadSettings();
@@ -1377,7 +1377,7 @@ var kryncms_system_module_edit = new Class({
 
         this.saveBtn.startTip(t('Saving ...'));
         this.lr = new Request.JSON({url: _pathAdmin +
-            'admin/system/module/editor/general?name=' + decodeURIComponent(this.mod), onComplete: function() {
+            'admin/system/bundle/editor/general?name=' + decodeURIComponent(this.mod), onComplete: function() {
             this.saveBtn.stopTip(t('Saved'));
         }.bind(this)}).post(req);
     },
@@ -1388,7 +1388,7 @@ var kryncms_system_module_edit = new Class({
             this.lr.cancel();
         }
         this.lr = new Request.JSON({url: _pathAdmin +
-            'admin/system/module/editor/config', noCache: 1, onComplete: function(pResult) {
+            'admin/system/bundle/editor/config', noCache: 1, onComplete: function(pResult) {
             this._loadGeneral(pResult.data);
             this.win.setLoading(false);
         }.bind(this)}).get({bundle: this.mod});
@@ -1400,7 +1400,7 @@ var kryncms_system_module_edit = new Class({
             this.lr.cancel();
         }
         this.lr = new Request.JSON({url: _pathAdmin +
-            'admin/system/module/editor/themes', noCache: 1, onComplete: function(pResult) {
+            'admin/system/bundle/editor/themes', noCache: 1, onComplete: function(pResult) {
             this.setupThemes(pResult.data);
             this.win.setLoading(false);
         }.bind(this)}).get({bundle: this.mod});
@@ -1553,7 +1553,7 @@ var kryncms_system_module_edit = new Class({
 
         this.saveBtn.startTip(t('Saving ...'));
 
-        this.lr = new Request.JSON({url: _pathAdmin + 'admin/system/module/editor/themes', noCache: 1, onComplete: function() {
+        this.lr = new Request.JSON({url: _pathAdmin + 'admin/system/bundle/editor/themes', noCache: 1, onComplete: function() {
             this.saveBtn.stopTip(t('Saved'));
             ka.loadSettings();
         }.bind(this)}).post({bundle: this.mod, themes: JSON.encode(themes)});
@@ -1868,7 +1868,7 @@ var kryncms_system_module_edit = new Class({
     },
 
     extractLanguage: function(language) {
-        this.lr = new Request.JSON({url: _pathAdmin + 'admin/system/module/editor/language/overview', noCache: 1,
+        this.lr = new Request.JSON({url: _pathAdmin + 'admin/system/bundle/editor/language/overview', noCache: 1,
             onComplete: function(pResponse) {
                 if (!pResponse.data) {
 
@@ -1924,7 +1924,7 @@ var kryncms_system_module_edit = new Class({
         document.id(this.saveButton).addClass('ka-Button-blue');
         document.id(this.saveButtonORM).addClass('ka-Button-blue');
 
-        this.lr = new Request.JSON({url: _pathAdmin + 'admin/system/module/editor/objects', noCache: 1,
+        this.lr = new Request.JSON({url: _pathAdmin + 'admin/system/bundle/editor/objects', noCache: 1,
             onComplete: function(pResult) {
 
                 if (pResult.data) {
@@ -1954,7 +1954,7 @@ var kryncms_system_module_edit = new Class({
             this.lr.cancel();
         }
 
-        this.lr = new Request.JSON({url: _pathAdmin + 'admin/system/module/editor/model/from-objects', noCache: 1,
+        this.lr = new Request.JSON({url: _pathAdmin + 'admin/system/bundle/editor/model/from-objects', noCache: 1,
             onComplete: function(response) {
                 if (response.data) {
                     var atLeastOneFailed = false;
@@ -2066,7 +2066,7 @@ var kryncms_system_module_edit = new Class({
     writeObjectModel: function(pObjectKey) {
         this.win.setLoading(true, t('Write model to model.xml'));
 
-        new Request.JSON({url: _path + 'admin/system/module/editor/model/from-object', onComplete: function(pResult) {
+        new Request.JSON({url: _path + 'admin/system/bundle/editor/model/from-object', onComplete: function(pResult) {
             this.win.setLoading(false);
         }.bind(this)}).post({bundle: this.mod, object: pObjectKey});
     },
@@ -2097,7 +2097,7 @@ var kryncms_system_module_edit = new Class({
         req.bundle = this.mod;
 
         this.lr = new Request.JSON({url: _pathAdmin +
-            'admin/system/module/editor/objects', noCache: 1,
+            'admin/system/bundle/editor/objects', noCache: 1,
             onFailure: function() {
                 this.saveButton.stopTip(t('Failed.'));
             },
@@ -2768,7 +2768,7 @@ var kryncms_system_module_edit = new Class({
                 reqs[pFieldId].cancel();
             }
 
-            reqs[pFieldId] = new Request.JSON({url: _path + 'admin/system/module/windowsExists', noCache: 1,
+            reqs[pFieldId] = new Request.JSON({url: _path + 'admin/system/bundle/windowsExists', noCache: 1,
                 onComplete: function(pResult) {
                     if (pFieldObject.existsInfo) {
                         pFieldObject.existsInfo.destroy();
@@ -2875,7 +2875,7 @@ var kryncms_system_module_edit = new Class({
                 this.win.setLoading(true, t('Creating windows ...'));
 
                 this.lr = new Request.JSON({url: _pathAdmin +
-                    'admin/system/module/createWindows', noCache: 1, onComplete: function(res) {
+                    'admin/system/bundle/createWindows', noCache: 1, onComplete: function(res) {
 
                     this.win.setLoading(false);
                     this.dialog.close();
@@ -3101,7 +3101,7 @@ var kryncms_system_module_edit = new Class({
         this.saveBtn = buttonBar.addButton(t('Save'), this.saveExtras.bind(this));
         this.saveBtn.setButtonStyle('blue');
 
-        this.lr = new Request.JSON({url: _pathAdmin + 'admin/system/module/editor/basic', noCache: 1,
+        this.lr = new Request.JSON({url: _pathAdmin + 'admin/system/bundle/editor/basic', noCache: 1,
             onComplete: function(pResult) {
 
                 if (pResult.data) {
@@ -3120,7 +3120,7 @@ var kryncms_system_module_edit = new Class({
         this.saveBtn.startLoading(t('Saving ...'));
 
         this.lr =
-            new Request.JSON({url: _pathAdmin + 'admin/system/module/editor/basic', noCache: 1, onComplete: function() {
+            new Request.JSON({url: _pathAdmin + 'admin/system/bundle/editor/basic', noCache: 1, onComplete: function() {
                 this.saveBtn.doneLoading(t('Saved'));
                 ka.loadSettings();
             }.bind(this)}).post(req);

@@ -72,7 +72,7 @@ var kryncms_system_languages_edit = new Class({
         this.saveBtn.startTip(_('Saving ...'));
         translations = JSON.encode(translations);
         this.lr = new Request.JSON({url: _pathAdmin +
-            'admin/system/module/editor/language', noCache: 1,
+            'admin/system/bundle/editor/language', noCache: 1,
             noErrorReporting: ['Exceptions\FileNotWritableException'],
             onComplete: function (res) {
             if ('Exceptions\FileNotWritableException' === res.error) {
@@ -87,7 +87,7 @@ var kryncms_system_languages_edit = new Class({
     _extractLanguage: function () {
         this.win.setLoading(true);
         this.lr = new Request.JSON({url: _pathAdmin +
-            'admin/system/module/editor/language/extract', noCache: 1, onComplete: function (pResponse) {
+            'admin/system/bundle/editor/language/extract', noCache: 1, onComplete: function (pResponse) {
             this.win.setLoading(false);
             if (pResponse.data) {
                 this.extractedLanguages = pResponse.data;
@@ -99,7 +99,7 @@ var kryncms_system_languages_edit = new Class({
     loadLanguage: function (pRenderExtractedLangs) {
         this.win.setLoading(true);
         this.lr = new Request.JSON({url: _pathAdmin +
-            'admin/system/module/editor/language', noCache: 1, onComplete: function (pResponse) {
+            'admin/system/bundle/editor/language', noCache: 1, onComplete: function (pResponse) {
             this._renderLangs(pResponse.data, pRenderExtractedLangs);
         }.bind(this)}).get({bundle: this.mod, lang: this.languageSelect.getValue()});
     },

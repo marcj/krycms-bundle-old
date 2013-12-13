@@ -1102,7 +1102,7 @@ class Objects
             throw new \Exception('Object is not a nested set.');
         }
 
-        if ($definition->getNestedRootObjectLabelField() && !$options['fields']) {
+        if ($definition->getNestedRootObjectLabelField() && !@$options['fields']) {
             $options['fields'] = $definition->getNestedRootObjectLabelField();
         }
 

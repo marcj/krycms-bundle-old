@@ -3,6 +3,7 @@
 namespace Kryn\CmsBundle\ORM;
 
 use Kryn\CmsBundle\Configuration\Condition;
+use Kryn\CmsBundle\Tools;
 
 class ObjectView extends Propel
 {
@@ -102,9 +103,8 @@ class ObjectView extends Propel
             $depth = 1;
         }
 
-        if (substr($path, -1) !== '/') {
-            $path .= '/';
-        }
+        $path = '@' . trim($path, '/@');
+        $path = str_replace(':', '/', $path);
 
         $c = 0;
         $offset = $options['offset'];
@@ -143,11 +143,13 @@ class ObjectView extends Propel
                 }
             }
         } else {
-//            preg_match('/\@+([a-zA-Z0-9\-_\\\\]+)/', $path, $matches);
-//            $bundleName = $matches[1];
 
-            $directory = $this->getKrynCore()->resolvePath($path, 'Resources/views', true);
-            $files = $this->getKrynCore()->getFilesystem()->getFiles($directory);
+            $directory = $this->getKrynCore()->resolvePath($path, 'Resources/views', true) . '/';
+            try {
+                $files = $this->getKrynCore()->getFilesystem()->getFiles($directory);
+            } catch(\Exception $e) {
+                throw new \Exception(sprintf('Can not find `%s` (in %s)', $path, $directory));
+            }
 
             foreach ($files as $file) {
                 if ($condition && $condition->hasRules() && !$condition->satisfy($file, 'KrynCmsBundle:file')) {
@@ -166,7 +168,7 @@ class ObjectView extends Propel
 
                 $item = array(
                     'name' => $item['name'],
-                    'path' => $this->buildPath($path . '/' . substr($item['path'], strlen($directory)))
+                    'path' => $this->buildPath($path . '/' . Tools::getRelativePath($item['path'], $directory))
                 );
 
                 if ($file->isDir()) {

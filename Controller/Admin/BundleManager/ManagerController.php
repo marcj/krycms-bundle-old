@@ -45,9 +45,9 @@ class ManagerController extends Controller
      *  description="Deactivates a bundle in the AppKernel"
      * )
      *
-     * @Rest\QueryParam(name="bundle", requirements=".+", strict=true, description="The bundle name")
+     * @Rest\RequestParam(name="bundle", requirements=".+", strict=true, description="The bundle name")
      *
-     * @Rest\Post("/system/bundle/manager/deactivate")
+     * @Rest\Post("/admin/system/bundle/manager/deactivate")
      *
      * @param string $bundle
      *
@@ -62,9 +62,7 @@ class ManagerController extends Controller
         if ($bundle) {
             $appModifier = new AppKernelModifier();
             $appModifier->removeBundle(get_class($bundle));
-            $appModifier->save();
-
-            return true;
+            return $appModifier->save();
         }
 
         return false;
@@ -76,11 +74,11 @@ class ManagerController extends Controller
      *  description="Creates a Symfony bundle"
      * )
      *
-     * @Rest\QueryParam(name="package", requirements=".+", strict=true, description="The composer package name")
-     * @Rest\QueryParam(name="namespace", requirements=".+", description="The PHP namespace")
-     * @Rest\QueryParam(name="directoryStructure", requirements=".+", default="false", description="If some directory structures should be created")
+     * @Rest\RequestParam(name="package", requirements=".+", strict=true, description="The composer package name")
+     * @Rest\RequestParam(name="namespace", requirements=".+", description="The PHP namespace")
+     * @Rest\RequestParam(name="directoryStructure", requirements=".+", default="false", description="If some directory structures should be created")
      *
-     * @Rest\Put("/system/bundle/manager")
+     * @Rest\Put("/admin/system/bundle/manager")
      *
      * @param ParamFetcher $paramFetcher
      *
@@ -184,9 +182,9 @@ This is the bundle $bundleClassName.
      *  description="Activates a bundle in the AppKernel"
      * )
      *
-     * @Rest\QueryParam(name="bundle", requirements=".+", strict=true, description="The bundle name")
+     * @Rest\RequestParam(name="bundle", requirements=".+", strict=true, description="The bundle name")
      *
-     * @Rest\Post("/system/bundle/manager/activate")
+     * @Rest\Post("/admin/system/bundle/manager/activate")
      *
      * @param string $bundle
      *
@@ -216,7 +214,7 @@ This is the bundle $bundleClassName.
      *
      * @Rest\QueryParam(name="name", requirements="[a-zA-Z0-9/]", strict=true, description="The composer package name")
      *
-     * @Rest\Get("/system/bundle/manager/info")
+     * @Rest\Get("/admin/system/bundle/manager/info")
      *
      * @param string $name
      *
@@ -247,7 +245,7 @@ This is the bundle $bundleClassName.
      *  description="Returns a list of all installed bundles and packages"
      * )
      *
-     * @Rest\Get("/system/bundle/manager/installed")
+     * @Rest\Get("/admin/system/bundle/manager/installed")
      *
      * @return array
      */
@@ -357,8 +355,8 @@ This is the bundle $bundleClassName.
             $finder
                 ->files()
                 ->name('*Bundle.php')
-                ->notPath('/Tests/')
-                ->notPath('/Test/')
+                ->notPath('/\/Tests\//')
+                ->notPath('/\/Test\//')
                 ->notPath('Kryn/CmsBundle/vendor')
                 ->in($this->getKernel()->getRootDir() . '/../' . $path);
 
@@ -423,7 +421,7 @@ This is the bundle $bundleClassName.
      *  description="Returns a list of all local available bundles and packages"
      * )
      *
-     * @Rest\Get("/system/bundle/manager/local")
+     * @Rest\Get("/admin/system/bundle/manager/local")
      *
      * @return array
      */
@@ -435,9 +433,9 @@ This is the bundle $bundleClassName.
         $finder
             ->files()
             ->name('*Bundle.php')
-            ->notPath('/Tests/')
+            ->notPath('/\/Tests\//')
             ->notPath('Kryn/CmsBundle/vendor')
-            ->notPath('/Test/');
+            ->notPath('/\/Test\//');
 
         if (file_exists($root . '/../vendor')) {
             $finder->in($root . '/../vendor');
@@ -492,10 +490,11 @@ This is the bundle $bundleClassName.
                 $composer = $this->getKrynCore()->getUtils()->getComposerArray($bundleClass) ? : [];
                 $composer['_path'] = $this->getKrynCore()->getBundleDir($bundleClass);
                 if (isset($composer['name'])) {
-                    $composer['_installed'] = $this->getInstalledInfo($composer['name']);
+                    $composer['_installed'] = $this->getInstalledInfoAction($composer['name']);
                 } else {
                     $composer['_installed'] = [];
                 }
+                $composer['_bundleName'] = $this->getKrynCore()->getBundleName($bundleClass);
                 $composer['activated'] = $this->getKrynCore()->isActiveBundle($name);
                 $composer['krynBundle'] = $this->getKrynCore()->isKrynBundle($name);
                 $res[$bundleClass] = $composer;
@@ -511,7 +510,7 @@ This is the bundle $bundleClassName.
      *  description="Checks for updates in composer packages"
      * )
      *
-     * @Rest\Get("/system/bundle/manager/check-updates")
+     * @Rest\Get("/admin/system/bundle/manager/check-updates")
      *
      * @return array
      */
@@ -552,7 +551,7 @@ This is the bundle $bundleClassName.
      * @Rest\QueryParam(name="bundle", requirements=".+", strict=true, description="The bundle name")
      * @Rest\QueryParam(name="ormUpdate", requirements=".+", default="false", description="If the orm should be updated")
      *
-     * @Rest\Post("/system/bundle/manager/install")
+     * @Rest\Post("/admin/system/bundle/manager/install")
      *
      * @param string $bundle
      * @param bool   $ormUpdate
@@ -575,7 +574,7 @@ This is the bundle $bundleClassName.
             $this->getKrynCore()->getEventDispatcher()->dispatch('core/bundle/schema-update', $bundle);
         }
 
-        $this->activate($bundle, true);
+        $this->activateAction($bundle, true);
 
         $this->firePackageManager($bundle, 'install');
 
@@ -595,7 +594,7 @@ This is the bundle $bundleClassName.
      * @Rest\QueryParam(name="removeFiles", requirements=".+", default="true", description="If the orm should be updated")
      * @Rest\QueryParam(name="ormUpdate", requirements=".+", default="false", description="If the orm should be updated")
      *
-     * @Rest\Post("/system/bundle/manager/install")
+     * @Rest\Post("/admin/system/bundle/manager/install")
      *
      * @param string $bundle
      * @param bool   $ormUpdate
@@ -621,7 +620,7 @@ This is the bundle $bundleClassName.
 
         $this->firePackageManager($bundle, 'uninstall');
 
-        $this->deactivate($bundle, true);
+        $this->deactivateAction($bundle);
 
         //fire update propel orm
         if ($ormUpdate && $hasPropelModels) {
@@ -637,7 +636,7 @@ This is the bundle $bundleClassName.
             if (0 === strpos($path, $this->getComposerVendorDir())) {
                 $path = explode('/', $path);
                 $composerName = $path[1] . '/' . $path[2];
-                $this->uninstallComposer($composerName);
+                $this->uninstallComposerAction($composerName);
             }
         }
 
@@ -660,7 +659,7 @@ This is the bundle $bundleClassName.
      *
      * @Rest\QueryParam(name="name", requirements=".+", strict=true, description="The composer package name")
      *
-     * @Rest\Post("/system/bundle/manager/composer/uninstall")
+     * @Rest\Post("/admin/system/bundle/manager/composer/uninstall")
      *
      * @param ParamFetcher $paramFetcher
      *
@@ -761,7 +760,7 @@ This is the bundle $bundleClassName.
      * @Rest\QueryParam(name="version", requirements=".+", strict=true, description="The version")
      * @Rest\QueryParam(name="withBundles", requirements=".+", default="false", description="If the containing bundle should be activated")
      *
-     * @Rest\Post("/system/bundle/manager/composer/install")
+     * @Rest\Post("/admin/system/bundle/manager/composer/install")
      *
      * @param ParamFetcher $paramFetcher
      *

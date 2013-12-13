@@ -993,9 +993,10 @@ class PageResponse extends Response
 
     public function getPublicAssetPath($path)
     {
+        $webDir = realpath($this->getKrynCore()->getKernel()->getRootDir().'/../web') .'/';
         try {
             $path = $this->getKrynCore()->resolveWebPath($path);
-            if (file_exists($path)) {
+            if (file_exists($webDir . $path)) {
                 return $path;
             }
         } catch (BundleNotFoundException $e) {

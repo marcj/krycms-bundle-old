@@ -28,27 +28,27 @@ class Tools {
     /**
      * Returns a relative path from $path to $current.
      *
-     * @param string $path
-     * @param string $current relative to this
+     * @param string $from
+     * @param string $to relative to this
      *
-     * @return string relative path with trailing slash
+     * @return string relative path without trailing slash
      */
-    public static function resolveRelativePath($path, $current)
+    public static function getRelativePath($from, $to)
     {
-        $path    = '/' . trim($path, '/');
-        $current = '/' . trim($current, '/');
+        $from = '/' . trim($from, '/');
+        $to = '/' . trim($to, '/');
 
-        if (0 === $pos = strpos($path, $current)) {
-            return substr($path, strlen($current));
+        if (0 === $pos = strpos($from, $to)) {
+            return substr($from, strlen($to) + ('/' === $to ? 0 : 1));
         }
 
         $result = '';
-        while ($current && false === strpos($path, $current)) {
+        while ($to && false === strpos($from, $to)) {
             $result .= '../';
-            $current = substr($current, 0, strrpos($current, '/'));
+            $to = substr($to, 0, strrpos($to, '/'));
         }
 
-        return !$current /*we reached root*/ ? $result . substr($path, 1) : $result;
+        return !$to /*we reached root*/ ? $result . substr($from, 1) : $result. substr($from, strlen($to) + 1);
     }
 
     public static function dbQuote($value, $table = '')

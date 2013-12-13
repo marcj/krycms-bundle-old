@@ -5,7 +5,8 @@ namespace Kryn\CmsBundle\Admin;
 
 use Kryn\CmsBundle\Core;
 
-class AdminAssets {
+class AdminAssets
+{
 
     /**
      * @var Core
@@ -80,7 +81,7 @@ class AdminAssets {
         $response->addJs(
             '
         window._path = window._baseUrl = ' . json_encode($request->getBasePath() . '/') . '
-        window._pathAdmin = ' . json_encode($request->getBaseUrl() .'/' . $prefix . '/')
+        window._pathAdmin = ' . json_encode($request->getBaseUrl() . '/' . $prefix . '/')
         );
 
         if ($this->getKrynCore()->getKernel()->isDebug()) {
@@ -110,8 +111,7 @@ class AdminAssets {
                         }
                     }
 
-                    foreach ($bundleConfig->getAdminAssetsPaths(false, '.*\.js', true, false)
-                             as $assetPath) {
+                    foreach ($bundleConfig->getAdminAssetsPaths(false, '.*\.js', true, false)as $assetPath) {
                         $response->addJsFile($assetPath);
                     }
                 }
@@ -142,7 +142,7 @@ class AdminAssets {
         $this->addSessionScripts();
         $page = $this->getKrynCore()->getCurrentPage();
 
-        $response = $this->getPageResponse();
+        $response = $this->getKrynCore()->getPageResponse();
         $response->addJsFile('@KrynCmsBundle/admin/mootools-core-1.4.5-fixed-memory-leak.js');
         $response->addJsFile('@KrynCmsBundle/admin/mootools-more.js');
 
@@ -162,8 +162,8 @@ class AdminAssets {
             'node' => $nodeArray
         ];
 
-        if (is_array($options = $request->query->get('_kryn_editor_options'))) {
-            $options = array_merge($options, $options);
+        if (is_array($extraOptions = $request->query->get('_kryn_editor_options'))) {
+            $options = array_merge($options, $extraOptions);
             $options['standalone'] = filter_var($options['standalone'], FILTER_VALIDATE_BOOLEAN);
         }
 

@@ -73,9 +73,9 @@ class FileController extends Controller
      *  description="Moves a file in /web to $target in /web"
      * )
      *
-     * @Rest\QueryParam(name="path", requirements=".+", strict=true, description="The file path")
-     * @Rest\QueryParam(name="target", requirements=".*", strict=true, description="The target file path")
-     * @Rest\QueryParam(name="overwrite", requirements=".*", default="false", description="If the target should be overwritten")
+     * @Rest\RequestParam(name="path", requirements=".+", strict=true, description="The file path")
+     * @Rest\RequestParam(name="target", requirements=".*", strict=true, description="The target file path")
+     * @Rest\RequestParam(name="overwrite", requirements=".*", default="false", description="If the target should be overwritten")
      *
      * @Rest\Post("/admin/file/move")
      *
