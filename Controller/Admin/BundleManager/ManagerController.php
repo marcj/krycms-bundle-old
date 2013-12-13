@@ -574,7 +574,7 @@ This is the bundle $bundleClassName.
             $this->getKrynCore()->getEventDispatcher()->dispatch('core/bundle/schema-update', $bundle);
         }
 
-        $this->activateAction($bundle, true);
+        $this->activateAction($bundle);
 
         $this->firePackageManager($bundle, 'install');
 

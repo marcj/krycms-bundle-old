@@ -478,7 +478,7 @@ function step5_1()
 
         foreach ($krynCore->getBundles() as $bundleName => $bundle) {
             if ($krynCore->isKrynBundle($bundleName)) {
-                $bundleManager->install($bundleName);
+                $bundleManager->installAction($bundleName);
             }
         }
 
@@ -753,7 +753,7 @@ function buildModInfo()
     $bundleManager = new \Kryn\CmsBundle\Controller\Admin\BundleManager\ManagerController();
     $bundleManager->setContainer($kernel->getContainer());
 
-    $bundles = $bundleManager->getLocal();
+    $bundles = $bundleManager->getLocalAction();
 
     $required = [
         'Kryn\CmsBundle\KrynCmsBundle',
