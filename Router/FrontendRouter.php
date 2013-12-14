@@ -201,7 +201,7 @@ class FrontendRouter
         if ('' !== $url && '/' !== $url && $domain && $domain->getStartnodeId() == $page->getId()) {
             //This is the start page, so add a redirect controller
             $this->routes->add(
-                $this->routes->count() + 1,
+                'kryn_page_redirect_to_startpage',
                 new SyRoute(
                     $url,
                     array('_controller' => $clazz . '::redirectToStartPageAction')
@@ -212,7 +212,7 @@ class FrontendRouter
         }
 
         $this->routes->add(
-            $this->routes->count() + 1,
+            'kryn_page_' . $page->getId().'-'.preg_replace('/\W/', '_', $page->getUrn()),
             new SyRoute(
                 $url,
                 array('_controller' => $controller)
@@ -290,7 +290,7 @@ class FrontendRouter
             }
 
             if ($pluginRoutes = $pluginDefinition->getRoutes()) {
-                foreach ($pluginRoutes as $route) {
+                foreach ($pluginRoutes as $idx => $route) {
 
                     $clazz = $pluginDefinition->getClass();
                     if (false !== strpos($clazz, '\\')) {
@@ -310,7 +310,7 @@ class FrontendRouter
                     }
 
                     $this->routes->add(
-                        $route->getId() ? : $this->routes->count() + 1,
+                        'kryn_plugin_' . ($route->getId() ? : $plugin->getId()).'_'.$idx,
                         new SyRoute(
                             $this->foundPageUrl . '/' . $route->getPattern(),
                             $defaults,
@@ -475,32 +475,31 @@ class FrontendRouter
         $title = sprintf('Searching Page [%s]', $url);
         $stopwatch->start($title);
 
-        $domain = $this->getKrynCore()->getCurrentDomain()->getId();
-        $urls = $this->getKrynCore()->getUtils()->getCachedUrlToPage($domain);
+        $domain = $this->getKrynCore()->getCurrentDomain();
+        $urls = $this->getKrynCore()->getUtils()->getCachedUrlToPage($domain->getId());
 
-        //extract extra url attributes
-        $end = false;
-        $possibleUrl = $next = $url;
+        $possibleUrl = $url;
+        $id = false;
 
-        do {
-            $id = isset($urls[$possibleUrl]) ? $urls[$possibleUrl] : 0;
+        while (1) {
 
-//            if ($id > 0 || $possibleUrl == '') {
-////                $found = true;
-//            }
-
-            if ($next == false) {
-                $end = true;
+            if (isset($urls[$possibleUrl])) {
+                $id = $urls[$possibleUrl];
+                break;
             }
 
-            $pos = strrpos($next, '/');
-            if ($pos !== false) {
-                $next = substr($next, 0, $pos);
+            if (false !== $pos = strrpos($possibleUrl, '/')) {
+                $possibleUrl = substr($possibleUrl, 0, $pos);
             } else {
-                $next = false;
+                break;
             }
+        }
 
-        } while (!$end);
+        if (!$id) {
+            //set to startpage
+            $id = $domain->getStartnodeId();
+            $possibleUrl = '/';
+        }
 
         $this->foundPageUrl = $possibleUrl;
 

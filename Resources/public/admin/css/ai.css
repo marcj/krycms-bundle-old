@@ -47,11 +47,11 @@ html, body {
     padding: 0;
 }
 
-
 .ka-admin h2.light,
 .ka-admin h3.light {
     font-family: "SourceSansPro-Light", "SourceSansPro-Regular", "Lucida Grande", "DejaVu Sans", "Bitstream Vera Sans", "Segoe UI", "Tahoma", sans-serif;
 }
+
 
 .ka-clear {
     clear: both;

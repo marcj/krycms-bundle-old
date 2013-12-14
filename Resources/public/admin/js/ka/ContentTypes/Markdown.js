@@ -17,7 +17,7 @@ ka.ContentTypes.Markdown = new Class({
     createLayout: function() {
         this.main = new Element('div', {
             'class': 'ka-normalize ka-content-markdown'
-        }).inject(this.getContentInstance());
+        }).inject(this.getContentInstance().getContentContainer());
 
         this.input = new ka.Field({
             type: 'textarea',

@@ -3,8 +3,8 @@
 namespace Kryn\CmsBundle\Controller\Admin\Object;
 
 use FOS\RestBundle\Request\ParamFetcher;
-use Kryn\CmsBundle\Admin\ObjectCrudController;
 use Kryn\CmsBundle\Controller as KrynController;
+use Kryn\CmsBundle\Controller\ObjectCrudController;
 use Kryn\CmsBundle\Exceptions\ClassNotFoundException;
 use Kryn\CmsBundle\Exceptions\ObjectMisconfiguration;
 use Kryn\CmsBundle\Exceptions\ObjectNotFoundException;
@@ -28,7 +28,7 @@ class Controller extends KrynController
      * @Rest\QueryParam(name="url", requirements=".+", strict=true, description="The object url")
      * @Rest\QueryParam(name="fields", requirements=".+", description="Comma separated list of field names")
      *
-     * @Rest\Get("/object")
+     * @Rest\Get("/admin/object")
      *
      * @param ParamFetcher $paramFetcher
      *
@@ -60,7 +60,7 @@ class Controller extends KrynController
      * @Rest\QueryParam(name="returnKey", requirements=".+", description="If the result should be indexed by the pk")
      * @Rest\QueryParam(name="returnKeyAsRequested", requirements=".+", description="If the result should be indexed by the pk as requested")
      *
-     * @Rest\Get("/objects")
+     * @Rest\Get("/admin/objects")
      *
      * @param ParamFetcher $paramFetcher
      *
@@ -163,7 +163,7 @@ class Controller extends KrynController
      * @Rest\QueryParam(name="order", array=true, requirements=".+", description="Order the result")
      * @Rest\QueryParam(name="filter", array=true, requirements=".+", description="Filter the result")
      *
-     * @Rest\Get("/object-browser/{objectKey}", requirements={"objectKey" = "[a-zA-Z0-9-_\.\\\\:]+"})
+     * @Rest\Get("/admin/object-browser/{objectKey}", requirements={"objectKey" = "[a-zA-Z0-9-_\.\\\\:]+"})
      *
      * @param string $objectKey
      * @param ParamFetcher $paramFetcher

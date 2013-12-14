@@ -19,6 +19,7 @@ ka.FieldTypes.Plugin = new Class({
             bundle: {
                 label: t('Bundle'),
                 type: 'select',
+                inputWidth: '100%',
                 items: {}
             }
         };
@@ -37,6 +38,7 @@ ka.FieldTypes.Plugin = new Class({
                 label: t('Plugin'),
                 type: 'select',
                 needValue: key,
+                inputWidth: '100%',
                 againstField: 'bundle',
                 items: {}
             };

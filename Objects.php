@@ -3,6 +3,7 @@
 namespace Kryn\CmsBundle;
 
 use Kryn\CmsBundle\Configuration\Condition;
+use Kryn\CmsBundle\Exceptions\AccessDeniedException;
 use Kryn\CmsBundle\Exceptions\InvalidArgumentException;
 use Kryn\CmsBundle\Exceptions\ObjectNotFoundException;
 use Symfony\Component\EventDispatcher\GenericEvent;
@@ -155,10 +156,10 @@ class Objects
             $internalUrl = substr($internalUrl, strlen($catch));
         }
 
-        $pos = strpos($internalUrl, '/');
+        $firstSlashPos = strpos($internalUrl, '/');
         $questionPos = strpos($internalUrl, '?');
 
-        if ($pos === false && $questionPos === false) {
+        if ($firstSlashPos === false && $questionPos === false) {
             return array(
                 $internalUrl,
                 false,
@@ -166,10 +167,11 @@ class Objects
                 $list
             );
         }
-        if ($pos === false && $questionPos != false) {
+
+        if ($firstSlashPos === false && $questionPos != false) {
             $objectKey = substr($internalUrl, 0, $questionPos);
         } else {
-            $objectKey = substr($internalUrl, 0, $pos);
+            $objectKey = $this->getObjectKey($internalUrl);
         }
 
         if (strpos($objectKey, '%')) {
@@ -185,12 +187,12 @@ class Objects
         if ($questionPos !== false) {
             parse_str(substr($internalUrl, $questionPos + 1), $params);
 
-            if ($pos !== false) {
-                $objectIds = substr($internalUrl, $pos + 1, $questionPos - ($pos + 1));
+            if ($firstSlashPos !== false) {
+                $objectIds = substr($internalUrl, $firstSlashPos + 1, $questionPos - ($firstSlashPos + 1));
             }
 
-        } elseif ($pos !== false) {
-            $objectIds = substr($internalUrl, $pos + 1);
+        } else {
+            $objectIds = substr($internalUrl, strlen($objectKey) + 1);
         }
 
         $objectIds = $this->parsePk($objectKey, $objectIds);
@@ -233,7 +235,8 @@ class Objects
 
     /**
      * Cuts of the namespace/module name of a object key.
-     * corebundle:node => Node.
+     *
+     * kryncms/node => Node.
      *
      * @param  string $objectKey
      *
@@ -253,7 +256,7 @@ class Objects
     /**
      * Cuts of the object name of the object key.
      *
-     * KrynCmsBundle:node => Core.
+     * kryncms/node => KrynCmsBundle.
      *
      * @param $objectKey
      * @return null|string
@@ -269,8 +272,8 @@ class Objects
     /**
      * Returns the namespace of the bundle of the object key.
      *
-     * KrynCmsBundle:node => Core.
-     * bundleWithNameSpace:myObject => Bundle\With\Namespace.
+     * KrynCmsBundle/node => KrynCmsBundle.
+     * bundleWithNameSpace/myObject => Bundle\With\Namespace.
      *
      * @param  string $objectKey
      *
@@ -360,15 +363,19 @@ class Objects
      */
     public function getObjectKey($url)
     {
-        if (strpos($url, '/') == 0) {
-            $url = substr($url, 9);
+        if (0 === strpos($url, 'object://')){
+            $url = substr($url, strlen('object://'));
         }
 
         $idx = strpos($url, '/');
-        if ($idx == -1) {
-            return $url;
+
+        if (false === $idx) {
+            return false;
         }
-        return substr($url, 0, $idx);
+
+        $idx = $idx + strpos(substr($url, $idx + 1), '/');
+
+        return static::normalizeObjectKey(substr($url, 0, $idx + 1));
     }
 
     /**
@@ -970,7 +977,7 @@ class Objects
 
             foreach ($values as $fieldName => $value) {
                 if (!$this->getKrynCore()->getACL()->checkUpdateExact($objectKey, $pk, [$fieldName => $value])) {
-                    throw new \NoFieldWritePermission(sprintf("No update permission to field '%s' in item '%s' from object '%s'", $fieldName, $pk, $objectKey));
+                    throw new AccessDeniedException(sprintf("No update permission to field '%s' in item '%s' from object '%s'", $fieldName, $pk, $objectKey));
                 }
             }
         }
@@ -1361,8 +1368,8 @@ class Objects
         $key = str_replace('\\', '/', $key);
         $key = str_replace(':', '/', $key);
         $key = str_replace('.', '/', $key);
-        $key = str_replace('bundle/', '/', $key);
-        return strtolower($key);
+        $key = str_replace('bundle/', '/', strtolower($key));
+        return $key;
     }
 
     /**

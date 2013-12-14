@@ -1,6 +1,4 @@
-if (typeof ka == 'undefined') {
-    window.ka = {};
-}
+window.ka = window.ka || {};
 
 ka.clipboard = {};
 ka.settings = {};
@@ -8,53 +6,24 @@ ka.settings = {};
 ka.performance = false;
 ka.streamParams = {};
 
-ka.uploads = {};
-ka._links = {};
-
-PATH = _path;
-PATH_WEB = PATH;
-
-ka._ = function(p) {
-    return t(p);
-};
-
-if (typeOf(ka.langs) != 'object') {
-    this.langs = {};
-}
-
-/**
- * Prints all kind of stuff into console.log.
- * Detects if `console` exists and ignores the call
- * if not.
- *
- * @params {*}
- */
-window.logger = ka.logger = function() {
-    if (typeOf(console) != "undefined") {
-        var args = arguments;
-        if (args.length == 1) {
-            args = args[0];
-        }
-        console.log(args);
-    }
-};
-
-window.error = ka.error = function() {
-    if (typeOf(console) != "undefined") {
-        var args = arguments;
-        if (args.length == 1) {
-            args = args[0];
-        }
-        console.error(args);
-    }
-};
+ka.langs = ka.langs || {};
+_path = _path || location.pathname.dirname();
 
 /**
  * Is true if the current browser has a mobile user agent.
  * @type {Boolean}
  */
-ka.mobile = (false || navigator.userAgent.match(/Android/i) || navigator.userAgent.match(/iPhone/i) || navigator.userAgent.match(/webOS/i) || navigator.userAgent.match(/iPad/i) || navigator.userAgent.match(/iPod/i) || navigator.userAgent.match(/BlackBerry/i) || navigator.userAgent.match(/Windows Phone/i)
-    );
+ka.mobile = navigator.userAgent.match(/Android/i) || navigator.userAgent.match(/iPhone/i) || navigator.userAgent.match(/webOS/i) || navigator.userAgent.match(/iPad/i) || navigator.userAgent.match(/iPod/i) || navigator.userAgent.match(/BlackBerry/i) || navigator.userAgent.match(/Windows Phone/i);
+
+/**
+ * Alias for ka.t().
+ *
+ * @param {String} p
+ * @returns {String}
+ */
+ka._ = function(p) {
+    return t(p);
+};
 
 /**
  * Opens the frontend in a new tab.
@@ -73,36 +42,49 @@ ka.getAdminInterface = function() {
 };
 
 /**
- * Return a translated message pMsg with plural and context ability
+ * Return a translated message with plural and context ability
+ * with additional replacement of kml2html.
  *
- * @param string pMsg     message id (msgid)
- * @param string pPlural  message id plural (msgid_plural)
- * @param int    pCount   the count for plural
- * @param string pContext the message id of the context (msgctxt)
+ * @param {String} message Message id (msgid)
+ * @param {String} plural  Message id plural (msgid_plural)
+ * @param {Number} count   the count for plural
+ * @param {String} context the message id of the context (msgctxt)
+ *
+ * @return {String}
  */
-window._ = window.t = ka.t = function(pMsg, pPlural, pCount, pContext) {
-    return ka._kml2html(ka.translate(pMsg, pPlural, pCount, pContext));
+window._ = window.t = ka.t = function(message, plural, count, context) {
+    return ka._kml2html(ka.translate(message, plural, count, context));
 }
 
-ka.translate = function(pMsg, pPlural, pCount, pContext) {
+/**
+ * Return a translated message with plural and context ability.
+ *
+ * @param {String} message Message id (msgid)
+ * @param {String} plural  Message id plural (msgid_plural)
+ * @param {Number} count   the count for plural
+ * @param {String} context the message id of the context (msgctxt)
+ *
+ * @return {String}
+ */
+ka.translate = function(message, plural, count, context) {
     if (!ka && parent) {
         ka = parent.ka;
     }
     if (ka && !ka.lang && parent && parent.ka) {
         ka.lang = parent.ka.lang;
     }
-    var id = (!pContext) ? pMsg : pContext + "\004" + pMsg;
+    var id = (!context) ? message : context + "\004" + message;
 
     if (ka.lang && ka.lang[id]) {
         if (typeOf(ka.lang[id]) == 'array') {
-            if (pCount) {
+            if (count) {
                 var fn = 'gettext_plural_fn_' + ka.lang['__lang'];
-                var plural = window[fn](pCount) + 0;
+                var plural = window[fn](count) + 0;
 
-                if (pCount && ka.lang[id][plural]) {
-                    return ka.lang[id][plural].replace('%d', pCount);
+                if (count && ka.lang[id][plural]) {
+                    return ka.lang[id][plural].replace('%d', count);
                 } else {
-                    return ((pCount === null || pCount === false || pCount === 1) ? pMsg : pPlural);
+                    return ((count === null || count === false || count === 1) ? message : plural);
                 }
             } else {
                 return ka.lang[id][0];
@@ -111,10 +93,15 @@ ka.translate = function(pMsg, pPlural, pCount, pContext) {
             return ka.lang[id];
         }
     } else {
-        return ((!pCount || pCount === 1) && pCount !== 0) ? pMsg : pPlural;
+        return ((!count || count === 1) && count !== 0) ? message : plural;
     }
 }
 
+/**
+ * sprintf for translations.
+ *
+ * @return {String}
+ */
 window.tf = ka.tf = function() {
     var args = Array.from(arguments);
     var text = args.shift();
@@ -126,89 +113,77 @@ window.tf = ka.tf = function() {
 }
 
 /**
- * Return a translated message $pMsg within a context $pContext
+ * Return a translated message within a context.
  *
- * @param string pContext the message id of the context
- * @param string pMsg     message id
+ * @param {String} context the message id of the context
+ * @param {String} message message id
  */
-window.tc = ka.tc = function(pContext, pMsg) {
-    return t(pMsg, null, null, pContext);
+window.tc = ka.tc = function(context, message) {
+    return t(message, null, null, context);
 }
 
-ka._kml2html = function(pRes) {
+/**
+ * Replaces some own <ka:> elements with correct html.
+ *
+ * @param {String} message
+ *
+ * @returns {String}
+ * @private
+ */
+ka._kml2html = function(message) {
 
     var kml = ['ka:help'];
-    if (pRes) {
-        pRes = pRes.replace(/<ka:help\s+id="(.*)">(.*)<\/ka:help>/g, '<a href="javascript:;" onclick="ka.wm.open(\'admin/help\', {id: \'$1\'}); return false;">$2</a>');
+    if (message) {
+        message = message.replace(/<ka:help\s+id="(.*)">(.*)<\/ka:help>/g, '<a href="javascript:;" onclick="ka.wm.open(\'admin/help\', {id: \'$1\'}); return false;">$2</a>');
     }
-    return pRes;
-}
-
-ka.findWindow = function(pElement) {
-
-    if (!typeOf(pElement)) {
-        throw 'ka.findWindow(): pElement is not an element.';
-    }
-
-    var window = pElement.getParent('.kwindow-border');
-
-    return window ? window.windowInstance : false;
-
-}
-
-ka.setLocalSetting = function(key, data) {
-    localStorage.setItem(key, data);
-}
-
-ka.getLocalSetting = function(key) {
-    return localStorage.getItem(key);
+    return message;
 }
 
 ka.entrypoint = {
 
-    open: function(pEntrypoint, pOptions, pSource, pInline, pDependWindowId) {
-        var entrypoint = ka.entrypoint.get(pEntrypoint);
+    open: function(path, options, inline, dependWindowId) {
+        var entryPoint = ka.entrypoint.get(path);
 
-        if (!entrypoint) {
-            throw 'Can not be found entrypoint: ' + pEntrypoint;
+        if (!entryPoint) {
+            throw 'Can not be found entryPoint: ' + path;
             return false;
         }
 
-        if (['custom', 'iframe', 'list', 'edit', 'add', 'combine'].contains(entrypoint.type)) {
-            ka.wm.open(pEntrypoint, pOptions, pDependWindowId, pInline, pSource);
-        } else if (entrypoint.type == 'function') {
-            ka.entrypoint.exec(entrypoint, pOptions, pSource);
+        if (['custom', 'iframe', 'list', 'edit', 'add', 'combine'].contains(entryPoint.type)) {
+            ka.wm.open(path, options, dependWindowId, inline);
+        } else if (entryPoint.type == 'function') {
+            ka.entrypoint.exec(entryPoint, options);
         }
     },
 
-    getRelative: function(pCurrent, pEntryPoint) {
+    getRelative: function(current, entryPoint) {
 
-        if (typeOf(pEntryPoint) != 'string' || !pEntryPoint) {
-            return pCurrent;
+        if (typeOf(entryPoint) != 'string' || !entryPoint) {
+            return current;
         }
 
-        if (pEntryPoint.substr(0, 1) == '/') {
-            return pEntryPoint;
+        if (entryPoint.substr(0, 1) == '/') {
+            return entryPoint;
         }
 
-        var current = pCurrent + '';
+        current = current + '';
         if (current.substr(current.length - 1, 1) != '/') {
             current += '/';
         }
 
-        return current + pEntryPoint;
+        return current + entryPoint;
 
     },
 
     //executes a entry point from type function
-    exec: function(pEntrypoint, pOptions, pSource) {
+    exec: function(entryPoint, options) {
 
-        if (pEntrypoint.functionType == 'global') {
-            if (window[pEntrypoint.functionName]) {
-                window[pEntrypoint.functionName](pOptions);
+        if (entryPoint.functionType == 'global') {
+            if (window[entryPoint.functionName]) {
+                window[entryPoint.functionName](options);
             }
-        } else if (pEntrypoint.functionType == 'code') {
-            eval(pEntrypoint.functionCode);
+        } else if (entryPoint.functionType == 'code') {
+            eval(entryPoint.functionCode);
         }
 
     },
@@ -225,9 +200,8 @@ ka.entrypoint = {
 
         var code = splitted.join('/');
 
-        var tempEntry = false;
-
-        var path = [], config, notFound = false, item;
+        var config, notFound = false, item;
+        path = [];
 
         config = ka.getConfig(extension);
 
@@ -266,8 +240,9 @@ ka.entrypoint = {
 };
 
 /**
+ * Replaces all <, >, & and " with html so you can use it in safely innerHTML.
  *
- * @param {String} value
+ * @param {String}   value
  * @returns {string} Safe for innerHTML usage.
  */
 ka.htmlEntities = function(value) {
@@ -290,8 +265,17 @@ ka.htmlEntities = function(value) {
     return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-ka.newBubble = function(pTitle, pText, pDuration) {
-    return ka.adminInterface.getHelpSystem().newBubble(pTitle, pText, pDuration);
+/**
+ * Creates a new information bubble on the right corner.
+ *
+ * @param {String} title
+ * @param {String} text
+ * @param {String} duration
+ *
+ * @returns {Element}
+ */
+ka.newBubble = function(title, text, duration) {
+    return ka.adminInterface.getHelpSystem().newBubble(title, text, duration);
 }
 
 /**
@@ -300,28 +284,28 @@ ka.newBubble = function(pTitle, pText, pDuration) {
  *
  * Example:
  *
- *   pFields = {
+ *   fields = {
  *      field1: {type: 'text', label: 'Field 1'},
  *      field2: {type: 'checkbox', label: 'Field 2'}
  *   }
  *
- *   pPrefix = 'options'
+ *   prefix = 'options'
  *
- *   pFields will be changed to:
+ *   fields will be changed to:
  *   {
  *      'options[field1]': {type: 'text', label: 'Field 1'},
  *      'options[field2]': {type: 'checkbox', label: 'Field 2'}
  *   }
  *
- * @param {Array} pFields Reference to object.
- * @param {String} pPrefix
+ * @param {Array} fields Reference to object.
+ * @param {String} prefix
  */
-ka.addFieldKeyPrefix = function(pFields, pPrefix) {
-    Object.each(pFields, function(field, key) {
-        pFields[pPrefix + '[' + key + ']'] = field;
-        delete pFields[key];
-        if (pFields.children) {
-            ka.addFieldKeyPrefix(field.children, pPrefix);
+ka.addFieldKeyPrefix = function(fields, prefix) {
+    Object.each(fields, function(field, key) {
+        fields[prefix + '[' + key + ']'] = field;
+        delete fields[key];
+        if (fields.children) {
+            ka.addFieldKeyPrefix(field.children, prefix);
         }
     });
 }
@@ -329,15 +313,15 @@ ka.addFieldKeyPrefix = function(pFields, pPrefix) {
 /**
  * Resolve path notations and returns the appropriate class.
  *
- * @param {String} pClassPath
+ * @param {String} classPath
  * @return {Class|Function}
  */
-ka.getClass = function(pClassPath) {
-    pClassPath = pClassPath.replace('[\'', '.');
-    pClassPath = pClassPath.replace('\']', '.');
+ka.getClass = function(classPath) {
+    classPath = classPath.replace('[\'', '.');
+    classPath = classPath.replace('\']', '.');
 
-    if (pClassPath.indexOf('.') > 0) {
-        var path = pClassPath.split('.');
+    if (classPath.indexOf('.') > 0) {
+        var path = classPath.split('.');
         var clazz = null;
         Array.each(path, function(item) {
             clazz = clazz ? clazz[item] : window[item];
@@ -345,56 +329,66 @@ ka.getClass = function(pClassPath) {
         return clazz;
     }
 
-    return window[pClassPath];
+    return window[classPath];
 }
 
 /**
  * Encodes a value from url usage.
  * If Array, it encodes the whole array an implodes it with comma.
- * If Object, it encodes the while object an implodes the <key>=<value> pairs with a comma.
+ * If Object, it encodes the whole object and implodes the <key>=<value> pairs with a comma.
  *
- * @param {String} pValue
- * @return {STring}
+ * @param {String} value
+ *
+ * @return {String}
  */
-ka.urlEncode = function(pValue) {
+ka.urlEncode = function(value) {
 
-    if (typeOf(pValue) == 'string') {
-        return encodeURIComponent(pValue).replace(/\%2F/g, '%252F'); //fix apache default setting
-    } else if (typeOf(pValue) == 'array') {
+    if (typeOf(value) == 'string') {
+        return encodeURIComponent(value).replace(/\%2F/g, '%252F'); //fix apache default setting
+    } else if (typeOf(value) == 'array') {
         var result = '';
-        Array.each(pValue, function(item) {
+        Array.each(value, function(item) {
             result += ka.urlEncode(item) + ',';
         });
         return result.substr(0, result.length - 1);
-    } else if (typeOf(pValue) == 'object') {
+    } else if (typeOf(value) == 'object') {
         var result = '';
-        Array.each(pValue, function(item, key) {
+        Array.each(value, function(item, key) {
             result += key + '=' + ka.urlEncode(item) + ',';
         });
         return result.substr(0, result.length - 1);
     }
 
-    return pValue;
+    return value;
 
 }
 
 /**
  * Decodes a value for url usage.
- * @param {String} pValue
+ *
+ * @param {String} value
+ *
  * @return {String}
  */
-ka.urlDecode = function(pValue) {
-    if (typeOf(pValue) != 'string') {
-        return pValue;
+ka.urlDecode = function(value) {
+    if (typeOf(value) != 'string') {
+        return value;
     }
 
     try {
-        return decodeURIComponent(pValue.replace(/%25252F/g, '%2F'));
+        return decodeURIComponent(value.replace(/%25252F/g, '%2F'));
     } catch (e) {
-        return pValue;
+        return value;
     }
 }
 
+/**
+ * Normalizes a objectKey.
+ *
+ * @param {String} objectKey
+ *
+ * @returns {string}
+ */
 ka.normalizeObjectKey = function(objectKey) {
     objectKey = objectKey.replace('\\', '/').replace('.', '/').replace(':', '/').toLowerCase().replace('bundle/', '/');
     var bundleName = objectKey.split('/')[0];
@@ -407,50 +401,63 @@ ka.normalizeObjectKey = function(objectKey) {
     return bundleName + '/' + objectName.lcfirst();
 }
 
+/**
+ * Normalizes a entryPoint path.
+ *
+ * Example
+ *
+ *   KrynCmsBundle/entry/point/path
+ *   => kryncms/entry/point/path
+ *
+ *
+ * @param {String} path
+ *
+ * @returns {String}
+ */
 ka.normalizeEntryPointPath = function(path) {
     var slash = path.indexOf('/');
 
-    return ka.getShortBundleName(path.substr(0, slash))+ path.substr(slash);
-
+    return ka.getShortBundleName(path.substr(0, slash)) + path.substr(slash);
 }
 
 /**
  * Returns a absolute path.
- * If pPath begins with # it returns pPath
- * if pPath is not a string it returns pPath
- * if pPath contains http:// on the beginning it returns pPath
+ * If path begins with # it returns path
+ * if path is not a string it returns path
+ * if path contains http:// on the beginning it returns path
  *
- * @param {String} pPath
+ * @param {String} path
+ *
  * @return {String}
  */
-ka.mediaPath = function(pPath) {
+ka.mediaPath = function(path) {
 
-    if (typeOf(pPath) != 'string') {
-        return pPath;
+    if (typeOf(path) != 'string') {
+        return path;
     }
 
-    if (pPath.substr(0, 1) == '#') {
-        return pPath;
+    if (path.substr(0, 1) == '#') {
+        return path;
     }
 
-    if (pPath.substr(0, 1) == '/') {
-        return _path + pPath.substr(1);
-    } else if (pPath.substr(0, 7) == 'http://') {
-        return pPath;
+    if (path.substr(0, 1) == '/') {
+        return _path + path.substr(1);
+    } else if (path.substr(0, 7) == 'http://') {
+        return path;
     } else {
-        return _path + '' + pPath;
+        return _path + '' + path;
     }
-
 }
 
 /**
- * Returns a list of the primary keys if pObjectKey.
+ * Returns a list of the primary keys.
  *
- * @param {String} pObjectKey
+ * @param {String} objectKey
+ *
  * @return {Array}
  */
-ka.getObjectPrimaryList = function(pObjectKey) {
-    var def = ka.getObjectDefinition(pObjectKey);
+ka.getObjectPrimaryList = function(objectKey) {
+    var def = ka.getObjectDefinition(objectKey);
 
     var res = [];
     Object.each(def.fields, function(field, key) {
@@ -463,169 +470,183 @@ ka.getObjectPrimaryList = function(pObjectKey) {
 }
 
 /**
- * Return only the primary keys of pItem as object.
+ * Returns the primaryKey name.
  *
- * @param {String} pObjectKey
- * @param {Object} pItem Always a object with the primary key => value pairs.
+ * @param {String} objectKey
+ *
+ * @returns {String}
+ */
+ka.getObjectPrimaryKey = function(objectKey) {
+    var pks = ka.getObjectPrimaryList(objectKey);
+    return pks[0];
+}
+
+/**
+ * Return only the primary key values of a object.
+ *
+ * @param {String} objectKey
+ * @param {Object} item Always a object with the primary key => value pairs.
  *
  * @return {Object}
  */
-ka.getObjectPk = function(pObjectKey, pItem) {
-    var pks = ka.getObjectPrimaryList(pObjectKey);
+ka.getObjectPk = function(objectKey, item) {
+    var pks = ka.getObjectPrimaryList(objectKey);
     var result = {};
     Array.each(pks, function(pk) {
-        result[pk] = pItem[pk];
+        result[pk] = item[pk];
     });
     return result;
 }
 
 /**
+ * Return the internal representation (id) of object primary keys.
+ *
+ * If the object has a composite primaryKey it all values are joined together
+ * separated with a slash character. All primary parts are urlEncoded: urlEncode(<pk1>)/urlEncode(<pk2>)
+ *
+ * @param {String} objectKey
+ * @param {Object} item
+ */
+ka.getObjectId = function(objectKey, item) {
+    var pks = ka.getObjectPrimaryList(objectKey);
+
+    if (1 < pks.length) {
+        var values = [];
+        Array.each(pks, function(pk) {
+            values = ka.urlEncode(item[pk]);
+        });
+        return values.join('/');
+    }
+
+    return item[pks[0]];
+}
+
+/**
+ * Returns the id part of a object url (object://<objectName>/<id>).
+ *
+ * If you need the full uri, use ka.getObjectUrl.
+ *
+ * @param {String} objectKey
+ * @param {Array}  item
+ *
+ * @return {String} already urlEncoded
+ */
+ka.getObjectUrlId = function(objectKey, item) {
+    var id = ka.getObjectId(objectKey, item);
+    return ka.hasCompositePk(objectKey) ? id : ka.urlEncode(id);
+}
+
+/**
+ * Returns the correct escaped id part of the object url (object://<objectName>/<id>).
+ *
+ * @param {String} objectKey
+ * @param {String} id String from ka.getObjectId or ka.getObjectIdFromUrl e.g.
+ */
+ka.getObjectUrlIdFromId = function(objectKey, id) {
+    return ka.hasCompositePk(objectKey) ? id : ka.urlEncode(id);
+}
+
+/**
+ * Returns true if objectKey as more than one primary key.
+ *
+ * @param {String} objectKey
+ * @returns {boolean}
+ */
+ka.hasCompositePk = function(objectKey) {
+    return 1 < ka.getObjectPrimaryList(objectKey).length;
+}
+
+/**
+ * Just converts arguments into a new string :
+ *
+ *    object://<objectKey>/<id>
+ *
+ *
+ * @param {String} objectKey
+ * @param {String} id        Has to be urlEncoded (use ka.urlEncode or ka.getObjectUrlId)
+ * @return {String}
+ */
+ka.getObjectUrl = function(objectKey, id) {
+    return 'object://' + ka.normalizeObjectKey(objectKey) + '/' + id;
+}
+
+/**
  * This just cut off object://<objectName>/ and returns the raw primary key part.
  *
- * @param {String} uri Internal uri
+ * @param {String} url
+ *
  * @return {String}
  */
-ka.getCroppedObjectId = function(uri) {
-    if ('string' !== typeOf(uri)) {
-        return uri;
-    }
-
-    if (uri.indexOf('object://') == 0) {
-        uri = uri.substr(9);
-    }
-
-    var idx = uri.indexOf('/'); //cut of bundleName
-    uri = -1 === idx ? uri : uri.substr(idx + 1);
-
-    var idx = uri.indexOf('/'); //cut of objectName
-    uri = -1 === idx ? uri : uri.substr(idx + 1);
-
-    return uri;
-}
-
-/**
- * Returns the id of an object item for the usage in urls (internal uri's) - urlencoded.
- * If you need the full uri, you ka.getObjectUrl
- *
- * @param {String} pObjectKey
- * @param {Array}  pItem
- * @return {String} urlencoded internal uri part of the id.
- */
-ka.getObjectUrlId = function(pObjectKey, pItem) {
-    var pks = ka.getObjectPrimaryList(pObjectKey);
-
-    if (pks.length == 0) {
-        throw pObjectKey + ' does not have primary keys.';
-    }
-
-    var urlId = '';
-    if (pks.length == 1 && typeOf(pItem) != 'object') {
-        return ka.urlEncode(pItem) + '';
-    } else {
-        var allNull = false;
-        Array.each(pks, function(pk) {
-            allNull |= null === ka.urlEncode(pItem[pk]);
-            urlId += ka.urlEncode(pItem[pk]) + ',';
-        });
-        if (allNull) return null;
-        return urlId.substr(0, urlId.length - 1);
-    }
-
-}
-
-/**
- * Just convert the arguments into a new string :
- *    object://<pObjectKey>/<pId>
- *
- *
- * @param {String} pObjectKey
- * @param {String} pId Has to be urlencoded (use ka.urlEncode())
- * @return {String}
- */
-ka.getObjectUrl = function(pObjectKey, pId) {
-    return 'object://' + ka.normalizeObjectKey(pObjectKey) + '/' + pId;
-}
-
-/**
- * Returns the object key (not id) from an object uri.
- *
- * @param url
- */
-ka.getObjectKey = function(url) {
-    if (typeOf(url) != 'string') {
-        throw 'url is not a string';
+ka.getCroppedObjectId = function(url) {
+    if ('string' !== typeOf(url)) {
+        return url;
     }
 
     if (url.indexOf('object://') == 0) {
         url = url.substr(9);
     }
 
-    var idx = url.indexOf('/');
-    if (idx == -1) {
-        return '';
-    }
+    var idx = url.indexOf('/'); //cut of bundleName
+    url = -1 === idx ? url : url.substr(idx + 1);
 
-    idx = idx + url.substr(idx + 1).indexOf('/');
-    return ka.normalizeObjectKey(url.substr(0, idx + 1));
+    idx = url.indexOf('/'); //cut of objectName
+    url = -1 === idx ? url : url.substr(idx + 1);
+
+    return url;
 }
 
 /**
- * Returns the PK of an object from a internal object url as object.
+ * This just cut anything but the full raw objectKey.
+ *
+ * @param {String} url Internal url
+ *
+ * @return {String} the objectKey
+ */
+ka.getCroppedObjectKey = function(url) {
+    if ('string' !== typeOf(url)) {
+        return url;
+    }
+
+    if (url.indexOf('object://') == 0) {
+        url = url.substr(9);
+    }
+
+    var idx = url.indexOf('/'); //till bundleName/
+    var nextPart = url.substr(idx + 1); // now we have <objectKey>/<id>
+
+    var lastIdx = nextPart.indexOf('/'); //till objectKey/
+
+    return -1 === lastIdx ? url : url.substr(0, idx + lastIdx + 1);
+}
+
+/**
+ * Return the internal representation (id) of a internal object url.
  *
  * Examples:
  *
- *  pUrl = object://user/1
- *  => {id: 1}
+ *  url = object://kryncms/user/1
+ *  => 1
  *
- *  pUrl = object://user/1/3
- *  => [{id: 1}, {id: 3}]
+ *  url = object://kryncms/file/%2Fadmin%2Fimages%2Fhi.jpg
+ *  => /admin/images/hi.jpg
  *
- *  pUrl = object://file/%2Fadmin%2Fimages%2Fhi.jpg
- *  => {path: /admin/images/hi.jpg}
+ *  url = object://kryncms/test/pk1/pk2
+ *  => pk1/pk2
  *
- * @param  {String} pUrl   object://user/1
- * @return {String|Object}  If we have only one pk, it returns a string, otherwise an array.
+ * @param {String} url
+ *
+ * @return {String}
  */
-ka.getObjectId = function(pUrl) {
-    if (typeOf(pUrl) != 'string') {
-        return pUrl;
-    }
-    var res = [];
+ka.getObjectIdFromUrl = function(url) {
+    var pks = ka.getObjectPrimaryList(ka.getCroppedObjectKey(url));
 
-    if (pUrl.indexOf('object://') != -1) {
-        var id = pUrl.substr(10 + pUrl.substr('object://'.length).indexOf('/'));
-    } else if (pUrl.indexOf('/') != -1) {
-        var id = pUrl.substr(pUrl.indexOf('/') + 1);
-    } else {
-        var id = pUrl;
+    var pkString = ka.getCroppedObjectId(url);
+
+    if (1 < pks.length) {
+        return pkString; //already correct formatted
     }
 
-    var objectKey = ka.getObjectKey(pUrl);
-    var objectUri = ka.getCroppedObjectId(pUrl);
-
-    var pks = ka.getObjectPrimaryList(objectKey);
-
-    var keys = objectUri.split('/');
-
-    if (keys.length > 1) {
-        var result = [];
-        Array.each(keys, function(key) {
-            var pk = {};
-            Array.each(key.split(','), function(id, pos) {
-                pk[pks[pos]] = ka.urlDecode(id);
-            });
-            result.push(pk);
-        });
-        return result;
-    } else {
-        var result = {};
-
-        Array.each(objectUri.split(','), function(id, pos) {
-            result[pks[pos]] = ka.urlDecode(id);
-        });
-
-        return result;
-    }
+    return ka.urlDecode(pkString);
 }
 
 /**
@@ -637,17 +658,17 @@ ka.getObjectId = function(pUrl) {
  * You can call this function really fast consecutively, since it queues all and fires
  * only one REST API call that receives all items at once per object key.(at least after 50ms of the last call).
  *
- * @param {String} pUri
- * @param {Function} pCb the callback function.
+ * @param {String} uri
+ * @param {Function} callback the callback function.
  *
  */
-ka.getObjectLabel = function(pUri, pCb) {
-    var objectKey = ka.normalizeObjectKey(ka.getObjectKey(pUri));
-    var pkString = ka.getCroppedObjectId(pUri);
-    var uri = 'object://' + objectKey + '/' + pkString;
+ka.getObjectLabel = function(uri, callback) {
+    var objectKey = ka.normalizeObjectKey(ka.getCroppedObjectKey(uri));
+    var pkString = ka.getCroppedObjectId(uri);
+    var normalizedUrl = 'object://' + objectKey + '/' + pkString;
 
     if (ka.getObjectLabelBusy[objectKey]) {
-        ka.getObjectLabel.delay(10, ka.getObjectLabel, [uri, pCb]);
+        ka.getObjectLabel.delay(10, ka.getObjectLabel, [normalizedUrl, callback]);
         return;
     }
 
@@ -659,17 +680,17 @@ ka.getObjectLabel = function(pUri, pCb) {
         ka.getObjectLabelQ[objectKey] = {};
     }
 
-    if (!ka.getObjectLabelQ[objectKey][uri]) {
-        ka.getObjectLabelQ[objectKey][uri] = [];
+    if (!ka.getObjectLabelQ[objectKey][normalizedUrl]) {
+        ka.getObjectLabelQ[objectKey][normalizedUrl] = [];
     }
 
-    ka.getObjectLabelQ[objectKey][uri].push(pCb);
+    ka.getObjectLabelQ[objectKey][normalizedUrl].push(callback);
 
     ka.getObjectLabelQTimer[objectKey] = (function() {
 
         ka.getObjectLabelBusy = true;
 
-        var uri = 'object://' + ka.urlEncode(ka.normalizeObjectKey(objectKey)) + '/';
+        var uri = 'object://' + ka.normalizeObjectKey(objectKey) + '/';
         Object.each(ka.getObjectLabelQ[objectKey], function(cbs, requestedUri) {
             uri += ka.getCroppedObjectId(requestedUri) + '/';
         });
@@ -722,76 +743,79 @@ ka.getObjectLabelQTimer = {};
  * Returns the object label, based on a label field or label template (defined
  * in the object definition).
  *
- * @param {String} pObjectKey
- * @param {Object} pItem
- * @param {String} pMode 'default', 'field' or 'tree'. Default is 'default'
- * @param {Object} pDefinition overwrite definitions stored in the pObjectKey
+ * @param {String} objectKey
+ * @param {Object} item
+ * @param {String} mode         'default', 'field' or 'tree'. Default is 'default'
+ * @param {Object} [overwriteDefinition] overwrite definitions stored in the objectKey
+ *
  * @return {String}
  */
-ka.getObjectLabelByItem = function(pObjectKey, pItem, pMode, pDefinition) {
+ka.getObjectLabelByItem = function(objectKey, item, mode, overwriteDefinition) {
 
-    var definition = ka.getObjectDefinition(pObjectKey);
+    var definition = ka.getObjectDefinition(objectKey);
     if (!definition) {
-        throw 'Definition not found ' + pObjectKey;
+        throw 'Definition not found ' + objectKey;
     }
 
-    var template = (pDefinition && pDefinition.labelTemplate) ? pDefinition.labelTemplate : definition.labelTemplate;
-    var label = (pDefinition && pDefinition.labelField) ? pDefinition.labelField : definition.labelField;
+    var template = definition.treeTemplate ? definition.treeTemplate : definition.labelTemplate;
+    var label = definition.treeLabel ? definition.treeLabel : definition.labelField;
 
-    if (pDefinition) {
+    if (overwriteDefinition) {
         ['fieldTemplate', 'fieldLabel', 'treeTemplate', 'treeLabel'].each(function(map) {
-            if (typeOf(pDefinition[map]) !== 'null') {
-                definition[map] = pDefinition[map];
+            if (typeOf(overwriteDefinition[map]) !== 'null') {
+                definition[map] = overwriteDefinition[map];
             }
         });
     }
 
     /* field ui */
-    if (pMode == 'field' && definition.fieldTemplate) {
+    if (mode == 'field' && definition.fieldTemplate) {
         template = definition.fieldTemplate;
     }
 
-    if (pMode == 'field' && definition.fieldLabel) {
+    if (mode == 'field' && definition.fieldLabel) {
         label = definition.fieldLabel;
     }
 
+    console.log(label, template);
+
     /* tree */
-    if (pMode == 'tree' && definition.treeTemplate) {
+    if (mode == 'tree' && definition.treeTemplate) {
         template = definition.treeTemplate;
     }
 
-    if (pMode == 'tree' && definition.treeLabel) {
+    if (mode == 'tree' && definition.treeLabel) {
         label = definition.treeLabel;
     }
 
     if (!template) {
         //we only have an label field, so return it
-        return mowla.fetch('{label}', {label: pItem[label]});
+        return mowla.fetch('{label}', {label: item[label]});
     }
 
-    return mowla.fetch(template, pItem);
+    return mowla.fetch(template, item);
 }
 
 /**
  * Returns all labels for a object item.
  *
- * @param {Object}  pFields  The array of fields definition, that defines /how/ you want to show the data. limited range of 'type' usage.
- * @param {Object}  pItem
- * @param {String} pObjectKey
- * @param {Boolean} pRelationsAsArray Relations would be returned as arrays/origin or as string(default).
+ * @param {Object}  fields  The array of fields definition, that defines /how/ you want to show the data. limited range of 'type' usage.
+ * @param {Object}  item
+ * @param {String}  objectKey
+ * @param {Boolean} [relationsAsArray] Relations would be returned as arrays/origin or as string(default).
  *
  * @return {Object}
  */
-ka.getObjectLabels = function(pFields, pItem, pObjectKey, pRelationsAsArray) {
+ka.getObjectLabels = function(fields, item, objectKey, relationsAsArray) {
 
-    var data = pItem, dataKey;
-    Object.each(pFields, function(field, fieldId) {
+    var data = item, dataKey;
+    Object.each(fields, function(field, fieldId) {
         dataKey = fieldId;
-        if (pRelationsAsArray && dataKey.indexOf('.') > 0) {
+        if (relationsAsArray && dataKey.indexOf('.') > 0) {
             dataKey = dataKey.split('.')[0];
         }
 
-        data[dataKey] = ka.getObjectFieldLabel(pItem, field, fieldId, pObjectKey, pRelationsAsArray);
+        data[dataKey] = ka.getObjectFieldLabel(item, field, fieldId, objectKey, relationsAsArray);
     }.bind(this));
 
     return data;
@@ -800,38 +824,39 @@ ka.getObjectLabels = function(pFields, pItem, pObjectKey, pRelationsAsArray) {
 /**
  * Returns a single label for a field of a object item.
  *
- * @param {Object} pValue
- * @param {Object} pField The array of fields definition, that defines /how/ you want to show the data. limited range of 'type' usage.
- * @param {String} pFieldId
- * @param {String} pObjectKey
- * @param {Boolean} pRelationsAsArray
+ * @param {Object} value
+ * @param {Object} field The array of fields definition, that defines /how/ you want to show the data. limited range of 'type' usage.
+ * @param {String} fieldId
+ * @param {String} objectKey
+ * @param {Boolean} [relationsAsArray]
  *
- * @return {String} Safe HTML. Escapted with ka.htmlEntities()
+ * @return {String} Safe HTML. Escaped with ka.htmlEntities()
  */
-ka.getObjectFieldLabel = function(pValue, pField, pFieldId, pObjectKey, pRelationsAsArray) {
-    var fields = ka.getObjectDefinition(pObjectKey);
-    if (!fields) {
-        throw 'Object not found ' + pObjectKey;
+ka.getObjectFieldLabel = function(value, field, fieldId, objectKey, relationsAsArray) {
+
+    var oriFields = ka.getObjectDefinition(objectKey);
+    if (!oriFields) {
+        throw 'Object not found ' + objectKey;
     }
 
-    var fieldId = pFieldId;
-    if (typeOf(pFieldId) == 'string' && pFieldId.indexOf('.') > 0) {
-        fieldId = pFieldId.split('.')[0];
+    var oriFieldId = fieldId;
+    if (typeOf(fieldId) == 'string' && fieldId.indexOf('.') > 0) {
+        oriFieldId = fieldId.split('.')[0];
     }
 
-    fields = fields['fields'];
-    var field = fields[fieldId];
+    oriFields = oriFields['fields'];
+    var oriField = oriFields[oriFieldId];
 
-    var showAsField = Object.clone(pField || field);
+    var showAsField = Object.clone(field || oriField);
     if (!showAsField.type) {
-        Object.each(field, function(v, i) {
+        Object.each(oriField, function(v, i) {
             if (!showAsField[i]) {
                 showAsField[i] = v;
             }
         });
     }
 
-    pValue = Object.clone(pValue);
+    value = Object.clone(value);
 
     if (showAsField.type == 'predefined') {
         if (ka.getObjectDefinition(showAsField.object)) {
@@ -840,8 +865,8 @@ ka.getObjectFieldLabel = function(pValue, pField, pFieldId, pObjectKey, pRelatio
     }
 
     showAsField.type = showAsField.type || 'text';
-    if (field) {
-        field.type = field.type || 'text';
+    if (oriField) {
+        oriField.type = oriField.type || 'text';
     }
 
     var clazz = showAsField.type.ucfirst();
@@ -849,24 +874,25 @@ ka.getObjectFieldLabel = function(pValue, pField, pFieldId, pObjectKey, pRelatio
         clazz = 'Text';
     }
 
-    if (pRelationsAsArray) {
+    if (relationsAsArray) {
         showAsField.options = showAsField.options || {};
         showAsField.options.relationsAsArray = true;
     }
 
-    var labelType = new ka.LabelTypes[clazz](field, showAsField, pFieldId, pObjectKey);
+    var labelType = new ka.LabelTypes[clazz](oriField, showAsField, fieldId, objectKey);
 
-    return labelType.render(pValue);
+    return labelType.render(value);
 }
 
 /**
  * Returns the module title of the given module key.
  *
- * @param {String} pKey
- * @return {String} Or false, if the module does not exist/its not activated.
+ * @param {String} key
+ *
+ * @return {String|null} Null if the module does not exist/its not activated.
  */
-ka.getExtensionTitle = function(pKey) {
-    var config = ka.getBundleConfig(pKey);
+ka.getExtensionTitle = function(key) {
+    var config = ka.getBundleConfig(key);
     if (!config) {
         return null;
     }
@@ -884,28 +910,6 @@ ka.getBundleConfig = function(bundle) {
         }
     });
     return result;
-}
-
-ka.tryLock = function(pWin, pKey, pForce) {
-    if (!pForce) {
-
-        new Request.JSON({url: _pathAdmin + 'admin/backend/tryLock', noCache: 1, onComplete: function(res) {
-
-            if (!res.locked) {
-                ka.lockNotPossible(pWin, res);
-            }
-
-        }}).get({key: pKey, force: pForce ? 1 : 0});
-
-    } else {
-        ka.lockContent(pKey);
-    }
-}
-
-ka.alreadyLocked = function(pWin, pResult) {
-
-    pWin._alert(t('Currently, a other user has this content open.'));
-
 }
 
 /**
@@ -945,85 +949,88 @@ ka.dateTime = function(seconds) {
     return date.format(format);
 }
 
-ka.getDomain = function(pRsn) {
-    var result = [];
+/**
+ * Returns a domain object.
+ *
+ * @param {Number} id
+ * @returns {Object}
+ */
+ka.getDomain = function(id) {
+    var result = null;
     ka.settings.domains.each(function(domain) {
-        if (domain.id == pRsn) {
+        if (domain.id == id) {
             result = domain;
         }
     })
     return result;
 }
 
-ka.loadSettings = function(keyLimitation, cb) {
-    ka.adminInterface.loadSettings(keyLimitation, cb);
+/**
+ * Loads all settings from the backend.
+ *
+ * @param {Array} keyLimitation
+ * @param {Function} callback
+ */
+ka.loadSettings = function(keyLimitation, callback) {
+    ka.adminInterface.loadSettings(keyLimitation, callback);
 }
 
 /**
  * Returns the bundle configuration array.
  *
  * @param {String} bundleName
- * @returns {Array}
+ * @returns {Object}
  */
 ka.getConfig = function(bundleName) {
     if (!bundleName) return;
     return ka.settings.configs[bundleName] || ka.settings.configs[bundleName.toLowerCase()] || ka.settings.configsAlias[bundleName] || ka.settings.configsAlias[bundleName.toLowerCase()];
 }
 
+/**
+ * Returns the short bundleName.
+ *
+ * @param {String} bundleName
+ *
+ * @returns {string}
+ */
 ka.getShortBundleName = function(bundleName) {
     return bundleName.toLowerCase().replace(/bundle$/, '');
 };
 
+/**
+ * Loads the main menu.
+ */
 ka.loadMenu = function() {
     ka.adminInterface.loadMenu();
 }
 
-ka.loadLanguage = function(pLang) {
-    if (!pLang) {
-        pLang = 'en';
+/**
+ * Sets the current language and reloads all messages.
+ *
+ * @param {String} languageCode
+ */
+ka.loadLanguage = function(languageCode) {
+    if (!languageCode) {
+        languageCode = 'en';
     }
-    window._session.lang = pLang;
+    window._session.lang = languageCode;
 
-    Cookie.write('kryn_language', pLang);
+    Cookie.write('kryn_language', languageCode);
 
-    Asset.javascript(_pathAdmin + 'admin/ui/language-plural?lang=' + pLang);
+    Asset.javascript(_pathAdmin + 'admin/ui/language-plural?lang=' + languageCode);
 
-    new Request.JSON({url: _pathAdmin + 'admin/ui/language?lang=' + pLang, async: false, noCache: 1, onComplete: function(pResponse) {
+    new Request.JSON({url: _pathAdmin + 'admin/ui/language?lang=' + languageCode, async: false, noCache: 1, onComplete: function(pResponse) {
         ka.lang = pResponse.data;
         Locale.define('en-US', 'Date', ka.lang);
     }}).get();
 
 }
 
-ka.saveUserSettings = function() {
-    if (ka.lastSaveUserSettings) {
-        ka.lastSaveUserSettings.cancel();
-    }
-
-    ka.settings.user = new Hash(ka.settings.user);
-
-    ka.lastSaveUserSettings = new Request.JSON({url: _pathAdmin + 'admin/backend/user-settings', noCache: 1, onComplete: function(res) {
-    }}).post({ settings: JSON.encode(ka.settings.user) });
-}
-
-ka.resetWindows = function() {
-    ka.settings.user['windows'] = new Hash();
-    ka.saveUserSettings();
-    ka.wm.resizeAll();
-}
-
-ka.addStreamParam = function(pKey, pVal) {
-    ka.streamParams[pKey] = pVal;
-}
-
-ka.removeStreamParam = function(pKey) {
-    delete ka.streamParams[pKey];
-}
-
 /**
+ * Register a new stream and starts probably the stream process.
  *
- * @param path
- * @param callback
+ * @param {String}   path
+ * @param {Function} callback
  */
 ka.registerStream = function(path, callback) {
     if (!ka.streamRegistered[path]) {
@@ -1034,8 +1041,9 @@ ka.registerStream = function(path, callback) {
 }
 
 ka.streamRegistered = {};
+
 /**
- * Register a callback to a stream path.
+ * Register a callback to a stream path. If no stream is remaining the stream process is stopped.
  *
  * @param {String}   path
  * @param {Function} callback
@@ -1096,23 +1104,49 @@ ka.loadStream = function() {
 }
 
 /**
+ * Returns the current value in the clipboard of the interface (not browser)
  *
- * @returns {Object} {type: , value: }
+ * @returns {Object} {type: {String}, value: {Mixed}}
  */
 ka.getClipboard = function() {
     return ka.clipboard;
 }
 
-ka.setClipboard = function(pTitle, pType, pValue) {
-    ka.clipboard = { type: pType, value: pValue };
+/**
+ * Sets the current clipboard of the interface (not browser)
+ *
+ * @param {String} title
+ * @param {String} type
+ * @param {Mixed}  value
+ */
+ka.setClipboard = function(title, type, value) {
+    ka.clipboard = { type: type, value: value };
+    window.fireEvent('clipboard');
 }
 
+/**
+ * Checks if current clipboard has the given type.
+ *
+ * @param {string} type
+ *
+ * @returns {Boolean}
+ */
+ka.isClipboard = function(type) {
+    return ka.getClipboard() && type === ka.getClipboard().type;
+}
+
+/**
+ * Clears the clipboard.
+ */
 ka.clearClipboard = function() {
     ka.clipboard = {};
 }
 
 ka.closeDialogsBodys = [];
 
+/**
+ * Closed current dialog.
+ */
 ka.closeDialog = function() {
 
     var killedOne = false;
@@ -1129,15 +1163,22 @@ ka.closeDialog = function() {
     });
 }
 
-ka.openDialog = function(item) {
-    if (!item.element || !item.element.getParent) {
+/**
+ * Positions options.element near options.target with settings of options.primary or options.secondary.
+ *
+ * @param {Object} options {element: {Element}, target: {Element}, primary: {Object}, secondary: {Object}}
+ *
+ * @returns {Element}
+ */
+ka.openDialog = function(options) {
+    if (!options.element || !options.element.getParent) {
         throw 'Got no element.';
     }
 
     var target = document.body;
 
-    if (item.target && item.target.getWindow()) {
-        target = item.target.getWindow().document.body;
+    if (options.target && options.target.getWindow()) {
+        target = options.target.getWindow().document.body;
     }
 
     if (!ka.closeDialogsBodys.contains(target)) {
@@ -1154,78 +1195,80 @@ ka.openDialog = function(item) {
             ka.closeDialog();
             e.stopPropagation();
             this.fireEvent('close');
-            if (item.onClose) {
-                item.onClose();
+            if (options.onClose) {
+                options.onClose();
             }
         }).inject(target);
 
     autoPositionLastOverlay.close = function() {
-        autoPositionLastOverlay.destroy();
-        delete autoPositionLastOverlay;
+        if (autoPositionLastOverlay) {
+            autoPositionLastOverlay.destroy();
+            autoPositionLastOverlay = null;
+        }
     };
 
-    item.element.setStyle('z-index', 201001);
+    options.element.setStyle('z-index', 201001);
 
-    var size = item.target.getWindow().getScrollSize();
+    var size = options.target.getWindow().getScrollSize();
 
     autoPositionLastOverlay.setStyles({
         width: size.x,
         height: size.y
     });
 
-    ka.autoPositionLastItem = item.element;
+    ka.autoPositionLastItem = options.element;
 
-    item.element.inject(target);
+    options.element.inject(target);
 
-    if (!item.offset) {
-        item.offset = {};
+    if (!options.offset) {
+        options.offset = {};
     }
 
-    if (!item.primary) {
-        item.primary = {
+    if (!options.primary) {
+        options.primary = {
             'position': 'bottomRight',
             'edge': 'upperRight',
-            offset: item.offset
+            offset: options.offset
         }
     }
 
-    if (!item.secondary) {
-        item.secondary = {
+    if (!options.secondary) {
+        options.secondary = {
             'position': 'upperRight',
             'edge': 'bottomRight',
-            offset: item.offset
+            offset: options.offset
         }
     }
 
     var updatePosition = function() {
-        item.primary.relativeTo = item.target;
-        item.secondary.relativeTo = item.target;
+        options.primary.relativeTo = options.target;
+        options.secondary.relativeTo = options.target;
 
-        item.element.position(item.primary);
+        options.element.position(options.primary);
 
-        var pos = item.element.getPosition();
-        var size = item.element.getSize();
+        var pos = options.element.getPosition();
+        var size = options.element.getSize();
 
-        var bsize = item.element.getParent().getSize();
-        var bscroll = item.element.getParent().getScroll();
+        var bsize = options.element.getParent().getSize();
+        var bscroll = options.element.getParent().getScroll();
         var height;
 
-        item.element.setStyle('height', '');
+        options.element.setStyle('height', '');
 
-        item.minHeight = item.element.getSize().y;
+        options.minHeight = options.element.getSize().y;
 
         if (size.y + pos.y > bsize.y + bscroll.y) {
             height = bsize.y - pos.y - 10;
         }
 
         if (height) {
-            if (item.minHeight && height < item.minHeight) {
-                var currentTop = item.element.getStyle('top').toInt();
-                var offsetY = (item.offset ? item.offset.y : 0) || 0;
-                item.element.setStyle('top', currentTop - item.element.getSize().y - item.target.getSize().y + 1 + (offsetY * -1));
+            if (options.minHeight && height < options.minHeight) {
+                var currentTop = options.element.getStyle('top').toInt();
+                var offsetY = (options.offset ? options.offset.y : 0) || 0;
+                options.element.setStyle('top', currentTop - options.element.getSize().y - options.target.getSize().y + 1 + (offsetY * -1));
                 //item.element.position(item.secondary);
             } else {
-                item.element.setStyle('height', height);
+                options.element.setStyle('height', height);
             }
         }
     };
@@ -1236,73 +1279,35 @@ ka.openDialog = function(item) {
     return autoPositionLastOverlay;
 }
 
-ka.getPrimariesForObject = function(pObjectKey) {
-
-    var definition = ka.getObjectDefinition(pObjectKey);
-
-    var result = {};
-
-    if (!definition) {
-        logger('Can not found object definition for object "' + pObjectKey + '"');
-        return;
-    }
-
-    Object.each(definition.fields, function(field, fieldKey) {
-
-        if (field.primaryKey) {
-            result[fieldKey] = Object.clone(field);
-        }
-
-    });
-
-    return result;
-}
-
-ka.getPrimaryListForObject = function(pObjectKey) {
-
-    var definition = ka.getObjectDefinition(pObjectKey);
-
-    var result = [];
-
-    if (!definition) {
-        logger('Can not found object definition for object "' + pObjectKey + '"');
-        return;
-    }
-
-    Object.each(definition.fields, function(field, fieldKey) {
-
-        if (field.primaryKey) {
-            result.push(fieldKey);
-        }
-
-    });
-
-    return result;
-}
-
 /**
- * Returns the object definition as array.
+ * Returns the object definition as object.
  *
- * @param pObjectKey
+ * @param {String} objectKey
+ *
  * @returns {Object}
  */
-ka.getObjectDefinition = function(pObjectKey) {
-    if (typeOf(pObjectKey) != 'string') {
-        throw 'pObjectKey is not a string: ' + pObjectKey;
+ka.getObjectDefinition = function(objectKey) {
+    if (typeOf(objectKey) != 'string') {
+        throw 'objectKey is not a string: ' + objectKey;
     }
 
-    pObjectKey = ka.normalizeObjectKey(pObjectKey);
+    objectKey = ka.normalizeObjectKey(objectKey);
 
-    var module = ("" + pObjectKey.split('/')[0]).toLowerCase();
-    var name = pObjectKey.split('/')[1].toLowerCase();
+    var module = ("" + objectKey.split('/')[0]).toLowerCase();
+    var name = objectKey.split('/')[1].toLowerCase();
 
     if (ka.getConfig(module) && ka.getConfig(module)['objects'][name]) {
         var config = ka.getConfig(module)['objects'][name];
-        config._key = pObjectKey;
+        config._key = objectKey;
         return config;
     }
 }
 
+/**
+ * Returns the default caching definition for ka.Fields.
+ *
+ * @returns {Object}
+ */
 ka.getFieldCaching = function() {
     return {
         'cache_type': {
@@ -1349,30 +1354,14 @@ ka.getFieldCaching = function() {
     }
 }
 
-ka.renderLayoutElements = function(pDom, pClassObj) {
-
-    var layoutBoxes = {};
-
-    pDom.getWindow().$$('.kryn_layout_content, .kryn_layout_slot').each(function(item) {
-
-        var options = {};
-        if (item.get('params')) {
-            var options = JSON.decode(item.get('params'));
-        }
-
-        if (item.hasClass('kryn_layout_slot')) {
-            layoutBoxes[ options.id ] = new ka.LayoutBox(item, options, pClassObj);
-        } //options.name, this.win, options.css, options['default'], this, options );
-        else {
-            layoutBoxes[ options.id ] = new ka.ContentBox(item, options, pClassObj);
-        }
-
-    });
-
-    return layoutBoxes;
-}
-
-ka.pregQuote = function(str) {
+/**
+ * Quotes string to be used in a regEx.
+ *
+ * @param string
+ *
+ * @returns {String}
+ */
+ka.pregQuote = function(string) {
     // http://kevin.vanzonneveld.net
     // +   original by: booeyOH
     // +   improved by: Ates Goral (http://magnetiq.com)
@@ -1385,28 +1374,11 @@ ka.pregQuote = function(str) {
     // *     example 3: preg_quote("\\.+*?[^]$(){}=!<>|:");
     // *     returns 3: '\\\.\+\*\?\[\^\]\$\(\)\{\}\=\!\<\>\|\:'
 
-    return (str + '').replace(/([\\\.\+\*\?\[\^\]\$\(\)\{\}\=\!\<\>\|\:])/g, "\\$1");
-}
-
-initWysiwyg = function(pElement, pOptions) {
-
-    var options = {
-        extraClass: 'SilkTheme',
-        //flyingToolbar: true,
-        dimensions: {
-            x: '100%'
-        },
-        actions: 'bold italic underline strikethrough | formatBlock justifyleft justifycenter justifyright justifyfull | insertunorderedlist insertorderedlist indent outdent | undo redo | tableadd | createlink unlink | image | toggleview'
-    };
-
-    if (pOptions) {
-        options = Object.append(options, pOptions);
-    }
-
-    return new MooEditable(document.id(pElement), options);
+    return (string + '').replace(/([\\\.\+\*\?\[\^\]\$\(\)\{\}\=\!\<\>\|\:])/g, "\\$1");
 }
 
 /**
+ * Generates little noise at element background.
  *
  * @param {Element} element
  * @param {Number} opacity

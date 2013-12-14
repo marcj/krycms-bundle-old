@@ -17,7 +17,7 @@ ka.ContentTypes.Tray = new Class({
     createLayout: function () {
         this.main = new Element('div', {
             'class': 'ka-normalize ka-content-plugin'
-        }).inject(this.getContentInstance());
+        }).inject(this.getContentInstance().getContentContainer());
 
         this.iconDiv = new Element('div', {
             'class': 'ka-content-inner-icon icon-clipboard-2'
@@ -39,7 +39,7 @@ ka.ContentTypes.Tray = new Class({
                 this.inner.set('text', t('Please choose a tray node.'));
             } else {
                 this.inner.set('text', 'Loading ...');
-                ka.getObjectLabel('kryncmsbundle:node/' + this.value.node, function(label, item) {
+                ka.getObjectLabel('kryncms/node/' + this.value.node, function(label, item) {
                     if (false === label) {
                         this.inner.set('text', t('Tray not found.'));
                     } else {

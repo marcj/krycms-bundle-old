@@ -63,7 +63,7 @@ class Files extends AbstractCache
 
     public function getPath($key)
     {
-        return $this->path . $this->prefix . '/'. urlencode($key) . ($this->useJson ? '.json' : '.php');
+        return $this->path . $this->prefix . '/'. md5($key) . ($this->useJson ? '.json' : '.php');
     }
 
     /**

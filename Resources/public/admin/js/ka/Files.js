@@ -975,8 +975,8 @@ ka.Files = new Class({
     },
 
     sidebarTreeMoved: function(source, target) {
-        var sourcePk = ka.getObjectId(source);
-        var targetPk = ka.getObjectId(target);
+        var sourcePk = ka.getObjectIdFromUrl(source);
+        var targetPk = ka.getObjectIdFromUrl(target);
 
         if (this.currentFile.id == sourcePk.id || this.currentFile.id == targetPk.id) {
             this.load(this.currentFile.id);

@@ -65,6 +65,8 @@ class AdminController extends Controller
         $template = $paramFetcher->get('template');
         $type = $paramFetcher->get('type');
 
+        //todo, check if $template is defined as content template
+
         $contentObject = new Content();
         $contentObject->setType($type);
         $contentObject->setTemplate($template);
@@ -110,6 +112,8 @@ class AdminController extends Controller
         $content = $paramFetcher->get('content');
         $nodeId = $paramFetcher->get('nodeId');
         $domainId = $paramFetcher->get('domainId');
+
+        //todo, check if $template is defined as content template
 
         $contentObject = new Content();
         $contentObject->setType($type);

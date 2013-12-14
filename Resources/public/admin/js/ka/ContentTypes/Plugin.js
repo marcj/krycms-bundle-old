@@ -16,7 +16,7 @@ ka.ContentTypes.Plugin = new Class({
     createLayout: function () {
         this.main = new Element('div', {
             'class': 'ka-normalize ka-content-plugin'
-        }).inject(this.getContentInstance());
+        }).inject(this.getContentInstance().getContentContainer());
 
         this.iconDiv = new Element('div', {
             'class': 'ka-content-inner-icon icon-cube-2'
@@ -110,7 +110,7 @@ ka.ContentTypes.Plugin = new Class({
             this.value = this.normalizeValue(this.value);
 
             this.renderValue();
-            this.contentInstance.fireChange();
+            this.fireEvent('change');
         }.bind(this));
     },
 

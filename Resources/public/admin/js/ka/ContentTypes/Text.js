@@ -28,28 +28,27 @@ ka.ContentTypes.Text = new Class({
         configs: {
             standard: {
                 plugins: [
-                    "advlist autolink autosave link image lists charmap print preview hr anchor pagebreak spellchecker",
-                    "searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking",
-                    "table contextmenu directionality emoticons template textcolor paste fullpage textcolor"
+                    "advlist autolink autosave link image lists charmap print preview hr anchor pagebreak spellchecker", "searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking", "table contextmenu directionality emoticons template textcolor paste fullpage textcolor"
                 ],
                 menubar: false,
                 toolbar_items_size: 'small',
-                toolbar1: "undo redo | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | styleselect formatselect fontselect fontsizeselect",
+                toolbar1: "formatselect | undo redo | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | styleselect fontselect fontsizeselect",
                 toolbar2: "searchreplace | bullist numlist | outdent indent blockquote | link unlink anchor image media code | forecolor backcolor",
                 toolbar3: "table | hr removeformat | subscript superscript | charmap emoticons | ltr rtl | visualchars visualblocks nonbreaking template pagebreak"
             },
             full: {
                 plugins: [
-                    "advlist autolink lists link image charmap print preview hr anchor pagebreak",
-                    "searchreplace wordcount visualblocks visualchars code fullscreen",
-                    "insertdatetime media nonbreaking save table contextmenu directionality",
-                    "emoticons template paste textcolor"
+                    "advlist autolink lists link image charmap print preview hr anchor pagebreak", "searchreplace wordcount visualblocks visualchars code fullscreen", "insertdatetime media nonbreaking save table contextmenu directionality", "emoticons template paste textcolor"
                 ],
                 toolbar1: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image",
                 toolbar2: "print preview media | forecolor backcolor emoticons",
                 tools: "inserttable"
             }
         }
+    },
+
+    isPreviewPossible: function() {
+        return false;
     },
 
     focus: function() {
@@ -61,7 +60,7 @@ ka.ContentTypes.Text = new Class({
             contentEditable: true,
             html: '<p><br/></p>',
             'class': 'ka-content-text selectable'
-        }).inject(this.getContentInstance());
+        }).inject(this.getContentInstance().getContentContainer());
 
         this.main.addEvent('focus', function(e) {
             this.getEditor().click(e, this.main.getParent('.ka-content'));
@@ -120,16 +119,35 @@ ka.ContentTypes.Text = new Class({
 
     deselected: function() {
         this.toolbar.dispose();
-        this.toolbarContainer.destroy();
+        this.mainToolbarContainer.dispose();
+
         delete this.isSelected;
+    },
+
+    destroy: function() {
+        tinymce.remove(this.main);
+        if (this.toolbar)
+            this.toolbar.destroy();
+
+        if (this.mainToolbarContainer)
+            this.mainToolbarContainer.destroy();
+
+        this.main.destroy(this.main);
     },
 
     selected: function(inspectorContainer) {
         this.isSelected = true;
-        this.toolbarContainer = new Element('div', {
-            'class': 'ka-content-text-toolbarContainer kryn_wysiwyg_toolbar'
-        }).inject(inspectorContainer);
-        this.toolbar.inject(this.toolbarContainer);
+
+        if (!this.mainToolbarContainer) {
+            this.mainToolbarContainer = new Element('div', {
+                'class': 'kryn_wysiwyg_toolbar ka-content-text-wysiwyg-toolbar',
+                style: 'float: left;'
+            })
+        }
+
+        this.mainToolbarContainer.inject(this.getContentFieldInstance().getOptionsContainer(), 'top');
+
+        this.toolbar.inject(this.mainToolbarContainer);
     }
 });
 

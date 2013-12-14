@@ -19,7 +19,7 @@ ka.ContentTypes.Image = new Class({
     createLayout: function() {
         this.main = new Element('div', {
             'class': 'ka-contentType-image'
-        }).inject(this.getContentInstance());
+        }).inject(this.getContentInstance().getContentContainer());
 
         if (this.getContentInstance().drop && ka.ContentTypes.Image.mimeTypes.contains(this.getContentInstance().drop.type)) {
             this.renderDrop(this.getContentInstance().drop);

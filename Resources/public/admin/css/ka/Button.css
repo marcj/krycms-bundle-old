@@ -34,6 +34,21 @@ a.ka-Button:link {
 }
 
 
+a.ka-button-icon,
+a.ka-button-icon:link {
+    display: inline-block;
+    cursor: pointer;
+    line-height: 28px;
+    height: 30px;
+    margin: 0 4px;
+    text-decoration: none;
+    outline: 0;
+}
+
+a.ka-button-icon:hover {
+    color: #47799B;
+}
+
 a.ka-Button > span {
     position: relative;
 }

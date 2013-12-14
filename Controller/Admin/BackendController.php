@@ -280,7 +280,7 @@ class BackendController extends Controller
                 $path = $this->getKrynCore()->resolvePath($assetPath, 'Resources/public');
                 if (file_exists($path)) {
                     $files[] = $assetPath;
-                    $md5String .= ">$path<";
+                    $md5String .= filemtime($path);
                 }
             }
         }

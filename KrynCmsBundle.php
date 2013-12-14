@@ -44,6 +44,7 @@ class KrynCmsBundle extends Bundle
         }
 
         $krynCore->prepareWebSymlinks();
+        $krynCore->loadBundleConfigs();
 
         if ($krynCore->getSystemConfig()->getLogs(true)->isActive()) {
             /** @var $logger \Symfony\Bridge\Monolog\Logger */

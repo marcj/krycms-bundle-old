@@ -10,11 +10,12 @@ ka.Editor = new Class({
     },
 
     container: null,
+    slots: [],
 
     initialize: function(pOptions, pContainer) {
         this.setOptions(pOptions);
 
-        this.container = pContainer || document.documentElement;
+        this.container = document.id(pContainer || document.documentElement);
 
         this.adjustAnchors();
         this.searchSlots();
@@ -35,7 +36,20 @@ ka.Editor = new Class({
         } else {
             delete this.disableNextContainerClick;
         }
+
+        //forward click to parent document
+        var evObj = document.createEvent('MouseEvents');
+        evObj.initMouseEvent('click', true, false);
+        document.body.dispatchEvent(evObj);
     },
+
+//    getScroll: function() {
+//        return this.container.getScroll();
+//    },
+//
+//    setScroll: function(positions) {
+//        return this.container.scrollTo(positions.x, positions.y);
+//    },
 
     /**
      * @return {ka.Window}
@@ -181,16 +195,27 @@ ka.Editor = new Class({
         });
     },
 
-    deactivateLinks: function() {
-        this.container.addEvent('click:relay(a)', function(event){
-            event.stop();
-        });
+    deactivateLinks: function(container) {
+
+        if (!this.deactivateLinkFn) {
+            this.deactivateLinkFn = function(event){
+                event.stop();
+            };
+        }
+        (container || this.container).addEvent('click:relay(a)', this.deactivateLinkFn);
+    },
+
+    activateLinks: function(container) {
+        (container || this.container).removeEvent('click:relay(a)', this.deactivateLinkFn);
     },
 
     setContentField: function(contentField) {
         this.contentField = contentField;
     },
 
+    /**
+     * @returns {ka.FieldTypes.Content}
+     */
     getContentField: function() {
         return this.contentField;
     },
@@ -212,19 +237,20 @@ ka.Editor = new Class({
     },
 
     highlightSlotsBubbles: function(pHighlight) {
+        if (this.lastBubbles) {
+            this.lastBubbles.invoke('destroy');
+        }
+        if (this.lastBubbleTimer) {
+            clearInterval(this.lastBubbleTimer);
+        }
+
         if (!pHighlight) {
-            if (this.lastBubbles) {
-                this.lastBubbles.invoke('destroy');
-            }
-            if (this.lastBubbleTimer) {
-                clearInterval(this.lastBubbleTimer);
-            }
             return;
         }
 
         this.lastBubbles = [];
 
-        this.slots.each(function(slot) {
+        Array.each(this.slots, function(slot) {
 
             var bubble = new Element('div', {
                 'class': 'ka-editor-slot-infobubble',

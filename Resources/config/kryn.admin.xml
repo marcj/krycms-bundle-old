@@ -19,6 +19,7 @@
             <asset>@KrynCmsBundle/admin/js/ka/WindowList.js</asset>
             <asset>@KrynCmsBundle/admin/js/ka/Select.js</asset>
             <asset>@KrynCmsBundle/admin/js/ka/FieldAbstract.js</asset>
+            <asset>@KrynCmsBundle/admin/js/ka/Dialog.js</asset>
             <assets>@KrynCmsBundle/admin/js/ka/*.js</assets>
             <assets>@KrynCmsBundle/admin/js/lib/*.js</assets>
             <assets>@KrynCmsBundle/admin/js/ka/DashboardWidgets/Base.js</assets>

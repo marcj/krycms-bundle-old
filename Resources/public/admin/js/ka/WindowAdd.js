@@ -79,13 +79,13 @@ ka.WindowAdd = new Class({
 
             if (this.addDialogLayoutPositionChooser) {
 
-                this.addDialogLayoutPositionChooser.addEvent('positionChoose', function(pDom, pDirection, pItem, pChooser, pTree) {
+                this.addDialogLayoutPositionChooser.addEvent('positionChoose', function(dom, direction, pk, chooser, tree) {
 
                     this.addItemToAdd = {
-                        position: pDirection == 'after' ? 'next' : 'first',
-                        pk: ka.getObjectPk(pDom.objectKey, pItem),
-                        objectKey: pDom.objectKey,
-                        tree: pTree
+                        position: direction == 'after' ? 'next' : 'first',
+                        pk: pk,
+                        objectKey: dom.objectKey,
+                        tree: tree
                     };
 
                     this.checkAddItemForm();

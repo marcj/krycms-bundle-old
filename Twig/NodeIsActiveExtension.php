@@ -46,8 +46,8 @@ class NodeIsActiveExtension extends \Twig_Extension
         }
 
         if (!$exact) {
-            $url = $this->getKrynCore()->getNodeUrl($current);
-            $purl = $this->getKrynCore()->getNodeUrl($node);
+            $url = $this->getKrynCore()->getNodeUrl($current, true, true);
+            $purl = $this->getKrynCore()->getNodeUrl($node, true, true);
 
             if ($url && $purl) {
                 $pos = strpos($url, $purl);

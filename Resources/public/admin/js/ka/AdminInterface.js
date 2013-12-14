@@ -405,64 +405,6 @@ ka.AdminInterface = new Class({
         return this.appContainer;
     },
 
-//    setupMainLinksDragger: function() {
-//        this.mainLinksSplitter.addEvent('resize', function() {
-//            this.lastMainLinksWidth = this.mainMenu.getStyle('width');
-//            this.desktopContainer.setStyle('left', this.lastMainLinksWidth);
-//            this.wmTabContainer.setStyle('left', this.lastMainLinksWidth);
-//
-//            this.setMainLinksIcons(120 > this.lastMainLinksWidth.toInt());
-//
-//            if (45 > this.lastMainLinksWidth.toInt()) {
-//                this.toggleMainLinks();
-//            }
-//
-//            window.fireEvent('resize');
-//        }.bind(this));
-//
-//        this.mainLinksSplitter.addEvent('resized', function() {
-//            ka.setLocalSetting('admin/interface/links-width', this.mainMenu.getStyle('width').toInt());
-//        }.bind(this));
-//
-//        var localSetting = ka.getLocalSetting('admin/interface/links-width');
-//        if ('boolean' === typeOf(localSetting)) {
-//            this.toggleMainLinks(localSetting);
-//        } else if (localSetting) {
-//            this.mainMenu.setStyle('width', localSetting+'px');
-//            this.mainLinksSplitter.fireEvent('resize');
-//        }
-//    },
-
-//    setMainLinksIcons: function(icons) {
-//        if (icons) {
-//            this.mainMenu.addClass('ka-main-menu-icons');
-//        } else {
-//            this.mainMenu.removeClass('ka-main-menu-icons');
-//        }
-//    },
-
-//    toggleMainLinks: function(visible) {
-//        visible = true === visible || 17 === this.mainMenu.getStyle('width').toInt();
-//        ka.setLocalSetting('admin/interface/links-width', visible || this.mainMenu.getStyle('width').toInt());
-//        if (visible) {
-//            //not visible
-//            if (this.lastMainLinksWidth) {
-//                this.mainMenu.setStyle('width', this.lastMainLinksWidth);
-//                this.desktopContainer.setStyle('left', this.lastMainLinksWidth);
-//                this.wmTabContainer.setStyle('left', this.lastMainLinksWidth);
-//            } else {
-//                this.mainMenu.setStyle('width');
-//                this.desktopContainer.setStyle('left');
-//                this.wmTabContainer.setStyle('left');
-//            }
-//        } else {
-//            this.lastMainLinksWidth = this.mainMenu.getStyle('width');
-//            this.mainMenu.setStyle('width', 17);
-//            this.desktopContainer.setStyle('left', 17);
-//            this.wmTabContainer.setStyle('left', 17);
-//        }
-//    },
-
     getWMTabContainer: function() {
         return this.wmTabContainer;
     },
@@ -562,14 +504,6 @@ ka.AdminInterface = new Class({
 //        }
 
         window.fireEvent('init');
-
-        if (this._crawler) {
-            this._crawler.stop();
-            delete this._crawler;
-            this._crawler = new ka.Crawler();
-        } else {
-            this._crawler = new ka.Crawler();
-        }
 
         ka.loadStream();
 

@@ -323,8 +323,7 @@ class Core extends Controller
 //            $cacheKey = 'core/config/' . $this->getKernel()->getEnvironment();
 
             $configFile = $this->getKernel()->getRootDir() . '/config/config.kryn.xml';
-            $configEnvFile = $this->getKernel()->getRootDir() . '/config/config.kryn_' . $this->getKernel(
-                )->getEnvironment() . '.xml';
+            $configEnvFile = $this->getKernel()->getRootDir() . '/config/config.kryn_' . $this->getKernel()->getEnvironment() . '.xml';
             if (file_exists($configEnvFile)) {
                 $configFile = $configEnvFile;
             }
@@ -500,10 +499,6 @@ class Core extends Controller
      */
     public function getConfigs()
     {
-        if (null === $this->configs) {
-            $this->loadBundleConfigs();
-        }
-
         return $this->configs;
     }
 
@@ -597,7 +592,7 @@ class Core extends Controller
      */
     public function isKrynBundle($bundleName)
     {
-        $root = realpath($this->getKernel()->getRootDir().'/..').'/';
+        $root = realpath($this->getKernel()->getRootDir() . '/..') . '/';
         $path = $root . $this->getBundleDir($bundleName) . 'Resources/config/';
         if (file_exists($path . 'kryn.xml')) {
             return true;
@@ -613,7 +608,7 @@ class Core extends Controller
      * @param bool $fullUrl
      * @return string
      */
-    public function getNodeUrl($nodeOrId, $fullUrl = false)
+    public function getNodeUrl($nodeOrId, $fullUrl = false, $suppressStartNodeCheck = false)
     {
         $id = $nodeOrId;
         if ($nodeOrId instanceof Node) {
@@ -629,11 +624,19 @@ class Core extends Controller
         );
         $currentDomain = $this->getCurrentDomain();
 
-        $urls =& $this->getUtils()->getCachedPageToUrl($domainId);
-        $url = isset($urls[$id]) ? $urls[$id] : '';
+        if (!$suppressStartNodeCheck && $currentDomain->getStartnodeId() === $id) {
+            $url = '/';
+        } else {
+            $urls =& $this->getUtils()->getCachedPageToUrl($domainId);
+            $url = isset($urls[$id]) ? $urls[$id] : '';
+        }
 
         //do we need to add app_dev.php/ or something?
-        $prefix = substr($this->getRequest()->getBaseUrl(), strlen($this->getRequest()->getBasePath()));
+        $prefix = substr(
+            $this->requestStack->getMasterRequest()->getBaseUrl(),
+            strlen($this->requestStack->getMasterRequest()->getBasePath())
+        );
+
         if (false !== $prefix) {
             $url = substr($prefix, 1) . $url;
         }

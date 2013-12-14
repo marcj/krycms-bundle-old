@@ -49,7 +49,7 @@
             <type>text</type>
           </field>
           <field id="category">
-            <object>Test\ItemCategory</object>
+            <object>test/itemCategory</object>
             <objectRelation>nToM</objectRelation>
             <type>object</type>
           </field>
@@ -75,12 +75,12 @@
           </field>
           <field id="category">
             <type>object</type>
-            <object>Test\ItemCategory</object>
+            <object>test/itemCategory</object>
             <objectRelation>nToM</objectRelation>
           </field>
           <field id="oneCategory">
             <type>object</type>
-            <object>Test\ItemCategory</object>
+            <object>test/itemCategory</object>
             <objectRelation>nTo1</objectRelation>
           </field>
         </fields>

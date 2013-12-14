@@ -344,47 +344,47 @@ ka.Select = new Class({
             this.lastRq.cancel();
         }
 
-        if (this.options.store) {
-            var storePath = this.options.store;
-
-            this.lastRq = new Request.JSON({url: _pathAdmin + storePath,
-                noErrorReporting: ['NoAccessException'],
-                onCancel: function() {
-                    pCallback(false);
-                },
-                onComplete: function(response) {
-                    if (response.error) {
-                        //todo, handle error
-                        return false;
-                    } else {
-
-                        var items = [];
-
-                        if (null !== response.data) {
-                            Object.each(response.data, function(item, id) {
-
-                                items.push({
-                                    id: id,
-                                    label: item
-                                });
-
-                                this.cachedObjectItems[id] = item;
-
-                            }.bind(this));
-                        }
-
-                        pCallback(items);
-                    }
-                }.bind(this)
-            }).get({
-                    //object: this.options.object,
-                    offset: pOffset,
-                    limit: pCount,
-                    _lang: this.options.objectLanguage,
-                    fields: this.objectFields ? this.objectFields.join(',') : null
-                });
-
-        }
+//        if (this.options.store) {
+//            var storePath = this.options.store;
+//
+//            this.lastRq = new Request.JSON({url: _pathAdmin + storePath,
+//                noErrorReporting: ['NoAccessException'],
+//                onCancel: function() {
+//                    pCallback(false);
+//                },
+//                onComplete: function(response) {
+//                    if (response.error) {
+//                        //todo, handle error
+//                        return false;
+//                    } else {
+//
+//                        var items = [];
+//
+//                        if (null !== response.data) {
+//                            Object.each(response.data, function(item, id) {
+//
+//                                items.push({
+//                                    id: id,
+//                                    label: item
+//                                });
+//
+//                                this.cachedObjectItems[id] = item;
+//
+//                            }.bind(this));
+//                        }
+//
+//                        pCallback(items);
+//                    }
+//                }.bind(this)
+//            }).get({
+//                    //object: this.options.object,
+//                    offset: pOffset,
+//                    limit: pCount,
+//                    _lang: this.options.objectLanguage,
+//                    fields: this.objectFields ? this.objectFields.join(',') : null
+//                });
+//
+//        }
         if (this.options.object) {
 
             this.lastRq = new Request.JSON({url: this.getObjectUrl(),
@@ -404,7 +404,7 @@ ka.Select = new Class({
                         if (null !== response.data) {
                             Array.each(response.data, function(item) {
 
-                                var id = ka.getObjectUrlId(this.options.object, item);
+                                var id = ka.getObjectId(this.options.object, item);
 
                                 if (this.hideOptions && this.hideOptions.contains(id)) {
                                     return;
@@ -435,13 +435,13 @@ ka.Select = new Class({
     },
 
     getObjectUrl: function() {
-        var uri = _pathAdmin + 'admin/object/' + ka.normalizeObjectKey(this.options.object);
+        var uri = _pathAdmin + 'admin/object/' + ka.normalizeObjectKey(this.options.object) +'/';
 
         if (this.options.objectBranch) {
             if (this.options.objectBranch === true) {
-                uri += '/:branch';
+                uri += ':branch';
             } else {
-                uri += '/' + ka.urlEncode(this.options.objectBranch) + '/:branch';
+                uri += ka.urlEncode(this.options.objectBranch) + '/:branch';
             }
         }
 
@@ -659,7 +659,7 @@ ka.Select = new Class({
 
                 this.loaded += pItems.length;
 
-                if (!pItems.length)//no items left
+                if (!pItems.length || pItems.length < this.options.maxItemsPerLoad)//no items left
                 {
                     this.maximumItemsReached = true;
                 }
@@ -673,7 +673,7 @@ ka.Select = new Class({
             this.whileFetching = false;
             this.checkScroll();
 
-        }.bind(this));
+        }.bind(this), this.options.maxItemsPerLoad);
 
     },
 
@@ -1010,29 +1010,30 @@ ka.Select = new Class({
                     this.lastLabelRequest.cancel();
                 }
 
-                if (this.options.store) {
-
-                    this.lastLabelRequest = new Request.JSON({
-                        url: _pathAdmin + this.options.store + '/' + ka.urlEncode(pId),
-                        onComplete: function(response) {
-
-                            if (!response.error) {
-
-                                if (response.data === false) {
-                                    return pCallback(false);
-                                }
-
-                                pCallback({
-                                    id: pId,
-                                    label: response.data
-                                });
-                            }
-                        }.bind(this)
-                    }).get({
-                            fields: this.objectFields.join(',')
-                        });
-
-                } else if (this.options.object) {
+//                if (this.options.store) {
+//
+//                    this.lastLabelRequest = new Request.JSON({
+//                        url: _pathAdmin + this.options.store + '/' + ka.urlEncode(pId),
+//                        onComplete: function(response) {
+//
+//                            if (!response.error) {
+//
+//                                if (response.data === false) {
+//                                    return pCallback(false);
+//                                }
+//
+//                                pCallback({
+//                                    id: pId,
+//                                    label: response.data
+//                                });
+//                            }
+//                        }.bind(this)
+//                    }).get({
+//                            fields: this.objectFields.join(',')
+//                        });
+//
+//                } else
+                if (this.options.object) {
                     this.lastLabelRequest = new Request.JSON({
                         url: _pathAdmin + 'admin/object/' + ka.normalizeObjectKey(this.options.object) + '/' + ka.urlEncode(pId),
                         onComplete: function(response) {
@@ -1065,10 +1066,6 @@ ka.Select = new Class({
     setValue: function(pValue, pInternal) {
         this.value = pValue;
 
-        if (this.options.object && typeOf(this.value) == 'object') {
-            this.value = ka.getObjectUrlId(this.options.object, this.value);
-        }
-
         if (typeOf(this.value) == 'null' || null === this.value) {
             if (!this.options.selectFirstOnNull) {
                 return this.title.set('text', '');
@@ -1096,10 +1093,6 @@ ka.Select = new Class({
     },
 
     getValue: function() {
-        if (this.options.object) {
-            return ka.getObjectId(this.options.object + '/' + this.value);
-        }
-
         return this.value;
     },
 

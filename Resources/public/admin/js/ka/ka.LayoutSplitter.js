@@ -71,8 +71,10 @@ ka.LayoutSplitter = new Class({
                 newWidth = newHeight = newY = newX = null;
 
                 max = ka.adminInterface.getDesktop().getSize();
+                self.fireEvent('start');
             },
             onComplete: function() {
+                self.fireEvent('end');
                 self.fireEvent('resized');
             },
             onDrag: function(pElement) {

@@ -24,8 +24,7 @@
 .ka-content-actionBar {
     min-height: 25px;
     min-width: 50px;
-    background-color: #eee;
-    border: 1px solid silver;
+    background-color: white;
     border-bottom: 0px;
     padding: 0 5px;
     line-height: 25px;
@@ -37,6 +36,15 @@
 
 .ka-content:hover .ka-content-actionBar {
     display: block;
+    border: 1px solid #ababb5;
+    border-bottom: 0px;
+}
+
+.ka-content-selected .ka-content-actionBar,
+.ka-content-selected:hover .ka-content-actionBar {
+    display: block;
+    border: 1px solid #22638E;
+    border-bottom: 0px;
 }
 
 .ka-content-actionBar a:link {
@@ -48,13 +56,13 @@
 }
 
 .ka-content:hover {
-    outline: 1px dashed #d0d0d0;
+    outline: 1px solid #ababb5;
 }
 
 .ka-content-selected,
 .ka-content-selected:hover {
-    outline: 1px dashed #FFF;
-    box-shadow: 0 0 1px #000;
+    outline: 1px solid #22638E;
+    box-shadow: 0 0 1px #fff;
 }
 
 .ka-content-actionBar a:hover {
@@ -72,15 +80,24 @@
 .ka-content-inner {
     background: #22638E;
     padding: 5px;
-    border-radius: 2px;
     color: white;
     padding-right: 40px;
     text-shadow: 0 1px 0 #333;
     cursor: pointer;
-
     min-height: 25px;
+}
 
-    border-top: 1px solid #eee;
+.ka-content-plugin {
+    border: 1px solid #6C8FA8;
+}
+
+.ka-content-selected .ka-content-plugin,
+.ka-content:hover .ka-content-plugin {
+    border: 1px solid white;
+}
+
+.ka-content-selected .ka-content-inner {
+    background: #25567e;
 }
 
 .ka-content-inner-icon {
@@ -130,4 +147,36 @@
     -webkit-box-shadow: none;
     -moz-box-shadow: none;
     box-shadow: none;
+}
+
+.ka-content-text-wysiwyg-toolbar {
+    position: relative;
+    height: 30px;
+    overflow: hidden;
+}
+
+.ka-content-text-wysiwyg-toolbar:hover {
+    overflow: visible;
+    z-index: 10000000;
+}
+
+.mce-tooltip {
+    pointer-events: none;
+}
+
+.ka-content-text-wysiwyg-toolbar .mce-btn-group .mce-btn {
+    border: 0;
+}
+
+.ka-content-text-wysiwyg-toolbar .mce-btn-small button {
+    padding: 5px;
+}
+
+.ka-content-text-wysiwyg-toolbar .mce-flow-layout-item {
+    margin: 0;
+}
+
+.ka-content-text-wysiwyg-toolbar .mce-menubtn.mce-fixed-width.mce-btn-small span {
+    width: auto;
+    margin-right: 15px;
 }

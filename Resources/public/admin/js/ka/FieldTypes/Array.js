@@ -410,7 +410,7 @@ ka.FieldTypes.Array = new Class({
         if (this.options.withOrder) {
 
             new Element('a', {
-                'class': 'text-button-icon icon-arrow-up-14',
+                'class': 'ka-button-icon icon-arrow-up-14',
                 title: t('Move up'),
                 href: 'javascript: ;'
             }).addEvent('click',function () {
@@ -420,7 +420,7 @@ ka.FieldTypes.Array = new Class({
             }).inject(td);
 
             new Element('a', {
-                'class': 'text-button-icon icon-arrow-down-14',
+                'class': 'ka-button-icon icon-arrow-down-14',
                 title: t('Move down'),
                 href: 'javascript: ;'
             }).addEvent('click',function () {
@@ -433,7 +433,7 @@ ka.FieldTypes.Array = new Class({
 
         if (!this.options.withoutRemove) {
             new Element('a', {
-                'class': 'text-button-icon icon-minus-5',
+                'class': 'ka-button-icon icon-minus-5',
                 title: t('Remove'),
                 href: 'javascript: ;'
             }).addEvent('click', function () {

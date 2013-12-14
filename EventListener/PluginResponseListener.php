@@ -54,15 +54,19 @@ class PluginResponseListener {
         if (null !== $response && $response instanceof PluginResponse) {
             $response->setControllerRequest($event->getRequest());
             $response = $this->getKrynCore()->getPageResponse()->setPluginResponse($response);
+
             if (HttpKernelInterface::MASTER_REQUEST === $event->getRequestType()) {
+                $response->setRenderFrontPage(true);
                 $response->renderContent();
             }
+
             $event->setResponse($response);
         }
     }
 
     public function onKernelView(GetResponseForControllerResultEvent $event)
     {
+
         $data = $event->getControllerResult();
         $request = $event->getRequest();
         if (!$request->attributes->has('_content')) {

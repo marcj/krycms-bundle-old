@@ -148,13 +148,19 @@ ka.Layout = new Class({
     },
 
     createResizer: function () {
+        this.resizer = {};
         Array.each(this.options.splitter, function (resize) {
             if ('array' === typeOf(resize)) {
-                new ka.LayoutSplitter(this.getCell(resize[0], resize[1]), resize[2]);
+                var splitter = new ka.LayoutSplitter(this.getCell(resize[0], resize[1]), resize[2]);
+                this.resizer[resize[0] +'_'+ resize[1] + '_' + resize[2]] = splitter;
             } else {
                 console.log('wrong format of `splitter`. Should be a array in a array. [ [1, 2, \'right\']]');
             }
         }.bind(this));
+    },
+
+    getSplitter: function(row, column, direction) {
+        return this.resizer[row + '_' + column + '_' + direction];
     },
 
     getCell: function (pRow, pColumn) {

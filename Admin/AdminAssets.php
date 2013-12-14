@@ -143,6 +143,8 @@ class AdminAssets
         $page = $this->getKrynCore()->getCurrentPage();
 
         $response = $this->getKrynCore()->getPageResponse();
+
+        // TODO, remove mootools dependency. WE NEED MOOTOOLS PRIME FOR THAT!
         $response->addJsFile('@KrynCmsBundle/admin/mootools-core-1.4.5-fixed-memory-leak.js');
         $response->addJsFile('@KrynCmsBundle/admin/mootools-more.js');
 

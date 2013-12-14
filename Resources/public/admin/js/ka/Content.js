@@ -17,6 +17,9 @@ ka.Content = new Class({
         this.drop = pDrop;
         this.renderLayout(pContainer);
         this.setValue(pContent);
+
+        this.clipboardListener = this.showPasteState.bind(this);
+        window.addEvent('clipboard', this.clipboardListener);
     },
 
     getSlot: function() {
@@ -44,6 +47,15 @@ ka.Content = new Class({
 
     getSortId: function() {
         return this.sortId;
+    },
+
+    /**
+     * Returns the actual contentType from ka.ContentTypes.*
+     *
+     * @returns {ka.ContentAbstract}
+     */
+    getContentObject: function() {
+        return this.contentObject;
     },
 
     renderLayout: function(container) {
@@ -76,7 +88,9 @@ ka.Content = new Class({
         if (this === this.getEditor().getContentField().getSelected()) {
             this.getEditor().getContentField().deselect();
         }
+        this.getContentObject().destroy();
         this.main.destroy();
+        window.removeEvent('clipboard', this.clipboardListener);
     },
 
     fireChange: function() {
@@ -109,13 +123,22 @@ ka.Content = new Class({
                 ka.setClipboard('Content', 'content', this.getValue());
             }.bind(this)).inject(this.actionBar);
 
-        new Element('a', {
+        this.actionBarItemVisibility = new Element('a', {
+            href: 'javascript: ;',
+            title: t('Hide/Show'),
+            'class': 'icon-eye'
+        }).addEvent('click', function(e) {
+                e.stop();
+                this.toggleVisibility();
+            }.bind(this)).inject(this.actionBar);
+
+        this.actionBarItemPaste = new Element('a', {
             href: 'javascript: ;',
             title: t('Paste content'),
             'class': 'icon-arrow-down-11'
         }).addEvent('click', function(e) {
                 e.stop();
-                if (ka.getClipboard() && ka.getClipboard().type === 'content') {
+                if (ka.isClipboard('content')) {
                     var value = ka.getClipboard().value;
                     if (value.id) {
                         delete value.id;
@@ -137,18 +160,37 @@ ka.Content = new Class({
 
     },
 
+    showVisibilityState: function() {
+        var opacity = this.value.hide ? 0.5 : null;
+
+        this.actionBarItemVisibility.setStyle('opacity', opacity);
+        this.main.getChildren().setStyle('opacity', opacity);
+        this.actionBar.setStyle('opacity', null);
+    },
+
+    showPasteState: function() {
+        var opacity = !ka.isClipboard('content') ? 0.5 : null;
+        this.actionBarItemPaste.setStyle('opacity', opacity);
+    },
+
+    toggleVisibility: function() {
+        this.value.hide = !this.value.hide;
+
+        this.updateUI();
+    },
+
     remove: function() {
         this.getEditor().deselect();
         this.main.destroy();
     },
 
-    //    onOver: function () {
-    //        this.actionBar.inject(this.main);
-    //    },
-    //
-    //    onOut: function () {
-    //        this.actionBar.dispose();
-    //    },
+    /**
+     *
+     * @returns {Element}
+     */
+    getContentContainer: function() {
+        return this.contentContainer;
+    },
 
     /**
      *
@@ -156,13 +198,12 @@ ka.Content = new Class({
      * @param {ka.ProgressWatch} progressWatch
      */
     setPreview: function(visible, progressWatch) {
-        this.preview = visible;
-
-        if (this.preview) {
-            this.loadPreview(progressWatch);
-        } else {
-            this.loadTemplate(progressWatch);
+        if (!this.getContentObject().isPreviewPossible()) {
+            return false;
         }
+
+        this.preview = visible;
+        this.updateUI();
     },
 
     /**
@@ -182,15 +223,23 @@ ka.Content = new Class({
             domainId: this.getEditor().getDomainId()
         });
 
+        this.getEditor().deactivateLinks(this.main);
         this.lastRq = new Request.JSON({url: _pathAdmin + 'admin/content/preview?' + req, noCache: true,
             onFailure: function() {
-                progressWatch.error();
+                if (progressWatch) {
+                    progressWatch.error();
+                }
             },
             onComplete: function(pResponse) {
                 this.actionBar.dispose();
                 this.main.empty();
+
                 this.main.set('html', pResponse.data);
-                progressWatch.done();
+                this.actionBar.inject(this.main, 'top');
+
+                if (progressWatch) {
+                    progressWatch.done();
+                }
             }.bind(this)}).post({
                 content: this.value.content
             });
@@ -200,20 +249,26 @@ ka.Content = new Class({
      * @param {ka.ProgressWatch} progressWatch
      */
     loadTemplate: function(progressWatch) {
-        if (this.lastRq) {
-            this.lastRq.cancel();
-        }
-
         if (null !== this.currentTemplate && this.currentTemplate == this.value.template) {
             return;
         }
 
+        if (this.lastRq) {
+            this.lastRq.cancel();
+        }
+
+        this.getEditor().activateLinks(this.main);
         this.lastRq = new Request.JSON({url: _pathAdmin + 'admin/content/template', noCache: true,
             onFailure: function() {
                 progressWatch.error();
             },
             onComplete: function(pResponse) {
                 this.actionBar.dispose();
+                this.main.setStyle('height', this.main.getSize().y);
+
+                if (this.contentObject) {
+                    this.contentObject.destroy();
+                }
                 this.main.empty();
                 this.main.set('html', pResponse.data);
 
@@ -223,7 +278,9 @@ ka.Content = new Class({
                 this.currentTemplate = this.value.template;
                 this.actionBar.inject(this.main, 'top');
 
-                return this.setValue(this.value);
+                this.setValue(this.value);
+
+                this.main.setStyle.delay(50, this.main, ['height']);
             }.bind(this)}).get({
                 template: this.value.template,
                 type: this.value.type
@@ -290,7 +347,6 @@ ka.Content = new Class({
             return this.updateUI();
         }.bind(this));
 
-        console.log(this.value.template);
         this.template.setValue(this.value.template || null);
 
         this.inspectorContainer = new Element('div', {
@@ -300,6 +356,10 @@ ka.Content = new Class({
 
     updateUI: function() {
         this.value = this.getValue();
+
+        this.showVisibilityState();
+        this.showPasteState();
+
         if (this.preview) {
             this.loadPreview();
         } else {
@@ -353,6 +413,9 @@ ka.Content = new Class({
             }
             this.currentType = pValue.type;
         }
+//
+        this.showVisibilityState();
+        this.showPasteState();
 
         this.contentObject.setValue(pValue.content);
 

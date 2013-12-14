@@ -17,7 +17,7 @@ ka.ContentTypes.Html = new Class({
     createLayout: function() {
         this.main = new Element('div', {
             'class': 'ka-normalize ka-content-plugin'
-        }).inject(this.getContentInstance());
+        }).inject(this.getContentInstance().getContentContainer());
 
         this.iconDiv = new Element('div', {
             'class': 'ka-content-inner-icon icon-html5'

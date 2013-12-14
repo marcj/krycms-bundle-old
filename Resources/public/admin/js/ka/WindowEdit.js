@@ -901,7 +901,7 @@ ka.WindowEdit = new Class({
                     if (typeOf(res.data) == 'object') {
                         this.winParams.item = res.data; //our new primary keys
                     } else {
-                        this.winParams.item = ka.getObjectPk(this.classProperties['object'], request); //maybe we changed some pk
+                        this.winParams.item = ka.getObject(this.classProperties['object'], request); //maybe we changed some pk
                     }
 
                     this.saveBtn.stopTip(t('Saved'));

@@ -58,7 +58,7 @@ class PageController extends PluginController
     public function redirectToStartPageAction()
     {
         $qs = $this->getKrynCore()->getRequest()->getQueryString();
-        $response = new RedirectResponse($this->getKrynCore()->getRequest()->getBaseUrl()  . ($qs ? '?'.$qs:''), 301);
+        $response = new RedirectResponse(($this->getKrynCore()->getRequest()->getBaseUrl() ?: '')  . ($qs ? '?'.$qs:''), 301);
 
         return $response;
     }

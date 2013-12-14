@@ -2,13 +2,6 @@ ka.ContentAbstract = new Class({
     Extends: ka.FieldAbstract,
 
     /**
-     * The reference to the current (parent) ka.Content instance.
-     *
-     * @type {ka.Field}
-     */
-    contentInstance: null,
-
-    /**
      * @returns {ka.Editor}
      */
     getEditor: function() {
@@ -20,6 +13,13 @@ ka.ContentAbstract = new Class({
      */
     getSlot: function() {
         return this.getContentInstance().getSlot();
+    },
+
+    /**
+     * Destroys everything related to this contentType.
+     */
+    destroy: function(){
+
     },
 
     /**
@@ -40,7 +40,26 @@ ka.ContentAbstract = new Class({
         //your field got deselected
     },
 
+    /**
+     * @returns {ka.Content}
+     */
     getContentInstance: function () {
         return this.getParentInstance();
+    },
+
+    /**
+     * @returns {ka.FieldTypes.Content}
+     */
+    getContentFieldInstance: function () {
+        return this.getEditor().getContentField();
+    },
+
+    /**
+     * Defines whether this type can be previewed.
+     *
+     * @returns {boolean}
+     */
+    isPreviewPossible: function() {
+        return true;
     }
 });

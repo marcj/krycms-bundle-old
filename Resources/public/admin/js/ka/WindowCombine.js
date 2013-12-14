@@ -1227,7 +1227,7 @@ ka.WindowCombine = new Class({
         this.loadItem(pItem);
     },
 
-    loadItem: function(pItem, objectKey) {
+    loadItem: function(pk, objectKey) {
         var _this = this;
 
         if (!objectKey) {
@@ -1235,8 +1235,6 @@ ka.WindowCombine = new Class({
         }
 
         this.needSelection = false;
-
-        var pk = ka.getObjectPk(objectKey, pItem);
 
         if (this.currentAdd) {
             //TODO check unsaved
@@ -1257,7 +1255,7 @@ ka.WindowCombine = new Class({
 
         if (!this.currentEdit) {
 
-            this.setActiveItem(pItem, objectKey);
+            this.setActiveItem(pk, objectKey);
             if (this.addBtn) {
                 this.addBtn.setPressed(false);
             }
@@ -1297,14 +1295,14 @@ ka.WindowCombine = new Class({
                 this.win.interruptClose = true;
                 this.win._confirm(t('There are unsaved data. Want to continue?'), function(pAccepted) {
                     if (pAccepted) {
-                        this.currentEdit.winParams = {item: pItem};
+                        this.currentEdit.winParams = {item: pk};
                         this.currentEdit.loadItem();
 
                         if (this.addBtn) {
                             this.addBtn.setPressed(false);
                         }
 
-                        this.setActiveItem(pItem, objectKey);
+                        this.setActiveItem(pk, objectKey);
                     }
                 }.bind(this));
                 return;
@@ -1316,7 +1314,7 @@ ka.WindowCombine = new Class({
                     this.addBtn.setPressed(false);
                 }
 
-                this.setActiveItem(pItem, objectKey);
+                this.setActiveItem(pk, objectKey);
             }
 
         }

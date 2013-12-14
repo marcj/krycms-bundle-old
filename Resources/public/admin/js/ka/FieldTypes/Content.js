@@ -62,10 +62,7 @@ ka.FieldTypes.Content = new Class({
             this.actionGroup.addButton(t('Reset'), '#icon-escape');
             this.actionGroup.addButton(t('Versions'), '#icon-history');
 
-            this.saveBtn = new ka.Button(t('Save'))
-                .setButtonStyle('blue')
-                .addEvent('click', this.saveStandalone.bind(this))
-                .inject(this.headerLayout.getCell(1, 2));
+            this.saveBtn = new ka.Button(t('Save')).setButtonStyle('blue').addEvent('click', this.saveStandalone.bind(this)).inject(this.headerLayout.getCell(1, 2));
         } else {
             this.mainLayout.getCell(1, 1).addClass('ka-Field-content-actionBar');
         }
@@ -74,7 +71,7 @@ ka.FieldTypes.Content = new Class({
 
         this.mainLayout.getCell(2, 1).setStyles({
             'border': '1px solid silver',
-            'background': 'url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAAIklEQVQIW2NkQAL37t37zwjjgzhKSkqMYAEYB8RmROaABAAGgA+evuWXiAAAAABJRU5ErkJggg==) repeat'
+            //'background': 'url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAAIklEQVQIW2NkQAL37t37zwjjgzhKSkqMYAEYB8RmROaABAAGgA+evuWXiAAAAABJRU5ErkJggg==) repeat'
         });
 
         this.mainLayout.getCell(2, 2).setStyles({
@@ -83,37 +80,47 @@ ka.FieldTypes.Content = new Class({
         });
 
         this.editableAreaContainer = new Element('div', {
-            style: 'position: absolute; left: 15px; right: 15px; top: 15px; bottom: 0px;'
+            style: 'position: absolute; left: 0px; right: 15px; top: 0px; bottom: 0px;'
         }).inject(this.mainLayout.getCell(2, 1));
 
         this.editableAreaLayout = new ka.Layout(this.editableAreaContainer, {
             layout: [
-                {columns: [null]},
-                {columns: [null], height: 30}
+                {columns: [null], height: 30},
+                {columns: [null]}
             ]
         });
 
-        this.optionsContainer = this.editableAreaLayout.getCell(2, 1);
+        this.optionsContainer = new Element('div').inject(this.editableAreaLayout.getCell(1, 1));
+
+        this.zoomContainer = new Element('div', {
+            style: 'float: right;'
+        }).inject(this.optionsContainer);
 
         new Element('span', {
             text: t('Zoom:'),
             style: 'padding-right: 5px; line-height: 30px;'
-        }).inject(this.optionsContainer);
+        }).inject(this.zoomContainer);
 
-        this.slider = new ka.Slider(this.optionsContainer, {
+        this.slider = new ka.Slider(this.zoomContainer, {
             steps: 100
         });
 
         this.zoomValue = new Element('span', {
             text: '100%',
             style: 'padding-left: 5px; line-height: 30px;'
-        }).inject(this.optionsContainer);
+        }).inject(this.zoomContainer);
 
         this.slider.setValue(100);
 
-        var iframeContainer = this.editableAreaLayout.getCell(1, 1);
+        this.toggleFullscreen = new Element('a', {
+            'class': 'ka-button-icon icon-expand-5',
+            style: 'padding: 0 15px; margin-left: 15px; margin-right: 0px; border-left: 1px solid #ddd; border-right: 1px solid #ddd;',
+            title: t('Toogle Fullscreen')
+        }).inject(this.zoomContainer);
 
-        this.iframe = new Element('iframe', {
+        var iframeContainer = this.editableAreaLayout.getCell(2, 1);
+
+        this.iframe = new IFrame({
             frameborder: 0,
             style: 'display: block; border: 0; height: 100%; width: 100%;'
         }).inject(iframeContainer);
@@ -123,12 +130,29 @@ ka.FieldTypes.Content = new Class({
 
         if (this.options.standalone) {
             this.domainSelection = new ka.Select(this.headerLayout.getCell(1, 1), {
-                object: 'kryncmsbundle:domain',
+                object: 'kryncms/domain',
                 onChange: function(item) {
                     this.loadEditor(this.domainSelection.getValue());
                 }.bind(this)
             });
         }
+
+        this.iframeOverlay = new Element('div', {
+            'class': 'ka-Full',
+            styles: {
+                opacity: 0.01,
+                backgroundColor: '#fff'
+            }
+        });
+
+        var splitter = this.mainLayout.getSplitter(2, 2, 'left');
+        splitter.addEvent('start', function() {
+            this.iframeOverlay.inject(iframeContainer);
+        }.bind(this));
+
+        splitter.addEvent('end', function() {
+            this.iframeOverlay.dispose()
+        }.bind(this));
 
         this.slider.addEvent('change', function(step) {
             if (0 == step) step = 1;
@@ -140,6 +164,14 @@ ka.FieldTypes.Content = new Class({
         this.renderSidebar();
 
         this.setupEvents();
+    },
+
+    /**
+     *
+     * @returns {Element}
+     */
+    getOptionsContainer: function() {
+        return this.optionsContainer;
     },
 
     setupEvents: function() {
@@ -247,10 +279,16 @@ ka.FieldTypes.Content = new Class({
                 },
                 onAllDone: function() {
                     this.saveBtn.setProgress(100);
-                    this.lastSaveRq = new Request.JSON({url: this.getUrl(), onComplete: function (pResponse) {
-                        this.saveBtn.stopLoading(t('Saved!'));
-                        this.saveBtn.setProgress(false);
-                    }.bind(this)}).post({content: value});
+                    this.lastSaveRq = new Request.JSON({url: this.getUrl(),
+                        onFailure: function(pResponse) {
+                            this.saveBtn.failedLoading(t('Failed!'));
+                            this.saveBtn.setProgress(false);
+                        }.bind(this),
+                        onComplete: function(pResponse) {
+                            this.saveBtn.doneLoading(t('Saved!'));
+                            this.saveBtn.setProgress(false);
+                        }.bind(this)
+                    }).post({_method: 'patch', content: value});
                 }.bind(this),
 
                 onAllProgress: function(progress) {
@@ -263,34 +301,34 @@ ka.FieldTypes.Content = new Class({
         }
     },
 
-    getValue: function(progressWatch) {
-        if (this.editor) {
-            var value = [];
-            var progressWatchManager = new ka.ProgressWatchManager({
-                onDone: function(progressWatch) {
-                    value.push(progressWatch.getValue());
-                },
-                onAllDone: function() {
-                    progressWatch.done(value);
-                }.bind(this),
-
-                onAllProgress: function(progress) {
-                    progressWatch.progress(progress);
-                }.bind(this)
-            });
-
-            return this.editor.getValue(progressWatchManager);
-        } else {
-            return progressWatch.done(this.lastContents);
-        }
-    },
+    //    getValue: function(progressWatch) {
+    //        if (this.editor) {
+    //            var value = [];
+    //            var progressWatchManager = new ka.ProgressWatchManager({
+    //                onDone: function(progressWatch) {
+    //                    value.push(progressWatch.getValue());
+    //                },
+    //                onAllDone: function() {
+    //                    progressWatch.done(value);
+    //                }.bind(this),
+    //
+    //                onAllProgress: function(progress) {
+    //                    progressWatch.progress(progress);
+    //                }.bind(this)
+    //            });
+    //
+    //            return this.editor.getValue(progressWatchManager);
+    //        } else {
+    //            return progressWatch.done(this.lastContents);
+    //        }
+    //    },
 
     getValue: function(progressWatch) {
         return this.lastContents;
     },
 
-    getUrl: function () {
-        return _pathAdmin + 'admin/object/kryncmsbundle:Node/' + this.editor.options.node.id + '?_method=patch';
+    getUrl: function() {
+        return _pathAdmin + 'admin/object/kryncms/node/' + this.editor.options.node.id;
     },
 
     selectElement: function(element) {
@@ -345,25 +383,20 @@ ka.FieldTypes.Content = new Class({
             text: t('Show slots'),
             style: 'cursor: default',
             'class': 'ka-editor-sidebar-item icon-checkbox-partial'
-        })
-            .addEvent('mouseover', function() {
+        }).addEvent('mouseover', function() {
                 if (this.editor)
                     this.editor.highlightSlots(true);
-            }.bind(this))
-            .addEvent('mouseout', function() {
+            }.bind(this)).addEvent('mouseout', function() {
                 if (this.editor)
                     this.editor.highlightSlots(false);
-            }.bind(this))
-            .inject(this.sidebar);
+            }.bind(this)).inject(this.sidebar);
 
         this.showPreview = new Element('div', {
             text: t('Toggle preview'),
             'class': 'ka-editor-sidebar-item icon-eye-4'
-        })
-            .addEvent('click', function() {
+        }).addEvent('click', function() {
                 this.togglePreview();
-            }.bind(this))
-            .inject(this.sidebar);
+            }.bind(this)).inject(this.sidebar);
 
         this.inspector = new Element('div', {
             'class': 'ka-editor-inspector'
@@ -413,6 +446,20 @@ ka.FieldTypes.Content = new Class({
         Object.each(ka.settings.configs, function(config, bundleName) {
             this.addPlugins(bundleName, config);
         }.bind(this));
+
+        this.contentElementsContainer.addEvent('click', function() {
+            this.teaseSlotBubbles();
+        }.bind(this));
+        this.pluginsContainer.addEvent('click', function() {
+            this.teaseSlotBubbles();
+        }.bind(this));
+    },
+
+    teaseSlotBubbles: function() {
+        this.getEditor().highlightSlotsBubbles(true);
+        (function() {
+            this.getEditor().highlightSlotsBubbles(false);
+        }).delay(1000, this);
     },
 
     togglePreview: function() {

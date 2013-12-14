@@ -188,12 +188,7 @@ ka.ObjectTree = new Class({
             throw 'Object is not a nested set ' + this.options.objectKey;
         }
 
-        this.primaryKeys = ka.getPrimariesForObject(this.options.objectKey);
-        Object.each(this.primaryKeys, function(def, id) {
-            if (!this.primaryKey) {
-                this.primaryKey = id;
-            }
-        }.bind(this));
+        this.primaryKey = ka.getObjectPrimaryKey(this.options.objectKey);
 
         if (!this.primaryKey) {
             throw 'Object has no primary key: ' + this.options.objectKey;
@@ -293,11 +288,12 @@ ka.ObjectTree = new Class({
      */
     startupWithObjectInfo: function(pId, pCallback) {
         var objectKey = this.options.objectKey;
-        if ('string' !== typeOf(pId)) {
-            pId = ka.getObjectUrlId(this.options.objectKey, pId);
+        if ('object' === typeOf(pId)) {
+            pId = ka.getObjectId(this.options.objectKey, pId);
         } else {
-            pId = ka.getCroppedObjectId(pId);
-            objectKey = ka.getObjectKey(pId) || this.options.objectKey;
+            //we assume its a objectUrl
+            pId = ka.getObjectIdFromUrl(pId);
+            objectKey = ka.getCroppedObjectKey(pId) || this.options.objectKey;
         }
 
         if (objectKey != this.options.objectKey) {
@@ -309,7 +305,7 @@ ka.ObjectTree = new Class({
             return;
         }
 
-        new Request.JSON({url: this.getUrl() + pId + '/:parents', noCache: 1, onComplete: function(response) {
+        new Request.JSON({url: this.getUrl() + ka.getObjectUrlIdFromId(pId) + '/:parents', noCache: 1, onComplete: function(response) {
             this.load_object_children = [];
             Array.each(response.data, function(item) {
                 if (item._object && ka.normalizeObjectKey(item._object) && ka.normalizeObjectKey(this.options.objectKey)) {
@@ -517,21 +513,21 @@ ka.ObjectTree = new Class({
 
         this.addRootItems(items, this.paneObjects);
 
-        if (this.options.withObjectAdd) {
-
-            if (ka.checkDomainAccess(this.rootA.id, 'addObjects')) {
-
-                new Element('img', {
-                    src: _path + this.options.iconAdd,
-                    title: t('Add object'),
-                    'class': 'ka-objectTree-add'
-                }).addEvent('click', function(e) {
-                        this.fireEvent('objectAdd', this.rootA.id, this.rootA.objectKey);
-                    }.bind(this)).inject(this.rootA);
-
-            }
-
-        }
+//        if (this.options.withObjectAdd) {
+//
+////            if (ka.checkDomainAccess(this.rootA.id, 'addObjects')) {
+////
+////                new Element('img', {
+////                    src: _path + this.options.iconAdd,
+////                    title: t('Add object'),
+////                    'class': 'ka-objectTree-add'
+////                }).addEvent('click', function(e) {
+////                        this.fireEvent('objectAdd', this.rootA.id, this.rootA.objectKey);
+////                    }.bind(this)).inject(this.rootA);
+////
+////            }
+//
+//        }
 
         this.firstLevelLoaded = true;
         this.activeLoadings--;
@@ -750,6 +746,7 @@ ka.ObjectTree = new Class({
         }).inject(a);
         a.objectEntry = pItem;
 
+        console.log(pItem);
         this.renderLabel(a.span, pItem, this.options.objectKey);
 
         this.items[url] = a;
@@ -1327,7 +1324,7 @@ ka.ObjectTree = new Class({
     },
 
     getItem: function(pId) {
-        var id = 'string' === typeOf(pId) ? pId : this.options.objectKey + '/' + ka.getObjectUrlId(this.options.objectKey, pId);
+        var id = 'string' === typeOf(pId) ? pId : this.options.objectKey + '/' + ka.getObjectId(this.options.objectKey, pId);
         return this.items[id];
     },
 
@@ -1346,12 +1343,11 @@ ka.ObjectTree = new Class({
     select: function(pPk) {
         var id, objectKey = this.options.objectKey;
 
-        if ('string' === typeOf(pPk)) {
-            objectKey = ka.getObjectKey(pPk) || this.options.objectKey;
-            pPk = ka.getCroppedObjectId(pPk);
-            id = objectKey + '/' + pPk;
-        } else {
+        if ('object' === typeOf(pPk)) {
             id = this.options.objectKey + '/' + ka.getObjectUrlId(this.options.objectKey, pPk);
+        } else {
+            objectKey = ka.getCroppedObjectKey(pPk) || this.options.objectKey;
+            id = objectKey + '/' + ka.getCroppedObjectId(pPk);
         }
 
         this.deselect();

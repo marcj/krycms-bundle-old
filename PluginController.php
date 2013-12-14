@@ -7,11 +7,20 @@ use Kryn\CmsBundle\Exceptions\FileNotFoundException;
 class PluginController extends Controller
 {
 
-    protected function setOptions(&$values, $defaults)
+    /**
+     * Replaces all falsy (0, '', null) values in $values with the $default value.
+     *
+     * @param array $values
+     * @param array $defaults
+     */
+    protected function setOptions(array &$values, array $defaults)
     {
-        $values = array_merge($defaults, $values);
+        foreach ($defaults as $key => $default) {
+            if (!@$values[$key]) {
+                $values[$key] = $default;
+            }
+        }
     }
-
 
 //    /**
 //     * Returns the rendered view output.
@@ -138,13 +147,14 @@ class PluginController extends Controller
      * @param string $cacheKey
      * @param string $view
      * @param array|callable $data Pass the data as array or a data provider function.
+     * @param integer $lifeTime In seconds. Default is one hour/3600 seconds.
      * @param bool $force Force to bypass the cache and always call $data. For debuggin purposes.
      *
      * @see method `render` to get more information.
      *
      * @return string
      */
-    protected function renderFullCached($cacheKey, $view, $data = null, $force = false)
+    protected function renderFullCached($cacheKey, $view, $data = null, $lifeTime = null, $force = false)
     {
         $cache = $this->getKrynCore()->getDistributedCache($cacheKey);
         $mTime = $this->getViewMTime($view);
@@ -174,7 +184,7 @@ class PluginController extends Controller
                 'responseDiff' => $diff
             );
 
-            $this->getKrynCore()->setDistributedCache($cacheKey, $cache);
+            $this->getKrynCore()->setDistributedCache($cacheKey, $cache, $lifeTime ?: 3600);
 
         } else if ($cache['responseDiff']) {
             $this->getKrynCore()->getPageResponse()->patch($cache['responseDiff']);
