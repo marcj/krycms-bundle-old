@@ -300,7 +300,7 @@ class Propel extends ORMAbstract
      * @param ModelCriteria $query
      * @param array $options
      *
-     * @throws FieldNotFoundException
+     * @throws FileNotFoundException
      */
     public function mapOptions(ModelCriteria $query, $options = array())
     {
@@ -314,10 +314,22 @@ class Propel extends ORMAbstract
 
         if (isset($options['order']) && is_array($options['order'])) {
             foreach ($options['order'] as $field => $direction) {
-                if (!$this->tableMap->hasColumnByPhpName(ucfirst($field))) {
-                    throw new FileNotFoundException(sprintf('Field %s in object %s not found', $field, $this->getObjectKey()));
+
+                $fieldName = ucfirst($field);
+                $tableMap = $this->tableMap;
+                if (false !== $pos = strpos($field, '.')) {
+                    $relationName = ucfirst(substr($field, 0, $pos));
+                    $fieldName = ucfirst(substr($field, $pos + 1));
+                    if (!$relation = $this->tableMap->getRelation($relationName)) {
+                        throw new FileNotFoundException(sprintf('Relation `%s` in object `%s` not found', $relationName, $this->getObjectKey()));
+                    }
+                    $tableMap = $relation->getForeignTable();
+                }
+
+                if (!$tableMap->hasColumnByPhpName(ucfirst($fieldName))) {
+                    throw new FileNotFoundException(sprintf('Field `%s` in object `%s` not found', $fieldName, $tableMap->getPhpName()));
                 } else {
-                    $column = $this->tableMap->getColumnByPhpName(ucfirst($field));
+                    $column = $this->tableMap->getColumnByPhpName(ucfirst($fieldName));
 
                     $query->orderBy($column->getName(), $direction);
                 }

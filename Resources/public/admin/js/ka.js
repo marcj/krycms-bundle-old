@@ -777,8 +777,6 @@ ka.getObjectLabelByItem = function(objectKey, item, mode, overwriteDefinition) {
         label = definition.fieldLabel;
     }
 
-    console.log(label, template);
-
     /* tree */
     if (mode == 'tree' && definition.treeTemplate) {
         template = definition.treeTemplate;

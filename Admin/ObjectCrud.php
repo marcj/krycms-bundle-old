@@ -1046,7 +1046,7 @@ class ObjectCrud extends ContainerAware
      *
      * @return array|null
      */
-    protected static function buildFilter($filter)
+    public static function buildFilter($filter)
     {
         $condition = null;
 
@@ -1585,6 +1585,7 @@ class ObjectCrud extends ContainerAware
         if ($this->getMultiLanguage()) {
             $langField = new Field(null, $this->getKrynCore());
             $langField->setId('lang');
+            $langField->setType('text');
             $langField->setRequired(true);
             $fields2[] = $langField;
         }

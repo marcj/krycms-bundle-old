@@ -1198,6 +1198,9 @@ ka.Files = new Class({
         this.imageCropUtils = null;
 
         this.fileContainer.removeClass('ka-Files-imageContainer');
+        this.fileContainer.removeClass('ka-Files-fileContainer-iframe');
+        this.fileContainer.removeClass('ka-Files-fileContainer-editor');
+        this.statusBar.removeClass('ka-Files-statusBar-image');
 
         if (this.currentFile.type == 'file') {
             this.prepareRenderFile();
@@ -1218,8 +1221,11 @@ ka.Files = new Class({
             onProgress: function(event) {
                 this.optionsBarSave.setProgress(parseInt(event.loaded / event.total * 100));
             }.bind(this),
+            onFailure: function() {
+                this.optionsBarSave.failedLoading();
+            }.bind(this),
             onComplete: function(response) {
-                if (!response.error) {
+                if (response && !response.error) {
                     this.optionsBarSave.doneLoading();
                 } else {
                     this.optionsBarSave.failedLoading();
@@ -1238,7 +1244,7 @@ ka.Files = new Class({
         var post = {
             path: this.currentFile.path,
             content: '',
-            contentEncoding: 'text/plain'
+            contentEncoding: 'plain'
         };
 
         if (this.isImage(this.currentFile)) {
@@ -1267,7 +1273,6 @@ ka.Files = new Class({
     },
 
     prepareRenderFiles: function() {
-        this.statusBar.removeClass('ka-Files-statusBar-image');
         this.fileContainer.empty();
     },
 
@@ -1278,10 +1283,6 @@ ka.Files = new Class({
 
     prepareRenderFile: function() {
         this.fileContainer.empty();
-        this.fileContainer.removeClass('ka-Files-fileContainer-iframe');
-        this.fileContainer.removeClass('ka-Files-fileContainer-editor');
-        this.statusBar.removeClass('ka-Files-statusBar-image');
-
 
         if (!this.isImage(this.currentFile)) {
             this.fileContainer.addClass('ka-Files-fileContainer-editor');

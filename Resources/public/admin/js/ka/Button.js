@@ -177,6 +177,10 @@ ka.Button = new Class({
             this.main.removeClass('ka-Button-stopLoading-' + highlightClass);
         }.bind(this);
 
+        if (this.progress) {
+            this.progress.destroy();
+        }
+
         if (text) {
             this.loadingLabel.set('text', text);
             this.main.addClass('ka-Button-stopLoading-' + highlightClass);
@@ -192,7 +196,7 @@ ka.Button = new Class({
     },
 
     failedLoading: function(text){
-        if (!text) text = t('Done');
+        if (!text) text = t('Failed');
         this.stopLoading(text, 'failed');
     },
 

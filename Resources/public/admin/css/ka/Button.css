@@ -81,7 +81,7 @@ a.ka-Button-textAndIcon:before {
     padding-right: 5px;
 }
 
-.ka-admin aa.ka-Button:hover,
+.ka-admin a.ka-Button:hover,
 a.ka-Button:hover {
     background-color: #fafafa;
     color: #111;
@@ -125,7 +125,7 @@ div.button-list {
     bottom: -1px;
     border-top: 1px solid gray;
     line-height: 28px;
-    background: #aaa;
+    background-color: #aaa;
 }
 
 a.ka-Button img {
@@ -136,7 +136,7 @@ a.ka-Button img {
 
 a.ka-Button-red, a.ka-Button-red:link {
     color: white;
-    background: #b23935;
+    background-color: #b23935;
 }
 
 a.ka-Button-red:hover {
@@ -144,33 +144,33 @@ a.ka-Button-red:hover {
 }
 
 a.ka-Button-red:active {
-    background: #af1715;
+    background-color: #af1715;
 }
 
-.ka-admin aa.ka-Button-blue,
-.ka-admin aa.ka-Button-blue:link,
+.ka-admin a.ka-Button-blue,
+.ka-admin a.ka-Button-blue:link,
 a.ka-Button-blue,
 a.ka-Button-blue:link {
     color: white;
-    background: #22638E;
+    background-color: #22638E;
     border: 1px solid #265F85;
 }
 
 a.ka-Button-blue:hover {
     color: #eee;
-    background: #205A81;
+    background-color: #205A81;
 }
 
 a.ka-Button-blue:active {
-    background: #154A66;
+    background-color: #154A66;
 }
 
-.ka-admin aa.ka-Button-deactivate,
-.ka-admin aa.ka-Button-deactivate:link,
-aa.ka-Button-deactivate,
-aa.ka-Button-deactivate:link,
-aa.ka-Button-deactivate:active,
-aa.ka-Button-deactivate:hover {
+.ka-admin a.ka-Button-deactivate,
+.ka-admin a.ka-Button-deactivate:link,
+a.ka-Button-deactivate,
+a.ka-Button-deactivate:link,
+a.ka-Button-deactivate:active,
+a.ka-Button-deactivate:hover {
     cursor: default;
     color: gray;
     background-color: transparent;
@@ -180,7 +180,7 @@ a.ka-Button-loading:before {
     content: url(../../images/loading.gif?v1);
 }
 
-a.ka-Button-progress {
+.ka-Button-progress {
     position: absolute;
     left: 0;
     top: 0;

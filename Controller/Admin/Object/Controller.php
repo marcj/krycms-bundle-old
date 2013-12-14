@@ -163,7 +163,7 @@ class Controller extends KrynController
      * @Rest\QueryParam(name="order", array=true, requirements=".+", description="Order the result")
      * @Rest\QueryParam(name="filter", array=true, requirements=".+", description="Filter the result")
      *
-     * @Rest\Get("/admin/object-browser/{objectKey}", requirements={"objectKey" = "[a-zA-Z0-9-_\.\\\\:]+"})
+     * @Rest\Get("/admin/object-browser/{objectKey}", requirements={"objectKey" = "[a-zA-Z0-9-_]+/[a-zA-Z0-9-_]+"})
      *
      * @param string $objectKey
      * @param ParamFetcher $paramFetcher
@@ -255,7 +255,7 @@ class Controller extends KrynController
      *
      * @Rest\QueryParam(name="filter", array=true, requirements=".+", description="Filter the result")
      *
-     * @Rest\Get("/object-browser-count/{objectKey}", requirements={"objectKey" = "[a-zA-Z0-9-_\.\\\\:]+"})
+     * @Rest\Get("/admin/object-browser-count/{objectKey}", requirements={"objectKey" = "[a-zA-Z0-9-_]+/[a-zA-Z0-9-_]+"})
      *
      * @param string $objectKey
      * @param ParamFetcher $paramFetcher

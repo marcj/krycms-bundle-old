@@ -66,15 +66,6 @@
           <entryPoint path="desktop-settings" type="custom" multi="true">
             <label>Desktop settings</label>
           </entryPoint>
-          <entryPoint path="searchIndexerList" type="list" multi="true">
-            <class>adminSearchIndexList</class>
-            <label>Search index</label>
-            <children>
-              <entryPoint path="doAction" type="custom">
-                <label>Add</label>
-              </entryPoint>
-            </children>
-          </entryPoint>
           <entryPoint path="layout" type="custom" system="true" icon="#icon-code" link="true" multi="true">
             <label>Layouts</label>
           </entryPoint>

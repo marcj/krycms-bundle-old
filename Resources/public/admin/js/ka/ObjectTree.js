@@ -69,7 +69,7 @@ ka.ObjectTree = new Class({
         openFirstLevel: null,
 
         /**
-         * If you want to change the root object. Thats not very often the case.
+         * If you want to change the root object. That's not very often the case.
          * @var {String}
          */
         rootObject: null,
@@ -746,7 +746,6 @@ ka.ObjectTree = new Class({
         }).inject(a);
         a.objectEntry = pItem;
 
-        console.log(pItem);
         this.renderLabel(a.span, pItem, this.options.objectKey);
 
         this.items[url] = a;
@@ -967,7 +966,7 @@ ka.ObjectTree = new Class({
             style: 'position: relative; top: 3px;'
         }).inject(pA.span);
 
-        console.log('loadChildren', this.getUrl(), pA.id, '=>', ka.getCroppedObjectId(pA.id), '/:branch');
+//        console.log('loadChildren', this.getUrl(), pA.id, '=>', ka.getCroppedObjectId(pA.id), '/:branch');
         new Request.JSON({url: this.getUrl() + ka.getCroppedObjectId(pA.id) + '/:branch',
             noCache: 1, onComplete: function(pResponse) {
 
@@ -1345,10 +1344,23 @@ ka.ObjectTree = new Class({
 
         if ('object' === typeOf(pPk)) {
             id = this.options.objectKey + '/' + ka.getObjectUrlId(this.options.objectKey, pPk);
-        } else {
+        } else
+
+        if ('string' === typeOf(pPk) && this.options.rootObject) {
+            //it could be the root item/different objectKey
             objectKey = ka.getCroppedObjectKey(pPk) || this.options.objectKey;
             id = objectKey + '/' + ka.getCroppedObjectId(pPk);
+//            console.log('converted from object url: ', pPk, objectKey, id);
+        } else {
+            if ('object' === typeOf(pPk)) {
+                id = ka.getObjectUrlId(this.options.objectKey, pPk);
+            } else {
+                id = ka.getObjectUrlIdFromId(this.options.objectKey, pPk);
+            }
+            id = this.options.objectKey + '/' + id;
         }
+
+//        console.log('select from', pPk, ' to ', id);
 
         this.deselect();
         this.selected = id;
@@ -1378,6 +1390,7 @@ ka.ObjectTree = new Class({
             return;
         }
 
+//        console.log(this.options.objectKey, objectKey, id, pPk);
         if (this.options.objectKey != objectKey) {
             //root item selected
             this.rootA.addClass('ka-objectTree-item-selected');

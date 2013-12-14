@@ -662,13 +662,14 @@ class FileController extends Controller
      *  description="Saves the file content"
      * )
      *
-     * @Rest\QueryParam(name="path", requirements=".+", strict=true, description="The file path or its ID")
-     * @Rest\QueryParam(name="contentEncoding", requirements="plain|base64", default="plain", description="The $content contentEncoding.")
+     * @Rest\RequestParam(name="path", requirements=".+", strict=true, description="The file path or its ID")
+     * @Rest\RequestParam(name="contentEncoding", requirements="plain|base64", default="plain", description="The $content contentEncoding.")
      * @Rest\RequestParam(name="content", description="The file content")
      *
      * @Rest\Post("/admin/file/content")
      *
      * @param ParamFetcher $paramFetcher
+     *
      * @return bool
      */
     public function setContentAction(ParamFetcher $paramFetcher)

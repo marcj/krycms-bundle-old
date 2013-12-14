@@ -2,7 +2,7 @@
 
 namespace Test\Controller\Admin;
  
-class TestCrud extends \Admin\ObjectCrud {
+class TestCrud extends \Kryn\CmsBundle\Controller\WindowController {
 
     public $fields = array (
   '__Gazzo__' => 

@@ -37,7 +37,7 @@ Request.JSON = new Class({
         if (ka.helpsystem) {
             ka.lastRequestBubble = ka.helpsystem.newBubble(
                 t('Response error'),
-                t('Server\' response is not valid JSON. Looks like the server has serious troubles. :-(') +
+                t('Server\'s response is not valid JSON. Looks like the server has serious troubles. :-(') +
                     "<br/>" + 'URI: %s'.replace('%s', this.options.url) +
                     '<br/><a class="ka-Button" href="javascript:;">Details</a>',
                 15000);

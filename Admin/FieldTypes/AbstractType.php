@@ -54,11 +54,9 @@ abstract class AbstractType implements TypeInterface
         $required = $this->getFieldDefinition()->isRequired()
             || ($this->getFieldDefinition()->isPrimaryKey() && !$this->getFieldDefinition()->isAutoIncrement());
 
-        if ($required && ($field->getValue() === '' || $field->getValue() === '')) {
+        if ($required && ($field->getValue() === '' || $field->getValue() === null)) {
             $result[] = 'Value is empty, but required.';
-        }
-
-        if ($required && $regex = $this->getRequiredRegex()) {
+        } else if ($required && $regex = $this->getRequiredRegex()) {
             $value = (string)$field->getValue();
             if (!preg_match('/' . addslashes($regex) . '/', $value)) {
 

@@ -91,7 +91,7 @@ class RestApiLoader extends Loader
                     continue;
                 }
 
-                if ($entryPoints = $config->getEntryPoints()) {
+                if ($entryPoints = $config->getAllEntryPoints()) {
                     foreach ($entryPoints as $entryPoint) {
                         if ($entryPoint->isFrameworkWindow()) {
                             $this->setupWindowRoute($entryPoint);

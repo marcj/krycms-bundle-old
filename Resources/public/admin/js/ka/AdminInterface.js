@@ -539,6 +539,10 @@ ka.AdminInterface = new Class({
         //        });
 
         ka.wm.handleHashtag();
+
+        if (!window.location.hash) {
+            this.openDashboard();
+        }
         ka.wm.updateWindowBar();
     },
 
@@ -1108,28 +1112,14 @@ ka.AdminInterface = new Class({
 
                 self.loaderTopLine.setStyle('width', 0);
 
-                //            new Fx.Elements([
-                //                this.border,
-                //                this.login
-                //            ], {
-                //               duration: 300
-                //            }).start({
-                //                0: {
-                //                    opacity: 1
-                //                },
-                //                1: {
-                //                    opacity: 0
-                //                }
-                //            });
-
-                var lastlogin = new Date();
+                var lastLogin = new Date();
                 if (window._session.lastlogin > 0) {
-                    lastlogin = new Date(window._session.lastlogin * 1000);
+                    lastLogin = new Date(window._session.lastlogin * 1000);
                 }
                 if (self.helpsystem) {
                     self.helpsystem.newBubble(
                         t('Welcome back, %s').replace('%s', window._session.username),
-                        t('Your last login was %s').replace('%s', lastlogin.format('%d. %b %I:%M')),
+                        t('Your last login was %s').replace('%s', lastLogin.format('%d. %b %I:%M')),
                         3000);
                 }
 
