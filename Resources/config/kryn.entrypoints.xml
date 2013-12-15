@@ -112,10 +112,42 @@
               <entryPoint path="orm" type="custom" system="true" icon="#icon-mug" link="true">
                 <label>ORM</label>
               </entryPoint>
-              <entryPoint path="fields" type="custom" system="true" icon="#icon-console" link="true" >
-                  <label>Fields</label>
+              <entryPoint path="fields" type="custom" system="true" icon="#icon-console" link="true">
+                <label>Fields</label>
               </entryPoint>
             </children>
+          </entryPoint>
+        </children>
+      </entryPoint>
+
+      <entryPoint path="user" system="true" link="true">
+        <label>User Management</label>
+        <children>
+          <entryPoint path="users" type="combine" link="true" icon="#icon-user-9" system="true">
+            <label>Users</label>
+            <class>Kryn\CmsBundle\Controller\Windows\UserCrudController</class>
+            <children>
+              <entryPoint path="editMe">
+                <label>User self edit</label>
+                <class>\Users\Controller\Admin\EditMe</class>
+                <children>
+                  <entryPoint path="groups">
+                    <label>Can edit groups</label>
+                  </entryPoint>
+                  <entryPoint path="username">
+                    <label>Can change username</label>
+                  </entryPoint>
+                </children>
+              </entryPoint>
+            </children>
+          </entryPoint>
+          <entryPoint path="groups" type="combine" icon="#icon-users-2" link="true" system="true">
+            <label>Groups</label>
+            <class>Kryn\CmsBundle\Controller\Windows\GroupCrudController</class>
+          </entryPoint>
+          <entryPoint path="acl" type="custom" link="true" icon="#icon-key-4" system="true">
+            <label>Access management</label>
+            <type>custom</type>
           </entryPoint>
         </children>
       </entryPoint>

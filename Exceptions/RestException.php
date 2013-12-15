@@ -3,7 +3,9 @@
 namespace Kryn\CmsBundle\Exceptions;
 
 
-class RestException extends \Exception
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+
+class RestException extends \Exception implements HttpExceptionInterface
 {
 
     /**
@@ -27,4 +29,25 @@ class RestException extends \Exception
         return $this->data;
     }
 
-} 
+    /**
+     * Returns the status code.
+     *
+     * @return integer An HTTP response status code
+     */
+    public function getStatusCode()
+    {
+        return 500;
+    }
+
+    /**
+     * Returns response headers.
+     *
+     * @return array Response headers
+     */
+    public function getHeaders()
+    {
+        return [];
+    }
+
+
+}

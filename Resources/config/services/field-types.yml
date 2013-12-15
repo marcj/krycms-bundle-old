@@ -19,6 +19,7 @@ parameters:
      kryn_cms.field.types.array.class: Kryn\CmsBundle\Admin\FieldTypes\TypeArray
      kryn_cms.field.types.content.class: Kryn\CmsBundle\Admin\FieldTypes\TypeContent
      kryn_cms.field.types.wysiwyg.class: Kryn\CmsBundle\Admin\FieldTypes\TypeWysiwyg
+     kryn_cms.field.types.password.class: Kryn\CmsBundle\Admin\FieldTypes\TypePassword
 
 services:
      kryn_cms.field.types:
@@ -119,3 +120,8 @@ services:
          class: %kryn_cms.field.types.content.class%
          tags:
              - { name: kryn_cms.field.type, alias: content }
+
+     kryn_cms.field.types.password:
+         class: %kryn_cms.field.types.password.class%
+         tags:
+             - { name: kryn_cms.field.type, alias: password }

@@ -841,6 +841,42 @@ ka.WindowEdit = new Class({
         return data;
     },
 
+    handleFailure: function(xhr, response) {
+
+        if (response && response.error == 'RouteNotFoundException') {
+            this.saveBtn.failedLoading();
+            return this.win.alert(t('RouteNotFoundException. You setup probably the wrong `editEntrypoint`'));
+        }
+
+        if (response && response.error == 'Kryn\\CmsBundle\\Exceptions\\Rest\\ValidationFailedException') {
+            this.saveBtn.failedLoading(t('Validation failed'));
+
+            Object.each(response.data.fields, function(errors, field) {
+                if (this.fields[field]) {
+                    this.fields[field].showInvalid(errors.join("\n"));
+                } else {
+                    this.win.alert(tf("Field `%s` has validation failures and can not be found.\n\nErrors: \n%s", field, errors.join("\n")));
+                }
+            }.bind(this));
+            return;
+        }
+
+        if (response && response.error == 'DuplicateKeysException') {
+            this.win.alert(t('Duplicate keys. Please change the values of marked fields.'));
+
+            Array.each(response.data.fields, function(field) {
+                if (this.fields[field]) {
+                    this.fields[field].showInvalid();
+                }
+            }.bind(this));
+
+            this.saveBtn.failedLoading(t('Duplicate keys'));
+            return;
+        }
+
+        this.saveBtn.failedLoading();
+    },
+
     save: function(pClose) {
 
         if (this.lastSaveRq) {
@@ -867,52 +903,25 @@ ka.WindowEdit = new Class({
                 onProgress: function(event) {
                     this.saveBtn.setProgress(parseInt(event.loaded / event.total * 100));
                 }.bind(this),
-                onFailure: function() {
-                    this.saveBtn.failedLoading();
-                }.bind(this),
-                onComplete: function(res) {
+                onFailure: this.handleFailure.bind(this),
+                onSuccess: function(response) {
 
-                    console.log(res);
-                    if (res && res.error == 'RouteNotFoundException') {
-                        this.saveBtn.failedLoading();
-                        return this.win.alert(t('RouteNotFoundException. You setup probably the wrong `editEntrypoint`'));
-                    }
-
-                    if (res && res.error == 'Kryn\\CmsBundle\\Exceptions\\Rest\\ValidationFailedException') {
-                        this.saveBtn.failedLoading(t('Validation failed'));
-                        return this.win.alert('Todo, show the filed etc.');
-                    }
-
-                    if (res && res.error == 'DuplicateKeysException') {
-                        this.win.alert(t('Duplicate keys. Please change the values of marked fields.'));
-
-                        Array.each(res.fields, function(field) {
-                            if (this.fields[field]) {
-                                this.fields[field].showInvalid();
-                            }
-                        }.bind(this));
-
-                        this.saveBtn.failedLoading();
-                        return;
-                    }
-
-                    if (!res) {
-                        this.saveBtn.failedLoading();
-                    }
-
-                    if (typeOf(res.data) == 'object') {
-                        this.winParams.item = res.data; //our new primary keys
+                    if (false === response.data) {
+                        this.saveBtn.failedLoading(t('No changes'));
                     } else {
-                        this.winParams.item = ka.getObject(this.classProperties['object'], request); //maybe we changed some pk
+                        this.saveBtn.doneLoading(t('Saved'));
                     }
 
-                    this.saveBtn.stopTip(t('Saved'));
+                    if (typeOf(response.data) == 'object') {
+                        this.winParams.item = response.data; //our new primary keys
+                    }
+
 
                     if (this.classProperties.loadSettingsAfterSave == true) {
                         ka.loadSettings();
                     }
 
-                    this.fireEvent('save', [request, res]);
+                    this.fireEvent('save', [request, response]);
                     ka.getAdminInterface().objectChanged(this.classProperties['object']);
 
                     if ((!pClose || this.inline ) && this.classProperties.versioning == true) {

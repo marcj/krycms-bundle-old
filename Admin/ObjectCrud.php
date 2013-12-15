@@ -379,12 +379,13 @@ class ObjectCrud extends ContainerAware
             throw new ObjectNotFoundException("Can not find object '" . $this->getObject() . "'");
         }
 
+
         if ($this->objectDefinition) {
             if (!$this->table) {
                 $this->table = $this->objectDefinition->getTable();
             }
             if (!$this->fields) {
-                $this->fields = $this->objectDefinition->getFields(true);
+                $this->fields = $this->objectDefinition->getFields();
             }
             if (!isset($this->titleField)) {
                 $this->titleField = $this->objectDefinition->getLabel();
@@ -766,8 +767,11 @@ class ObjectCrud extends ContainerAware
     {
         $fields = array();
 
+        $objectFields = array_flip(array_keys($this->getObjectDefinition()->getFieldsArray()));
+
+
         foreach ($this->_fields as $key => $field) {
-            if (!$field->isVirtual() && !$field['customValue'] && !$field['startEmpty']) {
+            if (isset($objectFields[$key]) && !$field->getCustomSave() && !$field->getStartEmpty()) {
                 $fields = array_merge($fields, $field->getFieldType()->getSelection());
             }
         }
@@ -1428,6 +1432,7 @@ class ObjectCrud extends ContainerAware
      *
      * Data is passed as POST.
      *
+     * @param  Request $request
      * @param  array $data
      * @param  array $pk
      * @param  string $position If nested set. `first` (child), `last` (child), `prev` (sibling), `next` (sibling)
@@ -1438,16 +1443,14 @@ class ObjectCrud extends ContainerAware
     public function add(Request $request, $data = null, $pk = null, $position = null, $targetObjectKey = null)
     {
         //collect values
-        if ($data) {
-            $data2 = $data;
-        } else {
-            $data2 = $this->collectData($request);
+        if (!$data) {
+            $data = $this->collectData($request);
         }
 
         //do normal add through Core\Object
         $this->primaryKey = $this->getKrynCore()->getObjects()->add(
             $this->getObject(),
-            $data2,
+            $data,
             $pk,
             $position,
             $targetObjectKey,
@@ -1483,6 +1486,7 @@ class ObjectCrud extends ContainerAware
      * Updates a object entry. This means, all fields which are not defined will be saved as NULL.
      *
      * @param  array $pk
+     * @param  Request $request
      *
      * @return bool
      */
@@ -1527,21 +1531,7 @@ class ObjectCrud extends ContainerAware
     public function patch(Request $request, $pk)
     {
         $this->primaryKey = $pk;
-
-        $options['fields'] = '';
-        $options['permissionCheck'] = $this->getPermissionCheck();
-
-        $item = $this->getKrynCore()->getObjects()->get($this->getObject(), $pk, $options);
-
-        //collect values
-        $allData = $this->collectData($request, null, $item);
-        $data = [];
-
-        foreach ($allData as $k => $v) {
-            if (@$item[$k] != @$allData[$k]) {
-                $data[$k] = $v;
-            }
-        }
+        $item = $this->getItem($pk);
 
         //check against additionally our own custom condition
         if (($condition = $this->getCondition()) && $condition->hasRules()) {
@@ -1550,11 +1540,13 @@ class ObjectCrud extends ContainerAware
             }
         }
 
+        $changedData = $this->collectData($request, array_keys($request->request->all()), $item);
+
         //do normal update through Core\Object
         $result = $this->getKrynCore()->getObjects()->patch(
             $this->getObject(),
             $pk,
-            $data,
+            $changedData,
             array('permissionCheck' => $this->getPermissionCheck())
         );
 
@@ -1567,19 +1559,19 @@ class ObjectCrud extends ContainerAware
      *
      * @param  Request $request
      * @param  \Kryn\CmsBundle\Configuration\Field[] $fields The fields definition. If empty we use $this->fields.
-     * @param  mixed $data Default data. Is used if a field is not defined through _POST or _GET
+     * @param  mixed $defaultData Default data. Is used if a field is not defined through _POST or _GET
      *
      * @return array
      * @throws \Kryn\CmsBundle\Exceptions\InvalidFieldValueException
      */
-    public function collectData(Request $request, $fields = null, $data = null)
+    public function collectData(Request $request, array $fieldsToReturn = null, $defaultData = null)
     {
-        $data2 = array();
+        $data = array();
 
-        if ($fields) {
-            $fields2 = $fields;
-        } else {
-            $fields2 = $this->_fields;
+        $fields = $this->_fields;
+
+        if ($fieldsToReturn) {
+            $fieldsToReturn = array_flip($fieldsToReturn); //flip keys so the check is faster
         }
 
         if ($this->getMultiLanguage()) {
@@ -1587,17 +1579,16 @@ class ObjectCrud extends ContainerAware
             $langField->setId('lang');
             $langField->setType('text');
             $langField->setRequired(true);
-            $fields2[] = $langField;
+            $fields[] = $langField;
         }
 
-//        $form = new \Kryn\CmsBundle\Admin\Form\Form($fields2);
-        new \Kryn\CmsBundle\Admin\Form\Form($fields2);
+        new \Kryn\CmsBundle\Admin\Form\Form($fields);
 
-        foreach ($fields2 as $field) {
+        foreach ($fields as $field) {
             $key = lcfirst($field->getId());
             $value = $request->request->get($key);
-            if (null == $value && $data) {
-                $value = @$data[$key];
+            if (null == $value && $defaultData) {
+                $value = @$defaultData[$key];
             }
 
             if ($field['customValue'] && method_exists($this, $method = $field['customValue'])) {
@@ -1607,34 +1598,36 @@ class ObjectCrud extends ContainerAware
             $field->setValue($value);
         }
 
-        foreach ($fields2 as $field) {
+        foreach ($fields as $field) {
             $key = $field->getId();
             if ($field['noSave']) {
                 continue;
             }
 
-            if ($field['customSave'] && method_exists($this, $method = $field['customValue'])) {
-                $this->$method($field, $key);
+            if ($field->getSaveOnlyFilled() && ($field->getValue() === '' || $field->getValue() === null)) {
                 continue;
             }
 
-            if (($field['saveOnlyFilled'] || $field['saveOnlyIfFilled']) && ($value === '' || $data2[$key] === null)) {
+            if ($field->getCustomSave() && method_exists($this, $method = $field->getCustomSave())) {
+                $this->$method($request, $data, $field);
                 continue;
             }
 
-            if (!$errors = $field->validate()) {
-                $data2[$key] = $field->getValue();
-            } else {
-                $restException = new ValidationFailedException(sprintf(
-                    'Field `%s` has a invalid value.',
-                    $key
-                ), 420);
-                $restException->setData($errors);
-                throw $restException;
+            if (!$fieldsToReturn || isset($fieldsToReturn[$key])) {
+                if (!$errors = $field->validate()) {
+                    $data[$key] = $field->getValue();
+                } else {
+                    $restException = new ValidationFailedException(sprintf(
+                        'Field `%s` has a invalid value.',
+                        $key
+                    ), 420);
+                    $restException->setData(['fields' => [$field->getId() => $errors]]);
+                    throw $restException;
+                }
             }
         }
 
-        return $data2;
+        return $data;
     }
 
     /**

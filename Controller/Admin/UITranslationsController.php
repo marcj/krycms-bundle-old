@@ -38,7 +38,7 @@ class UITranslationsController extends Controller
         }
 
         $response = new Response("window.ka = window.ka || {}; ka.possibleLangs = " . $json.';');
-        #$response->headers->set('Content-Type', 'text/javascript');
+        $response->headers->set('Content-Type', 'text/javascript');
         return $response;
     }
 

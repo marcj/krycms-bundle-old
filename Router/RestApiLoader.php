@@ -7,6 +7,7 @@ use Kryn\CmsBundle\Configuration\EntryPoint;
 use Kryn\CmsBundle\Configuration\Field;
 use Kryn\CmsBundle\Configuration\Object;
 use Kryn\CmsBundle\Core;
+use Kryn\CmsBundle\Exceptions\ClassNotFoundException;
 use Kryn\CmsBundle\Exceptions\ObjectNotFoundException;
 use Symfony\Component\Config\Loader\Loader;
 use Symfony\Component\Routing\Loader\AnnotationFileLoader;
@@ -105,6 +106,10 @@ class RestApiLoader extends Loader
     public function setupWindowRoute(EntryPoint $entryPoint)
     {
         $class = $entryPoint->getClass();
+
+        if (!class_exists($class)) {
+            throw new ClassNotFoundException(sprintf('Class `%s` not found in entryPoint `%s`', $class, $entryPoint->getFullPath()));
+        }
 
         /** @var $importedRoutes \Symfony\Component\Routing\RouteCollection */
         $importedRoutes = $this->import(

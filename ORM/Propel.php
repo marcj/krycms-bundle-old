@@ -866,7 +866,7 @@ class Propel extends ORMAbstract
 
             $fieldValue = @$values[$fieldName];
 
-            if ($field['primaryKey']) {
+            if ($field->isPrimaryKey() && $field->isAutoIncrement()) {
                 continue;
             }
 

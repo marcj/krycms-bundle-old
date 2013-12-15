@@ -128,7 +128,7 @@ ka.WindowAdd = new Class({
 
         var request = this.addMultipleFieldForm.getValue();
 
-        this.saveBtn.startLaggedTip(t('Still adding ...'));
+        this.saveBtn.startLoading(t('Adding ...'));
         if (this.lastAddRq) {
             this.lastAddRq.cancel();
         }
@@ -142,40 +142,26 @@ ka.WindowAdd = new Class({
         }
 
         this.lastAddRq = new Request.JSON({url: _pathAdmin + this.getEntryPoint() + '/:multiple',
-            noErrorReporting: ['DuplicateKeysException', 'ObjectItemNotModified'],
-            noCache: true, onComplete: function(pResponse) {
+            noErrorReporting: [
+                'Kryn\\CmsBundle\\Exceptions\\Rest\\ValidationFailedException',
+                'DuplicateKeysException',
+                'ObjectItemNotModified'
+            ],
+            noCache: true,
+            onProgress: function(event) {
+                this.saveBtn.setProgress(parseInt(event.loaded / event.total * 100));
+            }.bind(this),
+            onFailure: this.handleFailure.bind(this),
+            onSuccess: function(response) {
+                this.winParams.item = response.data[0]; //our new primary keys for the first item
 
-                if (pResponse.error == 'DuplicateKeysException') {
-                    this.win._alert(t('Duplicate keys. Please change the values of marked fields.'));
-
-                    Array.each(pResponse.fields, function(field) {
-                        if (this.fields[field]) {
-                            this.fields[field].showInvalid();
-                        }
-                    }.bind(this));
-
-                    this.saveBtn.stopTip(t('Failed'));
-                    return;
-                }
-
-                if (pResponse.error == 'FieldCanNotBeEmptyException') {
-                    this.saveBtn.stopTip(t('Failed'));
-                    return;
-                }
-
-                this.winParams.item = pResponse.data[0]; //our new primary keys for the first item
-
-                this.saveBtn.stopTip(t('Saved'));
-
-                if (!pClose && this.saveNoClose) {
-                    this.saveNoClose.stopTip(t('Done'));
-                }
+                this.saveBtn.doneLoading(t('Saved'));
 
                 if (this.classProperties.loadSettingsAfterSave == true) {
                     ka.loadSettings();
                 }
 
-                var args = [request, pResponse];
+                var args = [request, response];
                 if (this.addItemToAdd) {
                     args.push(this.addItemToAdd.tree);
                 }
@@ -422,45 +408,34 @@ ka.WindowAdd = new Class({
 
         if (typeOf(request) != 'null') {
 
-            this.saveBtn.startTip(t('Adding ...'));
+            this.saveBtn.startLoading(t('Adding ...'));
 
             this.lastSaveRq = new Request.JSON({url: _pathAdmin + this.getEntryPoint()+'/',
-                noErrorReporting: ['DuplicateKeysException', 'ObjectItemNotModified'],
                 noCache: true,
-                onError: function() {
-                    this.saveBtn.stopTip(t('Failed'));
+                noErrorReporting: [
+                    'Kryn\\CmsBundle\\Exceptions\\Rest\\ValidationFailedException',
+                    'DuplicateKeysException',
+                    'ObjectItemNotModified'
+                ],
+                noCache: true,
+                onProgress: function(event) {
+                    this.saveBtn.setProgress(parseInt(event.loaded / event.total * 100));
                 }.bind(this),
-                onComplete: function(res) {
-                    if (res.error == 'RouteNotFoundException') {
-                        return this.win.alert(t('RouteNotFoundException. You setup probably the wrong `editEntrypoint`'));
-                    }
-
-                    if (res.error == 'DuplicateKeysException') {
-                        this.win._alert(t('Duplicate keys. Please change the values of marked fields.'));
-
-                        Array.each(res.fields, function(field) {
-                            if (this.fields[field]) {
-                                this.fields[field].showInvalid();
-                            }
-                        }.bind(this));
-
-                        this.saveBtn.stopTip(t('Failed'));
-                        return;
-                    }
-
-                    if (typeOf(res.data) == 'object') {
-                        this.winParams.item = res.data; //our new primary keys
+                onFailure: this.handleFailure.bind(this),
+                onSuccess: function(response) {
+                    if (typeOf(response.data) == 'object') {
+                        this.winParams.item = response.data; //our new primary keys
                     } else {
                         this.winParams.item = ka.getObjectPk(this.classProperties['object'], request); //maybe we changed some pk
                     }
 
-                    this.saveBtn.stopTip(t('Added'));
+                    this.saveBtn.doneLoading(t('Added'));
 
                     if (this.classProperties.loadSettingsAfterSave == true) {
                         ka.loadSettings();
                     }
 
-                    this.fireEvent('add', [request, res]);
+                    this.fireEvent('add', [request, response]);
 
                     ka.getAdminInterface().objectChanged(this.classProperties['object']);
 

@@ -230,6 +230,21 @@ class Field extends Model
     protected $options;
 
     /**
+     * @var string
+     */
+    protected $customSave;
+
+    /**
+     * @var string
+     */
+    protected $customGet;
+
+    /**
+     * @var bool
+     */
+    protected $saveOnlyFilled = false;
+
+    /**
      * @var \Kryn\CmsBundle\Admin\FieldTypes\TypeInterface
      */
     private $fieldType;
@@ -1027,6 +1042,54 @@ class Field extends Model
     public function getObjectRelationOnDelete()
     {
         return $this->objectRelationOnDelete;
+    }
+
+    /**
+     * @param string $customGet
+     */
+    public function setCustomGet($customGet)
+    {
+        $this->customGet = $customGet;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCustomGet()
+    {
+        return $this->customGet;
+    }
+
+    /**
+     * @param string $customSave
+     */
+    public function setCustomSave($customSave)
+    {
+        $this->customSave = $customSave;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCustomSave()
+    {
+        return $this->customSave;
+    }
+
+    /**
+     * @param boolean $saveOnlyFilled
+     */
+    public function setSaveOnlyFilled($saveOnlyFilled)
+    {
+        $this->saveOnlyFilled = $saveOnlyFilled;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function getSaveOnlyFilled()
+    {
+        return $this->saveOnlyFilled;
     }
 
 }

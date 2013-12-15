@@ -231,7 +231,7 @@
             <label>Title</label>
           </field>
           <field id="ownerId" type="object">
-            <object>Users\User</object>
+            <object>kryncms/user</object>
             <objectRelation>nTo1</objectRelation>
             <objectLabel>name</objectLabel>
             <objectRelationName>owner</objectRelationName>
@@ -262,7 +262,7 @@
           </field>
           <field id="nodeId" type="object">
             <label>Node</label>
-            <object>KrynCmsBundle:Node</object>
+            <object>kryncms/node</object>
             <objectRelation>nTo1</objectRelation>
             <objectLabel>title</objectLabel>
             <objectRelationName>Node</objectRelationName>
@@ -294,6 +294,93 @@
           </field>
         </fields>
       </object>
+
+      <object id="User">
+        <label>Users</label>
+        <table>system_user</table>
+        <labelField>username</labelField>
+        <dataModel>propel</dataModel>
+        <blacklistSelection>passwd, passwdSalt</blacklistSelection>
+        <chooserFieldDataModel>default</chooserFieldDataModel>
+        <chooserFieldType>default</chooserFieldType>
+        <fields>
+          <field id="id" type="number" primaryKey="true" autoIncrement="true">
+            <label>ID</label>
+          </field>
+          <field id="username" type="text">
+            <label>Username</label>
+          </field>
+          <field id="authClass" type="text">
+            <label>Auth class</label>
+          </field>
+          <field id="passwd" type="textarea">
+            <label>Password</label>
+          </field>
+          <field id="passwdSalt" type="text">
+            <type>text</type>
+          </field>
+          <field id="activationKey" type="text">
+          </field>
+          <field id="email" type="text">
+            <label>Email</label>
+          </field>
+          <field id="settings" type="properties">
+          </field>
+          <field id="widgets" type="properties">
+          </field>
+          <field id="activate" type="checkbox">
+            <label>Active account</label>
+          </field>
+          <field id="logins" type="number">
+          </field>
+          <field id="lastLogin" type="number">
+          </field>
+          <field id="created" type="datetime">
+          </field>
+          <field id="modified" type="datetime">
+          </field>
+          <field id="groupMembership" type="object">
+            <label>Group membership</label>
+            <object>kryncms/group</object>
+            <objectLabel>name</objectLabel>
+            <objectRelation>nToM</objectRelation>
+            <objectRelationTable>system_user_group</objectRelationTable>
+            <objectRelationPhpName>UserGroup</objectRelationPhpName>
+          </field>
+          <field id="firstName" type="text">
+            <label>First name</label>
+          </field>
+          <field id="lastName" type="text">
+            <label>Last name</label>
+          </field>
+        </fields>
+      </object>
+      <object id="Group">
+        <label>Groups</label>
+        <table>system_group</table>
+        <labelField>name</labelField>
+        <defaultSelection>name, description</defaultSelection>
+        <dataModel>propel</dataModel>
+        <browserColumns>
+          <field id="name" type="text">
+            <width>30%</width>
+          </field>
+          <field id="description" type="text">
+          </field>
+        </browserColumns>
+        <fields>
+          <field id="id" type="number" primaryKey="true" autoIncrement="true">
+            <label>ID</label>
+          </field>
+          <field id="name" type="text">
+            <label>Name</label>
+          </field>
+          <field id="description" type="text">
+            <label>Description</label>
+          </field>
+        </fields>
+      </object>
+
     </objects>
   </bundle>
 </config>

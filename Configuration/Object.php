@@ -552,7 +552,7 @@ class Object extends Model
 
     /**
      * @param bool $withVirtual returns the virtual fields as well
-     * @return Field[]
+     * @return Field[] underscored fieldNames as index
      */
     public function getFields($withVirtual = false)
     {
@@ -575,6 +575,9 @@ class Object extends Model
         }
     }
 
+    /**
+     * @return array camelCased fieldNames as index
+     */
     public function getFieldsArray()
     {
         $fields = array();
