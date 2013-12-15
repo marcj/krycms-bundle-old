@@ -8,4 +8,23 @@ use Kryn\CmsBundle\Model\Base\User as BaseUser;
 
 class User extends BaseUser
 {
+
+    /**
+     * Converts $password in a hash and set it.
+     * If the salt is not already set, this generates one.
+     *
+     * @param string $password plain password
+     * @param Core $krynCore
+     *
+     */
+    public function setPassword($password, Core $krynCore)
+    {
+        if (!$this->getPasswdSalt()) {
+            $this->setPasswdSalt(ClientAbstract::getSalt());
+        }
+
+        $password = ClientAbstract::getHashedPassword($password, $this->getPasswdSalt(), $krynCore);
+
+        $this->setPasswd($password);
+    }
 }
