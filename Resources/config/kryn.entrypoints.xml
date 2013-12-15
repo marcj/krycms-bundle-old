@@ -51,15 +51,6 @@
       <entryPoint path="help" type="custom">
         <label>Help</label>
       </entryPoint>
-      <entryPoint path="stores">
-        <label>Data Stores</label>
-        <children>
-          <entryPoint path="layout" type="store">
-            <class>\Admin\Stores\Layout</class>
-            <label>Layouts</label>
-          </entryPoint>
-        </children>
-      </entryPoint>
       <entryPoint path="system" type="custom" icon="#icon-cog-4">
         <label>System</label>
         <children>

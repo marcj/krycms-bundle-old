@@ -636,7 +636,7 @@ class Bundle extends Model
         $this->objects = [];
         foreach ($objects as $object) {
             $object->setBundle($this);
-            $this->objects[$this->getKrynCore()->getObjects()->normalizeObjectKey($object->getId())] = $object;
+            $this->objects[strtolower($object->getId())] = $object;
         }
     }
 
@@ -648,8 +648,7 @@ class Bundle extends Model
     public function getObject($id)
     {
         if (null !== $this->objects) {
-            $id = Objects::normalizeObjectKey($id);
-
+            $id = strtolower($id);
             return isset($this->objects[$id]) ? $this->objects[$id] : null;
         }
     }

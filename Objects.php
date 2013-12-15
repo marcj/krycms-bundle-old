@@ -1365,11 +1365,11 @@ class Objects
 
     public static function normalizeObjectKey($key)
     {
-        $key = str_replace('\\', '/', $key);
-        $key = str_replace(':', '/', $key);
-        $key = str_replace('.', '/', $key);
-        $key = str_replace('bundle/', '/', strtolower($key));
-        return $key;
+        $key = str_replace(['\\', ':', '.'], '/', $key);
+        list($bundleName, $objectName) = explode('/', $key);
+        $bundleName = str_replace('bundle/', '/', strtolower($bundleName));
+        $objectName = lcfirst($objectName);
+        return $bundleName. '/' . $objectName;
     }
 
     /**

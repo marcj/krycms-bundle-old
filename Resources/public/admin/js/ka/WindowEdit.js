@@ -900,9 +900,7 @@ ka.WindowEdit = new Class({
                     'ObjectItemNotModified'
                 ],
                 noCache: true,
-                onProgress: function(event) {
-                    this.saveBtn.setProgress(parseInt(event.loaded / event.total * 100));
-                }.bind(this),
+                progressButton: this.saveBtn,
                 onFailure: this.handleFailure.bind(this),
                 onSuccess: function(response) {
 

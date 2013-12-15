@@ -390,8 +390,8 @@ ka.urlDecode = function(value) {
  * @returns {string}
  */
 ka.normalizeObjectKey = function(objectKey) {
-    objectKey = objectKey.replace('\\', '/').replace('.', '/').replace(':', '/').toLowerCase().replace('bundle/', '/');
-    var bundleName = objectKey.split('/')[0];
+    objectKey = objectKey.replace('\\', '/').replace('.', '/').replace(':', '/');
+    var bundleName = objectKey.split('/')[0].toLowerCase().replace('bundle/', '/');
     var objectName = objectKey.split('/')[1];
 
     if (!bundleName || !objectName) {
@@ -731,7 +731,7 @@ ka.getObjectLabel = function(uri, callback) {
 
             }}).get({url: uri, returnKeyAsRequested: 1});
 
-    }).delay(30);
+    }).delay(50);
 
 };
 
@@ -889,25 +889,13 @@ ka.getObjectFieldLabel = function(value, field, fieldId, objectKey, relationsAsA
  *
  * @return {String|null} Null if the module does not exist/its not activated.
  */
-ka.getExtensionTitle = function(key) {
-    var config = ka.getBundleConfig(key);
+ka.getBundleTitle = function(key) {
+    var config = ka.getConfig(key);
     if (!config) {
-        return null;
+        return key;
     }
 
     return config.label || config.name;
-}
-
-ka.getBundleConfig = function(bundle) {
-    var result;
-    bundle = bundle.toLowerCase();
-    Object.each(ka.settings.configs, function(config, key) {
-        if (result) return;
-        if (key.toLowerCase() == bundle || config.name.toLowerCase() == bundle || config['class'].toLowerCase() == bundle) {
-            result = config;
-        }
-    });
-    return result;
 }
 
 /**

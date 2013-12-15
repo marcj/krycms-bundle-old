@@ -29,7 +29,7 @@ var kryncms_system_languages_edit = new Class({
         }
 
         if (this.win.params && this.win.params.bundle) {
-            var bundleConfig = ka.getBundleConfig(this.win.params.bundle);
+            var bundleConfig = ka.getConfig(this.win.params.bundle);
 
             if (!bundleConfig) {
                 this.win._alert(tf('Bundle %s not found.', this.win.params.bundle));

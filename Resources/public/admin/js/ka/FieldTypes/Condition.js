@@ -392,7 +392,7 @@ ka.FieldTypes.Condition = new Class({
                 if (!item.hasClass('ka-field-condition-withoutRel')) {
                     result.push(item.relSelect.getValue());
                 }
-                result.push(extractValues(item.container));
+                result.push(this.extractValues(item.container));
             }
 
         });

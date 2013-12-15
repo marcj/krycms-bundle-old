@@ -65,6 +65,18 @@ ka.Select = new Class({
         items: null, //array or object
 
         /**
+         * When options.items is a array and this is false the value is the index, otherwise index=label.
+         *
+         * true:
+         *     ['a', 'b', 'c'] => 'c' returns 'c' as value
+         * false:
+         *     ['a', 'b', 'c'] => 'c' returns 2 as value
+         *
+         * @var {Boolean}
+         */
+        itemsLabelAsValue: true,
+
+        /**
          * Same as `items` but since object entries have in JavaScript no fixed order,
          * we can pass here a list of entries with a fixed order.
          *
@@ -296,7 +308,7 @@ ka.Select = new Class({
                     }
                 } else {
                     Array.each(this.options.items, function(label, idx) {
-                        this.items.push({id: idx, label: label});
+                        this.items.push({id: this.options.itemsLabelAsValue ? label : idx, label: label});
                     }.bind(this));
                 }
             }

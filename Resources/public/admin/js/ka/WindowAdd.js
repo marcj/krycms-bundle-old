@@ -417,10 +417,7 @@ ka.WindowAdd = new Class({
                     'DuplicateKeysException',
                     'ObjectItemNotModified'
                 ],
-                noCache: true,
-                onProgress: function(event) {
-                    this.saveBtn.setProgress(parseInt(event.loaded / event.total * 100));
-                }.bind(this),
+                progressButton: this.saveBtn,
                 onFailure: this.handleFailure.bind(this),
                 onSuccess: function(response) {
                     if (typeOf(response.data) == 'object') {

@@ -22,11 +22,11 @@ var kryncms_user_acl = new Class({
         this.win.getTitleGroupContainer().setStyle('height', 42);
 
         this.left = new Element('div', {
-            'class': 'users-acl-left ka-List'
+            'class': 'ka-user-acl-left ka-List'
         }).inject(this.win.content);
 
         this.right = new Element('div', {
-            'class': 'users-acl-right'
+            'class': 'ka-user-acl-right'
         }).inject(this.win.content);
 
         this.query = new ka.Field({
@@ -302,19 +302,19 @@ var kryncms_user_acl = new Class({
 
 
         this.selectModes.setLabel(-1,
-            [tc('usersAclModes', 'All rules') + ' (' + all + ')', 'bundles/admin/images/icons/tick.png']);
+            [tc('usersAclModes', 'All rules') + ' (' + all + ')', 'bundles/kryncms/admin/images/icons/tick.png']);
         this.selectModes.setLabel(0,
-            [tc('usersAclModes', 'Combined') + ' (' + modeCounter[0] + ')', 'bundles/admin/images/icons/arrow_in.png']);
+            [tc('usersAclModes', 'Combined') + ' (' + modeCounter[0] + ')', 'bundles/kryncms/admin/images/icons/arrow_in.png']);
         this.selectModes.setLabel(1,
-            [tc('usersAclModes', 'List') + ' (' + modeCounter[1] + ')', 'bundles/admin/images/icons/application_view_list.png']);
+            [tc('usersAclModes', 'List') + ' (' + modeCounter[1] + ')', 'bundles/kryncms/admin/images/icons/application_view_list.png']);
         this.selectModes.setLabel(2,
-            [tc('usersAclModes', 'View') + ' (' + modeCounter[2] + ')', 'bundles/admin/images/icons/application_form.png']);
+            [tc('usersAclModes', 'View') + ' (' + modeCounter[2] + ')', 'bundles/kryncms/admin/images/icons/application_form.png']);
         this.selectModes.setLabel(3,
-            [tc('usersAclModes', 'Add') + ' (' + modeCounter[3] + ')', 'bundles/admin/images/icons/application_form_add.png']);
+            [tc('usersAclModes', 'Add') + ' (' + modeCounter[3] + ')', 'bundles/kryncms/admin/images/icons/application_form_add.png']);
         this.selectModes.setLabel(4,
-            [tc('usersAclModes', 'Edit') + ' (' + modeCounter[4] + ')', 'bundles/admin/images/icons/application_form_edit.png']);
+            [tc('usersAclModes', 'Edit') + ' (' + modeCounter[4] + ')', 'bundles/kryncms/admin/images/icons/application_form_edit.png']);
         this.selectModes.setLabel(5,
-            [tc('usersAclModes', 'Delete') + ' (' + modeCounter[5] + ')', 'bundles/admin/images/icons/application_form_delete.png']);
+            [tc('usersAclModes', 'Delete') + ' (' + modeCounter[5] + ')', 'bundles/kryncms/admin/images/icons/application_form_delete.png']);
 
         if (!this.currentDefinition.nested) {
             this.objectsExactContainer.empty();
@@ -377,7 +377,7 @@ var kryncms_user_acl = new Class({
         }
 
         this.rulesSort = new Sortables(this.objectRulesContainer, {
-                handle: '.users-acl-object-rule-mover',
+                handle: '.ka-user-acl-object-rule-mover',
                 clone: true,
                 constrain: true,
                 revert: true,
@@ -492,36 +492,36 @@ var kryncms_user_acl = new Class({
 
     },
 
-    renderObjectRulesAdd: function (pRule) {
-        var count = this.objectRulesContainer.getChildren().length;
+    renderObjectRulesAdd: function (rule) {
+        var count = this.objectRulesContainer.getChildren().length, title;
 
         var div = new Element('div', {
-            'class': 'ka-List-item users-acl-object-rule'
+            'class': 'ka-List-item ka-user-acl-object-rule'
         }).inject(this.objectRulesContainer);
 
-        div.rule = pRule;
+        div.rule = rule;
 
         new Element('img', {
-            'class': 'users-acl-object-rule-mover',
-            src: _path + 'bundles/users/admin/images/users-acl-item-mover.png'
+            'class': 'ka-user-acl-object-rule-mover',
+            src: _path + 'bundles/kryncms/admin/images/item-mover.png'
         }).inject(div);
 
         var status = 'accept';
-        if (pRule.access == 0) {
+        if (rule.access == 0) {
             status = 'exclamation';
-        } else if (pRule.access == 2) {
+        } else if (rule.access == 2) {
             status = 'arrow_turn_bottom_left';
         }
 
         new Element('img', {
-            'class': 'users-acl-object-rule-status',
-            src: _path + 'bundles/admin/images/icons/' + status + '.png'
+            'class': 'ka-user-acl-object-rule-status',
+            src: _path + 'bundles/kryncms/admin/images/icons/' + status + '.png'
         }).inject(div);
 
         var mode = 'arrow_in'; //0, combined
         var modeTitle = 'All combined';
 
-        switch (parseInt(pRule.mode)) {
+        switch (parseInt(rule.mode)) {
             case 1:
                 mode = 'application_view_list';
                 modeTitle = 'List';
@@ -545,46 +545,46 @@ var kryncms_user_acl = new Class({
         }
 
         new Element('img', {
-            'class': 'users-acl-object-rule-mode',
-            src: _path + 'bundles/admin/images/icons/' + mode + '.png',
+            'class': 'ka-user-acl-object-rule-mode',
+            src: _path + 'bundles/kryncms/admin/images/icons/' + mode + '.png',
             title: modeTitle
         }).inject(div);
 
-        var title = t('All objects');
+        title = t('All objects');
 
-        if (pRule.constraintType == 1) {
-            title = 'object://' + this.currentObject + '/' + pRule.constraintCode;
+        if (rule.constraintType == 1) {
+            title = 'object://' + this.currentObject + '/' + rule.constraintCode;
         }
-        if (pRule.constraintType == 2) {
+        if (rule.constraintType == 2) {
             title = '';
         }
 
-        var title = new Element('span', {
+        title = new Element('span', {
             text: title
         }).inject(div);
 
-        if (pRule.constraintType == 2) {
+        if (rule.constraintType == 2) {
             var span = new Element('span').inject(title);
-            this.humanReadableCondition(pRule.constraintCode, span);
-        } else if (pRule.constraintType == 1) {
+            this.humanReadableCondition(rule.constraintCode, span);
+        } else if (rule.constraintType == 1) {
             this.loadObjectLabel(title);
         }
 
-        if (pRule.mode != 1 && pRule.mode <= 4) {
+        if (rule.mode != 1 && rule.mode <= 4) {
 
             var fieldSubline = new Element('div', {
-                'class': 'users-acl-object-rule-subline'
+                'class': 'ka-user-acl-object-rule-subline'
             }).inject(div);
 
             var comma;
 
-            if (pRule.fields && pRule.fields != '') {
+            if (rule.fields && rule.fields != '') {
 
                 var definition = ka.getObjectDefinition(this.currentObject);
 
-                var fieldsObj = JSON.decode(pRule.fields);
+                var fieldsObj = JSON.decode(rule.fields);
 
-                var primaries = ka.getPrimaryListForObject(this.currentObject);
+                var primaries = ka.getObjectPrimaryList(this.currentObject);
                 if (primaries) {
                     var primaryField = primaries[0];
                     var primaryLabel = definition.fields[primaryField].label || primaryField;
@@ -614,10 +614,10 @@ var kryncms_user_acl = new Class({
                                     var span = new Element('span').inject(fieldSubline);
                                     this.humanReadableCondition(rule.condition, span);
                                     if (rule.access == 1) {
-                                        new Element('img', {src: _path + 'bundles/admin/images/icons/accept.png'}).inject(span);
+                                        new Element('img', {src: _path + 'bundles/kryncms/admin/images/icons/accept.png'}).inject(span);
                                     } else {
                                         new Element('img',
-                                            {src: _path + 'bundles/admin/images/icons/exclamation.png'}).inject(span);
+                                            {src: _path + 'bundles/kryncms/admin/images/icons/exclamation.png'}).inject(span);
                                     }
                                     subcomma = new Element('span', {text: ', '}).inject(fieldSubline);
 
@@ -632,10 +632,10 @@ var kryncms_user_acl = new Class({
                                     }).inject(span);
 
                                     if (access == 1) {
-                                        new Element('img', {src: _path + 'bundles/admin/images/icons/accept.png'}).inject(span);
+                                        new Element('img', {src: _path + 'bundles/kryncms/admin/images/icons/accept.png'}).inject(span);
                                     } else {
                                         new Element('img',
-                                            {src: _path + 'bundles/admin/images/icons/exclamation.png'}).inject(span);
+                                            {src: _path + 'bundles/kryncms/admin/images/icons/exclamation.png'}).inject(span);
                                     }
 
                                     new Element('img', {src: imgSrc}).inject(span);
@@ -651,9 +651,9 @@ var kryncms_user_acl = new Class({
                             new Element('span', {text: ']'}).inject(fieldSubline);
 
                         } else if (def == 0) {
-                            imgSrc = _path + 'bundles/admin/images/icons/exclamation.png';
+                            imgSrc = _path + 'bundles/kryncms/admin/images/icons/exclamation.png';
                         } else if (def) {
-                            imgSrc = _path + 'bundles/admin/images/icons/accept.png';
+                            imgSrc = _path + 'bundles/kryncms/admin/images/icons/accept.png';
                         }
 
                         if (imgSrc) {
@@ -673,11 +673,11 @@ var kryncms_user_acl = new Class({
         }
 
         var actions = new Element('div', {
-            'class': 'users-acl-object-rule-actions'
+            'class': 'ka-user-acl-object-rule-actions'
         }).inject(div);
 
         new Element('img', {
-            src: _path + 'bundles/admin/images/icons/pencil.png',
+            src: _path + 'bundles/kryncms/admin/images/icons/pencil.png',
             title: t('Edit rule')
         })
             .addEvent('click', function () {
@@ -686,7 +686,7 @@ var kryncms_user_acl = new Class({
             .inject(actions);
 
         new Element('img', {
-            src: _path + 'bundles/admin/images/icons/delete.png',
+            src: _path + 'bundles/kryncms/admin/images/icons/delete.png',
             title: t('Delete rule')
         })
             .addEvent('click', this.deleteObjectRule.bind(this, div))
@@ -694,56 +694,33 @@ var kryncms_user_acl = new Class({
 
     },
 
-    loadObjectLabel: function (pDomObject) {
+    loadObjectLabel: function (domObject) {
+        var url = domObject.get('text');
 
-        var uri = pDomObject.get('text');
-        var objectKey = ka.getObjectKey(uri);
-        var objectId = ka.getCroppedObjectId(uri);
-
-        //todo, maybe we have a template and extra fields for the label
-        var definition = ka.getObjectDefinition(objectKey);
-        var fields = definition.labelField;
-
-        new Request.JSON({url: _pathAdmin + 'admin/object/' + ka.urlEncode(objectKey) + '/' +
-            objectId, onComplete: function (pResult) {
-
-            if (!pResult || pResult.error || !pResult.data) {
-                pDomObject.set('text', 'Object not found. ' + uri);
-                return;
-            }
-            ;
-
-            var sFields = fields.split(',');
-            var title = [];
-            Array.each(sFields, function (field) {
-                title.push(pResult.data[field]);
-            });
-
-            pDomObject.set('text', title.join(', '));
-
-        }}).get({fields: fields});
-
-        //http://ilee/admin/objectGetLabel?url=object://news/3
+        ka.getObjectLabel(url, function(label) {
+            domObject.set('text', label);
+        });
     },
 
-    humanReadableCondition: function (pCondition, pDomObject) {
-
-        if (typeOf(pCondition) == 'string') {
-            pCondition = JSON.decode(pCondition);
+    humanReadableCondition: function (condition, domObject) {
+        if (typeOf(condition) == 'string') {
+            condition = JSON.decode(condition);
         }
 
-        if (typeOf(pCondition) != 'array') {
+        if (typeOf(condition) != 'array') {
             return;
         }
+
+        console.log('humanReadableCondition', condition);
 
         var field = '';
         var definition = ka.getObjectDefinition(this.currentObject);
 
         var span = new Element('span');
 
-        if (pCondition.length > 0) {
+        if (condition.length > 0) {
 
-            Array.each(pCondition, function (condition) {
+            Array.each(condition, function (condition) {
 
                 if (typeOf(condition) == 'string') {
                     new Element('span',
@@ -758,7 +735,6 @@ var kryncms_user_acl = new Class({
                         new Element('span', {text: ')'}).inject(span);
 
                     } else {
-
                         field = condition[0];
                         if (definition && definition.fields[field] && definition.fields[field].label) {
                             field = definition.fields[field].label;
@@ -774,30 +750,30 @@ var kryncms_user_acl = new Class({
             span.set('text', t('-- Nothing --'));
         }
 
-        pDomObject.empty();
-        span.inject(pDomObject);
+        domObject.empty();
+        span.inject(domObject);
 
     },
 
-    addObjectsToList: function (pConfig, pExtKey) {
+    addObjectsToList: function (bundleConfig, bundleName) {
 
         new Element('div', {
             'class': 'ka-List-split',
-            text: ka.getExtensionTitle(pExtKey)
+            text: ka.getBundleTitle(bundleName)
         }).inject(this.objectList);
 
-        Object.each(pConfig.objects, function (object, objectKey) {
+        Object.each(bundleConfig.objects, function (object, objectName) {
 
             var div = new Element('div', {
                 'class': 'ka-List-item'
             })
                 .addEvent('click', function () {
-                    this.loadObjectRules(pExtKey + ':' + objectKey)
+                    this.loadObjectRules(ka.normalizeObjectKey(bundleName+'/'+objectName))
                 }.bind(this))
                 .inject(this.objectList);
 
             var h2 = new Element('h2', {
-                text: object.label || objectKey
+                text: object.label || objectName
             }).inject(div);
 
             div.count = new Element('span', {
@@ -811,7 +787,7 @@ var kryncms_user_acl = new Class({
                 }).inject(div);
             }
 
-            this.objectDivs[pExtKey.toLowerCase() + ':' + objectKey.toLowerCase()] = div;
+            this.objectDivs[ka.normalizeObjectKey(bundleName+'/'+objectName)] = div;
 
         }.bind(this));
 
@@ -820,17 +796,17 @@ var kryncms_user_acl = new Class({
     loadObjects: function () {
 
         this.objectList = new Element('div', {
-            'class': 'users-acl-object-list'
+            'class': 'ka-user-acl-object-list'
         })
             .inject(this.objectTab.pane);
 
         this.objectConstraints = new Element('div', {
-            'class': 'users-acl-object-constraints'
+            'class': 'ka-user-acl-object-constraints'
         })
             .inject(this.objectTab.pane);
 
         this.objectRulesFilter = new Element('div', {
-            'class': 'users-acl-object-constraints-title'
+            'class': 'ka-user-acl-object-constraints-title'
         }).inject(this.objectConstraints);
 
         new Element('div', {
@@ -849,7 +825,7 @@ var kryncms_user_acl = new Class({
             .inject(div);
 
         this.objectConstraintsContainer = new Element('div', {
-            'class': 'users-acl-object-constraints-container'
+            'class': 'ka-user-acl-object-constraints-container'
         })
             .inject(this.objectConstraints);
 
@@ -871,7 +847,7 @@ var kryncms_user_acl = new Class({
         }).inject(h2);
 
         new Element('img', {
-            src: _path + 'bundles/admin/images/icons/add.png',
+            src: _path + 'bundles/kryncms/admin/images/icons/add.png',
             style: 'cursor: pointer; position: relative; top: -1px; float: right;',
             title: t('Add')
         })
@@ -895,7 +871,7 @@ var kryncms_user_acl = new Class({
         }).inject(this.objectConstraintsContainer);
 
         new Element('img', {
-            src: _path + 'bundles/admin/images/icons/add.png',
+            src: _path + 'bundles/kryncms/admin/images/icons/add.png',
             style: 'cursor: pointer; position: relative; top: -1px; float: right;',
             title: t('Add')
         })
@@ -918,7 +894,7 @@ var kryncms_user_acl = new Class({
         }).inject(this.objectsExactSplit);
 
         this.btnAddExact = new Element('img', {
-            src: _path + 'bundles/admin/images/icons/add.png',
+            src: _path + 'bundles/kryncms/admin/images/icons/add.png',
             style: 'cursor: pointer; position: relative; top: -1px; float: right;',
             title: t('Add')
         })
@@ -928,21 +904,21 @@ var kryncms_user_acl = new Class({
             .inject(this.objectsExactSplit);
 
         this.objectRules = new Element('div', {
-            'class': 'users-acl-object-rules'
+            'class': 'ka-user-acl-object-rules'
         })
             .inject(this.objectTab.pane);
 
         this.objectRulesFilter = new Element('div', {
-            'class': 'users-acl-object-rules-filter'
+            'class': 'ka-user-acl-object-rules-filter'
         }).inject(this.objectRules);
 
         new Element('div', {
             'class': 'ka-List-split',
-            text: t('Rules (priority order: bottom up)')
+            text: t('Rules (priority order: top is more important)')
         }).inject(this.objectRulesFilter);
 
         this.objectRulesInfo = new Element('div', {
-            'class': 'users-acl-object-rules-info'
+            'class': 'ka-user-acl-object-rules-info'
         }).inject(this.objectRulesFilter);
 
         //        new Element('div', {
@@ -958,13 +934,13 @@ var kryncms_user_acl = new Class({
 
         document.id(this.selectModes).setStyle('width', 120);
 
-        this.selectModes.addImage(-1, tc('usersAclModes', 'All rules'), 'bundles/admin/images/icons/tick.png');
-        this.selectModes.addImage(0, tc('usersAclModes', 'Combined'), 'bundles/admin/images/icons/arrow_in.png');
-        this.selectModes.addImage(1, tc('usersAclModes', 'List'), 'bundles/admin/images/icons/application_view_list.png');
-        this.selectModes.addImage(2, tc('usersAclModes', 'View'), 'bundles/admin/images/icons/application_form.png');
-        this.selectModes.addImage(3, tc('usersAclModes', 'Add'), 'bundles/admin/images/icons/application_form_add.png');
-        this.selectModes.addImage(4, tc('usersAclModes', 'Edit'), 'bundles/admin/images/icons/application_form_edit.png');
-        this.selectModes.addImage(5, tc('usersAclModes', 'Delete'), 'bundles/admin/images/icons/application_form_delete.png');
+        this.selectModes.addImage(-1, tc('usersAclModes', 'All rules'), 'bundles/kryncms/admin/images/icons/tick.png');
+        this.selectModes.addImage(0, tc('usersAclModes', 'Combined'), 'bundles/kryncms/admin/images/icons/arrow_in.png');
+        this.selectModes.addImage(1, tc('usersAclModes', 'List'), 'bundles/kryncms/admin/images/icons/application_view_list.png');
+        this.selectModes.addImage(2, tc('usersAclModes', 'View'), 'bundles/kryncms/admin/images/icons/application_form.png');
+        this.selectModes.addImage(3, tc('usersAclModes', 'Add'), 'bundles/kryncms/admin/images/icons/application_form_add.png');
+        this.selectModes.addImage(4, tc('usersAclModes', 'Edit'), 'bundles/kryncms/admin/images/icons/application_form_edit.png');
+        this.selectModes.addImage(5, tc('usersAclModes', 'Delete'), 'bundles/kryncms/admin/images/icons/application_form_delete.png');
 
         this.lastRulesModeFilter = false;
 
@@ -979,16 +955,16 @@ var kryncms_user_acl = new Class({
         }.bind(this));
 
         this.objectRulesContainer = new Element('div', {
-            'class': 'users-acl-object-rules-container'
+            'class': 'ka-user-acl-object-rules-container'
         })
             .inject(this.objectRules);
 
-        this.addObjectsToList(ka.settings.configs.core, 'core');
-        this.addObjectsToList(ka.settings.configs.users, 'users');
+        this.addObjectsToList(ka.getConfig('kryncms'), 'kryncms');
 
         Object.each(ka.settings.configs, function (config, extKey) {
-
-            if (!config.objects || extKey == 'users' || extKey == 'core' || typeOf(config.objects) != 'object') {
+            extKey = ka.getShortBundleName(extKey);
+            if ('kryncms' === extKey) return;
+            if (!config.objects || typeOf(config.objects) != 'object') {
                 return;
             }
             this.addObjectsToList(config, extKey);
@@ -1039,6 +1015,7 @@ var kryncms_user_acl = new Class({
             this.currentAcls.push(value);
         }
 
+        console.log('apply', this.currentAcls);
         this.renderObjectRules();
         this.updateObjectRulesCounter();
 
@@ -1160,28 +1137,31 @@ var kryncms_user_acl = new Class({
                 type: 'select',
                 inputWidth: 140,
                 'default': '0',
-                items: {
-                    '0': [tc('usersAclModes', 'Combined'), 'bundles/admin/images/icons/arrow_in.png'],
-                    '1': [tc('usersAclModes', 'List'), 'bundles/admin/images/icons/application_view_list.png'],
-                    '2': [tc('usersAclModes', 'View'), 'bundles/admin/images/icons/application_form.png'],
-                    '3': [tc('usersAclModes', 'Add'), 'bundles/admin/images/icons/application_form_add.png'],
-                    '4': [tc('usersAclModes', 'Edit'), 'bundles/admin/images/icons/application_form_edit.png'],
-                    '5': [tc('usersAclModes', 'Delete'), 'bundles/admin/images/icons/application_form_delete.png']
+                options: {
+                    items: [
+                        [tc('usersAclModes', 'Combined'), 'bundles/kryncms/admin/images/icons/arrow_in.png'],
+                        [tc('usersAclModes', 'List'), 'bundles/kryncms/admin/images/icons/application_view_list.png'],
+                        [tc('usersAclModes', 'View'), 'bundles/kryncms/admin/images/icons/application_form.png'],
+                        [tc('usersAclModes', 'Add'), 'bundles/kryncms/admin/images/icons/application_form_add.png'],
+                        [tc('usersAclModes', 'Edit'), 'bundles/kryncms/admin/images/icons/application_form_edit.png'],
+                        [tc('usersAclModes', 'Delete'), 'bundles/kryncms/admin/images/icons/application_form_delete.png']
+                    ],
+                    itemsLabelAsValue: false
                 }
             },
 
             __fields__: {
                 label: t('Fields'),
-                needValue: ['0', '2', '3', '4'],
+                needValue: [0, 2, 3, 4],
                 againstField: 'mode',
                 type: 'label'
             },
 
             fields: {
                 noWrapper: true,
-                needValue: ['0', '2', '3', '4'],
+                needValue: [0, 2, 3, 4],
                 againstField: 'mode',
-                type: 'usersAclRuleFields',
+                type: 'UserAclRuleFields',
                 object: pObject
             }
 
@@ -1213,7 +1193,7 @@ var kryncms_user_acl = new Class({
 
     clickEntrypoint: function (pEvent) {
 
-        this.entryPointList.getElements('a').removeClass('users-acl-entrypoint-rule-active');
+        this.entryPointList.getElements('a').removeClass('ka-user-acl-entrypoint-rule-active');
         this.entryPointRuleContainer.empty();
 
         if (!pEvent.target) {
@@ -1228,7 +1208,7 @@ var kryncms_user_acl = new Class({
             }
         }
 
-        element.addClass('users-acl-entrypoint-rule-active');
+        element.addClass('ka-user-acl-entrypoint-rule-active');
 
         this.clickEntryPointRule(element);
 
@@ -1239,7 +1219,7 @@ var kryncms_user_acl = new Class({
         this.currentEntrypointDoms = {};
 
         this.entryPointList = new Element('div', {
-            'class': 'users-acl-entrypoint-list'
+            'class': 'ka-user-acl-entrypoint-list'
         })
             .inject(this.entryPointTab.pane);
 
@@ -1251,14 +1231,14 @@ var kryncms_user_acl = new Class({
         this.entryPointListContainer.addEvent('click', this.clickEntrypoint.bind(this));
 
         this.entryPointRuleContainer = new Element('div', {
-            'class': 'users-acl-entrypoint-rule-container'
+            'class': 'ka-user-acl-entrypoint-rule-container'
         })
             .inject(this.entryPointTab.pane);
 
-        this.adminEntryPointDom = this.addEntryPointTree(ka.settings.configs['admin'], 'admin');
+        this.adminEntryPointDom = this.addEntryPointTree(ka.getConfig('KrynCmsBundle'), 'KrynCmsBundle');
 
         Object.each(ka.settings.configs, function (ext, extCode) {
-            if (extCode != 'admin' && ext.entryPoints) {
+            if (extCode != 'KrynCmsBundle' && ext.entryPoints) {
                 this.addEntryPointTree(ext, extCode);
             }
         }.bind(this));
@@ -1293,49 +1273,55 @@ var kryncms_user_acl = new Class({
     getEntryPointIcon: function (pNode) {
         switch (pNode.type) {
             case 'list':
-                return 'bundles/admin/images/icons/application_view_list.png';
+                return 'bundles/kryncms/admin/images/icons/application_view_list.png';
             case 'edit':
-                return 'bundles/admin/images/icons/application_form_edit.png';
+                return 'bundles/kryncms/admin/images/icons/application_form_edit.png';
             case 'add':
-                return 'bundles/admin/images/icons/application_form_add.png';
+                return 'bundles/kryncms/admin/images/icons/application_form_add.png';
             case 'combine':
-                return 'bundles/admin/images/icons/application_side_list.png';
+                return 'bundles/kryncms/admin/images/icons/application_side_list.png';
             case 'function':
-                return 'bundles/admin/images/icons/script_code.png';
+                return 'bundles/kryncms/admin/images/icons/script_code.png';
             case 'iframe':
             case 'custom':
-                return 'bundles/admin/images/icons/application.png';
+                return 'bundles/kryncms/admin/images/icons/application.png';
             case 'store':
-                return 'bundles/admin/images/icons/database.png';
+                return 'bundles/kryncms/admin/images/icons/database.png';
             default:
-                return 'bundles/admin/images/icons/folder.png'
+                return 'bundles/kryncms/admin/images/icons/folder.png'
         }
 
     },
 
-    addEntryPointTree: function (pExtensionConfig, pExtensionKey) {
-        var title = ka.getExtensionTitle(pExtensionKey);
+    addEntryPointTree: function (bundleConfig, bundleName) {
+        var title = ka.getBundleTitle(bundleName);
+
+        if (bundleName != 'KrynCmsBundle') {
+            title += ' ('+bundleName+')';
+        }
+
+        bundleName = ka.getShortBundleName(bundleName);
 
         var target = new Element('div', {
             style: 'padding-top: 5px; margin-top: 5px; border-top: 1px dashed silver;'
-        }).inject(pExtensionKey == 'admin' ? this.entryPointListContainer : this.adminEntryPointDom.childContainer);
+        }).inject(bundleName == 'kryncms' ? this.entryPointListContainer : this.adminEntryPointDom.childContainer);
 
-        var path = '/' + (pExtensionKey === 'admin' ? '' : pExtensionKey);
+        var path = '/' + (bundleName === 'kryncms' ? '' : bundleName);
 
         var a = new Element('a', { href: 'javascript:;', text: title, title: '#' +
             path, style: 'font-weight: bold;'}).inject(target);
 
         var childContainer = new Element('div',
-            {'class': 'users-acl-tree-childcontainer', style: 'padding-left: 25px;'}).inject(a, 'after');
+            {'class': 'ka-user-acl-tree-childcontainer', style: 'padding-left: 25px;'}).inject(a, 'after');
 
-        if (pExtensionKey == 'admin') {
+        if (bundleName == 'admin') {
             this.extContainer = childContainer;
         }
 
-        a.entryPath = ka.urlEncode(path);
+        a.entryPath = path;
         a.childContainer = childContainer;
         this.currentEntrypointDoms[a.entryPath] = a;
-        this.loadEntryPointChildren(pExtensionConfig.entryPoints, pExtensionKey, childContainer);
+        this.loadEntryPointChildren(bundleConfig.entryPoints, bundleName, childContainer);
 
         return a;
 
@@ -1358,10 +1344,10 @@ var kryncms_user_acl = new Class({
             }).inject(element, 'top');
 
             var code = (pCode == '/' ? '/' : pCode + '/') + index;
-            element.entryPath = ka.urlEncode(code);
+            element.entryPath = code;
             this.currentEntrypointDoms[element.entryPath] = element;
             var childContainer = new Element('div',
-                {'class': 'users-acl-tree-childcontainer', style: 'padding-left: 25px;'}).inject(pChildContainer);
+                {'class': 'ka-user-acl-tree-childcontainer', style: 'padding-left: 25px;'}).inject(pChildContainer);
 
             this.loadEntryPointChildren(item.children, code, childContainer);
 
@@ -1388,32 +1374,33 @@ var kryncms_user_acl = new Class({
             this.lastRq.cancel();
         }
 
-        this.lastRq = new Request.JSON({url: _pathAdmin + 'users/acl/search', noCache: 1,
+        this.lastRq = new Request.JSON({url: _pathAdmin + 'admin/acl/search', noCache: 1,
             onComplete: this.renderList.bind(this)
         }).get(req);
 
     },
 
-    renderList: function (pItems) {
+    renderList: function (response) {
+        var items = response.data;
 
-        if (pItems && typeOf(pItems) == 'object') {
+        if (items && typeOf(items) == 'object') {
 
             this.left.empty();
 
-            if (!pItems.users && !pItems.groups) {
+            if (!items.users && !items.groups) {
                 new Element('div', {
                     'class': 'ka-List-info',
                     text: t('No users and groups.')
                 }).inject(this.left);
             }
 
-            if (typeOf(pItems.users) == 'array' && pItems.users.length > 0) {
+            if (typeOf(items.users) == 'array' && items.users.length > 0) {
                 new Element('div', {
                     'class': 'ka-List-split',
                     text: t('Users')
                 }).inject(this.left);
 
-                Array.each(pItems.users, function (item) {
+                Array.each(items.users, function (item) {
 
                     var div = new Element('div', {
                         'class': 'ka-List-item'
@@ -1469,13 +1456,13 @@ var kryncms_user_acl = new Class({
                 }.bind(this));
             }
 
-            if (typeOf(pItems.groups) == 'array' && pItems.groups.length > 0) {
+            if (typeOf(items.groups) == 'array' && items.groups.length > 0) {
                 new Element('div', {
                     'class': 'ka-List-split',
                     text: t('Groups')
                 }).inject(this.left);
 
-                Array.each(pItems.groups, function (item) {
+                Array.each(items.groups, function (item) {
 
                     var div = new Element('div', {
                         'class': 'ka-List-item'
@@ -1567,7 +1554,7 @@ var kryncms_user_acl = new Class({
         this.currentTargetRsn = pId;
 
         this.lrAcls = new Request.JSON({
-            url: _pathAdmin + 'users/acl',
+            url: _pathAdmin + 'admin/acl',
             noCache: true,
             onComplete: this.setAcls.bind(this)
         }).get({type: pType, id: pId});
@@ -1578,7 +1565,7 @@ var kryncms_user_acl = new Class({
         this.objectConstraints.setStyle('display', 'none');
         this.objectRules.setStyle('display', 'none');
 
-        this.entryPointList.getElements('a').removeClass('users-acl-entrypoint-rule-active');
+        this.entryPointList.getElements('a').removeClass('ka-user-acl-entrypoint-rule-active');
         this.entryPointRuleContainer.empty();
     },
 
@@ -1605,7 +1592,7 @@ var kryncms_user_acl = new Class({
         Array.each(this.currentAcls, function (rule) {
             var objectName = ka.normalizeObjectKey(rule.object);
 
-            if (objectName != 'core:entrypoint') {
+            if (objectName != 'kryncms/entryPoint') {
                 return;
             }
 
@@ -1624,7 +1611,7 @@ var kryncms_user_acl = new Class({
         } else {
 
             var rule = {
-                object: 'core:entrypoint',
+                object: 'kryncms/entryPoint',
                 constraintType: 1,
                 sub: 1,
                 prio: 0,
@@ -1647,7 +1634,7 @@ var kryncms_user_acl = new Class({
         this.entryPointRuleContainer.empty();
 
         var div = new Element('div', {
-            'class': 'users-acl-entrypoint-rule'
+            'class': 'ka-user-acl-entrypoint-rule'
         })
             .inject(this.entryPointRuleContainer);
 
@@ -1683,7 +1670,7 @@ var kryncms_user_acl = new Class({
 
             Array.each(this.currentAcls, function (acl, index) {
                 var objectKey = ka.normalizeObjectKey(acl.object);
-                if (objectKey != 'core:entrypoint') {
+                if (objectKey != 'kryncms/entryPoint') {
                     return;
                 }
 
@@ -1693,7 +1680,6 @@ var kryncms_user_acl = new Class({
 
                 this.currentAcls[index] = Object.merge(pDom.rule, kaFields.getValue());
                 pDom.rule = this.currentAcls[index];
-                console.log(pDom.rule);
             }.bind(this));
 
             this.updateEntryPointRules();
@@ -1704,7 +1690,7 @@ var kryncms_user_acl = new Class({
 
     deleteEntrypointRule: function (pDom) {
 
-        this.entryPointList.getElements('a').removeClass('users-acl-entrypoint-rule-active');
+        this.entryPointList.getElements('a').removeClass('ka-user-acl-entrypoint-rule-active');
         this.entryPointRuleContainer.empty();
 
         var index = this.currentAcls.indexOf(pDom.rule);
@@ -1736,7 +1722,7 @@ var kryncms_user_acl = new Class({
         dom.rule = pRule;
 
         dom.ruleIcon = new Element('img', {
-            src: _path + 'bundles/admin/images/icons/' + accessIcon + '.png',
+            src: _path + 'bundles/kryncms/admin/images/icons/' + accessIcon + '.png',
             style: 'position: absolute; left: -13px; top: 4px; width: 10px;'
         }).inject(dom);
 
@@ -1805,8 +1791,7 @@ var kryncms_user_acl = new Class({
             this.lastSaveRq.cancel();
         }
 
-        this.btnSave.startTip(t('Saving ...'));
-        this.win.setBlocked(true);
+        this.btnSave.startLoading(t('Saving ...'));
 
         var req = {
             targetType: this.currentTargetType,
@@ -1814,11 +1799,16 @@ var kryncms_user_acl = new Class({
             rules: this.currentAcls
         };
 
-        this.lastSaveRq = new Request.JSON({url: _pathAdmin + 'users/acl', onComplete: function () {
-            this.unsavedContent = false;
-            this.btnSave.stopTip(t('Saved'));
-            this.win.setBlocked(false);
-        }.bind(this)}).post(req);
+        this.lastSaveRq = new Request.JSON({url: _pathAdmin + 'admin/acl',
+            progressButton: this.btnSave,
+            onFailure: function() {
+                this.btnSave.failedLoading(t('Failed'));
+            }.bind(this),
+            onSuccess: function () {
+                this.unsavedContent = false;
+                this.btnSave.doneLoading(t('Saved'));
+            }.bind(this)
+        }).post(req);
     }
 
 });

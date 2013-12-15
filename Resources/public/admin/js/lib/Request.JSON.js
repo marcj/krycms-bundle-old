@@ -15,6 +15,12 @@ Request.JSON = new Class({
             window.fireEvent('restCall', [pData, this]);
         }.bind(this));
 
+        if (options.progressButton) {
+            this.addEvent('progress', function(event) {
+                options.progressButton.setProgress(parseInt(event.loaded / event.total * 100));
+            });
+        }
+
         this.parent(options);
 
         if (options.noErrorReporting === true) {
