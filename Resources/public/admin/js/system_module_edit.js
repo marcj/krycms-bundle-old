@@ -102,17 +102,18 @@ var kryncms_system_module_edit = new Class({
         this.saveBtn = buttonBar.addButton(t('Save'), this.savePlugins.bind(this));
         this.saveBtn.setButtonStyle('blue');
 
-        this.lr = new Request.JSON({url: _pathAdmin +
-            'admin/system/bundle/editor/plugins', noCache: 1, onComplete: function(res) {
+        this.lr = new Request.JSON({url: _pathAdmin + 'admin/system/bundle/editor/plugins',
+            noCache: 1,
+            onComplete: function(res) {
 
-            if (res) {
-                Object.each(res.data, function(item, key) {
-                    this.addPlugin(item, key)
-                }.bind(this));
-            }
-            this.win.setLoading(false);
+                if (res) {
+                    Object.each(res.data, function(item, key) {
+                        this.addPlugin(item, key)
+                    }.bind(this));
+                }
+                this.win.setLoading(false);
 
-        }.bind(this)}).get({bundle: this.mod});
+            }.bind(this)}).get({bundle: this.mod});
     },
 
     savePlugins: function() {
@@ -136,15 +137,15 @@ var kryncms_system_module_edit = new Class({
         if (this.lr) {
             this.lr.cancel();
         }
-        this.saveBtn.startTip(t('Saving ...'));
 
-        req.plugins = JSON.encode(req.plugins);
-        req.bundle = this.mod;
-        this.lr = new Request.JSON({url: _pathAdmin +
-            'admin/system/bundle/editor/plugins', noCache: 1, onComplete: function(res) {
-            this.saveBtn.stopTip(t('Saved'));
-            ka.loadSettings();
-        }.bind(this)}).post(req);
+        this.lr = new Request.JSON({
+            url: _pathAdmin + 'admin/system/bundle/editor/plugins?bundle=' + this.mod,
+            noCache: 1,
+            saveStatusButton: this.saveBtn,
+            onComplete: function(res) {
+                ka.loadSettings();
+            }.bind(this)
+        }).post(req);
 
     },
 
@@ -204,150 +205,140 @@ var kryncms_system_module_edit = new Class({
         tr.pluginPhpMethod.setValue(pPlugin && pPlugin.method ? pPlugin.method : '');
         tr.pluginLabel.setValue(pPlugin && pPlugin.label) ? pPlugin.label : '';
 
-        new ka.Button(t('Options'))
-            .addEvent('click', function(){
-                var dialog = new ka.Dialog(this.win, {
-                    withButtons: true,
-                    title: tf('Options of `%s`', tr.pluginLabel.getValue())
-                });
+        new ka.Button(t('Options')).addEvent('click', function() {
+            var dialog = new ka.Dialog(this.win, {
+                withButtons: true,
+                title: tf('Options of `%s`', tr.pluginLabel.getValue())
+            });
 
-                var fieldTable = new ka.FieldTable(dialog.getContentContainer(), this.win, {
-                    arrayKey: true
-                });
+            var fieldTable = new ka.FieldTable(dialog.getContentContainer(), this.win, {
+                arrayKey: true
+            });
 
-                dialog.addEvent('apply', function() {
-                    tr.pluginOptions = fieldTable.getValue();
-                });
+            dialog.addEvent('apply', function() {
+                tr.pluginOptions = fieldTable.getValue();
+            });
 
-                if (tr.pluginOptions) {
-                    fieldTable.setValue(tr.pluginOptions);
-                }
+            if (tr.pluginOptions) {
+                fieldTable.setValue(tr.pluginOptions);
+            }
 
-                dialog.center(true);
-            }.bind(this))
-            .inject(actionTd);
+            dialog.center(true);
+        }.bind(this)).inject(actionTd);
 
-        new ka.Button(t('Routes'))
-            .addEvent('click', function(){
-                var dialog = new ka.Dialog(this.win, {
-                    withButtons: true,
-                    minWidth: '80%',
-                    title: tf('Routes of `%s`', tr.pluginLabel.getValue())
-                });
+        new ka.Button(t('Routes')).addEvent('click', function() {
+            var dialog = new ka.Dialog(this.win, {
+                withButtons: true,
+                minWidth: '80%',
+                title: tf('Routes of `%s`', tr.pluginLabel.getValue())
+            });
 
-                var routes = new ka.Field({
-                    type: 'array',
-                    width: 'auto',
-                    withOrder: true,
-                    tableLayout: true,
-                    addText: t('Add route'),
-                    columns: [
-                        {label: 'Pattern', width: 150},
-                        {label: 'Defaults'},
-                        {label: 'Requirements'}
-                    ],
-                    fields: {
-                        pattern: {
-                            type: 'text',
-                            required: true
-                        },
-                        defaults: {
-                            type: 'array',
-                            asHash: true,
-                            tableLayout: true,
-                            addText: t('Add default'),
-                            columns: [
-                                {label: 'Key'},
-                                {label: 'value'}
-                            ],
-                            fields: {
-                                key: {
-                                    type: 'text',
-                                    required: true
-                                },
-                                value: {
-                                    type: 'text',
-                                    required: true
-                                }
+            var routes = new ka.Field({
+                type: 'array',
+                width: 'auto',
+                withOrder: true,
+                tableLayout: true,
+                addText: t('Add route'),
+                columns: [
+                    {label: 'Pattern', width: 150},
+                    {label: 'Defaults'},
+                    {label: 'Requirements'}
+                ],
+                fields: {
+                    pattern: {
+                        type: 'text',
+                        required: true
+                    },
+                    defaults: {
+                        type: 'array',
+                        asHash: true,
+                        tableLayout: true,
+                        addText: t('Add default'),
+                        columns: [
+                            {label: 'Key'},
+                            {label: 'value'}
+                        ],
+                        fields: {
+                            key: {
+                                type: 'text',
+                                required: true
+                            },
+                            value: {
+                                type: 'text',
+                                required: true
                             }
-                        },
-                        requirements: {
-                            type: 'array',
-                            asHash: true,
-                            tableLayout: true,
-                            addText: t('Add requirement'),
-                            columns: [
-                                {label: 'Key'},
-                                {label: 'RegEx'}
-                            ],
-                            fields: {
-                                key: {
-                                    type: 'text',
-                                    required: true
-                                },
-                                regex: {
-                                    type: 'text',
-                                    required: true
-                                }
+                        }
+                    },
+                    requirements: {
+                        type: 'array',
+                        asHash: true,
+                        tableLayout: true,
+                        addText: t('Add requirement'),
+                        columns: [
+                            {label: 'Key'},
+                            {label: 'RegEx'}
+                        ],
+                        fields: {
+                            key: {
+                                type: 'text',
+                                required: true
+                            },
+                            regex: {
+                                type: 'text',
+                                required: true
                             }
                         }
                     }
-                }, dialog.getContentContainer());
-
-                dialog.addEvent('apply', function() {
-                    tr.pluginRoutes = routes.getValue();
-                });
-
-                if (tr.pluginRoutes) {
-                    routes.setValue(tr.pluginRoutes);
                 }
+            }, dialog.getContentContainer());
 
-                dialog.center(true);
-            }.bind(this))
-            .inject(actionTd);
+            dialog.addEvent('apply', function() {
+                tr.pluginRoutes = routes.getValue();
+            });
+
+            if (tr.pluginRoutes) {
+                routes.setValue(tr.pluginRoutes);
+            }
+
+            dialog.center(true);
+        }.bind(this)).inject(actionTd);
 
         new Element('a', {
             style: "cursor: pointer; font-family: 'icomoon'; padding: 0px 2px;",
             title: t('Delete plugin'),
             html: '&#xe26b;'
-        })
-            .addEvent('click', function() {
+        }).addEvent('click', function() {
                 this.win._confirm(t('Really delete'), function(ok) {
                     if (!ok) {
                         return;
                     }
                     tr.destroy();
                 });
-            }.bind(this))
-            .inject(actionTd);
+            }.bind(this)).inject(actionTd);
 
         new Element('a', {
             style: "cursor: pointer; font-family: 'icomoon'; padding: 0px 2px;",
             title: t('Move up'),
             html: '&#xe2ca;'
-        })
-            .addEvent('click', function() {
+        }).addEvent('click',function() {
                 var previous = tr.getPrevious();
                 if (previous.getElement('th')) {
                     return;
                 }
 
                 tr.inject(previous.getPrevious(), 'before');
-            })
-            .inject(actionTd);
+            }).inject(actionTd);
 
         new Element('a', {
             style: "cursor: pointer; font-family: 'icomoon'; padding: 0px 2px;",
             title: t('Move down'),
             html: '&#xe2cc;'
-        })
-            .addEvent('click', function() {
+        }).addEvent('click',function() {
                 if (!tr.getNext()) {
                     return false;
                 }
                 tr.inject(tr.getNext(), 'after');
-            })
-            .inject(actionTd);
+            }).inject(actionTd);
 
     },
 
@@ -362,11 +353,11 @@ var kryncms_system_module_edit = new Class({
         if (this.lr) {
             this.lr.cancel();
         }
-        this.win.setLoading(true, t('Saving ...'));
-        this.lr = new Request.JSON({url: _pathAdmin +
-            'admin/system/bundle/editor/docu', noCache: 1, onComplete: function(res) {
-            this.win.setLoading(false);
-        }.bind(this)}).post({text: this.text.getValue(), bundle: this.mod});
+        this.lr = new Request.JSON({
+            url: _pathAdmin + 'admin/system/bundle/editor/docu?bundle=' + this.mod,
+            noCache: 1,
+            saveStatusButton: this.saveBtn
+        }).post({text: this.text.getValue()});
     },
 
     loadDocu: function() {
@@ -395,8 +386,7 @@ var kryncms_system_module_edit = new Class({
         }, p, {win: this.win});
         this.text.setValue(t('Loading ...'));
 
-        this.lr = new Request.JSON({url: _pathAdmin +
-            'admin/system/bundle/editor/docu', noCache: 1, onComplete: function(response) {
+        this.lr = new Request.JSON({url: _pathAdmin + 'admin/system/bundle/editor/docu', noCache: 1, onComplete: function(response) {
             this.text.setValue(response.data || '');
         }.bind(this)}).get({bundle: this.mod});
 
@@ -492,47 +482,43 @@ var kryncms_system_module_edit = new Class({
 
         name.setValue('Controller\\Admin\\');
 
-        this.newWindowDialogCancelBtn = new ka.Button(t('Cancel'))
-            .addEvent('click', function() {
-                dialog.close();
-            })
-            .inject(dialog.bottom);
+        this.newWindowDialogCancelBtn = new ka.Button(t('Cancel')).addEvent('click',function() {
+            dialog.close();
+        }).inject(dialog.bottom);
 
-        this.newWindowDialogApplyBtn = new ka.Button(t('Apply'))
-            .addEvent('click', function() {
+        this.newWindowDialogApplyBtn = new ka.Button(t('Apply')).addEvent('click', function() {
 
-                if (name.value == '') {
+            if (name.value == '') {
 
-                    this.win._alert(t('Class name is empty'));
-                    return;
-                }
+                this.win._alert(t('Class name is empty'));
+                return;
+            }
 
-                this.newWindowDialogCancelBtn.deactivate();
-                this.newWindowDialogApplyBtn.deactivate();
-                this.newWindowDialogApplyBtn.startTip(t('Please wait ...'));
+            this.newWindowDialogCancelBtn.deactivate();
+            this.newWindowDialogApplyBtn.deactivate();
+            this.newWindowDialogApplyBtn.startTip(t('Please wait ...'));
 
-                new Request.JSON({url: _pathAdmin + 'admin/system/bundle/editor/window', noCache: 1,
-                    noErrorReporting: ['FileAlreadyExistException'],
-                    onComplete: function(pResponse) {
+            new Request.JSON({url: _pathAdmin + 'admin/system/bundle/editor/window', noCache: 1,
+                noErrorReporting: ['FileAlreadyExistException'],
+                onComplete: function(pResponse) {
 
-                        this.newWindowDialogApplyBtn.stopTip();
+                    this.newWindowDialogApplyBtn.stopTip();
 
-                        if (pResponse.error) {
-                            this.newWindowDialogApplyBtn.stopTip(t('Error: %s', pResponse.message));
-                        }
+                    if (pResponse.error) {
+                        this.newWindowDialogApplyBtn.stopTip(t('Error: %s', pResponse.message));
+                    }
 
-                        this.newWindowDialogCancelBtn.activate();
-                        this.newWindowDialogApplyBtn.activate();
+                    this.newWindowDialogCancelBtn.activate();
+                    this.newWindowDialogApplyBtn.activate();
 
-                        if (!pResponse.error) {
-                            this.loadWindows();
-                            dialog.close();
-                        }
+                    if (!pResponse.error) {
+                        this.loadWindows();
+                        dialog.close();
+                    }
 
-                    }.bind(this)}).put({'class': name.getValue(), module: this.mod});
+                }.bind(this)}).put({'class': name.getValue(), module: this.mod});
 
-            }.bind(this))
-            .inject(dialog.bottom);
+        }.bind(this)).inject(dialog.bottom);
 
         dialog.center();
 
@@ -558,11 +544,9 @@ var kryncms_system_module_edit = new Class({
 
         var td = new Element('td').inject(tr);
 
-        new ka.Button(t('Edit window'))
-            .addEvent('click', function() {
-                ka.wm.open('kryncmsbundle/system/module/editWindow', {bundle: this.mod, className: pClassName});
-            }.bind(this))
-            .inject(td);
+        new ka.Button(t('Edit window')).addEvent('click', function() {
+            ka.wm.open('kryncmsbundle/system/module/editWindow', {bundle: this.mod, className: pClassName});
+        }.bind(this)).inject(td);
 
         new Element('a', {
             style: "cursor: pointer; font-family: 'icomoon'; padding: 0px 2px;",
@@ -585,8 +569,7 @@ var kryncms_system_module_edit = new Class({
         if (this.lr) {
             this.lr.cancel();
         }
-        this.lr = new Request.JSON({url: _pathAdmin +
-            'admin/system/bundle/editor/model', noCache: 1, onComplete: function(res) {
+        this.lr = new Request.JSON({url: _pathAdmin + 'admin/system/bundle/editor/model', noCache: 1, onComplete: function(res) {
             this.win.setLoading(false);
             this._renderDb(res.data);
         }.bind(this)}).get({bundle: this.mod});
@@ -594,24 +577,22 @@ var kryncms_system_module_edit = new Class({
 
     saveDb: function(andUpdate) {
         var req = {};
-        req.bundle = this.mod;
         req.model = this.dbEditor.getValue();
-
-        this.saveButton.startTip(t('Saving ...'));
 
         if (this.lr) {
             this.lr.cancel();
         }
 
-        this.lr = new Request.JSON({url: _pathAdmin + 'admin/system/bundle/editor/model', noCache: 1, onComplete: function() {
-            this.saveButton.stopTip(t('Saved'));
-
-            if (true === andUpdate) {
-                this.updateORM();
-            }
-
-            ka.loadSettings();
-        }.bind(this)}).post(req);
+        this.lr = new Request.JSON({
+            url: _pathAdmin + 'admin/system/bundle/editor/model?bundle=' + this.mod,
+            noCache: 1,
+            saveStatusButton: this.saveBtn,
+            onComplete: function() {
+                if (true === andUpdate) {
+                    this.updateORM();
+                }
+                ka.loadSettings();
+            }.bind(this)}).post(req);
     },
 
     _renderDb: function(pModel) {
@@ -664,12 +645,12 @@ var kryncms_system_module_edit = new Class({
             this.lr.cancel();
         }
 
-        this.lr =
-            new Request.JSON({url: _pathAdmin + 'admin/system/bundle/getHelp', noCache: 1, onComplete: function(res) {
+        this.lr = new Request.JSON({url: _pathAdmin + 'admin/system/bundle/getHelp',
+            noCache: 1,
+            onSuccess: function(res) {
                 this.win.setLoading(false);
                 this._renderHelp(res);
-
-            }.bind(this)}).post({bundle: this.mod/*, lang: this.languageSelect.value*/});
+            }.bind(this)}).get({bundle: this.mod/*, lang: this.languageSelect.value*/});
     },
 
     _renderHelp: function(pHelp) {
@@ -705,15 +686,10 @@ var kryncms_system_module_edit = new Class({
 
         }.bind(this));
 
-        //        req.lang = this.languageSelect.value;
-        req.name = this.mod;
-        req.help = JSON.encode(items);
-        this.win.setLoading(true, t('Saving ...'));
-
-        this.lr =
-            new Request.JSON({url: _pathAdmin + 'admin/system/bundle/saveHelp', noCache: 1, onComplete: function() {
-                this.win.setLoading(false);
-            }.bind(this)}).post(req);
+        this.lr = new Request.JSON({url: _pathAdmin + 'admin/system/bundle/saveHelp?bundle=' + this.mod,
+            noCache: 1,
+            saveStatusButton: this.saveBtn
+        }).post(req);
     },
 
     addHelpItem: function(pItem) {
@@ -771,8 +747,7 @@ var kryncms_system_module_edit = new Class({
             this.lr.cancel();
         }
 
-        this.lr = new Request.JSON({url: _pathAdmin +
-            'admin/system/bundle/editor/entry-points', noCache: 1, onComplete: function(res) {
+        this.lr = new Request.JSON({url: _pathAdmin + 'admin/system/bundle/editor/entry-points', noCache: 1, onComplete: function(res) {
             this.win.setLoading(false);
             this._renderLinks(res.data);
         }.bind(this)}).get({bundle: this.mod});
@@ -956,8 +931,7 @@ var kryncms_system_module_edit = new Class({
 
         if (pContainer.get('tag') == 'tr') {
             if (!pContainer.childContainer) {
-                var childTr = new Element('tr', {'class': 'ka-entryPoint-childrenContainer'})
-                    .inject(pContainer, 'after');
+                var childTr = new Element('tr', {'class': 'ka-entryPoint-childrenContainer'}).inject(pContainer, 'after');
                 var childTd = new Element('td', {colspan: 4}).inject(childTr);
                 var childDiv = new Element('div', {style: 'margin-left: 25px;'}).inject(childTd);
                 pContainer.childTr = childTr;
@@ -1031,67 +1005,58 @@ var kryncms_system_module_edit = new Class({
         //ACTIONS
         var tdActions = new Element('td', {width: 250}).inject(tr);
 
-        new ka.Button(t('Settings'))
-            .addEvent('click', function() {
+        new ka.Button(t('Settings')).addEvent('click', function() {
 
-                var dialog = this.win.newDialog('', true);
+            var dialog = this.win.newDialog('', true);
 
-                dialog.setStyle('width', '90%');
-                dialog.setStyle('height', '90%');
+            dialog.setStyle('width', '90%');
+            dialog.setStyle('height', '90%');
 
-                var applyBtn = new ka.Button(t('Apply'));
+            var applyBtn = new ka.Button(t('Apply'));
 
-                var fieldObject = new ka.FieldForm(dialog.content, this.entryPointSettingsFields, {
-                    allTableItems: true,
-                    tableItemLabelWidth: 300,
-                    saveButton: applyBtn
-                });
+            var fieldObject = new ka.FieldForm(dialog.content, this.entryPointSettingsFields, {
+                allTableItems: true,
+                tableItemLabelWidth: 300,
+                saveButton: applyBtn
+            });
 
-                fieldObject.setValue(tr.definition);
+            fieldObject.setValue(tr.definition);
 
-                fieldObject.getField('type').setValue(tr.typeField.getValue(), true);
-                fieldObject.getField('label').setValue(tr.titleField.getValue(), true);
+            fieldObject.getField('type').setValue(tr.typeField.getValue(), true);
+            fieldObject.getField('label').setValue(tr.titleField.getValue(), true);
 
-                new ka.Button(t('Cancel'))
-                    .addEvent('click', dialog.closeAnimated)
-                    .inject(dialog.bottom);
+            new ka.Button(t('Cancel')).addEvent('click', dialog.closeAnimated).inject(dialog.bottom);
 
-                applyBtn.addEvent('click', function() {
-                        if (!fieldObject.isValid()) {
-                            return;
-                        }
+            applyBtn.addEvent('click', function() {
+                if (!fieldObject.isValid()) {
+                    return;
+                }
 
-                        tr.definition = fieldObject.getValue();
-                        tr.typeField.setValue(tr.definition.type);
-                        tr.titleField.setValue(tr.definition.title);
+                tr.definition = fieldObject.getValue();
+                tr.typeField.setValue(tr.definition.type);
+                tr.titleField.setValue(tr.definition.title);
 
-                        dialog.close();
+                dialog.close();
 
-                    }.bind(this))
-                    .setButtonStyle('blue')
-                    .inject(dialog.bottom);
+            }.bind(this)).setButtonStyle('blue').inject(dialog.bottom);
 
-                dialog.center(true);
+            dialog.center(true);
 
-            }.bind(this))
-            .inject(tdActions);
+        }.bind(this)).inject(tdActions);
 
         new Element('a', {
             style: "cursor: pointer; font-family: 'icomoon'; padding: 0px 5px;",
             title: t('Add children'),
             html: '&#xe109;'
-        })
-            .addEvent('click', function() {
+        }).addEvent('click', function() {
                 this.entryPointsAdd('', {}, tr);
-            }.bind(this))
-            .inject(tdActions);
+            }.bind(this)).inject(tdActions);
 
         new Element('a', {
             style: "cursor: pointer; font-family: 'icomoon'; padding: 0px 5px;",
             title: _('Remove'),
             html: '&#xe26b;'
-        })
-            .addEvent('click', function() {
+        }).addEvent('click', function() {
                 this.win._confirm(t('Really delete?'), function(ok) {
                     if (ok) {
                         tr.fireEvent('delete');
@@ -1102,15 +1067,13 @@ var kryncms_system_module_edit = new Class({
                         }
                     }
                 }.bind(this));
-            }.bind(this))
-            .inject(tdActions);
+            }.bind(this)).inject(tdActions);
 
         new Element('a', {
             style: "cursor: pointer; font-family: 'icomoon'; padding: 0px 2px;",
             title: t('Move up'),
             html: '&#xe2ca;'
-        })
-            .addEvent('click', function() {
+        }).addEvent('click', function() {
 
                 var previous = tr.getPrevious('.ka-entryPoint-item');
                 if (!previous) {
@@ -1122,15 +1085,13 @@ var kryncms_system_module_edit = new Class({
                     tr.childTr.inject(tr, 'after');
                 }
 
-            }.bind(this))
-            .inject(tdActions);
+            }.bind(this)).inject(tdActions);
 
         new Element('a', {
             style: "cursor: pointer; font-family: 'icomoon'; padding: 0px 2px;",
             title: t('Move down'),
             html: '&#xe2cc;'
-        })
-            .addEvent('click', function() {
+        }).addEvent('click', function() {
 
                 var next = tr.getNext('.ka-entryPoint-item');
                 if (!next) {
@@ -1142,21 +1103,18 @@ var kryncms_system_module_edit = new Class({
                     tr.childTr.inject(tr, 'after');
                 }
 
-            }.bind(this))
-            .inject(tdActions);
+            }.bind(this)).inject(tdActions);
 
         new Element('a', {
             style: "cursor: pointer; font-family: 'icomoon'; padding: 0px 2px;",
             title: t('Open'),
             html: '&#xe28d;'
-        })
-            .addEvent('click', function() {
+        }).addEvent('click', function() {
 
                 if (['list', 'add', 'edit', 'combine', 'custom'].contains(tr.definition.type)) {
                     var extension = this.mod;
                     var parent = tr, code = tr.key.getValue();
-                    while ((parent = parent.getParent('.ka-entryPoint-childrenContainer')) &&
-                        (parent = parent.getPrevious('.ka-entryPoint-item'))) {
+                    while ((parent = parent.getParent('.ka-entryPoint-childrenContainer')) && (parent = parent.getPrevious('.ka-entryPoint-item'))) {
 
                         code = parent.key.getValue() + '/' + code;
                     }
@@ -1165,8 +1123,7 @@ var kryncms_system_module_edit = new Class({
                     logger(code);
                 }
 
-            }.bind(this))
-            .inject(tdActions);
+            }.bind(this)).inject(tdActions);
 
         if (pDefinition.children) {
             Object.each(pDefinition.children, function(link, key) {
@@ -1185,14 +1142,14 @@ var kryncms_system_module_edit = new Class({
             entryPoints.push(itemData);
         });
 
-        this.entryPointsSaveButton.startTip(t('Saving ...'));
-
         this.lr = new Request.JSON({url: _pathAdmin + 'admin/system/bundle/editor/entry-points?bundle=' + decodeURIComponent(this.mod),
-            noCache: 1, onComplete: function() {
-                this.entryPointsSaveButton.stopTip(t('Saved'));
+            noCache: 1,
+            saveStatusButton: this.entryPointsSaveButton,
+            onComplete: function() {
                 ka.loadSettings();
                 ka.adminInterface.loadMenu();
-            }.bind(this)}).post({entryPoints: entryPoints});
+            }.bind(this)
+        }).post({entryPoints: entryPoints});
 
     },
 
@@ -1269,11 +1226,11 @@ var kryncms_system_module_edit = new Class({
                 desc: t('Screenshots in %s').replace('%s', pConfig._path + 'Resources/screenshots/'),
                 disabled: true
             },
-//            version: {
-//                label: t('Version'),
-//                required: true,
-//                type: 'text'
-//            },
+            //            version: {
+            //                label: t('Version'),
+            //                required: true,
+            //                type: 'text'
+            //            },
             authors: {
                 label: t('Authors'),
                 desc: t(''),
@@ -1361,11 +1318,10 @@ var kryncms_system_module_edit = new Class({
 
         if (ka.settings.system.communityId > 0 && !pConfig.owner > 0) {
             var ownerField = this.generalFieldsObj.getField('owner');
-            new ka.Button(t('Set to my extension: ' + ka.settings.system.communityEmail))
-                .addEvent('click', function() {
-                    this.setToMyExtension = ka.settings.system.communityId;
-                    ownerField.setValue(ka.settings.system.communityEmail);
-                }.bind(this)).inject(document.id(ownerField).getElement('.ka-field-field'));
+            new ka.Button(t('Set to my extension: ' + ka.settings.system.communityEmail)).addEvent('click', function() {
+                this.setToMyExtension = ka.settings.system.communityId;
+                ownerField.setValue(ka.settings.system.communityEmail);
+            }.bind(this)).inject(document.id(ownerField).getElement('.ka-field-field'));
         }
 
         this.generalFieldsObj.setValue(value);
@@ -1375,11 +1331,9 @@ var kryncms_system_module_edit = new Class({
     saveGeneral: function() {
         var req = this.generalFieldsObj.getValue();
 
-        this.saveBtn.startTip(t('Saving ...'));
-        this.lr = new Request.JSON({url: _pathAdmin +
-            'admin/system/bundle/editor/general?name=' + decodeURIComponent(this.mod), onComplete: function() {
-            this.saveBtn.stopTip(t('Saved'));
-        }.bind(this)}).post(req);
+        this.lr = new Request.JSON({url: _pathAdmin + 'admin/system/bundle/editor/config?bundle=' + decodeURIComponent(this.mod),
+            saveStatusButton: this.saveBtn
+        }).post(req);
     },
 
     loadGeneral: function() {
@@ -1387,8 +1341,7 @@ var kryncms_system_module_edit = new Class({
         if (this.lr) {
             this.lr.cancel();
         }
-        this.lr = new Request.JSON({url: _pathAdmin +
-            'admin/system/bundle/editor/config', noCache: 1, onComplete: function(pResult) {
+        this.lr = new Request.JSON({url: _pathAdmin + 'admin/system/bundle/editor/config', noCache: 1, onComplete: function(pResult) {
             this._loadGeneral(pResult.data);
             this.win.setLoading(false);
         }.bind(this)}).get({bundle: this.mod});
@@ -1399,8 +1352,7 @@ var kryncms_system_module_edit = new Class({
         if (this.lr) {
             this.lr.cancel();
         }
-        this.lr = new Request.JSON({url: _pathAdmin +
-            'admin/system/bundle/editor/themes', noCache: 1, onComplete: function(pResult) {
+        this.lr = new Request.JSON({url: _pathAdmin + 'admin/system/bundle/editor/themes', noCache: 1, onComplete: function(pResult) {
             this.setupThemes(pResult.data);
             this.win.setLoading(false);
         }.bind(this)}).get({bundle: this.mod});
@@ -1551,12 +1503,14 @@ var kryncms_system_module_edit = new Class({
             this.lr.cancel();
         }
 
-        this.saveBtn.startTip(t('Saving ...'));
-
-        this.lr = new Request.JSON({url: _pathAdmin + 'admin/system/bundle/editor/themes', noCache: 1, onComplete: function() {
-            this.saveBtn.stopTip(t('Saved'));
-            ka.loadSettings();
-        }.bind(this)}).post({bundle: this.mod, themes: JSON.encode(themes)});
+        this.lr = new Request.JSON({
+            url: _pathAdmin + 'admin/system/bundle/editor/themes?bundle=' + this.mod,
+            noCache: 1,
+            saveStatusButton: this.saveBtn,
+            onComplete: function() {
+                ka.loadSettings();
+            }.bind(this)
+        }).post({themes: themes});
     },
 
     _addPublicProperty: function(pContainer, pKey, pTitle, pType) {
@@ -1688,8 +1642,7 @@ var kryncms_system_module_edit = new Class({
                 style: "cursor: pointer; font-family: 'icomoon'; padding: 0px 2px;",
                 title: _('Edit template'),
                 html: '&#xe00f;'
-            }).addEvent('click',
-                function() {
+            }).addEvent('click',function() {
                     ka.wm.open('kryncmsbundle/files/edit', {file: {path: '/' + file.value}});
                 }).inject(li);
             new Element('a', {
@@ -1863,7 +1816,6 @@ var kryncms_system_module_edit = new Class({
         }.bind(this));
         this.langTranslateBtn.deactivate();
 
-
         this.extractLanguage(this.languageLanguageSelect.getValue());
     },
 
@@ -1872,19 +1824,12 @@ var kryncms_system_module_edit = new Class({
             onComplete: function(pResponse) {
                 if (!pResponse.data) {
 
-                    this.langProgressBars.setText(
-                        'Error.'
-                    );
+                    this.langProgressBars.setText('Error.');
                 } else {
                     this.langProgressBars.setUnlimited(false);
-                    this.langProgressBars.setValue((pResponse.data.countTranslated / pResponse.data.count) *
-                        100);
+                    this.langProgressBars.setValue((pResponse.data.countTranslated / pResponse.data.count) * 100);
 
-                    this.langProgressBars.setText(
-                        _('%1 of %2 translated')
-                            .replace('%1', pResponse.data.countTranslated)
-                            .replace('%2', pResponse.data['count'])
-                    );
+                    this.langProgressBars.setText(_('%1 of %2 translated').replace('%1', pResponse.data.countTranslated).replace('%2', pResponse.data['count']));
                 }
                 this.langTranslateBtn.activate();
             }.bind(this)}).get({bundle: this.mod, lang: language});
@@ -1919,7 +1864,7 @@ var kryncms_system_module_edit = new Class({
 
         this.saveButton = buttonBar.addButton(t('Save'), this.saveObjects.bind(this, false));
         this.saveButton.setButtonStyle('blue');
-        this.saveButtonORM = buttonBar.addButton(t('Save, write models.xml and ORM Update'), this.saveObjects.bind(this, true));
+        this.saveButtonORM = buttonBar.addButton(t('Save, build models and update schema'), this.saveObjects.bind(this, true));
 
         document.id(this.saveButton).addClass('ka-Button-blue');
         document.id(this.saveButtonORM).addClass('ka-Button-blue');
@@ -1954,11 +1899,13 @@ var kryncms_system_module_edit = new Class({
             this.lr.cancel();
         }
 
-        this.lr = new Request.JSON({url: _pathAdmin + 'admin/system/bundle/editor/model/from-objects', noCache: 1,
+        this.lr = new Request.JSON({
+            url: _pathAdmin + 'admin/system/bundle/editor/model/from-objects?bundle=' + this.mod,
+            noCache: 1,
             onComplete: function(response) {
                 if (response.data) {
                     var atLeastOneFailed = false;
-                    Object.each(response.data, function(success, id){
+                    Object.each(response.data, function(success, id) {
                         if (true !== success) {
                             atLeastOneFailed = true;
                         }
@@ -1974,8 +1921,7 @@ var kryncms_system_module_edit = new Class({
                             text: t('One or more objects have errors.')
                         }).inject(dialog.getContentContainer());
 
-
-                        Object.each(response.data, function(success, id){
+                        Object.each(response.data, function(success, id) {
                             var div = new Element('div').inject(dialog.getContentContainer());
 
                             new Element('h2', {
@@ -1997,17 +1943,14 @@ var kryncms_system_module_edit = new Class({
 
                         dialog.center();
 
-                        var ok = new ka.Button(t('Ok'))
-                            .addEvent('click', dialog.close)
-                            .setButtonStyle('blue')
-                            .inject(dialog.bottom);
+                        var ok = new ka.Button(t('Ok')).addEvent('click', dialog.close).setButtonStyle('blue').inject(dialog.bottom);
 
                         this.currentButton.stopTip(t('Failed.'));
                     } else {
                         pCallback(response);
                     }
                 }
-            }.bind(this)}).post({bundle: this.mod});
+            }.bind(this)}).post();
     },
 
     printOrmError: function(pResponse) {
@@ -2034,28 +1977,29 @@ var kryncms_system_module_edit = new Class({
         dialog.setStyle('height', '90%');
         dialog.center();
 
-        var ok = new ka.Button(t('Ok'))
-            .addEvent('click', dialog.close)
-            .setButtonStyle('blue')
-            .inject(dialog.bottom);
+        var ok = new ka.Button(t('Ok')).addEvent('click', dialog.close).setButtonStyle('blue').inject(dialog.bottom);
     },
 
     updateORM: function() {
 
-        this.currentButton.startTip(t('Object saved. Write model.xml ...'));
+        this.currentButton.setProgress(25);
+        this.currentButton.startLoading(t('Object saved. Write model.xml ...'));
 
         this.updateOrmWriteModel(function() {
-            this.currentButton.startTip(t('Saved. Update PHP models ...'));
+            this.currentButton.setProgress(50);
+            this.currentButton.startLoading(t('Saved. Update PHP models ...'));
             this.updateOrm('models', function(response) {
                 if (response.error) {
                     this.printOrmError(response);
                 } else {
-                    this.currentButton.startTip(t('Saved. Update database tables ...'));
+                    this.currentButton.setProgress(75);
+                    this.currentButton.startLoading(t('Saved. Update database tables ...'));
                     this.updateOrm('update', function(response) {
                         if (response.error) {
                             this.printOrmError(response);
                         } else {
-                            this.currentButton.stopTip(t('Done.'));
+                            this.currentButton.setProgress(100);
+                            this.currentButton.doneLoading(t('Done.'));
                         }
                     }.bind(this));
                 }
@@ -2063,15 +2007,7 @@ var kryncms_system_module_edit = new Class({
         }.bind(this));
     },
 
-    writeObjectModel: function(pObjectKey) {
-        this.win.setLoading(true, t('Write model to model.xml'));
-
-        new Request.JSON({url: _path + 'admin/system/bundle/editor/model/from-object', onComplete: function(pResult) {
-            this.win.setLoading(false);
-        }.bind(this)}).post({bundle: this.mod, object: pObjectKey});
-    },
-
-    saveObjects: function(pWithUpdate) {
+    saveObjects: function(withBuildAndUpdate) {
 
         var objects = {};
 
@@ -2088,32 +2024,22 @@ var kryncms_system_module_edit = new Class({
         if (this.lr) {
             this.lr.cancel();
         }
-        this.currentButton = pWithUpdate ? this.saveButtonORM : this.saveButton;
-
-        this.currentButton.startTip(t('Saving ...'));
+        this.currentButton = withBuildAndUpdate ? this.saveButtonORM : this.saveButton;
 
         var req = {};
         req.objects = objects;
         req.bundle = this.mod;
 
-        this.lr = new Request.JSON({url: _pathAdmin +
-            'admin/system/bundle/editor/objects', noCache: 1,
-            onFailure: function() {
-                this.saveButton.stopTip(t('Failed.'));
-            },
-            onComplete: function(response) {
-            if (response.status == 200) {
+        this.lr = new Request.JSON({
+            url: _pathAdmin + 'admin/system/bundle/editor/objects?bundle=' + this.mod,
+            noCache: 1,
+            saveStatusButton: this.currentButton,
+            onSuccess: function(response) {
                 ka.loadSettings(['configs']);
-                if (pWithUpdate) {
+                if (withBuildAndUpdate) {
                     this.updateORM();
                 }
-                else {
-                    this.saveButton.stopTip(t('Saved.'));
-                }
-            } else {
-                this.saveButton.stopTip(t('Failed.'));
-            }
-        }.bind(this)}).post(req);
+            }.bind(this)}).post(req);
 
     },
 
@@ -2152,10 +2078,9 @@ var kryncms_system_module_edit = new Class({
                                 desc: t('Class that extends from \\Core\\ORM\\ORMAbstract.')
                             },
                             table: {
-                                needValue: 'propel',
                                 label: t('Table name'),
                                 modifier: 'underscore|trim',
-                                desc: t('Propel ORM needs a table name which is then created in the database.')
+                                desc: t('A ORM needs usually a table name which is then created in the database.')
                             },
                             labelField: {
                                 label: t('Label field'),
@@ -2551,8 +2476,7 @@ var kryncms_system_module_edit = new Class({
             width: '100%'
         }).inject(this.dialog.content);
 
-        var kaParseObj = new ka.FieldForm(tbody, kaFields, {allTableItems: true, tableItemLabelWidth: 220},
-            {win: this.win});
+        var kaParseObj = new ka.FieldForm(tbody, kaFields, {allTableItems: true, tableItemLabelWidth: 220}, {win: this.win});
 
         new ka.Button(t('Cancel')).addEvent('click', this.cancelObjectSettings.bind(this)).inject(this.dialog.bottom);
 
@@ -2568,8 +2492,7 @@ var kryncms_system_module_edit = new Class({
 
             }.bind(this))
 
-            .setButtonStyle('blue')
-            .inject(this.dialog.bottom);
+            .setButtonStyle('blue').inject(this.dialog.bottom);
 
         //switcher
         if (definition.table) {
@@ -2593,14 +2516,14 @@ var kryncms_system_module_edit = new Class({
     addObject: function(pDefinition, pKey) {
         var row = [];
 
-//        tr.definition = pDefinition || {};
+        //        tr.definition = pDefinition || {};
 
-//        var helpText = new Element('td', {
-//            style: 'text-align: right; color: gray; padding-left: 3px;',
-//            text: this.mod.charAt(0).toUpperCase() + this.mod.slice(1) + '\\'
-//        });
-//
-//        row.push(helpText);
+        //        var helpText = new Element('td', {
+        //            style: 'text-align: right; color: gray; padding-left: 3px;',
+        //            text: this.mod.charAt(0).toUpperCase() + this.mod.slice(1) + '\\'
+        //        });
+        //
+        //        row.push(helpText);
 
         var actions = new Element('div');
         var iKey = new ka.Field({
@@ -2627,30 +2550,24 @@ var kryncms_system_module_edit = new Class({
 
         var fieldsBtn = new ka.Button(t('Fields')).inject(actions);
 
-        new ka.Button(t('Settings'))
-            .addEvent('click', this.openObjectSettings.bind(this, tr))
-            .inject(actions);
+        new ka.Button(t('Settings')).addEvent('click', this.openObjectSettings.bind(this, tr)).inject(actions);
 
         if (pDefinition) {
-            new ka.Button(t('Window wizard'))
-                .addEvent('click', this.openObjectWizard.bind(this, pKey, pDefinition))
-                .inject(actions);
+            new ka.Button(t('Window wizard')).addEvent('click', this.openObjectWizard.bind(this, pKey, pDefinition)).inject(actions);
         }
 
         new Element('a', {
             style: "cursor: pointer; font-family: 'icomoon'; padding: 0px 2px;",
             title: _('Remove'),
             html: '&#xe26b;'
-        })
-            .addEvent('click', function() {
+        }).addEvent('click', function() {
                 this.win._confirm(t('Really delete'), function(ok) {
                     if (!ok) {
                         return;
                     }
                     tr.destroy();
                 });
-            }.bind(this))
-            .inject(actions);
+            }.bind(this)).inject(actions);
 
         fieldsBtn.addEvent('click', function() {
 
@@ -2706,30 +2623,30 @@ var kryncms_system_module_edit = new Class({
                 fieldTable.setValue(tr.definition.fields);
             }
 
-            new ka.Button(t('Apply')).addEvent('click', function() {
+            new ka.Button(t('Apply')).addEvent('click',function() {
 
                 tr.definition.fields = fieldTable.getValue();
                 dialog.closeAnimated();
 
-            })
-                .setButtonStyle('blue')
-                .inject(dialog.bottom);
+            }).setButtonStyle('blue').inject(dialog.bottom);
 
             dialog.center(true);
 
         }.bind(this));
     },
 
-    openObjectWizard: function(pKey, pDefinition) {
+    openObjectWizard: function(key, definition) {
 
-        this.dialog = this.win.newDialog('', true);
 
-        this.dialog.setStyles({
-            height: '80%',
-            width: '90%'
+        this.dialog = ka.Dialog(this.win, {
+            minHeight: '80%',
+            minWidth: '90%',
+            withButtons: true,
+            content: '#Todo'
         });
 
-        this.dialog.center();
+        this.dialog.show();
+        return;
 
         var tbody = new Element('table', {
             width: '100%'
@@ -2741,7 +2658,7 @@ var kryncms_system_module_edit = new Class({
         var colCount = 0;
         var useIt = false;
 
-        Object.each(pDefinition.fields, function(field, key) {
+        Object.each(definition.fields, function(field, key) {
 
             useIt = false;
             if (!field.primaryKey && colCount <= 4) {
@@ -2784,7 +2701,7 @@ var kryncms_system_module_edit = new Class({
                     }
                 }}).get({bundle: this.mod, className: pValue});
 
-        }.bind(this)
+        }.bind(this);
 
         var kaFields = {
 
@@ -2792,19 +2709,19 @@ var kryncms_system_module_edit = new Class({
                 label: tc('objectWindowWizard', 'Window list class name'),
                 regexp_replace: '',
                 type: 'text',
-                'default': pKey + 'List',
+                'default': key + 'List',
                 onChange: checkClassName
             },
             windowAddName: {
                 label: tc('objectWindowWizard', 'Window add class name'),
                 type: 'text',
-                'default': pKey + 'Add',
+                'default': key + 'Add',
                 onChange: checkClassName
             },
             windowEditName: {
                 label: tc('objectWindowWizard', 'Window edit class name'),
                 type: 'text',
-                'default': pKey + 'Edit',
+                'default': key + 'Edit',
                 onChange: checkClassName
             },
 
@@ -2867,26 +2784,27 @@ var kryncms_system_module_edit = new Class({
 
         this.objectWizardSaveBtn = new ka.Button(t('Apply')).addEvent('click', function() {
 
-                var values = kaParseObj.getValue();
-                this.dialog.canClosed = false;
-                this.objectWizardCloseBtn.deactivate();
-                this.objectWizardSaveBtn.deactivate();
+            var values = kaParseObj.getValue();
+            this.dialog.canClosed = false;
+            this.objectWizardCloseBtn.deactivate();
+            this.objectWizardSaveBtn.deactivate();
 
-                this.win.setLoading(true, t('Creating windows ...'));
+            this.win.setLoading(true, t('Creating windows ...'));
 
-                this.lr = new Request.JSON({url: _pathAdmin +
-                    'admin/system/bundle/createWindows', noCache: 1, onComplete: function(res) {
+            this.lr = new Request.JSON({
+                url: _pathAdmin + 'admin/system/bundle/windows?bundle=' + this.mod,
+                noCache: 1,
+                onComplete: function(res) {
 
                     this.win.setLoading(false);
                     this.dialog.close();
                     ka.loadMenu();
                     ka.loadSettings();
 
-                }.bind(this)}).post({object: pKey, bundle: this.mod, values: values});
+                }.bind(this)
+            }).post({_method: 'put', object: key, values: values});
 
-            }.bind(this))
-            .setButtonStyle('blue')
-            .inject(this.dialog.bottom);
+        }.bind(this)).setButtonStyle('blue').inject(this.dialog.bottom);
 
     },
 
@@ -3094,8 +3012,7 @@ var kryncms_system_module_edit = new Class({
             style: 'bottom: 40px;'
         }).inject(this.panes['extras']);
 
-        this.extraFieldsObj =
-            new ka.FieldForm(this.extrasPane, extrasFields, {allTableItems: 1, tableItemLabelWidth: 270});
+        this.extraFieldsObj = new ka.FieldForm(this.extrasPane, extrasFields, {allTableItems: 1, tableItemLabelWidth: 270});
 
         var buttonBar = new ka.ButtonBar(this.panes['extras']);
         this.saveBtn = buttonBar.addButton(t('Save'), this.saveExtras.bind(this));
@@ -3115,13 +3032,12 @@ var kryncms_system_module_edit = new Class({
     saveExtras: function() {
 
         var req = this.extraFieldsObj.getValue();
-        req.bundle = this.mod;
 
-        this.saveBtn.startLoading(t('Saving ...'));
-
-        this.lr =
-            new Request.JSON({url: _pathAdmin + 'admin/system/bundle/editor/basic', noCache: 1, onComplete: function() {
-                this.saveBtn.doneLoading(t('Saved'));
+        this.lr = new Request.JSON({
+            url: _pathAdmin + 'admin/system/bundle/editor/basic?bundle=' + this.mod,
+            noCache: 1,
+            saveStatusButton: this.saveBtn,
+            onComplete: function() {
                 ka.loadSettings();
             }.bind(this)}).post(req);
     },

@@ -391,7 +391,7 @@ ka.urlDecode = function(value) {
  */
 ka.normalizeObjectKey = function(objectKey) {
     objectKey = objectKey.replace('\\', '/').replace('.', '/').replace(':', '/');
-    var bundleName = objectKey.split('/')[0].toLowerCase().replace('bundle/', '/');
+    var bundleName = objectKey.split('/')[0].toLowerCase().replace(/bundle$/, '');
     var objectName = objectKey.split('/')[1];
 
     if (!bundleName || !objectName) {

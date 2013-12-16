@@ -81,7 +81,6 @@ a.ka-Button-textAndIcon:before {
     padding-right: 5px;
 }
 
-.ka-admin a.ka-Button:hover,
 a.ka-Button:hover {
     background-color: #fafafa;
     color: #111;
@@ -147,8 +146,6 @@ a.ka-Button-red:active {
     background-color: #af1715;
 }
 
-.ka-admin a.ka-Button-blue,
-.ka-admin a.ka-Button-blue:link,
 a.ka-Button-blue,
 a.ka-Button-blue:link {
     color: white;
@@ -165,8 +162,6 @@ a.ka-Button-blue:active {
     background-color: #154A66;
 }
 
-.ka-admin a.ka-Button-deactivate,
-.ka-admin a.ka-Button-deactivate:link,
 a.ka-Button-deactivate,
 a.ka-Button-deactivate:link,
 a.ka-Button-deactivate:active,

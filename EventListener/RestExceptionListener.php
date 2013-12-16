@@ -4,6 +4,7 @@ namespace Kryn\CmsBundle\EventListener;
 
 use FOS\RestBundle\View\ViewHandler;
 use Kryn\CmsBundle\Exceptions\RestException;
+use Kryn\CmsBundle\Tools;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
@@ -40,22 +41,7 @@ class RestExceptionListener
             }
 
             if ($this->container->get('kernel')->isDebug()) {
-                $trace = [];
-                foreach ($event->getException()->getTrace() as $t) {
-                    $args = [];
-                    foreach ((array)@$t['args'] as $arg) {
-                        $args[] = gettype($arg);
-                    }
-
-                    $trace[] = [
-                        'function' => @$t['function'],
-                        'class' => @$t['class'],
-                        'file' => @$t['file'],
-                        'line' => @$t['line'],
-                        'type' => @$t['type'],
-                        'args' => $args,
-                    ];
-                }
+                $trace = Tools::getArrayTrace($event->getException());
 
                 $view['file'] = $event->getException()->getFile();
                 $view['line'] = $event->getException()->getLine();

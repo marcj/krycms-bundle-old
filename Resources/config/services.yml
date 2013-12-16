@@ -30,12 +30,16 @@ parameters:
      kryn_cms.filesystem.web.class: Kryn\CmsBundle\Filesystem\WebFilesystem
      kryn_cms.filesystem.adapter.local.class: Kryn\CmsBundle\Filesystem\Adapter\Local
 
+     kryn_cms.model.builder.class: Kryn\CmsBundle\ORM\Builder\Builder
+     kryn_cms.model.builder.propel.class: Kryn\CmsBundle\ORM\Builder\Propel
+
 #     kryn_cms.configuration.class: Kryn\CmsBundle\Configuration\SystemConfig
      kryn_cms.configuration.database.class: Kryn\CmsBundle\Configuration\Database
 
      kryn_cms.configuration.database.connection.main.class: Kryn\CmsBundle\Configuration\Connection
 
      database_table_prefix: kryn_
+     kryn_admin_prefix: /kryn
 
 services:
      kryn_cms:
@@ -185,3 +189,13 @@ services:
         arguments: ["@kryn_cms"]
         tags:
             - { name: routing.loader }
+
+     kryn_cms.model.builder:
+        class: %kryn_cms.model.builder.class%
+        arguments: ["@kryn_cms.objects"]
+
+     kryn_cms.model.builder.propel:
+        class: %kryn_cms.model.builder.propel.class%
+        arguments: [@kryn_cms.filesystem.local]
+        tags:
+            - { name: kryn_cms.model.builder, alias: propel }

@@ -616,7 +616,7 @@ ka.FieldForm = new Class({
             try {
                 pValues = JSON.decode(pValues);
             } catch (e){
-                error(tf('Can not decode JSON `%s`', pValues), e);
+                //(tf('Can not decode JSON `%s`', pValues), e);
             }
         }
 

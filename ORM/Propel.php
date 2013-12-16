@@ -196,8 +196,7 @@ class Propel extends ORMAbstract
         //filer relation fields
         foreach ($relationFields as $relation => &$objectFields) {
 
-//            $objectName = $relations[$relation]->getRightTable()->getPhpName();
-            $relationDef = $this->getDefinition()->getFieldByRelationName($relation);
+            $relationDef = $this->getDefinition()->getField($relation);
             if (!$relationDef) {
                 continue;
             }
@@ -343,7 +342,7 @@ class Propel extends ORMAbstract
      * @return \PDOStatement
      * @throws \PDOException
      */
-    public function getStm(ModelCriteria $query, \Kryn\CmsBundle\Configuration\Condition $condition = null)
+    public function getStm(ModelCriteria $query, Condition $condition = null)
     {
         $params = [];
         $condition2Params = [];
@@ -536,7 +535,7 @@ class Propel extends ORMAbstract
     /**
      * {@inheritDoc}
      */
-    public function getItems(\Kryn\CmsBundle\Configuration\Condition $condition = null, $options = null)
+    public function getItems(Condition $condition = null, $options = null)
     {
         $this->init();
         $query = $this->getQueryClass();

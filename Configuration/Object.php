@@ -317,7 +317,7 @@ class Object extends Model
             if ($field->getObjectRelation() == \Kryn\CmsBundle\ORM\ORMAbstract::MANY_TO_ONE) {
                 $objectName = $this->getKrynCore()->getObjects()->getName($field['object']);
                 $bundleName = strtolower($this->getKrynCore()->getObjects()->getBundleName($field['object']));
-                $fieldName = lcfirst($field['objectRefRelationName'] ? : $this->getId());
+                $fieldName = lcfirst($field->getObjectRefRelationName() ? : $this->getId());
 
                 $bundle = $this->getKrynCore()->getConfig($bundleName);
                 if ($bundle && $object = $bundle->getObject($objectName)) {
@@ -557,22 +557,6 @@ class Object extends Model
     public function getFields($withVirtual = false)
     {
         return $withVirtual ? array_merge($this->fields ?: [], $this->virtualFields ?: []) : $this->fields;
-    }
-
-    /**
-     * @param string $name
-     * @return Field
-     */
-    public function getFieldByRelationName($name)
-    {
-        $name = strtolower($name);
-        if (null !== $this->fields) {
-            foreach ($this->fields as $field) {
-                if (strtolower($field->getObjectRelationName()) == $name) {
-                    return $field;
-                }
-            }
-        }
     }
 
     /**

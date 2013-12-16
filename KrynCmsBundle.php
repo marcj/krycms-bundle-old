@@ -5,6 +5,7 @@ namespace Kryn\CmsBundle;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Kryn\CmsBundle\DependencyInjection\ContentTypesCompilerPass;
 use Kryn\CmsBundle\DependencyInjection\FieldTypesCompilerPass;
+use Kryn\CmsBundle\DependencyInjection\ModelBuilderCompilerPass;
 use Kryn\CmsBundle\Propel\PropelHelper;
 use Symfony\Component\ClassLoader\UniversalClassLoader;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -22,6 +23,7 @@ class KrynCmsBundle extends Bundle
         parent::build($container);
         $container->addCompilerPass(new ContentTypesCompilerPass());
         $container->addCompilerPass(new FieldTypesCompilerPass());
+        $container->addCompilerPass(new ModelBuilderCompilerPass());
     }
 
     public function boot()

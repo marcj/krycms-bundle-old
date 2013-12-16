@@ -4,13 +4,14 @@ namespace Kryn\CmsBundle\Controller\Admin\BundleManager;
 
 use FOS\RestBundle\Request\ParamFetcher;
 use Kryn\CmsBundle\ContainerHelperTrait;
-use Kryn\CmsBundle\Exceptions\BuildException;
+use Kryn\CmsBundle\Exceptions\ModelBuildException;
 use Kryn\CmsBundle\Configuration\Asset;
 use Kryn\CmsBundle\Configuration\Assets;
 use Kryn\CmsBundle\Configuration\Model;
 use Kryn\CmsBundle\Configuration\Object;
 use Kryn\CmsBundle\Exceptions\ClassNotFoundException;
 use Kryn\CmsBundle\Exceptions\FileAlreadyExistException;
+use Kryn\CmsBundle\Tools;
 use Symfony\Component\DependencyInjection\ContainerAware;
 use Symfony\Component\Finder\Finder;
 use FOS\RestBundle\Controller\Annotations as Rest;
@@ -56,8 +57,6 @@ class EditorController extends ContainerAware
      *
      * @Rest\Post("/admin/system/bundle/editor/config")
      *
-     * @param ParamFetcher $paramFetcher
-     *
      * @param string $bundle
      *
      * @return array
@@ -82,15 +81,13 @@ class EditorController extends ContainerAware
      * @Rest\QueryParam(name="bundle", requirements=".*", strict=true, description="The bundle name")
      *
      * @Rest\Get("/admin/system/bundle/editor/basic")
-     *
-     * @param ParamFetcher $paramFetcher
+     **
+     * @param string $bundle
      *
      * @return array
      */
-    public function getBasicAction(ParamFetcher $paramFetcher)
+    public function getBasicAction($bundle)
     {
-        $bundle = $paramFetcher->get('bundle');
-
         $config = $this->getKrynCore()->getConfig($bundle);
         if (!$config) {
             return null;
@@ -125,10 +122,10 @@ class EditorController extends ContainerAware
      * )
      *
      * @Rest\QueryParam(name="bundle", requirements=".*", strict=true, description="The bundle name")
-     * @Rest\QueryParam(name="events", description="The `events` values array")
-     * @Rest\QueryParam(name="listeners", description="The `listeners` values array")
-     * @Rest\QueryParam(name="adminAssets", description="The `adminAssets` values array")
-     * @Rest\QueryParam(name="falDrivers", description="The `falDrivers` values array")
+     * @Rest\RequestParam(name="events", description="The `events` values array")
+     * @Rest\RequestParam(name="listeners", description="The `listeners` values array")
+     * @Rest\RequestParam(name="adminAssets", description="The `adminAssets` values array")
+     * @Rest\RequestParam(name="falDrivers", description="The `falDrivers` values array")
      *
      * @Rest\Post("/admin/system/bundle/editor/basic")
      *
@@ -267,7 +264,7 @@ class EditorController extends ContainerAware
      * )
      *
      * @Rest\QueryParam(name="bundle", requirements=".*", strict=true, description="The bundle name")
-     * @Rest\QueryParam(name="plugins", array=true, description="The `plugins` value array")
+     * @Rest\RequestParam(name="plugins", strict=false, description="The `plugins` value array")
      *
      * @Rest\Post("/admin/system/bundle/editor/plugins")
      *
@@ -324,7 +321,7 @@ class EditorController extends ContainerAware
      * )
      *
      * @Rest\QueryParam(name="bundle", requirements=".*", strict=true, description="The bundle name")
-     * @Rest\QueryParam(name="themes", array=true, description="The `themes` value array")
+     * @Rest\RequestParam(name="themes", strict=false, description="The `themes` value array")
      *
      * @Rest\Post("/admin/system/bundle/editor/themes")
      *
@@ -431,18 +428,17 @@ class EditorController extends ContainerAware
      * )
      *
      * @Rest\QueryParam(name="bundle", requirements=".*", strict=true, description="The bundle name")
-     * @Rest\QueryParam(name="objects", array=true, description="The `objects` value array")
+     * @Rest\RequestParam(name="objects", strict=false, description="The `objects` value array")
      *
      * @Rest\Post("/admin/system/bundle/editor/objects")
      *
-     * @param ParamFetcher $paramFetcher
+     * @param string $bundle
+     * @param array $objects
+     *
      * @return bool
      */
-    public function setObjectsAction(ParamFetcher $paramFetcher)
+    public function setObjectsAction($bundle, $objects = null)
     {
-        $bundle = $paramFetcher->get('bundle');
-        $objects = $paramFetcher->get('objects') ?: null;
-
         $config = $this->getKrynCore()->getConfig($bundle);
         if (!$config) {
             return null;
@@ -489,7 +485,7 @@ class EditorController extends ContainerAware
      * )
      *
      * @Rest\QueryParam(name="bundle", requirements=".*", strict=true, description="The bundle name")
-     * @Rest\QueryParam(name="model", requirements=".*", description="Propel's model content (schema.xml)")
+     * @Rest\RequestParam(name="model", requirements=".*", description="Propel's model content (schema.xml)")
      *
      * @Rest\Post("/admin/system/bundle/editor/model")
      *
@@ -510,30 +506,50 @@ class EditorController extends ContainerAware
     /**
      * @ApiDoc(
      *  section="Bundle Editor",
-     *  description="Modifies Propel's Resources/config/kryn.propel.schema.xml based on the object definition in $bundle"
+     *  description="Builds all necessary model files and updates database"
      * )
      *
      * @Rest\QueryParam(name="bundle", requirements=".*", strict=true, description="The bundle name")
      *
      * @Rest\Post("/admin/system/bundle/editor/model/from-objects")
      *
-     * @param ParamFetcher $paramFetcher
+     * @param string $bundle
      *
      * @return array
-     * @throws BuildException
+     * @throws ModelBuildException
      */
-    public function setModelFromObjectsAction(ParamFetcher $paramFetcher)
+    public function setModelFromObjectsAction($bundle)
     {
-        $bundle = $paramFetcher->get('object');
-
         $config = $this->getKrynCore()->getConfig($bundle);
         if (!$config) {
             return null;
         }
 
+        $modelBuilder = $this->getKrynCore()->getModelBuilder();
+        $errors = [];
+
+        foreach ($config->getObjects() as $object) {
+            try {
+                $modelBuilder->buildModel($object);
+            } catch (ModelBuildException $e) {
+                $error = [
+                    'error' => get_class($e),
+                    'message' => $e->getMessage()
+                ];
+
+                if ($this->getKrynCore()->isDebugMode() ) {
+                    $error['file'] = $e->getFile();
+                    $error['line'] = $e->getLine();
+                    $error['trace'] = Tools::getArrayTrace($e);
+                }
+
+                $errors[$object->getId()] = $error;
+            }
+        }
+
         $path = $this->getKrynCore()->getBundleDir($bundle) . 'Resources/config/kryn.propel.schema.xml';
         if (!file_exists($path) && !touch($path)) {
-            throw new BuildException(sprintf('File `%s` is not writeable.', $path));
+            throw new ModelBuildException(sprintf('File `%s` is not writeable.', $path));
         }
 
         $result = array();
@@ -541,7 +557,7 @@ class EditorController extends ContainerAware
             /** @var $object Object */
             try {
                 $result[$object->getId()] = $this->setModelFromObject($bundle, $object);
-            } catch (BuildException $e) {
+            } catch (ModelBuildException $e) {
                 $result[$object->getId()] = $e->getMessage();
             }
         }
@@ -601,7 +617,7 @@ class EditorController extends ContainerAware
      * )
      *
      * @Rest\QueryParam(name="bundle", requirements=".*", strict=true, description="The bundle name")
-     * @Rest\QueryParam(name="entryPoints", array=true, description="The `objects` value array")
+     * @Rest\RequestParam(name="entryPoints", strict=false, description="The `objects` value array")
      *
      * @Rest\Post("/admin/system/bundle/editor/entry-points")
      *
@@ -773,12 +789,12 @@ class EditorController extends ContainerAware
      *
      * Target path is specified in $general['file'].
      *
-     * @Rest\QueryParam(name="class", requirements=".*", strict=true, description="The PHP class name")
-     * @Rest\QueryParam(name="list", array=true, description="The `list` value array")
-     * @Rest\QueryParam(name="add", array=true, description="The `add` value array")
-     * @Rest\QueryParam(name="general", array=true, description="The `general` value array")
-     * @Rest\QueryParam(name="methods", array=true, description="The `methods` value array")
-     * @Rest\QueryParam(name="fields", array=true, description="The `fields` value array")
+     * @Rest\RequestParam(name="class", requirements=".*", strict=true, description="The PHP class name")
+     * @Rest\RequestParam(name="list", strict=false, description="The `list` value array")
+     * @Rest\RequestParam(name="add", strict=false, description="The `add` value array")
+     * @Rest\RequestParam(name="general", strict=false, description="The `general` value array")
+     * @Rest\RequestParam(name="methods", strict=false, description="The `methods` value array")
+     * @Rest\RequestParam(name="fields", strict=false, description="The `fields` value array")
      *
      * @Rest\Post("/admin/system/bundle/editor/window")
      *

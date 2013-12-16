@@ -150,6 +150,8 @@ ka.ObjectTree = new Class({
 
         this.definition = this.objectDefinition;
 
+        this.options.objectKey = ka.normalizeObjectKey(this.options.objectKey);
+
         if (this.options.objectKey && !this.objectDefinition) {
             throw 'Object not found: ' + this.options.objectKey;
         }
@@ -253,7 +255,7 @@ ka.ObjectTree = new Class({
 
         var objectKey;
         if (this.options.selectObject) {
-            objectKey = ka.getObjectKey(this.options.selectObject);
+            objectKey = ka.getCroppedObjectKey(this.options.selectObject);
         }
 
         if (this.options.selectObject && (!objectKey || objectKey == this.options.objectKey || objectKey == this.options.rootObject)) {

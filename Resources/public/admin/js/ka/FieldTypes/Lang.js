@@ -6,13 +6,13 @@ ka.FieldTypes.Lang = new Class({
         asModel: true
     },
 
-    createLayout: function () {
-        this.parent();
+    initialize: function (fieldInstance, options) {
+        options.object = 'kryncms/language';
+        this.parent(fieldInstance, options);
 
         var hasSessionLang = false;
         Object.each(ka.settings.langs, function (lang, id) {
 
-            this.select.add(id, lang.langtitle + ' (' + lang.title + ', ' + id + ')');
             if (id == window._session.lang) {
                 hasSessionLang = true;
             }
@@ -21,10 +21,6 @@ ka.FieldTypes.Lang = new Class({
 
         if (hasSessionLang) {
             this.select.setValue(window._session.lang);
-        }
-
-        if (this.select.options.selectFirst) {
-            this.select.selectFirst();
         }
     }
 

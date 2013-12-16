@@ -12,19 +12,25 @@ ka.wm = {
     activeWindowInformation: [],
     tempItems: {},
 
-    openWindow: function (pEntryPoint, pLink, pParentWindowId, pParams, pInline) {
+    openWindow: function (entryPointPath, pLink, pParentWindowId, pParams, pInline) {
         var win;
 
-        if (!ka.entrypoint.get(pEntryPoint)) {
-            logger(tf('Entry point `%s` not found.', pEntryPoint));
+        if (!ka.entrypoint.get(entryPointPath)) {
+            logger(tf('Entry point `%s` not found.', entryPointPath));
             return;
         }
 
-        if ((win = this.checkOpen(pEntryPoint, null, pParams)) && !pInline) {
+        if (!pInline && window.event && window.event.which === 2) {
+            //open new tab.
+            top.open(location.pathname + '#' + entryPointPath, '_blank');
+            return;
+        }
+
+        if ((win = this.checkOpen(entryPointPath, null, pParams)) && !pInline) {
             return win.toFront();
         }
 
-        return ka.wm.loadWindow(pEntryPoint, pLink, pParentWindowId, pParams, pInline);
+        return ka.wm.loadWindow(entryPointPath, pLink, pParentWindowId, pParams, pInline);
     },
 
     addEvent: function (pEv, pFunc) {

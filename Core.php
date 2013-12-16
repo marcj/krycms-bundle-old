@@ -495,6 +495,14 @@ class Core extends Controller
     }
 
     /**
+     * @return ORM\Builder\Builder
+     */
+    public function getModelBuilder()
+    {
+        return $this->container->get('kryn_cms.model.builder');
+    }
+
+    /**
      * @return Configuration\Configs|Configuration\Bundle[]
      */
     public function getConfigs()

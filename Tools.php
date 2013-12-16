@@ -20,6 +20,28 @@ class Tools {
         return $return;
     }
 
+    public static function getArrayTrace($exception)
+    {
+        $trace = [];
+        foreach ($exception->getTrace() as $t) {
+            $args = [];
+            foreach ((array)@$t['args'] as $arg) {
+                $args[] = gettype($arg);
+            }
+
+            $trace[] = [
+                'function' => @$t['function'],
+                'class' => @$t['class'],
+                'file' => @$t['file'],
+                'line' => @$t['line'],
+                'type' => @$t['type'],
+                'args' => $args,
+            ];
+        }
+
+        return $trace;
+    }
+
     public static function camelcase2Underscore($value)
     {
         return strtolower(preg_replace('/([a-z])([A-Z])/', '$1_$2', $value));

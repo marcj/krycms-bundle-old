@@ -43,8 +43,7 @@ class ORMController extends Controller
      */
     public function writeModelsAction()
     {
-        //todo, make it ORM agnostic
-        return $this->getPropelHelper()->generateClasses();
+
     }
 
     /**

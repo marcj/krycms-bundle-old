@@ -3,7 +3,7 @@ ka.FieldTypes.Datetime = new Class({
 
     Statics: {
         label: 'Date & Time',
-        isModel: true,
+        asModel: true,
         options: {
             format: {
                 type: 'text',

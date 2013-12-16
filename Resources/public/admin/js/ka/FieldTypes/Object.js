@@ -26,7 +26,7 @@ ka.FieldTypes.Object = new Class({
         modelOptions: {
             object: {
                 label: 'Object key',
-                desc: 'Example: kryncmsbundle:Node.',
+                desc: 'Example: kryncms/node.',
                 type: 'objectKey',
                 required: true
             },
@@ -42,19 +42,26 @@ ka.FieldTypes.Object = new Class({
                 required: true,
                 items: {
                     'nTo1': 'Many to One (n-1)',
-                    '1ToN': 'One to Many (1-n)',
-                    '1To1': 'One to One (1-1)',
                     'nToM': 'Many to Many (n-n)'
+                },
+                children: {
+                    objectRelationPhpName: {
+                        type: 'text',
+                        needValue: 'nToM',
+                        label: t('PHP name of the middle-table'),
+                        desc: t('Used only in n-to-n relations.')
+                    },
+                    objectRelationTable: {
+                        type: 'text',
+                        needValue: 'nToM',
+                        label: t('Table name of the middle-table'),
+                        desc: t('Used only in n-to-n relations.')
+                    }
                 }
             },
-            'objectRelationName': {
-                label: t('Relation name'),
-                desc: t('Example: for a nTo1 relation with the column name `categoryId` you should use here `category`.'),
-                required: true
-            },
             'objectRefRelationName': {
-                label: t('Relation foreign name (Optional)'),
-                desc: t('Default is the camelCased table name of this object. Use another if the foreign object/table has already a relation with this name.')
+                label: t('Reference name (Optional)'),
+                desc: t('Name for the outgoing-relation in the foreign object to this object.')
             },
             'objectRelationOnDelete': {
                 label: t('OnDelete method (Optional)'),

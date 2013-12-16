@@ -79,7 +79,7 @@
         <defaultSelection>type, title, alternativeTitle, urn, layout, visible, target</defaultSelection>
         <nested>true</nested>
         <nestedRootAsObject>true</nestedRootAsObject>
-        <nestedRootObject>kryncmsbundle:domain</nestedRootObject>
+        <nestedRootObject>kryncms/domain</nestedRootObject>
         <nestedRootObjectField>domainId</nestedRootObjectField>
         <nestedRootObjectLabelField>domain</nestedRootObjectLabelField>
         <treeFields>type, title, accessDenied, accessFromGroups, visible</treeFields>
@@ -108,9 +108,8 @@
           <field id="alternativeTitle" type="text">
             <label>Page title</label>
           </field>
-          <field id="urn" type="text">
+          <field id="urn" type="text" required="true">
             <label>URN</label>
-            <required>true</required>
           </field>
           <field id="link" type="text">
             <label>Link</label>
@@ -144,10 +143,9 @@
           <field id="layout" type="layout"/>
           <field id="content" type="object">
             <label>Contents</label>
-            <object>kryncmsbundle:content</object>
+            <object>kryncms/content</object>
             <objectRelation>1ToN</objectRelation>
-            <objectRelationName>content</objectRelationName>
-            <options/>
+            <objectRelationTable>system_content</objectRelationTable>
           </field>
         </fields>
         <publicUrlGenerator>Core\PageController::getPublicUrl</publicUrlGenerator>
@@ -180,11 +178,10 @@
             <label>Domain Redirects</label>
             <desc>A comma separated list of domain redirections.</desc>
           </field>
-          <field id="startnodeId" type="object" required="true">
+          <field id="startnode" type="object" required="true">
             <label>Startpage</label>
             <object>KrynCmsBundle:Node</object>
             <objectRelation>1ToN</objectRelation>
-            <objectRelationName>startnode</objectRelationName>
           </field>
           <field id="resourceCompression" type="checkbox">
             <label>Resource compression</label>
@@ -211,9 +208,11 @@
       <object id="Language">
         <label>Language</label>
         <table>system_langs</table>
+        <class>Kryn\CmsBundle\ORM\ObjectLanguage</class>
         <labelField>title</labelField>
         <labelTemplate>{title} ({langtitle}, {code})</labelTemplate>
         <defaultSelection>title, langtitle, code</defaultSelection>
+        <dataModel>custom</dataModel>
         <fields>
           <field id="code" type="text" primaryKey="true"/>
           <field id="title" type="text"/>
@@ -230,11 +229,10 @@
           <field id="title" type="text">
             <label>Title</label>
           </field>
-          <field id="ownerId" type="object">
+          <field id="owner" type="object">
             <object>kryncms/user</object>
             <objectRelation>nTo1</objectRelation>
             <objectLabel>name</objectLabel>
-            <objectRelationName>owner</objectRelationName>
           </field>
           <field id="created" type="datetime"/>
         </fields>
@@ -265,8 +263,6 @@
             <object>kryncms/node</object>
             <objectRelation>nTo1</objectRelation>
             <objectLabel>title</objectLabel>
-            <objectRelationName>Node</objectRelationName>
-            <objectRefRelationName>Content</objectRefRelationName>
           </field>
           <field id="boxId" type="number"/>
           <field id="sort" type="number"/>
@@ -294,15 +290,11 @@
           </field>
         </fields>
       </object>
-
       <object id="User">
         <label>Users</label>
         <table>system_user</table>
         <labelField>username</labelField>
-        <dataModel>propel</dataModel>
         <blacklistSelection>passwd, passwdSalt</blacklistSelection>
-        <chooserFieldDataModel>default</chooserFieldDataModel>
-        <chooserFieldType>default</chooserFieldType>
         <fields>
           <field id="id" type="number" primaryKey="true" autoIncrement="true">
             <label>ID</label>
@@ -316,34 +308,25 @@
           <field id="passwd" type="textarea">
             <label>Password</label>
           </field>
-          <field id="passwdSalt" type="text">
-            <type>text</type>
-          </field>
-          <field id="activationKey" type="text">
-          </field>
+          <field id="passwdSalt" type="text"/>
+          <field id="activationKey" type="text"/>
           <field id="email" type="text">
             <label>Email</label>
           </field>
-          <field id="settings" type="properties">
-          </field>
-          <field id="widgets" type="properties">
-          </field>
+          <field id="settings" type="properties"/>
+          <field id="widgets" type="properties"/>
           <field id="activate" type="checkbox">
             <label>Active account</label>
           </field>
-          <field id="logins" type="number">
-          </field>
-          <field id="lastLogin" type="number">
-          </field>
-          <field id="created" type="datetime">
-          </field>
-          <field id="modified" type="datetime">
-          </field>
-          <field id="groupMembership" type="object">
+          <field id="logins" type="number"/>
+          <field id="lastLogin" type="number"/>
+          <field id="created" type="datetime"/>
+          <field id="modified" type="datetime"/>
+          <field id="group" type="object">
             <label>Group membership</label>
             <object>kryncms/group</object>
-            <objectLabel>name</objectLabel>
             <objectRelation>nToM</objectRelation>
+            <objectLabel>name</objectLabel>
             <objectRelationTable>system_user_group</objectRelationTable>
             <objectRelationPhpName>UserGroup</objectRelationPhpName>
           </field>
@@ -360,14 +343,6 @@
         <table>system_group</table>
         <labelField>name</labelField>
         <defaultSelection>name, description</defaultSelection>
-        <dataModel>propel</dataModel>
-        <browserColumns>
-          <field id="name" type="text">
-            <width>30%</width>
-          </field>
-          <field id="description" type="text">
-          </field>
-        </browserColumns>
         <fields>
           <field id="id" type="number" primaryKey="true" autoIncrement="true">
             <label>ID</label>
@@ -379,8 +354,13 @@
             <label>Description</label>
           </field>
         </fields>
+        <browserColumns>
+          <field id="name" type="text">
+            <width>30%</width>
+          </field>
+          <field id="description" type="text"/>
+        </browserColumns>
       </object>
-
     </objects>
   </bundle>
 </config>

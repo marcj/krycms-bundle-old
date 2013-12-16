@@ -4,7 +4,7 @@ namespace Kryn\CmsBundle\Configuration;
 
 use Kryn\CmsBundle\Admin\FieldTypes\TypeNotFoundException;
 use Kryn\CmsBundle\Exceptions\ObjectNotFoundException;
-use Kryn\CmsBundle\Form\Form;
+use Kryn\CmsBundle\Admin\Form\Form;
 use Kryn\CmsBundle\Tools;
 
 class Field extends Model
@@ -49,7 +49,7 @@ class Field extends Model
     /**
      * One of
      *
-     * \Core\ORM\ORMAbstract::
+     * \Kryn\CmsBundle\ORM\ORMAbstract::
      *       MANY_TO_ONE = 'nTo1',
      *       ONE_TO_MANY = '1ToN',
      *       ONE_TO_ONE = '1To1',
@@ -65,12 +65,21 @@ class Field extends Model
     protected $objectLabel;
 
     /**
+     * The table name of the middle-table of a nToM relation.
+     *
      * @var string
      */
-    protected $objectRelationName;
+    protected $objectRelationTable;
 
     /**
-     * The virtualField name of the field in the foreign object.
+     * The php name of the middle-table of a nToM relation.
+     *
+     * @var string
+     */
+    protected $objectRelationPhpName;
+
+    /**
+     * The virtualField name of the field in the foreign object pointing to us back.
      *
      * @var string
      */
@@ -354,7 +363,7 @@ class Field extends Model
                 $options->removeOption($key);
             }
         }
-        $this->options = $options;
+        $this->options = $options && $options->getLength() ? $options : null;
     }
 
     /**
@@ -965,22 +974,6 @@ class Field extends Model
     }
 
     /**
-     * @param string $objectRelationName
-     */
-    public function setObjectRelationName($objectRelationName)
-    {
-        $this->objectRelationName = $objectRelationName;
-    }
-
-    /**
-     * @return string
-     */
-    public function getObjectRelationName()
-    {
-        return $this->objectRelationName;
-    }
-
-    /**
      * @param string $objectRefRelationName
      */
     public function setObjectRefRelationName($objectRefRelationName)
@@ -1090,6 +1083,38 @@ class Field extends Model
     public function getSaveOnlyFilled()
     {
         return $this->saveOnlyFilled;
+    }
+
+    /**
+     * @param string $objectRelationTable
+     */
+    public function setObjectRelationTable($objectRelationTable)
+    {
+        $this->objectRelationTable = $objectRelationTable;
+    }
+
+    /**
+     * @return string
+     */
+    public function getObjectRelationTable()
+    {
+        return $this->objectRelationTable;
+    }
+
+    /**
+     * @param string $objectRelationPhpName
+     */
+    public function setObjectRelationPhpName($objectRelationPhpName)
+    {
+        $this->objectRelationPhpName = $objectRelationPhpName;
+    }
+
+    /**
+     * @return string
+     */
+    public function getObjectRelationPhpName()
+    {
+        return $this->objectRelationPhpName;
     }
 
 }

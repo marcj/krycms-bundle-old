@@ -4,6 +4,8 @@
 Request.JSON = new Class({
     Extends: Request.JSON,
 
+    saveButton: null,
+
     initialize: function (options) {
         if (!'secure' in options) {
             options.secure = true;
@@ -21,12 +23,28 @@ Request.JSON = new Class({
             });
         }
 
+        if (options.saveStatusButton) {
+            this.saveButton = options.saveStatusButton;
+            this.addEvent('failure', function() {
+                this.saveButton.failedLoading(this.options.saveStatusButtonFailureText);
+            }.bind(this));
+            this.addEvent('success', function() {
+                this.saveButton.doneLoading(this.options.saveStatusButtonSuccessText);
+            }.bind(this));
+        }
+
         this.parent(options);
 
         if (options.noErrorReporting === true) {
             return;
         }
+    },
 
+    send: function(data) {
+        if (this.saveButton) {
+            this.saveButton.startLoading(this.options.saveStatusButtonStartText || t('Saving ...'));
+        }
+        this.parent(data);
     },
 
     onFailure: function () {

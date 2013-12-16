@@ -39,6 +39,11 @@ abstract class AbstractType implements TypeInterface
         return [$this->getFieldDefinition()->getId()];
     }
 
+    public function getColumns()
+    {
+        return [$this->name => $this];
+    }
+
     /**
      * @return array
      */

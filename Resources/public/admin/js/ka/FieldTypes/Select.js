@@ -13,6 +13,22 @@ ka.FieldTypes.Select = new Class({
                 label: t('static items'),
                 desc: t('Use JSON notation. Array(key==label) or Object(key => label). Example: {"item1": "[[Item 1]]"} or ["Foo", "Bar", "Three"].')
             },
+            /**
+             * When options.items is a array and this is false the value is the index, otherwise index=label.
+             *
+             * true:
+             *     ['a', 'b', 'c'] => 'c' returns 'c' as value
+             * false:
+             *     ['a', 'b', 'c'] => 'c' returns 2 as value
+             *
+             * @var {Boolean}
+             */
+            itemsLabelAsValue: {
+                label: '`items` label as value',
+                desc: 'When options.items is a array and this is false the value is the index, otherwise index=label',
+                type: 'checkbox',
+                'default': true
+            },
             store: {
                 label: t('Store path'),
                 desc: t('&lt;extKey&gt;/&lt;EntryPath&gt;, Example: publication/stores/news.')
@@ -34,7 +50,7 @@ ka.FieldTypes.Select = new Class({
                 combobox: true,
                 type: 'objectKey',
                 desc: t('The key of the object')
-            }
+            },
         }
     },
 

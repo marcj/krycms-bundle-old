@@ -14,17 +14,17 @@ ka.FieldTypes.ObjectKey = new Class({
     createLayout: function () {
         this.parent();
 
-        Object.each(ka.settings.configs, function (config, extensionKey) {
+        Object.each(ka.settings.configs, function (config, bundleName) {
             if (config.objects) {
-                extensionKey = extensionKey.charAt(0).toUpperCase() + extensionKey.substr(1);
+                this.select.addSplit(config.label || bundleName);
 
-                this.select.addSplit(config.label || extensionKey);
+                bundleName = ka.getShortBundleName(bundleName);
 
-                Object.each(config.objects, function (object, object_key) {
-                    object_key = object_key.charAt(0).toUpperCase() + object_key.substr(1);
+                Object.each(config.objects, function (object, objectName) {
+                    objectName = objectName.lcfirst();
                     this.select.add(
-                        extensionKey + ':' + object_key,
-                        (object.label || object_key) + " (" + extensionKey + ':' + object_key + ")"
+                        bundleName + '/' + objectName,
+                        (object.label || objectName) + " (" + bundleName + '/' + objectName + ")"
                     );
                 }.bind(this));
             }

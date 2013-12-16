@@ -118,6 +118,11 @@ class Options extends Model
         return $this->options;
     }
 
+    public function getLength()
+    {
+        return count($this->options);
+    }
+
     /**
      * @param string $key
      */

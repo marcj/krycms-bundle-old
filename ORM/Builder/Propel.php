@@ -1,15 +1,173 @@
 <?php
 
-namespace Kryn\CmsBundle\ORM\Sync;
+namespace Kryn\CmsBundle\ORM\Builder;
 
 use Kryn\CmsBundle\Configuration\Bundle;
-use \Kryn\CmsBundle\Exceptions\BuildException;
+use \Kryn\CmsBundle\Exceptions\ModelBuildException;
 use Kryn\CmsBundle\Configuration\Field;
 use Kryn\CmsBundle\Configuration\Object;
+use Kryn\CmsBundle\Filesystem\Filesystem;
+use Kryn\CmsBundle\Objects;
+use Kryn\CmsBundle\Tools;
 
-class Propel implements SyncInterface {
+class Propel implements BuildInterface
+{
 
-    public function getPropelColumnType($field) {
+    /**
+     * @var Filesystem
+     */
+    protected $filesystem;
+
+    /**
+     * @var Objects
+     */
+    protected $objects;
+
+    function __construct(Filesystem $filesystem, Objects $objects)
+    {
+        $this->filesystem = $filesystem;
+        $this->objects = $objects;
+    }
+
+    public function build(Object $object)
+    {
+        $bundlePath = $object->getKrynCore()->getBundleDir($object->getBundle()->getName());
+        $bundle = $object->getBundle();
+
+        $modelsFile = $bundlePath . 'Resources/config/kryn.propel.schema.test.xml';
+
+        if ($this->filesystem->has($modelsFile) && $xmlString = $this->filesystem->read($modelsFile)) {
+            $xml = @simplexml_load_string($xmlString);
+
+            if ($xml === false) {
+                $errors = libxml_get_errors();
+                throw new ModelBuildException(sprintf('Parse error in %s: %s', $modelsFile, json_encode($errors, JSON_PRETTY_PRINT)));
+            }
+        } else {
+            $xml = simplexml_load_string('<database></database>');
+        }
+
+        $xml['namespace'] = ucfirst($bundle->getNamespace());
+
+        //search if we've already the table defined.
+        $tables = $xml->xpath('table[@name=\'' . $object['table'] . '\']');
+
+        if (!$tables) {
+            $objectTable = $xml->addChild('table');
+        } else {
+            $objectTable = current($tables);
+        }
+
+        if (!$object['table']) {
+            throw new ModelBuildException(sprintf('The object `%s` has no table defined.', $object->getId()));
+        }
+
+        $objectTable['name'] = $object['table'];
+        $objectTable['phpName'] = $object['propelClassName'] ? : ucfirst($object->getId());
+
+        $columnsDefined = array();
+
+//        $clonedTable = simplexml_load_string($objectTable->asXML());
+
+        //removed all non-custom foreign-keys
+        $foreignKeys = $objectTable->xpath("foreign-key[not(@custom='true')]");
+        foreach ($foreignKeys as $k => $fk) {
+            unset($foreignKeys[$k][0]);
+        }
+
+        //removed all non-custom behaviors
+        $items = $objectTable->xpath("behavior[not(@custom='true')]");
+        foreach ($items as $k => $v) {
+            unset($items[$k][0]);
+        }
+
+        foreach ($object->getFields() as $field) {
+
+            $columns = $this->getColumnFromField(
+                ucfirst($bundle->getNamespace()) . '\\' . $object->getId(),
+                $field->getId(),
+                $field,
+                $objectTable,
+                $xml,
+                $null,
+                $bundle
+            );
+
+            if (!$columns) {
+                continue;
+            }
+
+            foreach ($columns as $key => $column) {
+                //column exist?
+                $eColumns = $objectTable->xpath('column[@name =\'' . $key . '\']');
+
+                if ($eColumns) {
+                    $newCol = current($eColumns);
+                    if ($newCol['custom'] == true) {
+                        continue;
+                    }
+                } else {
+                    $newCol = $objectTable->addChild('column');
+                }
+
+                $newCol['name'] = $key;
+                $columnsDefined[] = $key;
+
+                foreach ($column as $k => $v) {
+                    $newCol[$k] = $v;
+                }
+            }
+        }
+
+        //check for deleted columns
+        $columns = $objectTable->xpath("column[not(@custom='true')]");
+        foreach ($columns as $k => $column) {
+            $col = $object->getField(underscore2Camelcase($column['name']));
+            if (!$col) {
+                unset($columns[$k][0]);
+            }
+        }
+
+        if ($object['workspace']) {
+            $behaviors = $objectTable->xpath('behavior[@name=\'Kryn\CmsBundle\WorkspaceBehavior\']');
+            if ($behaviors) {
+                $behavior = current($behaviors);
+            } else {
+                $behavior = $objectTable->addChild('behavior');
+            }
+            $behavior['name'] = 'Kryn\CmsBundle\WorkspaceBehavior';
+        }
+
+        $vendors = $objectTable->xpath('vendor[@type=\'mysql\']');
+        if ($vendors) {
+            $vendor = current($vendors);
+        } else {
+            $vendor = $objectTable->addChild('vendor');
+        }
+        $vendor['type'] = 'mysql';
+
+        $params = $vendor->xpath('parameter[@name=\'Charset\']');
+        if ($params) {
+            $param = current($params);
+        } else {
+            $param = $vendor->addChild('parameter');
+        }
+
+        $param['name'] = 'Charset';
+        $param['value'] = 'utf8';
+
+        $dom = new \DOMDocument;
+        $dom->preserveWhiteSpace = false;
+        $dom->loadXML($xml->asXML());
+        $dom->formatOutput = true;
+
+        $this->filesystem->write($modelsFile, $dom->saveXml());
+
+        return true;
+    }
+
+    public function getPropelColumnType($field)
+    {
 
         switch (strtolower($field['type'])) {
             case 'textarea':
@@ -59,11 +217,11 @@ class Propel implements SyncInterface {
 
             case 'number':
 
-                return $field['number_type'] ?: 'INTEGER';
+                return $field['number_type'] ? : 'INTEGER';
 
             case 'checkbox':
 
-                return'BOOLEAN';
+                return 'BOOLEAN';
 
             case 'custom':
 
@@ -75,6 +233,7 @@ class Propel implements SyncInterface {
                 if ($field['asUnixTimestamp'] === false) {
                     return $field['type'] == 'date' ? 'DATE' : 'TIMESTAMP';
                 }
+
                 return 'BIGINT';
 
             default:
@@ -82,7 +241,8 @@ class Propel implements SyncInterface {
         }
     }
 
-    public function getPropelAdditional($field) {
+    public function getPropelAdditional($field)
+    {
 
         $column = [];
 
@@ -199,8 +359,7 @@ class Propel implements SyncInterface {
         &$database,
         &$refColumn = null,
         Bundle $bundle = null
-    )
-    {
+    ) {
 
         $columns = array();
         if ($refColumn) {
@@ -216,17 +375,16 @@ class Propel implements SyncInterface {
             return;
         }
 
-
         switch (strtolower($field['type'])) {
             case 'object':
 
                 $foreignObject = \Kryn\CmsBundle\Object::getDefinition($field['object']);
 
                 if (!$foreignObject) {
-                    throw new BuildException(sprintf('The object `%s` does not exist in field `%s`.', $field['object'], $field['id']));
+                    throw new ModelBuildException(sprintf('The object `%s` does not exist in field `%s`.', $field['object'], $field['id']));
                 }
 
-                $relationName = ucfirst($field['objectRelationName'] ?: $foreignObject->getId());
+                $relationName = ucfirst($field['objectRelationName'] ? : $foreignObject->getId());
 
                 if ($field['objectRelation'] == 'nTo1' || $field['objectRelation'] == '1ToN') {
 
@@ -236,7 +394,11 @@ class Propel implements SyncInterface {
                     $foreignObject = \Kryn\CmsBundle\Object::getDefinition($field['object']);
 
                     if (!$foreignObject['table']) {
-                        throw new BuildException(tf('The object `%s` has no table defined. Used in field `%s`.', $field['object'], $field['id']));
+                        throw new ModelBuildException(sprintf(
+                            'The object `%s` has no table defined. Used in field `%s`.',
+                            $field['object'],
+                            $field['id']
+                        ));
                     }
 
                     $foreigns = $table->xpath('foreign-key[@phpName=\'' . $relationName . '\']');
@@ -294,14 +456,17 @@ class Propel implements SyncInterface {
                             $reference['foreign'] = $key;
 
                             //create additional fields
-                            $columns = array_merge($columns, $this->getColumnFromField(
-                                $object,
-                                underscore2Camelcase($fieldKey . '_' . $key),
-                                $def,
-                                $table,
-                                $database,
-                                $bundle
-                            ));
+                            $columns = array_merge(
+                                $columns,
+                                $this->getColumnFromField(
+                                    $object,
+                                    underscore2Camelcase($fieldKey . '_' . $key),
+                                    $def,
+                                    $table,
+                                    $database,
+                                    $bundle
+                                )
+                            );
                         }
 
                         return $columns;
@@ -310,11 +475,11 @@ class Propel implements SyncInterface {
                 } else {
                     //n-n, we need a extra table
 
-                    $probablyName = $bundle->getName() . '_' . camelcase2Underscore(
+                    $probableName = $bundle->getName() . '_' . camelcase2Underscore(
                             \Kryn\CmsBundle\Object::getName($object)
                         ) . '_' . camelcase2Underscore($fieldKey) . '_relation';
 
-                    $table2Name = $field['objectRelationTable'] ? $field['objectRelationTable'] : $probablyName;
+                    $table2Name = $field['objectRelationTable'] ? $field['objectRelationTable'] : $probableName;
 
                     //search if we've already the table defined.
                     $table2s = $database->xpath('table[@name=\'' . $table2Name . '\']');
@@ -462,144 +627,10 @@ class Propel implements SyncInterface {
             $column['autoIncrement'] = "true";
         }
 
-        $columns[camelcase2Underscore($fieldKey)] = $column;
+        $columns[Tools::camelcase2Underscore($fieldKey)] = $column;
 
         return $columns;
     }
 
 
-
-    public function syncObject(Bundle $bundle, Object $object) {
-        $path = $bundle->getPath() . 'Resources/config/models.xml';
-        if (!file_exists($path) && !touch($path)) {
-            throw new BuildException(tf('File `%s` is not writeable.', $path));
-        }
-
-        if (file_exists($path) && filesize($path)) {
-            $xml = @simplexml_load_file($path);
-
-            if ($xml === false) {
-                $errors = libxml_get_errors();
-                throw new BuildException(tf('Parse error in %s: %s', $path, json_format($errors)));
-            }
-        } else {
-            $xml = simplexml_load_string('<database></database>');
-        }
-        $xml['namespace'] = ucfirst($bundle->getNamespace());
-
-        //search if we've already the table defined.
-        $tables = $xml->xpath('table[@name=\'' . $object['table'] . '\']');
-
-        if (!$tables) {
-            $objectTable = $xml->addChild('table');
-        } else {
-            $objectTable = current($tables);
-        }
-
-        if (!$object['table']) {
-            throw new BuildException(tf('The object `%s` has no table defined.', $object->getId()));
-        }
-
-        $objectTable['name'] = $object['table'];
-        $objectTable['phpName'] = $object['propelClassName'] ? : ucfirst($object->getId());
-
-        $columnsDefined = array();
-
-//        $clonedTable = simplexml_load_string($objectTable->asXML());
-
-        //removed all non-custom foreign-keys
-        $foreignKeys = $objectTable->xpath("foreign-key[not(@custom='true')]");
-        foreach ($foreignKeys as $k => $fk) {
-            unset($foreignKeys[$k][0]);
-        }
-
-        //removed all non-custom behaviors
-        $items = $objectTable->xpath("behavior[not(@custom='true')]");
-        foreach ($items as $k => $v) {
-            unset($items[$k][0]);
-        }
-
-        foreach ($object->getFields() as $field) {
-
-            $columns = $this->getColumnFromField(
-                ucfirst($bundle->getNamespace()) . '\\' . $object->getId(),
-                $field->getId(),
-                $field,
-                $objectTable,
-                $xml,
-                $null,
-                $bundle
-            );
-
-            if (!$columns) {
-                continue;
-            }
-
-            foreach ($columns as $key => $column) {
-                //column exist?
-                $eColumns = $objectTable->xpath('column[@name =\'' . $key . '\']');
-
-                if ($eColumns) {
-                    $newCol = current($eColumns);
-                    if ($newCol['custom'] == true) {
-                        continue;
-                    }
-                } else {
-                    $newCol = $objectTable->addChild('column');
-                }
-
-                $newCol['name'] = $key;
-                $columnsDefined[] = $key;
-
-                foreach ($column as $k => $v) {
-                    $newCol[$k] = $v;
-                }
-            }
-        }
-
-        //check for deleted columns
-        $columns = $objectTable->xpath("column[not(@custom='true')]");
-        foreach ($columns as $k => $column) {
-            $col = $object->getField(underscore2Camelcase($column['name']));
-            if (!$col) {
-                unset($columns[$k][0]);
-            }
-        }
-
-        if ($object['workspace']) {
-            $behaviors = $objectTable->xpath('behavior[@name=\'Kryn\CmsBundle\WorkspaceBehavior\']');
-            if ($behaviors) {
-                $behavior = current($behaviors);
-            } else {
-                $behavior = $objectTable->addChild('behavior');
-            }
-            $behavior['name'] = 'Kryn\CmsBundle\WorkspaceBehavior';
-        }
-
-        $vendors = $objectTable->xpath('vendor[@type=\'mysql\']');
-        if ($vendors) {
-            $vendor = current($vendors);
-        } else {
-            $vendor = $objectTable->addChild('vendor');
-        }
-        $vendor['type'] = 'mysql';
-
-        $params = $vendor->xpath('parameter[@name=\'Charset\']');
-        if ($params) {
-            $param = current($params);
-        } else {
-            $param = $vendor->addChild('parameter');
-        }
-
-        $param['name'] = 'Charset';
-        $param['value'] = 'utf8';
-
-        $dom = new \DOMDocument;
-        $dom->preserveWhiteSpace = false;
-        $dom->loadXML($xml->asXML());
-        $dom->formatOutput = true;
-        $this->getKrynCore()->getFilesystem()->write($path, $dom->saveXml());
-
-        return true;
-    }
 }

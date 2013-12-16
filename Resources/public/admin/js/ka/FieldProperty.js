@@ -178,18 +178,26 @@ ka.FieldProperty = new Class({
                 if (this.options.asModel && field.modelOptions) {
                     options = Object.merge(options, field.modelOptions);
                 }
-                Object.each(options, function(option, optionKey) {
-                    if ('function' === typeOf(option)) {
-                        fields[optionKey] = option();
-                    } else {
-                        fields[optionKey] = option;
-                    }
-                    this.fieldOptionsMap[key.lcfirst()].push(optionKey);
-                }.bind(this));
+
+                var extractOptions = function(optionsToExtract) {
+                    Object.each(optionsToExtract, function(option, optionKey) {
+                        if ('function' === typeOf(option)) {
+                            fields[optionKey] = option();
+                        } else {
+                            fields[optionKey] = option;
+                        }
+                        this.fieldOptionsMap[key.lcfirst()].push(optionKey);
+                        if ('fieldForm' !== option.type && option.children) {
+                            extractOptions(option.children);
+                        }
+                    }.bind(this));
+                }.bind(this);
+
+                extractOptions(options);
 
                 children['options.' + key.lcfirst()] = {
                     type: 'fieldForm',
-                    fields: fields,
+                    fields: options,
                     noWrapper: true,
                     needValue: key.lcfirst(),
                     allTableItems: this.options.allTableItems
@@ -597,26 +605,31 @@ ka.FieldProperty = new Class({
         }
 
         var options = {};
-        Object.each(this.fieldOptionsMap, function(fields, type) {
-            options[type] = {};
-            Array.each(fields, function(field) {
-                var value = pDefinition[field];
-                if (pDefinition.options && pDefinition.options[field]) {
-                    value = pDefinition.options[field];
-                }
-                options[type][field] = value;
+        var normalize = function(map){
+            Object.each(map, function(fields, type) {
+                options[type] = {};
+                Array.each(fields, function(field) {
+                    var value = pDefinition[field];
+                    if (pDefinition.options && pDefinition.options[field]) {
+                        value = pDefinition.options[field];
+                    }
+                    options[type][field] = value;
+                });
             });
-        });
+        };
+
+        normalize(this.fieldOptionsMap);
 
         pDefinition.options = options;
     },
 
-    setValue: function (pKey, pDefinition) {
-        this.definition = Object.clone(pDefinition || {});
+    setValue: function (key, definition) {
+        this.definition = Object.clone(definition || {});
+        //console.log('setValue', key, definition);
         this.normalizeValues(this.definition);
 
         if (this.options.asTableItem) {
-            this.iKey.setValue(pKey);
+            this.iKey.setValue(key);
             this.typeField.setValue(this.definition.type);
 
             if (this.options.asFrameworkColumn || this.options.withWidth) {

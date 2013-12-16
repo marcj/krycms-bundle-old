@@ -472,7 +472,7 @@ h3.kryn-headline {
     padding: 0 15px;
 }
 
-.ka-admin .ka-Window-sidebar a.ka-Button {
+.ka-Window-sidebar a.ka-Button {
     display: block;
     background-color: transparent;
     box-shadow: none;
@@ -484,10 +484,10 @@ h3.kryn-headline {
     cursor: pointer;
 }
 
-.ka-admin .ka-Window-sidebar a.ka-Button-pressed,
-.ka-admin .ka-Window-sidebar a.ka-Button-pressed:link,
-.ka-admin .ka-Window-sidebar a.ka-Button-pressed:hover,
-.ka-admin .ka-Window-sidebar a.ka-Button-pressed:active {
+.ka-Window-sidebar a.ka-Button-pressed,
+.ka-Window-sidebar a.ka-Button-pressed:link,
+.ka-Window-sidebar a.ka-Button-pressed:hover,
+.ka-Window-sidebar a.ka-Button-pressed:active {
     top: 0;
     box-shadow: none;
     background-color: #3d3d3d;

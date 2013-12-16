@@ -2,6 +2,6 @@
 
 namespace Kryn\CmsBundle\Exceptions;
 
-class BuildException extends \Exception
+class ModelBuildException extends \Exception
 {
 }

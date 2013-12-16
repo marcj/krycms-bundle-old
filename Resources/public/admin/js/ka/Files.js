@@ -963,7 +963,7 @@ ka.Files = new Class({
             this.sideTree = new ka.Field({
                 type: 'tree',
                 noWrapper: true,
-                object: 'KrynCmsBundle:File',
+                object: 'kryncms/file',
                 onMove: this.sidebarTreeMoved.bind(this),
                 onReady: this.sidebarTreeReady.bind(this)
             }, this.infos);
@@ -2872,11 +2872,7 @@ ka.Files = new Class({
                 }).inject(div, 'top');
 
                 a.addEvent('click', function() {
-                    if (file.type == 'dir') {
-                        this.loadPath(file.path);
-                    } else {
-                        ka.wm.openWindow('kryncmsbundle/file/edit', null, null, {file: file});
-                    }
+                    this.loadPath(file.path);
                 }.bind(this));
 
             }.bind(this));

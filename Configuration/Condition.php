@@ -226,7 +226,7 @@ class  Condition extends Model
             );
         }
 
-        return $this->conditionToSql($condition, $params, $objectKey, $pFieldNames);;
+        return $this->conditionToSql($condition, $params, $objectKey, $pFieldNames);
     }
 
     /**
@@ -342,7 +342,7 @@ class  Condition extends Model
 
         $this->toSql($params, null, $fields);
 
-        return $fields;
+        return array_keys($fields);
     }
 
     /**

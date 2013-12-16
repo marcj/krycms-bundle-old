@@ -4,7 +4,7 @@ ka.FieldTypes.Date = new Class({
 
     Statics: {
         label: 'Date',
-        isModel: true,
+        asModel: true,
         options: {
             format: {
                 type: 'text',

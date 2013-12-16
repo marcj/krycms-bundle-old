@@ -15,22 +15,22 @@ html, body {
     font-smooth: never;
 }
 
-.ka-admin table {
+table {
     border-collapse: separate;
 }
 
-.ka-admin .CodeMirror-gutter {
+.CodeMirror-gutter {
     z-index: auto;
 }
 
-.ka-admin h1,
-.ka-admin h2,
-.ka-admin h3 {
+h1,
+h2,
+h3 {
     font-weight: normal;
     font-family: "SourceSansPro-Semibold";
 }
 
-.ka-admin h1 {
+h1 {
     font-size: 36px;
     color: #797979;
     line-height: 50px;
@@ -39,7 +39,7 @@ html, body {
     font-family: "SourceSansPro-Light", "SourceSansPro-Regular", "Lucida Grande", "DejaVu Sans", "Bitstream Vera Sans", "Segoe UI", "Tahoma", sans-serif;
 }
 
-.ka-admin h2 {
+h2 {
     font-size: 26px;
     color: #666;
     line-height: 30px;
@@ -47,8 +47,8 @@ html, body {
     padding: 0;
 }
 
-.ka-admin h2.light,
-.ka-admin h3.light {
+h2.light,
+h3.light {
     font-family: "SourceSansPro-Light", "SourceSansPro-Regular", "Lucida Grande", "DejaVu Sans", "Bitstream Vera Sans", "Segoe UI", "Tahoma", sans-serif;
 }
 
@@ -57,7 +57,7 @@ html, body {
     clear: both;
 }
 
-.ka-admin h3 {
+h3 {
     text-transform: uppercase;
 }
 
@@ -246,8 +246,8 @@ td {
 */
 
 
-.ka-admin div,
-.ka-admin span {
+div,
+span {
     -webkit-user-select: none;
     -khtml-user-select: none;
     -moz-user-select: -moz-none;
@@ -255,32 +255,32 @@ td {
     user-select: none;
 }
 
-.ka-admin {
+{
     -webkit-tap-highlight-color: transparent;
     background-color: #eee;
 }
 
-.ka-admin a,
-.ka-admin a:link {
+a,
+a:link {
     color: gray;
 }
 
-a.ka-admin a:hover {
+aa:hover {
     color: #333;
 }
 
-.ka-admin a img,
-.ka-admin a:link img {
+a img,
+a:link img {
     border: 0px;
 }
 
-.ka-admin img {
+img {
     border: 0px;
 }
 
-.ka-admin input,
-.ka-admin select,
-.ka-admin textarea {
+input,
+select,
+textarea {
     outline: 0;
 }
 
