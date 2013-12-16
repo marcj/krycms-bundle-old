@@ -246,6 +246,11 @@ class FrontendRouter
                 continue;
             }
             $data = json_decode($plugin->getContent(), true);
+
+            if (!$data) {
+                continue;
+            }
+
             if (!$data) {
                 $this->getKrynCore()->getLogger()->addAlert(
                     sprintf(
@@ -258,7 +263,7 @@ class FrontendRouter
                 continue;
             }
 
-            $bundleName = isset($data['module']) ? $data['module'] : $data['bundle'];
+            $bundleName = isset($data['module']) ? $data['module'] : @$data['bundle'];
 
             $config = $this->getKrynCore()->getConfig($bundleName);
             if (!$config) {
@@ -266,7 +271,7 @@ class FrontendRouter
                     sprintf(
                         'Bundle `%s` for plugin `%s` on page `%s` [%d] does not not exist.',
                         $bundleName,
-                        $data['plugin'],
+                        @$data['plugin'],
                         $this->getKrynCore()->getCurrentPage()->getTitle(),
                         $this->getKrynCore()->getCurrentPage()->getId()
                     )
@@ -274,14 +279,14 @@ class FrontendRouter
                 continue;
             }
 
-            $pluginDefinition = $config->getPlugin($data['plugin']);
+            $pluginDefinition = $config->getPlugin(@$data['plugin']);
 
             if (!$pluginDefinition) {
                 $this->getKrynCore()->getLogger()->addAlert(
                     sprintf(
                         'In bundle `%s` the plugin `%s` on page `%s` [%d] does not not exist.',
                         $bundleName,
-                        $data['plugin'],
+                        @$data['plugin'],
                         $this->getKrynCore()->getCurrentPage()->getTitle(),
                         $this->getKrynCore()->getCurrentPage()->getId()
                     )
@@ -302,7 +307,7 @@ class FrontendRouter
                     $defaults = array(
                         '_controller' => $controller,
                         '_content' => $plugin,
-                        'options' => $data['options']
+                        'options' => @$data['options']
                     );
 
                     if ($route->getDefaults()) {
