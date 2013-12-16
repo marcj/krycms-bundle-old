@@ -94,14 +94,14 @@ ka.ContentTypes.Image = new Class({
     },
 
     renderValue: function() {
-        if (this.value.file) {
+        if (this.value.file || this.value.image) {
             if (this.currentImageFile !== this.value.file) {
                 this.main.empty();
                 var url = _pathAdmin + 'admin/file/image?' + Object.toQueryString({
                     path: this.value.file
                 });
                 this.image = new Element('img', {
-                    src: url
+                    src: this.value.image || url
                 }).inject(this.main);
             }
             this.image.set('width', this.value.width || '100%');

@@ -817,7 +817,9 @@ class Objects
 
         $targetPk = $this->normalizePk($objectKey, $targetPk);
         $objectKey = Objects::normalizeObjectKey($objectKey);
-        $targetObjectKey = Objects::normalizeObjectKey($targetObjectKey);
+        if ($targetObjectKey) {
+            $targetObjectKey = Objects::normalizeObjectKey($targetObjectKey);
+        }
 
         $obj = $this->getClass($objectKey);
 
