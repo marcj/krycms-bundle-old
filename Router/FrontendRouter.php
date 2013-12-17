@@ -267,7 +267,7 @@ class FrontendRouter
 
             $config = $this->getKrynCore()->getConfig($bundleName);
             if (!$config) {
-                $this->getKrynCore()->getLogger()->addAlert(
+                $this->getKrynCore()->getLogger()->alert(
                     sprintf(
                         'Bundle `%s` for plugin `%s` on page `%s` [%d] does not not exist.',
                         $bundleName,

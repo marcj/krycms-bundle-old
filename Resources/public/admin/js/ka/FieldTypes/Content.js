@@ -70,7 +70,7 @@ ka.FieldTypes.Content = new Class({
         this.win.setTitle(t('Home'));
 
         this.mainLayout.getCell(2, 1).setStyles({
-            'border': '1px solid silver',
+            'border': '1px solid silver'
             //'background': 'url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAAIklEQVQIW2NkQAL37t37zwjjgzhKSkqMYAEYB8RmROaABAAGgA+evuWXiAAAAABJRU5ErkJggg==) repeat'
         });
 

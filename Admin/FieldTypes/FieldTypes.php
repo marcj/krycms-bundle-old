@@ -7,7 +7,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class FieldTypes {
 
     /**
-     * @var AbstractType[]
+     * @var AbstractSingleColumnType[]
      */
     protected $types;
 

@@ -28,7 +28,15 @@ class Model implements \ArrayAccess
      */
     protected $krynCore;
 
+    /**
+     * @var \Kryn\CmsBundle\Core
+     */
     public static $serialisationKrynCore;
+
+    /**
+     * @var array
+     */
+    protected $_excludeFromExport = [];
 
     /**
      * Defines which values are attributes of the <rootName> element.
@@ -620,7 +628,7 @@ class Model implements \ArrayAccess
             $rootNode = $doc->createElement($this->rootName);
             $node->appendChild($rootNode);
         } catch (\DOMException $e ){
-            throw new \Exception(tf('Can not create xml element `%s`', $this->rootName), 0, $e);
+            throw new \Exception(sprintf('Can not create xml element `%s`', $this->rootName), 0, $e);
         }
 
         foreach ($this as $key => $val) {
@@ -848,7 +856,7 @@ class Model implements \ArrayAccess
 
     public function canPropertyBeExported($key)
     {
-        return true;
+        return !in_array($key, $this->_excludeFromExport);
     }
 
     public function getArrayKey()
@@ -1145,6 +1153,7 @@ class Model implements \ArrayAccess
         $blacklist = ['element', 'krynCore'];
 
         foreach ($properties as $property => $val) {
+            if ($reflection->getProperty($property) && $reflection->getProperty($property)->isPrivate()) continue;
             if (in_array($property, $static)) continue;
             if (!in_array($property, $blacklist)){
                 $vars[] = $property;
@@ -1153,6 +1162,22 @@ class Model implements \ArrayAccess
 
         return $vars;
     }
+
+//    public function __clone()
+//    {
+//        $properties = $this->__sleep();
+//        foreach ($properties as $property) {
+//            if (is_array($this->$property)) {
+//                foreach ($this->$property as &$value) {
+//                    if (is_object($value)) {
+//                        $value = clone $value;
+//                    }
+//                }
+//            } else if (is_object($this->$property)) {
+//                $this->$property = clone $this->$property;
+//            }
+//        }
+//    }
 
     public function __wakeup()
     {

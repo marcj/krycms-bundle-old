@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: marc
- * Date: 08.12.13
- * Time: 23:26
- */
 
 namespace Kryn\CmsBundle\EventListener;
 

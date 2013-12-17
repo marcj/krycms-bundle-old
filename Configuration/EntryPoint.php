@@ -6,6 +6,8 @@ class EntryPoint extends Model
 {
     protected $attributes = ['path', 'type', 'icon', 'multi', 'link', 'system'];
 
+    protected $_excludeFromExport = ['parentInstance', 'fullPath'];
+
     /**
      * @var string
      */
@@ -54,12 +56,12 @@ class EntryPoint extends Model
     /**
      * @var EntryPoint
      */
-    private $parentInstance;
+    protected $parentInstance;
 
     /**
      * @var string
      */
-    private $fullPath;
+    protected $fullPath;
 
     /**
      * @param EntryPoint[] $children

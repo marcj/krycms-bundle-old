@@ -5,6 +5,7 @@ namespace Kryn\CmsBundle\Configuration;
 use Kryn\CmsBundle\Admin\FieldTypes\TypeNotFoundException;
 use Kryn\CmsBundle\Exceptions\ObjectNotFoundException;
 use Kryn\CmsBundle\Admin\Form\Form;
+use Kryn\CmsBundle\ORM\Builder\Builder;
 use Kryn\CmsBundle\Tools;
 
 class Field extends Model
@@ -37,14 +38,19 @@ class Field extends Model
     protected $type;
 
     /**
-     * @var mixed
+     * @var integer
      */
-    protected $value;
+    protected $maxLength;
 
     /**
      * @var string
      */
     protected $object;
+
+    /**
+     * @var \Kryn\CmsBundle\Configuration\Object
+     */
+    private $objectDefinition;
 
     /**
      * One of
@@ -72,11 +78,11 @@ class Field extends Model
     protected $objectRelationTable;
 
     /**
-     * The php name of the middle-table of a nToM relation.
+     * The object name of the cross-table of a nToM relation.
      *
      * @var string
      */
-    protected $objectRelationPhpName;
+    protected $objectRelationCrossObjectKey;
 
     /**
      * The virtualField name of the field in the foreign object pointing to us back.
@@ -229,7 +235,7 @@ class Field extends Model
     protected $autoIncrement = false;
 
     /**
-     * @var array
+     * @var Field[]
      */
     protected $children;
 
@@ -279,17 +285,10 @@ class Field extends Model
     }
 
     /**
-     * @return string
-     */
-    public function getPhpDataType()
-    {
-        $fieldType = $this->getFieldType();
-
-        return $fieldType->getPhpDataType();
-    }
-
-    /**
      * @return \Kryn\CmsBundle\Admin\FieldTypes\TypeInterface
+     *
+     * @throws ObjectNotFoundException
+     * @throws TypeNotFoundException
      */
     public function getFieldType()
     {
@@ -316,6 +315,50 @@ class Field extends Model
         }
 
         return $this->fieldType;
+    }
+
+    /**
+     * @param \Kryn\CmsBundle\Configuration\Object $objectDefinition
+     */
+    public function setObjectDefinition(Object $objectDefinition)
+    {
+        $this->objectDefinition = $objectDefinition;
+    }
+
+    /**
+     * @return \Kryn\CmsBundle\Configuration\Object
+     */
+    public function getObjectDefinition()
+    {
+        return $this->objectDefinition;
+    }
+
+    /**
+     * Do whatever is needed to setup the build environment correctly.
+     *
+     * @param \Kryn\CmsBundle\Configuration\Object $object
+     * @param Configs $configs
+     *
+     * @return bool true for the boot has changed something on a object/field and we need to call it on other fields again.
+     */
+    public function bootBuildTime(Object $object, Configs $configs)
+    {
+        return $this->getFieldType()->bootBuildTime($object, $configs);
+    }
+
+    /**
+     * Do whatever is needed to setup the runtime environment correctly.
+     *
+     * e.g. create cross foreignKeys for 1-to-n relations.
+     *
+     * @param \Kryn\CmsBundle\Configuration\Object $object
+     * @param Configs $configs
+     *
+     * @return bool true for the boot has changed something on a object/field and we need to call it on other fields again.
+     */
+    public function bootRunTime(Object $object, Configs $configs)
+    {
+        return $this->getFieldType()->bootRunTime($object, $configs);
     }
 
     /**
@@ -798,7 +841,7 @@ class Field extends Model
      */
     public function setValue($value)
     {
-        $this->value = $value;
+        $this->getFieldType()->setValue($value);
     }
 
     /**
@@ -806,9 +849,8 @@ class Field extends Model
      */
     public function getValue()
     {
-        return $this->value;
+        return $this->getFieldType()->getValue();
     }
-
 
     public function canPropertyBeExported($k)
     {
@@ -834,10 +876,6 @@ class Field extends Model
      */
     public function getRequiredRegex()
     {
-        if (null === $this->requiredRegex) {
-            return $this->getFieldType()->getRequiredRegex();
-        }
-
         return $this->requiredRegex;
     }
 
@@ -890,6 +928,7 @@ class Field extends Model
         if ($this->isVirtual()) {
             return [];
         }
+
         return $this->getFieldType()->validate();
     }
 
@@ -1104,17 +1143,32 @@ class Field extends Model
     /**
      * @param string $objectRelationPhpName
      */
-    public function setObjectRelationPhpName($objectRelationPhpName)
+    public function setObjectRelationCrossObjectKey($objectRelationPhpName)
     {
-        $this->objectRelationPhpName = $objectRelationPhpName;
+        $this->objectRelationCrossObjectKey = $objectRelationPhpName;
     }
 
     /**
      * @return string
      */
-    public function getObjectRelationPhpName()
+    public function getObjectRelationCrossObjectKey()
     {
-        return $this->objectRelationPhpName;
+        return $this->objectRelationCrossObjectKey;
     }
 
+    /**
+     * @param int $maxLength
+     */
+    public function setMaxLength($maxLength)
+    {
+        $this->maxLength = $maxLength;
+    }
+
+    /**
+     * @return int
+     */
+    public function getMaxLength()
+    {
+        return $this->maxLength;
+    }
 }

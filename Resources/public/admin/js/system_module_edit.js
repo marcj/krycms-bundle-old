@@ -2109,16 +2109,6 @@ var kryncms_system_module_edit = new Class({
                                 label: t('Limit data sets'),
                                 type: 'condition'
                             },
-                            'propelClass': {
-                                needValue: 'propel',
-                                label: t('Custom propel class (Optional)'),
-                                desc: t('Class that extends from \\Core\\ORM\\Propel or \\Core\\ORM\\ORMAbstract.')
-                            },
-                            'propelClassName': {
-                                needValue: 'propel',
-                                label: t("Propel's model class name (Optional)"),
-                                desc: t('Generates the classes &lt;name&gt;, &lt;name&gt;Query, &lt;name&gt;Peer. Default is the object key.')
-                            },
                             nested: {
                                 label: t('Nested Set Model'),
                                 desc: t('Implement with lft, rgt and lvl fields.'),
@@ -2170,11 +2160,7 @@ var kryncms_system_module_edit = new Class({
                     domainDepended: {
                         label: t('Domain depended'),
                         type: 'checkbox',
-                        desc: t('Adds a extra field \'domainId\' int')
-                    },
-                    plugins: {
-                        label: t('Plugins (View controller)'),
-                        desc: t('Which plugins handles the frontend output of this object? Comma separated.')
+                        desc: t('Adds a extra \'domain\' object field')
                     }
                 }
             },
@@ -2607,8 +2593,8 @@ var kryncms_system_module_edit = new Class({
                 }).inject(item.tdType, 'before');
 
                 var updateUnderscore = function() {
-                    var ucv = item.iKey.getValue().replace(/([^a-z])/g, function($1) {
-                        return "_" + $1.toLowerCase().replace(/[^a-z]/, '');
+                    var ucv = item.iKey.getValue().replace(/([^a-z0-9])/g, function($1) {
+                        return "_" + $1.toLowerCase().replace(/[^a-z0-9]/, '');
                     });
                     item.underscoreDisplay.set('text', ucv);
                 };

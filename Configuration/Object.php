@@ -2,11 +2,13 @@
 
 namespace Kryn\CmsBundle\Configuration;
 
+use Kryn\CmsBundle\ORM\Builder\Builder;
 use Kryn\CmsBundle\Tools;
 
 class Object extends Model
 {
     protected $attributes = ['id'];
+    protected $_excludeFromExport = ['bundle'];
 
     /**
      * The id of the object.
@@ -18,7 +20,7 @@ class Object extends Model
     /**
      * @var Bundle
      */
-    private $bundle;
+    protected $bundle;
 
     /**
      * A label of the object.
@@ -71,6 +73,15 @@ class Object extends Model
      */
     protected $blacklistSelection;
 
+    /**
+     * @var \Kryn\CmsBundle\Admin\FieldTypes\RelationDefinitionInterface[]
+     */
+    private $relations;
+
+    /**
+     * @var array
+     */
+    private $indexes;
 
     /**
      * The data model in the back.
@@ -97,13 +108,6 @@ class Object extends Model
      * @var bool
      */
     protected $domainDepended = false;
-
-    /**
-     * Comma separated list of plugins.
-     *
-     * @var string
-     */
-    protected $plugins;
 
     /**
      * Which field shall be used as default label for a default text input `field` instance in the user interface.
@@ -275,6 +279,11 @@ class Object extends Model
     protected $browserColumns;
 
     /**
+     * @var array
+     */
+    private $triggeredReboot = [];
+
+    /**
      * The callable string pointing to a method/function that generates the actual public url for a object pk.
      *
      * example:
@@ -289,78 +298,166 @@ class Object extends Model
      */
     protected $publicUrlGenerator;
 
-    /**
-     * Class name to be used in propel's model classes.
-     * Default is the `id`.
-     *
-     * \BundleName\Models\<className>
-     *
-     * @var string
-     */
-    protected $propelClassName;
-
-    /**
-     * @var array
-     */
-    private $virtualFields;
+//    /**
+//     * @var array
+//     */
+//    private $virtualFields;
 
     /**
      * @var array
      */
     private $primaryKeys;
 
-    public function syncRelations()
+
+//    public function syncRelations()
+//    {
+//        ///resolve relations
+//        //if a object has a MANY_TO_ONE relation to another, then we create a virtual field to the other.
+//        foreach ($this->getFields() as $field) {
+//            if ($field->getObjectRelation() == \Kryn\CmsBundle\ORM\ORMAbstract::MANY_TO_ONE) {
+//                $objectName = $this->getKrynCore()->getObjects()->getName($field['object']);
+//                $bundleName = strtolower($this->getKrynCore()->getObjects()->getBundleName($field['object']));
+//                $fieldName = lcfirst($field->getObjectRefRelationName() ? : $this->getId());
+//
+//                $bundle = $this->getKrynCore()->getConfig($bundleName);
+//                if ($bundle && $object = $bundle->getObject($objectName)) {
+//                    $objectName = $this->getBundle()->getBundleName() . ':' . $this->getId();
+//                    $virtualField = new Field(array(
+//                        'id' => $fieldName,
+//                        'virtual' => true,
+//                        'label' => 'Auto Object Relation (' . $objectName . ')',
+//                        'object' => $objectName,
+//                        'objectRelation' => \Kryn\CmsBundle\ORM\ORMAbstract::ONE_TO_MANY
+//                    ), $this->getKrynCore());
+//
+//                    $object->addVirtualField($virtualField);
+//                }
+//            }
+//        }
+//    }
+
+    /**
+     * Do whatever is needed to setup the runtime environment correctly.
+     *
+     * e.g. create cross foreignKeys for 1-to-n relations.
+     *
+     * @param Configs $configs
+     *
+     * @return bool true for the boot has changed something on a object/field and we need to call it on other fields again.
+     */
+    public function bootRunTime(Configs $configs)
     {
-        ///resolve relations
-        //if a object has a MANY_TO_ONE relation to another, then we create a virtual field to the other.
-        foreach ($this->getFields() as $field) {
-            if ($field->getObjectRelation() == \Kryn\CmsBundle\ORM\ORMAbstract::MANY_TO_ONE) {
-                $objectName = $this->getKrynCore()->getObjects()->getName($field['object']);
-                $bundleName = strtolower($this->getKrynCore()->getObjects()->getBundleName($field['object']));
-                $fieldName = lcfirst($field->getObjectRefRelationName() ? : $this->getId());
-
-                $bundle = $this->getKrynCore()->getConfig($bundleName);
-                if ($bundle && $object = $bundle->getObject($objectName)) {
-                    $objectName = $this->getBundle()->getBundleName() . ':' . $this->getId();
-                    $virtualField = new Field(array(
-                        'id' => $fieldName,
-                        'virtual' => true,
-                        'label' => 'Auto Object Relation (' . $objectName . ')',
-                        'object' => $objectName,
-                        'objectRelation' => \Kryn\CmsBundle\ORM\ORMAbstract::ONE_TO_MANY
-                    ), $this->getKrynCore());
-
-                    $object->addVirtualField($virtualField);
-                }
+        $this->triggeredReboot = [];
+        foreach ($this->getFields() as $key => $field) {
+            if ($boots = $field->bootRunTime($this, $configs)) {
+                $count = (isset($this->triggeredReboot[$key]) ? $this->triggeredReboot[$key]['count'] : 0) + 1;
+                $this->triggeredReboot[$key] = [
+                    'count' => $count,
+                    'triggeredReboots' => $boots
+                ];
             }
         }
+        return $this->triggeredReboot;
     }
 
     /**
-     * @param Field[] $virtualFields
+     * Do whatever is needed to setup the build environment correctly.
+     *
+     * e.g. create crossTables for n-to-n relations.
+     *
+     * @param Configs $configs
+     *
+     * @return bool true for the boot has changed something on a object/field and we need to call it on other fields again.
      */
-    public function setVirtualFields(array $virtualFields = null)
+    public function bootBuildTime(Configs $configs)
     {
-        $this->virtualFields = $virtualFields;
+        $changed = false;
+        foreach ($this->getFields() as $field) {
+            if ($field->bootBuildTime($this, $configs)) {
+                $changed = true;
+            }
+        }
+        return $changed;
     }
 
     /**
-     * @param Field $virtualField
+     * @param array $indexes
      */
-    public function addVirtualField(Field $virtualField)
+    public function setIndexes($indexes)
     {
-        if (!in_array($virtualField, $this->virtualFields ?: [], true)) {
-            $this->virtualFields[] = $virtualField;
+        $this->indexes = $indexes;
+    }
+
+    /**
+     * @return array
+     */
+    public function getIndexes()
+    {
+        return $this->indexes;
+    }
+
+    /**
+     * @param \Kryn\CmsBundle\Admin\FieldTypes\RelationDefinitionInterface[] $relations
+     */
+    public function setRelations(array $relations)
+    {
+        $this->relations = [];
+        foreach ($relations as $relation) {
+            $this->relations[strtolower($relation->getName())] = $relation;
         }
     }
 
     /**
-     * @return Field[]
+     * @param \Kryn\CmsBundle\Admin\FieldTypes\RelationDefinitionInterface $relation
      */
-    public function getVirtualFields()
+    public function addRelation($relation)
     {
-        return $this->virtualFields;
+        $this->relations[strtolower($relation->getName())] = $relation;
     }
+
+    /**
+     * @return \Kryn\CmsBundle\Admin\FieldTypes\RelationDefinitionInterface[]
+     */
+    public function getRelations()
+    {
+        return $this->relations;
+    }
+
+    /**
+     * @param $name
+     * @return bool
+     */
+    public function hasRelation($name)
+    {
+        return isset($this->relations[strtolower($name)]);
+    }
+
+
+//    /**
+//     * @param Field[] $virtualFields
+//     */
+//    public function setVirtualFields(array $virtualFields = null)
+//    {
+//        $this->virtualFields = $virtualFields;
+//    }
+//
+//    /**
+//     * @param Field $virtualField
+//     */
+//    public function addVirtualField(Field $virtualField)
+//    {
+//        if (!in_array($virtualField, $this->virtualFields ? : [], true)) {
+//            $this->virtualFields[] = $virtualField;
+//        }
+//    }
+//
+//    /**
+//     * @return Field[]
+//     */
+//    public function getVirtualFields()
+//    {
+//        return $this->virtualFields;
+//    }
 
 
     /**
@@ -542,21 +639,38 @@ class Object extends Model
     /**
      * @param Field[] $fields
      */
-    public function setFields(array $fields = null)
+    public function setFields(array $fields = array())
     {
         $this->fields = [];
         foreach ($fields as $field) {
-            $this->fields[$field->getColumnName()] = $field;
+            $this->addField($field);
         }
     }
 
     /**
-     * @param bool $withVirtual returns the virtual fields as well
+     * @param Field $field
+     */
+    public function addField(Field $field)
+    {
+        $field->setObjectDefinition($this);
+        $this->fields[$field->getColumnName()] = $field;
+    }
+
+    /**
+     * @param string $name
+     * @return bool
+     */
+    public function hasField($name)
+    {
+        return !!$this->getField($name);
+    }
+
+    /**
      * @return Field[] underscored fieldNames as index
      */
-    public function getFields($withVirtual = false)
+    public function getFields()
     {
-        return $withVirtual ? array_merge($this->fields ?: [], $this->virtualFields ?: []) : $this->fields;
+        return $this->fields;
     }
 
     /**
@@ -570,6 +684,7 @@ class Object extends Model
                 $fields[lcfirst($field->getId())] = $field->toArray();
             }
         }
+
         return $fields;
     }
 
@@ -582,6 +697,7 @@ class Object extends Model
     {
         if (null !== $this->fields) {
             $id = Tools::camelcase2Underscore($fieldId);
+
             return isset($this->fields[$id]) ? $this->fields[$id] : null;
         }
     }
@@ -610,6 +726,7 @@ class Object extends Model
                 $fields[lcfirst($field->getId())] = $field->toArray();
             }
         }
+
         return $fields;
     }
 
@@ -639,11 +756,23 @@ class Object extends Model
     }
 
     /**
+     * Returns the object id. E.g. Node
+     *
      * @return string
      */
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * Returns the full object key. E.g. kryncms/node
+     *
+     * @return string
+     */
+    public function getKey()
+    {
+        return $this->getBundle()->getName().'/'.lcfirst($this->getId());
     }
 
     /**
@@ -809,22 +938,6 @@ class Object extends Model
     public function getNestedRootObjectLabelField()
     {
         return $this->nestedRootObjectLabelField;
-    }
-
-    /**
-     * @param string $plugins
-     */
-    public function setPlugins($plugins)
-    {
-        $this->plugins = $plugins;
-    }
-
-    /**
-     * @return string
-     */
-    public function getPlugins()
-    {
-        return $this->plugins;
     }
 
     /**
@@ -1114,22 +1227,6 @@ class Object extends Model
     public function getLimitDataSets()
     {
         return $this->limitDataSets;
-    }
-
-    /**
-     * @param string $propelClassName
-     */
-    public function setPropelClassName($propelClassName)
-    {
-        $this->propelClassName = $propelClassName;
-    }
-
-    /**
-     * @return string
-     */
-    public function getPropelClassName()
-    {
-        return $this->propelClassName;
     }
 
     /**

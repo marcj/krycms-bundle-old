@@ -25,6 +25,12 @@ ka._ = function(p) {
     return t(p);
 };
 
+window.logger = function(){
+    if ('undefined' !== typeof console) {
+        console.error.apply(console, arguments);
+    }
+}
+
 /**
  * Opens the frontend in a new tab.
  */
@@ -224,7 +230,6 @@ ka.entrypoint = {
                 break;
             }
         }
-        ;
 
         if (notFound) {
             return null;

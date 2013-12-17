@@ -17,6 +17,8 @@ class Bundle extends Model
         'plugins' => 'kryn.plugins.xml',
     ];
 
+    protected $_excludeFromExport = ['bundleName'];
+
     protected $id;
 
     /**
@@ -57,7 +59,7 @@ class Bundle extends Model
     /**
      * @var string
      */
-    private $bundleName;
+    protected $bundleName;
 
     /**
      * @var string
@@ -89,9 +91,12 @@ class Bundle extends Model
      */
     private $imported = [];
 
+    private $triggeredReboot = [];
+
     /**
      * @param string $bundleName
      * @param \DOMElement $bundleDoc
+     * @param null $krynCore
      */
     public function __construct($bundleName = '', \DOMElement $bundleDoc = null, $krynCore = null)
     {
@@ -102,15 +107,29 @@ class Bundle extends Model
     }
 
     /**
-     *  All bundle configs have been loaded. Do whatever is needed with it.
+     * All bundle configs have been loaded.
+     *
+     * @param Configs $configs
+     *
+     * @return array|boolean truthy means we need a reboot
      */
-    public function setup(Configs $configs)
+    public function boot(Configs $configs)
     {
+        $this->triggeredReboot = [];
+
         if ($this->getObjects()) {
-            foreach ($this->getObjects() as $object) {
-                $object->syncRelations();
+            foreach ($this->getObjects() as $key => $object) {
+                if ($boots = $object->bootRunTime($configs)) {
+                    $count = (isset($this->triggeredReboot[$key]) ? $this->triggeredReboot[$key]['count'] : 0) + 1;
+                    $this->triggeredReboot[$key] = [
+                        'count' => $count,
+                        'triggeredReboots' => $boots
+                    ];
+                }
             }
         }
+
+        return $this->triggeredReboot;
     }
 
     /**
@@ -191,8 +210,7 @@ class Bundle extends Model
     public function getPropertyFilePath($property)
     {
         if (!$this->imported[$property]) {
-            $path = $this->getBundleClass()->getPath(
-                ) . 'Resources/config/' . (static::$propertyToFile[$property] ? : 'kryn.xml');
+            $path = $this->getBundleClass()->getPath() . 'Resources/config/' . (static::$propertyToFile[$property] ? : 'kryn.xml');
             $root = realpath($this->getKrynCore()->getKernel()->getRootDir() . '/../');
 
             return substr($path, strlen($root) + 1);
@@ -629,26 +647,35 @@ class Bundle extends Model
     }
 
     /**
-     * @param Object[] $objects
+     * @param \Kryn\CmsBundle\Configuration\Object[] $objects
      */
     public function setObjects(array $objects = null)
     {
         $this->objects = [];
         foreach ($objects as $object) {
-            $object->setBundle($this);
-            $this->objects[strtolower($object->getId())] = $object;
+            $this->addObject($object);
         }
+    }
+
+    /**
+     * @param \Kryn\CmsBundle\Configuration\Object $object
+     */
+    public function addObject(Object $object)
+    {
+        $object->setBundle($this);
+        $this->objects[strtolower($object->getId())] = $object;
     }
 
     /**
      * @param string $id
      *
-     * @return Object
+     * @return \Kryn\CmsBundle\Configuration\Object|null
      */
     public function getObject($id)
     {
         if (null !== $this->objects) {
             $id = strtolower($id);
+
             return isset($this->objects[$id]) ? $this->objects[$id] : null;
         }
     }

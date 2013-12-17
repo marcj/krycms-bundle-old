@@ -2,7 +2,7 @@
 
 namespace Kryn\CmsBundle\Admin\FieldTypes;
 
-class TypePassword extends AbstractType
+class TypePassword extends AbstractSingleColumnType
 {
     protected $name = 'Password';
 

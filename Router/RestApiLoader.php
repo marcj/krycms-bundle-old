@@ -66,7 +66,10 @@ class RestApiLoader extends Loader
                     $pks[] = '{' . $pk . '}';
 
                     if ($route instanceof Route) {
-                        $route->setRequirement($pk, $field->getRequiredRegex());
+                        $pkColumns = $field->getFieldType()->getColumns();
+                        //we support for now only one column per pk
+                        $column = current($pkColumns);
+                        $route->setRequirement($pk, $column->getRequiredRegex());
                     }
                 }
             }

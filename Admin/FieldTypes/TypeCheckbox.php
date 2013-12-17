@@ -2,7 +2,7 @@
 
 namespace Kryn\CmsBundle\Admin\FieldTypes;
 
-class TypeCheckbox extends AbstractType
+class TypeCheckbox extends AbstractSingleColumnType
 {
     protected $name = 'Checkbox';
 

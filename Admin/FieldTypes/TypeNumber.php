@@ -2,7 +2,7 @@
 
 namespace Kryn\CmsBundle\Admin\FieldTypes;
 
-class TypeNumber extends AbstractType
+class TypeNumber extends AbstractSingleColumnType
 {
     protected $name = 'Number';
 

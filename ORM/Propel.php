@@ -271,9 +271,6 @@ class Propel extends ORMAbstract
      */
     public function getPhpName($objectName = null)
     {
-        if (!$objectName && class_exists($clazz = $this->definition->getPropelClassName())) {
-            return $clazz;
-        }
         $clazz = Objects::normalizeObjectKey($objectName ?: $this->getObjectKey());
         $clazz = ucfirst($this->getKrynCore()->getObjects()->getNamespace($clazz) . '\\Model\\' . $this->getKrynCore()->getObjects()->getName($clazz));
         return $clazz;

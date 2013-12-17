@@ -2,7 +2,7 @@
 
 namespace Kryn\CmsBundle\Admin\FieldTypes;
 
-class TypeLang extends AbstractType
+class TypeLang extends AbstractSingleColumnType
 {
     protected $name = 'Language';
 

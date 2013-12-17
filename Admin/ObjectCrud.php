@@ -769,10 +769,10 @@ class ObjectCrud extends ContainerAware
 
         $objectFields = array_flip(array_keys($this->getObjectDefinition()->getFieldsArray()));
 
-
         foreach ($this->_fields as $key => $field) {
             if (isset($objectFields[$key]) && !$field->getCustomSave() && !$field->getStartEmpty()) {
-                $fields = array_merge($fields, $field->getFieldType()->getSelection());
+                $columnNames = $field->getFieldType()->getSelection();
+                $fields = array_merge($fields, $columnNames);
             }
         }
 
@@ -801,6 +801,7 @@ class ObjectCrud extends ContainerAware
 
         $position = 0;
 
+        $singlePrimaryKey = null;
         if (count($primaryKey) == 1) {
             $singlePrimaryKey = key($primaryKey);
             $singlePrimaryValue = current($primaryKey);

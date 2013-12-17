@@ -2,7 +2,7 @@
 
 namespace Kryn\CmsBundle\Admin\FieldTypes;
 
-class TypeFile extends AbstractType
+class TypeFile extends AbstractSingleColumnType
 {
     protected $name = 'File';
 

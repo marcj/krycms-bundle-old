@@ -495,14 +495,6 @@ class Core extends Controller
     }
 
     /**
-     * @return ORM\Builder\Builder
-     */
-    public function getModelBuilder()
-    {
-        return $this->container->get('kryn_cms.model.builder');
-    }
-
-    /**
      * @return Configuration\Configs|Configuration\Bundle[]
      */
     public function getConfigs()
@@ -815,7 +807,16 @@ class Core extends Controller
 
         if (!$this->configs) {
             $this->configs = new Configuration\Configs($this, $bundles);
-            $this->configs->setup();
+            $i = 0;
+            while (++$i && $this->configs->boot()) {
+                if ($i > 100) {
+                    $triggeredReboots = $this->configs->getTriggeredReboots();
+                    throw new \Exception(sprintf(
+                        'Can not boot bundle configuration, there is a recursive loop. [%s]',
+                        json_encode($triggeredReboots)
+                    ));
+                }
+            }
             $cached = serialize(
                 [
                     'md5' => $hash,

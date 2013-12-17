@@ -2,7 +2,7 @@
 
 namespace Kryn\CmsBundle\Admin\FieldTypes;
 
-class TypeDatetime extends AbstractType
+class TypeDatetime extends AbstractSingleColumnType
 {
     protected $name = 'Datetime';
 

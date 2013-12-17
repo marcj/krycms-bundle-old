@@ -2,7 +2,7 @@
 
 namespace Kryn\CmsBundle\Admin\FieldTypes;
 
-class TypeSelect extends AbstractType
+class TypeSelect extends AbstractSingleColumnType
 {
     protected $name = 'Select';
 

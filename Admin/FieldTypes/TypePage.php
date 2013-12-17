@@ -2,8 +2,11 @@
 
 namespace Kryn\CmsBundle\Admin\FieldTypes;
 
-class TypePage extends TypeObject
+class TypePage extends AbstractSingleColumnType
 {
-    protected $objectKey = 'kryncms/node';
+    protected $name = 'Page';
 
+    protected $phpDataType = 'integer';
+
+    protected $sqlDataType = 'integer';
 }

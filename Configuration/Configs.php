@@ -3,6 +3,8 @@
 namespace Kryn\CmsBundle\Configuration;
 
 use Kryn\CmsBundle\Core;
+use Kryn\CmsBundle\Exceptions\BundleNotFoundException;
+use Kryn\CmsBundle\Objects;
 
 class Configs implements \IteratorAggregate
 {
@@ -15,6 +17,8 @@ class Configs implements \IteratorAggregate
      * @var Core
      */
     protected $core;
+
+    protected $triggeredReboot = [];
 
     /**
      * @param Core $core
@@ -103,7 +107,7 @@ class Configs implements \IteratorAggregate
         $configs = array();
         $rename = [];
         foreach ($this->getConfigFiles($bundleName) as $file) {
-            if (file_exists($file)) {
+            if (file_exists($file) && file_get_contents($file)) {
                 $doc = new \DOMDocument();
                 $doc->load($file);
 
@@ -134,17 +138,44 @@ class Configs implements \IteratorAggregate
         return $configs;
     }
 
-    /**
-     * Handles the <modify> element.
-     * Calls on each config object the setup method.
-     */
-    public function setup()
-    {
-        foreach ($this->configElements as $config) {
+//    /**
+//     * Handles the <modify> element.
+//     * Calls on each config object the setup method.
+//     */
+//    public function setup()
+//    {
+//        foreach ($this->configElements as $config) {
+//
+//            //todo, handle modify tag.
+//            $config->setup($this);
+//        }
+//    }
 
-            //todo, handle modify tag.
-            $config->setup($this);
+    /**
+     * @return bool
+     */
+    public function boot()
+    {
+        $changed = false;
+        foreach ($this->configElements as $key => $config) {
+            if ($boots = $config->boot($this)) {
+                $changed = true;
+                $count = (isset($this->triggeredReboot[$key]) ? $this->triggeredReboot[$key]['count'] : 0) + 1;
+                $this->triggeredReboot[$key] = [
+                    'count' => $count,
+                    'triggeredReboots' => $boots
+                ];
+            }
         }
+        return $changed;
+    }
+
+    /**
+     * @return array
+     */
+    public function getTriggeredReboots()
+    {
+        return $this->triggeredReboot;
     }
 
     /**
@@ -181,15 +212,36 @@ class Configs implements \IteratorAggregate
     /**
      * @param string $bundleName
      *
-     * @return Config
+     * @return \Kryn\CmsBundle\Configuration\Bundle
      */
     public function getConfig($bundleName)
     {
-        $bundleName = strtolower($bundleName);
+        $bundleName = preg_replace('/bundle$/', '', strtolower($bundleName));
+        $bundleName .= 'bundle';
 
         return isset($this->configElements[$bundleName]) ? $this->configElements[$bundleName] : null;
     }
 
+    /**
+     * @param string $objectKey
+     * @return \Kryn\CmsBundle\Configuration\Object
+     */
+    public function getObject($objectKey)
+    {
+        list($bundleName, $objectName) = explode('/', Objects::normalizeObjectKey($objectKey));
+
+        $bundleName .= 'bundle';
+
+        if (!$config = $this->getConfig($bundleName)) {
+            throw new BundleNotFoundException(sprintf('Bundle `%s` not found. [%s]', $bundleName, $objectKey));
+        }
+
+        return $config->getObject($objectName);
+    }
+
+    /**
+     * @return Bundle[]
+     */
     public function getConfigs()
     {
         return $this->configElements;
@@ -211,7 +263,7 @@ class Configs implements \IteratorAggregate
     }
 
     /**
-     * @return Config[]
+     * @return \Kryn\CmsBundle\Configuration\Bundle[]
      */
     public function getIterator()
     {

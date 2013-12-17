@@ -42,6 +42,7 @@ ka.FieldTypes.Object = new Class({
                 required: true,
                 items: {
                     'nTo1': 'Many to One (n-1)',
+                    '1ToN': 'One to Many (-1)',
                     'nToM': 'Many to Many (n-n)'
                 },
                 children: {
@@ -103,7 +104,6 @@ ka.FieldTypes.Object = new Class({
                 }
             }.bind(this));
         }
-        ;
 
         var definition = ka.getObjectDefinition(this.options.objects[0]);
 

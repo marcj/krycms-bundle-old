@@ -253,12 +253,12 @@
         <label>Contents</label>
         <table>system_content</table>
         <labelField>id</labelField>
-        <defaultSelection>nodeId,boxId,template,type,content</defaultSelection>
+        <defaultSelection>node,boxId,template,type,content</defaultSelection>
         <fields>
           <field id="id" type="number" primaryKey="true" autoIncrement="true">
             <label>ID</label>
           </field>
-          <field id="nodeId" type="object">
+          <field id="node" type="object">
             <label>Node</label>
             <object>kryncms/node</object>
             <objectRelation>nTo1</objectRelation>

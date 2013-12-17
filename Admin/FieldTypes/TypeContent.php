@@ -2,9 +2,9 @@
 
 namespace Kryn\CmsBundle\Admin\FieldTypes;
 
-class TypeContent extends AbstractType
+class TypeContent extends AbstractSingleColumnType
 {
-    protected $name = 'Content Elements';
+    protected $name = 'Node Contents';
 
     protected $phpDataType = 'string';
 

@@ -2,7 +2,7 @@
 
 namespace Kryn\CmsBundle\Admin\FieldTypes;
 
-class TypeFilelist extends AbstractType
+class TypeFilelist extends AbstractSingleColumnType
 {
     protected $name = 'File list';
 

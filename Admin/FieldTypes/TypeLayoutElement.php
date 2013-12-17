@@ -2,7 +2,7 @@
 
 namespace Kryn\CmsBundle\Admin\FieldTypes;
 
-class TypeLayoutElement extends AbstractType
+class TypeLayoutElement extends AbstractSingleColumnType
 {
     protected $name = 'LayoutElement';
 

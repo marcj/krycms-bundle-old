@@ -221,12 +221,12 @@ class Objects
         $objectKey = Objects::normalizeObjectKey($objectKey);
         $temp = explode('/', $objectKey);
         if (2 !== count($temp)) {
-            throw new InvalidArgumentException(sprintf('Not a valid object key `%s`', $objectKey));
+            return null;
         }
-        $module = $temp[0];
+        $bundleName = $temp[0];
         $name = $temp[1];
 
-        $config = $this->getKrynCore()->getConfig($module);
+        $config = $this->getKrynCore()->getConfig($bundleName);
 
         if ($config) {
             return $config->getObject($name);
@@ -1368,6 +1368,11 @@ class Objects
     public static function normalizeObjectKey($key)
     {
         $key = str_replace(['\\', ':', '.'], '/', $key);
+
+        if (false === strpos($key, '/')) {
+            return preg_replace('/bundle$/', '', strtolower($key));
+        }
+
         list($bundleName, $objectName) = explode('/', $key);
         $bundleName = str_replace('bundle/', '/', strtolower($bundleName));
         $objectName = lcfirst($objectName);

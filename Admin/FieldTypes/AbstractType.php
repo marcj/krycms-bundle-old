@@ -2,29 +2,22 @@
 
 namespace Kryn\CmsBundle\Admin\FieldTypes;
 
+use Kryn\CmsBundle\Configuration\Configs;
 use Kryn\CmsBundle\Configuration\Field;
+use Kryn\CmsBundle\ORM\Builder\Builder;
 
 abstract class AbstractType implements TypeInterface
 {
-    /**
-     * @var string
-     */
-    protected $phpDataType;
-
-    /**
-     * @var string
-     */
-    protected $sqlDataType;
-
-    /**
-     * @var string
-     */
-    protected $name;
 
     /**
      * @var \Kryn\CmsBundle\Configuration\Field
      */
-    protected $field;
+    protected $fieldDefinition;
+
+    /**
+     * @var mixed
+     */
+    protected $value;
 
     /**
      * @var \Kryn\CmsBundle\Admin\Form\Form
@@ -32,85 +25,24 @@ abstract class AbstractType implements TypeInterface
     protected $form;
 
     /**
-     * @return array
+     * @var string
      */
-    public function getSelection()
-    {
-        return [$this->getFieldDefinition()->getId()];
-    }
+    protected $name;
 
-    public function getColumns()
+    /**
+     * @param string $name
+     */
+    public function setName($name)
     {
-        return [$this->name => $this];
+        $this->name = $name;
     }
 
     /**
-     * @return array
+     * @return string
      */
-    public function validate()
+    public function getName()
     {
-        $field = $this->getFieldDefinition();
-        $result = [];
-
-        if ($field->isHidden()) {
-            return $result;
-        }
-
-        $required = $this->getFieldDefinition()->isRequired()
-            || ($this->getFieldDefinition()->isPrimaryKey() && !$this->getFieldDefinition()->isAutoIncrement());
-
-        if ($required && ($field->getValue() === '' || $field->getValue() === null)) {
-            $result[] = 'Value is empty, but required.';
-        } else if ($required && $regex = $this->getRequiredRegex()) {
-            $value = (string)$field->getValue();
-            if (!preg_match('/' . addslashes($regex) . '/', $value)) {
-
-                if ($this->isInteger() || $this->isFloat() || $this->isBoolean()) {
-                    $name = 'Integer';
-                    if ($this->isFloat()) $name = 'Decimal';
-                    if ($this->isBoolean()) $name = 'Boolean';
-                    $result[] = sprintf('Value is not a %s (%s)', $name, $regex);
-                } else {
-                    $result[] = sprintf('Value requires format %s', $regex);
-                }
-            }
-        }
-
-        return $result;
-    }
-
-    /**
-     * @return mixed|string
-     */
-    public function getRequiredRegex()
-    {
-        if ('string' === $this->getPhpDataType()) {
-            return '.+';
-
-        } else if ($this->isInteger()) {
-            return '[-+]?\d+';
-
-        } else if ($this->isFloat()) {
-            return '[-+]?(\d*[.])?\d+';
-
-        } else if ($this->isBoolean()) {
-            return 'false|true|1|0';
-        }
-    }
-
-    public function isInteger()
-    {
-        return 'integer' === $this->getPhpDataType();
-    }
-
-    public function isFloat()
-    {
-        return in_array($this->getPhpDataType(), ['float', 'double', 'real']);
-    }
-
-    public function isBoolean()
-    {
-        return in_array($this->getPhpDataType(), ['boolean', 'bool']);
+        return $this->name;
     }
 
     /**
@@ -130,11 +62,27 @@ abstract class AbstractType implements TypeInterface
     }
 
     /**
+     * @param mixed $value
+     */
+    public function setValue($value)
+    {
+        $this->value = $value;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getValue()
+    {
+        return $this->value;
+    }
+
+    /**
      * @param Field $field
      */
     public function setFieldDefinition(Field $field)
     {
-        $this->field = $field;
+        $this->fieldDefinition = $field;
     }
 
     /**
@@ -142,55 +90,61 @@ abstract class AbstractType implements TypeInterface
      */
     public function getFieldDefinition()
     {
-        return $this->field;
+        return $this->fieldDefinition;
     }
 
     /**
-     * @param string $name
+     * @return array
      */
-    public function setName($name)
+    public function validate()
     {
-        $this->name = $name;
-    }
+        $result = [];
+        $values = $this->getValue();
 
-    /**
-     * @return string
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
+        $required = $this->getFieldDefinition()->isRequired()
+            || ($this->getFieldDefinition()->isPrimaryKey() && !$this->getFieldDefinition()->isAutoIncrement());
 
-    /**
-     * @param string $phpDataType
-     */
-    public function setPhpDataType($phpDataType)
-    {
-        $this->phpDataType = $phpDataType;
-    }
+        if (!$required) {
+            return [];
+        }
 
-    /**
-     * @return string
-     */
-    public function getPhpDataType()
-    {
-        return $this->phpDataType;
-    }
+        foreach ($this->getColumns() as $column) {
+            $field = $this->getFieldDefinition();
+            $errors = [];
+            $value = @$values[$column->getName()];
 
-    /**
-     * @param string $sqlDataType
-     */
-    public function setSqlDataType($sqlDataType)
-    {
-        $this->sqlDataType = $sqlDataType;
-    }
+            if ($field->isHidden()) {
+                return $result;
+            }
 
-    /**
-     * @return string
-     */
-    public function getSqlDataType()
-    {
-        return $this->sqlDataType;
-    }
+            if (($value === '' || $value === null)) {
+                $errors[] = 'Value is empty, but required.';
+            } else {
+                if ($regex = $column->getRequiredRegex()) {
+                    $valueString = (string)$value;
+                    if (!preg_match('/' . addslashes($regex) . '/', $valueString)) {
 
-}
+                        if (ColumnDefinition::isInteger($column) || ColumnDefinition::isFloat($column) || ColumnDefinition::isBoolean($column)) {
+                            $name = 'Integer';
+                            if (ColumnDefinition::isFloat($column)) {
+                                $name = 'Decimal';
+                            }
+                            if (ColumnDefinition::isBoolean($column)) {
+                                $name = 'Boolean';
+                            }
+                            $errors[] = sprintf('Value is not a %s (%s)', $name, $regex);
+                        } else {
+                            $errors[] = sprintf('Value requires format %s', $regex);
+                        }
+                    }
+                }
+            }
+
+            if ($errors) {
+                $result[$column->getName()] = $errors;
+            }
+        }
+
+        return $result;
+    }
+} 

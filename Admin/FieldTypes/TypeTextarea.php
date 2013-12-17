@@ -2,7 +2,7 @@
 
 namespace Kryn\CmsBundle\Admin\FieldTypes;
 
-class TypeTextarea extends AbstractType
+class TypeTextarea extends AbstractSingleColumnType
 {
     protected $name = 'Textarea';
 

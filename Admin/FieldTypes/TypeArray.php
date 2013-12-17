@@ -2,7 +2,7 @@
 
 namespace Kryn\CmsBundle\Admin\FieldTypes;
 
-class TypeArray extends AbstractType
+class TypeArray extends AbstractSingleColumnType
 {
     protected $name = 'Array';
 

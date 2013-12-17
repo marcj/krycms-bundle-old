@@ -2,12 +2,15 @@
 
 namespace Kryn\CmsBundle\ORM\Builder;
 
+use Kryn\CmsBundle\Admin\FieldTypes\ColumnDefinitionInterface;
+use Kryn\CmsBundle\Admin\FieldTypes\RelationDefinitionInterface;
 use Kryn\CmsBundle\Configuration\Bundle;
 use \Kryn\CmsBundle\Exceptions\ModelBuildException;
 use Kryn\CmsBundle\Configuration\Field;
 use Kryn\CmsBundle\Configuration\Object;
 use Kryn\CmsBundle\Filesystem\Filesystem;
 use Kryn\CmsBundle\Objects;
+use Kryn\CmsBundle\ORM\ORMAbstract;
 use Kryn\CmsBundle\Tools;
 
 class Propel implements BuildInterface
@@ -63,11 +66,9 @@ class Propel implements BuildInterface
         }
 
         $objectTable['name'] = $object['table'];
-        $objectTable['phpName'] = $object['propelClassName'] ? : ucfirst($object->getId());
+        $objectTable['phpName'] = ucfirst($object->getId());
 
         $columnsDefined = array();
-
-//        $clonedTable = simplexml_load_string($objectTable->asXML());
 
         //removed all non-custom foreign-keys
         $foreignKeys = $objectTable->xpath("foreign-key[not(@custom='true')]");
@@ -83,47 +84,51 @@ class Propel implements BuildInterface
 
         foreach ($object->getFields() as $field) {
 
-            $columns = $this->getColumnFromField(
-                ucfirst($bundle->getNamespace()) . '\\' . $object->getId(),
-                $field->getId(),
-                $field,
-                $objectTable,
-                $xml,
-                $null,
-                $bundle
-            );
+            if ($columns = $field->getFieldType()->getColumns()) {
+                foreach ($columns as $column) {
+                    $name = Tools::camelcase2Underscore($column->getName());
 
-            if (!$columns) {
-                continue;
-            }
+                    //column exist?
+                    $eColumns = $objectTable->xpath('column[@name =\'' . $name . '\']');
 
-            foreach ($columns as $key => $column) {
-                //column exist?
-                $eColumns = $objectTable->xpath('column[@name =\'' . $key . '\']');
-
-                if ($eColumns) {
-                    $newCol = current($eColumns);
-                    if ($newCol['custom'] == true) {
-                        continue;
+                    if ($eColumns) {
+                        $newCol = current($eColumns);
+                        if ($newCol['custom'] == true) {
+                            continue;
+                        }
+                    } else {
+                        $newCol = $objectTable->addChild('column');
                     }
-                } else {
-                    $newCol = $objectTable->addChild('column');
-                }
 
-                $newCol['name'] = $key;
-                $columnsDefined[] = $key;
+                    $columnsDefined[] = $name;
 
-                foreach ($column as $k => $v) {
-                    $newCol[$k] = $v;
+                    $this->setupColumnAttributes($column, $newCol);
+
+                    if ($field->isRequired()) {
+                        $newCol['required'] = 'true';
+                    }
+
+                    if ($field->isPrimaryKey()) {
+                        $newCol['primary'] = 'true';
+                    }
+
+                    if ($field->isAutoIncrement()) {
+                        $newCol['autoIncrement'] = 'true';
+                    }
                 }
+            }
+        }
+
+        if ($relations = $object->getRelations()) {
+            foreach ($relations as $relation) {
+                $this->addRelation($relation, $objectTable);
             }
         }
 
         //check for deleted columns
         $columns = $objectTable->xpath("column[not(@custom='true')]");
         foreach ($columns as $k => $column) {
-            $col = $object->getField(underscore2Camelcase($column['name']));
-            if (!$col) {
+            if (!in_array($column['name'], $columnsDefined)) {
                 unset($columns[$k][0]);
             }
         }
@@ -140,10 +145,15 @@ class Propel implements BuildInterface
 
         $vendors = $objectTable->xpath('vendor[@type=\'mysql\']');
         if ($vendors) {
-            $vendor = current($vendors);
-        } else {
-            $vendor = $objectTable->addChild('vendor');
+            foreach ($vendors as $k => $v){
+                unset($vendors[$k][0]);
+            }
+//            $vendor = current($vendors);
         }
+//        } else {
+
+        $vendor = $objectTable->addChild('vendor');
+//        }
         $vendor['type'] = 'mysql';
 
         $params = $vendor->xpath('parameter[@name=\'Charset\']');
@@ -161,12 +171,110 @@ class Propel implements BuildInterface
         $dom->loadXML($xml->asXML());
         $dom->formatOutput = true;
 
+//        echo 'xml: '. htmlentities($dom->saveXml());
         $this->filesystem->write($modelsFile, $dom->saveXml());
 
         return true;
     }
 
-    public function getPropelColumnType($field)
+    protected function addRelation(RelationDefinitionInterface $relation, &$xmlTable)
+    {
+        if (ORMAbstract::MANY_TO_ONE == $relation->getType()) {
+            $this->addForeignKey($relation, $xmlTable);
+        }
+    }
+
+    protected function addForeignKey(RelationDefinitionInterface $relation, &$xmlTable)
+    {
+        $relationName = $relation->getName();
+        $foreignObject = $this->objects->getDefinition($relation->getForeignObjectKey());
+
+        if (!$foreignObject) {
+            throw new ModelBuildException(sprintf(
+                'Object `%s` does not exist in relation `%s`',
+                $relation->getForeignObjectKey(),
+                $relation->getName()
+            ));
+        }
+
+        if ('propel' !== strtolower($foreignObject->getDataModel())) {
+            throw new ModelBuildException(sprintf(
+                'Can not create a relation between two different dataModels. Got `%s` but propel is needed.',
+                $foreignObject->getDataModel()
+            ));
+        }
+
+        $foreigns = $xmlTable->xpath('foreign-key[@phpName=\'' . $relationName . '\']');
+        if ($foreigns) {
+            $foreignKey = current($foreigns);
+        } else {
+            $foreignKey = $xmlTable->addChild('foreign-key');
+        }
+
+        $foreignKey['phpName'] = $relationName;
+        $foreignKey['foreignTable'] = $foreignObject->getTable();
+
+        $foreignKey['onDelete'] = $relation->getOnDelete();
+        $foreignKey['onUpdate'] = $relation->getOnUpdate();
+
+        $references = $foreignKey->xpath("reference[not(@custom='true')]");
+        foreach ($references as $i => $ref) {
+            unset($references[$i][0]);
+        }
+
+        foreach ($relation->getReferences() as $reference) {
+            $localName = Tools::camelcase2Underscore($reference->getLocalColumn()->getName());
+            $references = $foreignKey->xpath('reference[@local=\'' . $localName . '\']');
+            if ($references) {
+                $xmlReference = current($references);
+            } else {
+                $xmlReference = $foreignKey->addChild('reference');
+            }
+
+            $xmlReference['local'] = $localName;
+            $xmlReference['foreign'] = Tools::camelcase2Underscore($reference->getForeignColumn()->getName());
+        }
+
+    }
+
+    protected function setupColumnAttributes(ColumnDefinitionInterface $column, $xmlColumn)
+    {
+        $xmlColumn['name'] = Tools::camelcase2Underscore($column->getName());
+
+        $type = $column->getSqlDataType();
+        $size = null;
+        if (false !== $pos = strpos($type, '(')) {
+            $type = substr($type, 0, $pos);
+            $size = trim(str_replace(['(', ')'], '', substr($type, $pos)));
+        }
+
+        $propelType = $this->getPropelColumnType($type);
+
+        $xmlColumn['type'] = strtoupper($propelType);
+
+        if ($size) {
+            $xmlColumn['size'] = $size;
+        }
+    }
+
+
+    /**
+     * Transform some sql types to propel types
+     *
+     * @param string $type
+     * @return mixed
+     */
+    public function getPropelColumnType($type)
+    {
+        $map = [
+            'text' => 'LONGVARCHAR',
+        ];
+
+        return @$map[strtolower($type)] ? : $type;
+    }
+
+
+    public function getP2222ropelColumnType($field)
     {
 
         switch (strtolower($field['type'])) {

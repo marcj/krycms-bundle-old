@@ -2,7 +2,7 @@
 
 namespace Kryn\CmsBundle\Admin\FieldTypes;
 
-class TypeView extends AbstractType
+class TypeView extends AbstractSingleColumnType
 {
     protected $name = 'View';
 

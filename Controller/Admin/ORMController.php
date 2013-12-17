@@ -43,7 +43,16 @@ class ORMController extends Controller
      */
     public function writeModelsAction()
     {
+    }
 
+    /**
+     *
+     * @Rest\Get("admin/system/orm/build")
+     */
+    public function build()
+    {
+        $modelBuilder = $this->getKrynCore()->getModelBuilder();
+        return $modelBuilder->build();
     }
 
     /**

@@ -2,7 +2,7 @@
 
 namespace Kryn\CmsBundle\Admin\FieldTypes;
 
-class TypeWysiwyg extends AbstractType
+class TypeWysiwyg extends AbstractSingleColumnType
 {
     protected $name = 'Wysiwyg';
 

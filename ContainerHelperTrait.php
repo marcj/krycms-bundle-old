@@ -13,6 +13,14 @@ trait ContainerHelperTrait
     }
 
     /**
+     * @return ORM\Builder\Builder
+     */
+    public function getModelBuilder()
+    {
+        return $this->container->get('kryn_cms.model.builder');
+    }
+
+    /**
      * Returns a Filesystem interface for the root folder (where your composer.json is placed)
      *
      * @return \Kryn\CmsBundle\Filesystem\FilesystemInterface

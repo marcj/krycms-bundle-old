@@ -526,6 +526,9 @@ class EditorController extends ContainerAware
         }
 
         $modelBuilder = $this->getKrynCore()->getModelBuilder();
+        return $modelBuilder->build();
+
+
         $errors = [];
 
         foreach ($config->getObjects() as $object) {
@@ -547,22 +550,22 @@ class EditorController extends ContainerAware
             }
         }
 
-        $path = $this->getKrynCore()->getBundleDir($bundle) . 'Resources/config/kryn.propel.schema.xml';
-        if (!file_exists($path) && !touch($path)) {
-            throw new ModelBuildException(sprintf('File `%s` is not writeable.', $path));
-        }
-
-        $result = array();
-        foreach ($config->getObjects() as $object) {
-            /** @var $object Object */
-            try {
-                $result[$object->getId()] = $this->setModelFromObject($bundle, $object);
-            } catch (ModelBuildException $e) {
-                $result[$object->getId()] = $e->getMessage();
-            }
-        }
-
-        return $result;
+//        $path = $this->getKrynCore()->getBundleDir($bundle) . 'Resources/config/kryn.propel.schema.xml';
+//        if (!file_exists($path) && !touch($path)) {
+//            throw new ModelBuildException(sprintf('File `%s` is not writeable.', $path));
+//        }
+//
+//        $result = array();
+//        foreach ($config->getObjects() as $object) {
+//            /** @var $object Object */
+//            try {
+//                $result[$object->getId()] = $this->setModelFromObject($object);
+//            } catch (ModelBuildException $e) {
+//                $result[$object->getId()] = $e->getMessage();
+//            }
+//        }
+//
+//        return $result;
     }
 
     /**
@@ -570,18 +573,11 @@ class EditorController extends ContainerAware
      * @param Object $object
      * @return bool
      */
-    protected function setModelFromObject(BundleInterface $bundle, Object $object)
+    protected function setModelFromObject(Object $object)
     {
-        // todo, make it as a service with tags
-        $clazz = 'Kryn\CmsBundle\ORM\Sync\\' . ucfirst($object->getDataModel());
-        if (class_exists($clazz)) {
-            /** @var $sync \Kryn\CmsBundle\ORM\Sync\SyncInterface */
-            $sync = new $clazz();
+        $modelBuilder = $this->getModelBuilder();
 
-            return $sync->syncObject($bundle, $object);
-        }
-
-        return false;
+        return $modelBuilder->buildModel($object);
     }
 
     /**
