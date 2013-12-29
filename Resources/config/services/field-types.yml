@@ -33,6 +33,11 @@ services:
          tags:
              - { name: kryn_cms.field.type, alias: text }
 
+     kryn_cms.field.types.theme:
+         class: %kryn_cms.field.types.text.class%
+         tags:
+             - { name: kryn_cms.field.type, alias: theme }
+
      kryn_cms.field.types.number:
          class: %kryn_cms.field.types.number.class%
          tags:
