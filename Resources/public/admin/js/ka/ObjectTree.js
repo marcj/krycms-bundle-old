@@ -294,8 +294,8 @@ ka.ObjectTree = new Class({
             pId = ka.getObjectId(this.options.objectKey, pId);
         } else {
             //we assume its a objectUrl
-            pId = ka.getObjectIdFromUrl(pId);
             objectKey = ka.getCroppedObjectKey(pId) || this.options.objectKey;
+            pId = ka.getObjectIdFromUrl(pId);
         }
 
         if (objectKey != this.options.objectKey) {
@@ -307,7 +307,7 @@ ka.ObjectTree = new Class({
             return;
         }
 
-        new Request.JSON({url: this.getUrl() + ka.getObjectUrlIdFromId(pId) + '/:parents', noCache: 1, onComplete: function(response) {
+        new Request.JSON({url: this.getUrl() + ka.getObjectUrlIdFromId(objectKey, pId) + '/:parents', noCache: 1, onComplete: function(response) {
             this.load_object_children = [];
             Array.each(response.data, function(item) {
                 if (item._object && ka.normalizeObjectKey(item._object) && ka.normalizeObjectKey(this.options.objectKey)) {
