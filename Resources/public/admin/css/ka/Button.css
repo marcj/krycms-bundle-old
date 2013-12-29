@@ -75,6 +75,7 @@ a.ka-Button:before {
     padding-left: 0px;
     position: relative;
     top: 1px;
+    margin-right: 5px;
 }
 
 a.ka-Button-textAndIcon:before {

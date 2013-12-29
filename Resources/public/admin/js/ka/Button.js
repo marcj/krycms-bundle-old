@@ -207,7 +207,6 @@ ka.Button = new Class({
     },
 
     /**
-     *
      * @param {String} pText
      * @param {Integer} pDelay Default is 300
      */
