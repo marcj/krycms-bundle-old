@@ -29,7 +29,7 @@ window.logger = function(){
     if ('undefined' !== typeof console) {
         console.error.apply(console, arguments);
     }
-}
+};
 
 /**
  * Opens the frontend in a new tab.
@@ -60,7 +60,7 @@ ka.getAdminInterface = function() {
  */
 window._ = window.t = ka.t = function(message, plural, count, context) {
     return ka._kml2html(ka.translate(message, plural, count, context));
-}
+};
 
 /**
  * Return a translated message with plural and context ability.
@@ -101,7 +101,7 @@ ka.translate = function(message, plural, count, context) {
     } else {
         return ((!count || count === 1) && count !== 0) ? message : plural;
     }
-}
+};
 
 /**
  * sprintf for translations.
@@ -116,7 +116,7 @@ window.tf = ka.tf = function() {
     }
 
     return text.sprintf.apply(text, args);
-}
+};
 
 /**
  * Return a translated message within a context.
@@ -126,7 +126,7 @@ window.tf = ka.tf = function() {
  */
 window.tc = ka.tc = function(context, message) {
     return t(message, null, null, context);
-}
+};
 
 /**
  * Replaces some own <ka:> elements with correct html.
@@ -143,7 +143,7 @@ ka._kml2html = function(message) {
         message = message.replace(/<ka:help\s+id="(.*)">(.*)<\/ka:help>/g, '<a href="javascript:;" onclick="ka.wm.open(\'admin/help\', {id: \'$1\'}); return false;">$2</a>');
     }
     return message;
-}
+};
 
 ka.entrypoint = {
 
@@ -215,7 +215,7 @@ ka.entrypoint = {
             throw 'Config not found for module ' + extension;
         }
 
-        tempEntry = config.entryPoints[splitted.shift()]
+        var tempEntry = config.entryPoints[splitted.shift()]
         if (!tempEntry) {
             return null;
         }
@@ -241,7 +241,6 @@ ka.entrypoint = {
 
         return tempEntry;
     }
-
 };
 
 /**
@@ -268,7 +267,7 @@ ka.htmlEntities = function(value) {
         return value;
     }
     return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
+};
 
 /**
  * Creates a new information bubble on the right corner.
@@ -281,7 +280,7 @@ ka.htmlEntities = function(value) {
  */
 ka.newBubble = function(title, text, duration) {
     return ka.adminInterface.getHelpSystem().newBubble(title, text, duration);
-}
+};
 
 /**
  * Adds a prefix to the keys of pFields.
@@ -313,7 +312,7 @@ ka.addFieldKeyPrefix = function(fields, prefix) {
             ka.addFieldKeyPrefix(field.children, prefix);
         }
     });
-}
+};
 
 /**
  * Resolve path notations and returns the appropriate class.
@@ -335,7 +334,7 @@ ka.getClass = function(classPath) {
     }
 
     return window[classPath];
-}
+};
 
 /**
  * Encodes a value from url usage.
@@ -347,17 +346,17 @@ ka.getClass = function(classPath) {
  * @return {String}
  */
 ka.urlEncode = function(value) {
-
+	var result;
     if (typeOf(value) == 'string') {
         return encodeURIComponent(value).replace(/\%2F/g, '%252F'); //fix apache default setting
     } else if (typeOf(value) == 'array') {
-        var result = '';
+        result = '';
         Array.each(value, function(item) {
             result += ka.urlEncode(item) + ',';
         });
         return result.substr(0, result.length - 1);
     } else if (typeOf(value) == 'object') {
-        var result = '';
+        result = '';
         Array.each(value, function(item, key) {
             result += key + '=' + ka.urlEncode(item) + ',';
         });
@@ -365,8 +364,7 @@ ka.urlEncode = function(value) {
     }
 
     return value;
-
-}
+};
 
 /**
  * Decodes a value for url usage.
@@ -385,7 +383,7 @@ ka.urlDecode = function(value) {
     } catch (e) {
         return value;
     }
-}
+};
 
 /**
  * Normalizes a objectKey.
@@ -404,7 +402,7 @@ ka.normalizeObjectKey = function(objectKey) {
     }
 
     return bundleName + '/' + objectName.lcfirst();
-}
+};
 
 /**
  * Normalizes a entryPoint path.
@@ -423,7 +421,7 @@ ka.normalizeEntryPointPath = function(path) {
     var slash = path.indexOf('/');
 
     return ka.getShortBundleName(path.substr(0, slash)) + path.substr(slash);
-}
+};
 
 /**
  * Returns a absolute path.
@@ -452,7 +450,7 @@ ka.mediaPath = function(path) {
     } else {
         return _path + '' + path;
     }
-}
+};
 
 /**
  * Returns a list of the primary keys.
@@ -472,7 +470,7 @@ ka.getObjectPrimaryList = function(objectKey) {
     });
 
     return res;
-}
+};
 
 /**
  * Returns the primaryKey name.
@@ -484,7 +482,7 @@ ka.getObjectPrimaryList = function(objectKey) {
 ka.getObjectPrimaryKey = function(objectKey) {
     var pks = ka.getObjectPrimaryList(objectKey);
     return pks[0];
-}
+};
 
 /**
  * Return only the primary key values of a object.
@@ -501,7 +499,7 @@ ka.getObjectPk = function(objectKey, item) {
         result[pk] = item[pk];
     });
     return result;
-}
+};
 
 /**
  * Return the internal representation (id) of object primary keys.
@@ -511,6 +509,8 @@ ka.getObjectPk = function(objectKey, item) {
  *
  * @param {String} objectKey
  * @param {Object} item
+ *
+ * @return {String}
  */
 ka.getObjectId = function(objectKey, item) {
     var pks = ka.getObjectPrimaryList(objectKey);
@@ -524,7 +524,7 @@ ka.getObjectId = function(objectKey, item) {
     }
 
     return item[pks[0]];
-}
+};
 
 /**
  * Returns the id part of a object url (object://<objectName>/<id>).
@@ -539,7 +539,7 @@ ka.getObjectId = function(objectKey, item) {
 ka.getObjectUrlId = function(objectKey, item) {
     var id = ka.getObjectId(objectKey, item);
     return ka.hasCompositePk(objectKey) ? id : ka.urlEncode(id);
-}
+};
 
 /**
  * Returns the correct escaped id part of the object url (object://<objectName>/<id>).
@@ -549,7 +549,7 @@ ka.getObjectUrlId = function(objectKey, item) {
  */
 ka.getObjectUrlIdFromId = function(objectKey, id) {
     return ka.hasCompositePk(objectKey) ? id : ka.urlEncode(id);
-}
+};
 
 /**
  * Returns true if objectKey as more than one primary key.
@@ -559,7 +559,7 @@ ka.getObjectUrlIdFromId = function(objectKey, id) {
  */
 ka.hasCompositePk = function(objectKey) {
     return 1 < ka.getObjectPrimaryList(objectKey).length;
-}
+};
 
 /**
  * Just converts arguments into a new string :
@@ -573,7 +573,7 @@ ka.hasCompositePk = function(objectKey) {
  */
 ka.getObjectUrl = function(objectKey, id) {
     return 'object://' + ka.normalizeObjectKey(objectKey) + '/' + id;
-}
+};
 
 /**
  * This just cut off object://<objectName>/ and returns the raw primary key part.
@@ -598,10 +598,14 @@ ka.getCroppedObjectId = function(url) {
     url = -1 === idx ? url : url.substr(idx + 1);
 
     return url;
-}
+};
 
 /**
  * This just cut anything but the full raw objectKey.
+ *
+ * Example:
+ *
+ *    kryn/file/3 => kryn/file
  *
  * @param {String} url Internal url
  *
@@ -622,7 +626,7 @@ ka.getCroppedObjectKey = function(url) {
     var lastIdx = nextPart.indexOf('/'); //till objectKey/
 
     return -1 === lastIdx ? url : url.substr(0, idx + lastIdx + 1);
-}
+};
 
 /**
  * Return the internal representation (id) of a internal object url.
@@ -652,7 +656,7 @@ ka.getObjectIdFromUrl = function(url) {
     }
 
     return ka.urlDecode(pkString);
-}
+};
 
 /**
  * Returns the object label, based on a label field or label template (defined
@@ -737,7 +741,6 @@ ka.getObjectLabel = function(uri, callback) {
             }}).get({url: uri, returnKeyAsRequested: 1});
 
     }).delay(50);
-
 };
 
 ka.getObjectLabelQ = {};
@@ -797,7 +800,7 @@ ka.getObjectLabelByItem = function(objectKey, item, mode, overwriteDefinition) {
     }
 
     return mowla.fetch(template, item);
-}
+};
 
 /**
  * Returns all labels for a object item.
@@ -822,7 +825,7 @@ ka.getObjectLabels = function(fields, item, objectKey, relationsAsArray) {
     }.bind(this));
 
     return data;
-}
+};
 
 /**
  * Returns a single label for a field of a object item.
@@ -885,7 +888,7 @@ ka.getObjectFieldLabel = function(value, field, fieldId, objectKey, relationsAsA
     var labelType = new ka.LabelTypes[clazz](oriField, showAsField, fieldId, objectKey);
 
     return labelType.render(value);
-}
+};
 
 /**
  * Returns the module title of the given module key.
@@ -901,7 +904,7 @@ ka.getBundleTitle = function(key) {
     }
 
     return config.label || config.name;
-}
+};
 
 /**
  *
@@ -938,7 +941,7 @@ ka.dateTime = function(seconds) {
     }
 
     return date.format(format);
-}
+};
 
 /**
  * Returns a domain object.
@@ -952,9 +955,9 @@ ka.getDomain = function(id) {
         if (domain.id == id) {
             result = domain;
         }
-    })
+    });
     return result;
-}
+};
 
 /**
  * Loads all settings from the backend.
@@ -964,7 +967,7 @@ ka.getDomain = function(id) {
  */
 ka.loadSettings = function(keyLimitation, callback) {
     ka.adminInterface.loadSettings(keyLimitation, callback);
-}
+};
 
 /**
  * Returns the bundle configuration array.
@@ -975,7 +978,7 @@ ka.loadSettings = function(keyLimitation, callback) {
 ka.getConfig = function(bundleName) {
     if (!bundleName) return;
     return ka.settings.configs[bundleName] || ka.settings.configs[bundleName.toLowerCase()] || ka.settings.configsAlias[bundleName] || ka.settings.configsAlias[bundleName.toLowerCase()];
-}
+};
 
 /**
  * Returns the short bundleName.
@@ -985,7 +988,20 @@ ka.getConfig = function(bundleName) {
  * @returns {string}
  */
 ka.getShortBundleName = function(bundleName) {
-    return bundleName.toLowerCase().replace(/bundle$/, '');
+    return ka.getBundleName(bundleName).toLowerCase().replace(/bundle$/, '');
+};
+
+/**
+ * Returns the bundle name.
+ *
+ * Kryn\CmsBundle\KrynCmsBundle => KrynCmsBundle
+ *
+ * @param {String} bundleClass
+ * @return {String} returns only the base bundle name
+ */
+ka.getBundleName = function(bundleClass) {
+	var split = bundleClass.split('\\');
+	return split[split.length -1];
 };
 
 /**
@@ -993,7 +1009,7 @@ ka.getShortBundleName = function(bundleName) {
  */
 ka.loadMenu = function() {
     ka.adminInterface.loadMenu();
-}
+};
 
 /**
  * Sets the current language and reloads all messages.
@@ -1014,8 +1030,7 @@ ka.loadLanguage = function(languageCode) {
         ka.lang = pResponse.data;
         Locale.define('en-US', 'Date', ka.lang);
     }}).get();
-
-}
+};
 
 /**
  * Register a new stream and starts probably the stream process.
@@ -1029,7 +1044,7 @@ ka.registerStream = function(path, callback) {
     }
     ka.streamRegistered[path].push(callback);
     ka.loadStream();
-}
+};
 
 ka.streamRegistered = {};
 
@@ -1052,7 +1067,7 @@ ka.deRegisterStream = function(path, callback) {
         delete ka.streamRegistered[path];
     }
     ka.loadStream();
-}
+};
 
 /**
  * The stream loader loop.
@@ -1092,7 +1107,7 @@ ka.loadStream = function() {
             }}).get(ka.streamParams);
         }
     }).delay(50);
-}
+};
 
 /**
  * Returns the current value in the clipboard of the interface (not browser)
@@ -1101,7 +1116,7 @@ ka.loadStream = function() {
  */
 ka.getClipboard = function() {
     return ka.clipboard;
-}
+};
 
 /**
  * Sets the current clipboard of the interface (not browser)
@@ -1113,7 +1128,7 @@ ka.getClipboard = function() {
 ka.setClipboard = function(title, type, value) {
     ka.clipboard = { type: type, value: value };
     window.fireEvent('clipboard');
-}
+};
 
 /**
  * Checks if current clipboard has the given type.
@@ -1124,14 +1139,14 @@ ka.setClipboard = function(title, type, value) {
  */
 ka.isClipboard = function(type) {
     return ka.getClipboard() && type === ka.getClipboard().type;
-}
+};
 
 /**
  * Clears the clipboard.
  */
 ka.clearClipboard = function() {
     ka.clipboard = {};
-}
+};
 
 ka.closeDialogsBodys = [];
 
@@ -1152,7 +1167,7 @@ ka.closeDialog = function() {
             last.close();
         }
     });
-}
+};
 
 /**
  * Positions options.element near options.target with settings of options.primary or options.secondary.
@@ -1268,7 +1283,7 @@ ka.openDialog = function(options) {
     autoPositionLastOverlay.updatePosition = updatePosition;
 
     return autoPositionLastOverlay;
-}
+};
 
 /**
  * Returns the object definition as object.
@@ -1292,7 +1307,7 @@ ka.getObjectDefinition = function(objectKey) {
         config._key = objectKey;
         return config;
     }
-}
+};
 
 /**
  * Returns the default caching definition for ka.Fields.
@@ -1343,7 +1358,7 @@ ka.getFieldCaching = function() {
             }
         }
     }
-}
+};
 
 /**
  * Quotes string to be used in a regEx.
@@ -1366,7 +1381,7 @@ ka.pregQuote = function(string) {
     // *     returns 3: '\\\.\+\*\?\[\^\]\$\(\)\{\}\=\!\<\>\|\:'
 
     return (string + '').replace(/([\\\.\+\*\?\[\^\]\$\(\)\{\}\=\!\<\>\|\:])/g, "\\$1");
-}
+};
 
 /**
  * Generates little noise at element background.
@@ -1402,4 +1417,4 @@ ka.generateNoise = function(element, opacity) {
     }
 
     element.style.backgroundImage = "url(" + canvas.toDataURL("image/png") + ")";
-}
+};
