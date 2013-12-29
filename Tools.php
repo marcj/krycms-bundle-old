@@ -44,7 +44,7 @@ class Tools {
 
     public static function camelcase2Underscore($value)
     {
-        return strtolower(preg_replace('/([a-z])([A-Z])/', '$1_$2', $value));
+        return strtolower(preg_replace('/([a-z0-9])([A-Z])/', '$1_$2', $value));
     }
 
     /**
