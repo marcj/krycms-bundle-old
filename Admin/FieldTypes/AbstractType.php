@@ -77,6 +77,11 @@ abstract class AbstractType implements TypeInterface
         return $this->value;
     }
 
+    public function mapValues(array &$data)
+    {
+        $data[$this->getFieldDefinition()->getId()] = $this->getValue();
+    }
+
     /**
      * @param Field $field
      */
@@ -122,7 +127,8 @@ abstract class AbstractType implements TypeInterface
             } else {
                 if ($regex = $column->getRequiredRegex()) {
                     $valueString = (string)$value;
-                    if (!preg_match('/' . addslashes($regex) . '/', $valueString)) {
+
+                    if (!preg_match('/' . $regex . '/', $valueString)) {
 
                         if (ColumnDefinition::isInteger($column) || ColumnDefinition::isFloat($column) || ColumnDefinition::isBoolean($column)) {
                             $name = 'Integer';
@@ -147,4 +153,26 @@ abstract class AbstractType implements TypeInterface
 
         return $result;
     }
-} 
+
+	/**
+	 * @return string
+	 */
+	public function getPhpDataType()
+	{
+		if (1 < count($this->getColumns())) {
+			return 'array';
+		}
+		if ($this->getColumns()) {
+			$first = $this->getColumns()[0];
+			if (ColumnDefinition::isInteger($first)) {
+				return 'integer';
+			} else if (ColumnDefinition::isBoolean($first)) {
+				return 'boolean';
+			} else if (ColumnDefinition::isFloat($first)) {
+				return 'float';
+			} else {
+				return 'string';
+			}
+		}
+	}
+}

@@ -37,15 +37,15 @@ ka.FieldAbstract = new Class({
      * Constructor.
      *
      * @internal
-     * @param  {Object} pFieldInstance The instance of ka.Field
-     * @param  {Object} pOptions
+     * @param  {Object} fieldInstance The instance of ka.Field
+     * @param  {Object} options
      */
-    initialize: function (pFieldInstance, pOptions) {
-        this.fieldInstance = pFieldInstance;
+    initialize: function (fieldInstance, options) {
+        this.fieldInstance = fieldInstance;
         this.win = this.fieldInstance.win;
-        pOptions = pOptions || {};
-        this.setOptions(pOptions);
-        this.options = Object.merge(pOptions, this.options); //keep on* keys available. setOptions will delete those
+        options = options || {};
+        this.setOptions(options);
+        this.options = Object.merge(options, this.options); //keep on* keys available. setOptions will delete those
         this.createLayout(this.fieldInstance.fieldPanel);
     },
 
@@ -81,9 +81,9 @@ ka.FieldAbstract = new Class({
      * This method is called, when the option 'disabled' is true and there this field
      * should act as a disabled one.
      *
-     * @param {Boolean} pDisabled
+     * @param {Boolean} disabled
      */
-    setDisabled: function (pDisabled) {
+    setDisabled: function (disabled) {
         /* Override it to your needs */
     },
 
@@ -104,11 +104,22 @@ ka.FieldAbstract = new Class({
      * Renders the UI with the new value.
      * Do not call this function in your code.
      *
-     * @param {Mixed} pValue
+     * @param {*} value
+     * @param {Boolean} internal
      */
-    setValue: function (pValue, pInternal) {
+    setValue: function (value, internal) {
         /* Override it to your needs */
     },
+
+//    /**
+//     * Same as setValue but `values` is a object with all values used in ka.FieldForm.
+//     *
+//     * @param {Object} values
+//     * @param {boolean} internal
+//     */
+//    setValues: function(values, internal) {
+//
+//    },
 
     /**
      * Returns true if the content value has been changed.
@@ -246,9 +257,9 @@ ka.FieldAbstract = new Class({
     /**
      * If the entered data is no valid, this will be fired. (possible with each 'change' event)
      *
-     * @param  {String} pText text to display
+     * @param  {String} text text to display
      */
-    showInvalid: function (pText) {
+    showInvalid: function (text) {
         if (!((this.main || this.input) && (this.wrapper || this.input))) {
             return;
         }
@@ -261,7 +272,7 @@ ka.FieldAbstract = new Class({
             'class': 'ka-field-invalid-icon icon-warning blink'
         }).inject(this.wrapper || this.input, 'after');
 
-        var text = pText || this.options.notValidText || t('The current value is invalid.');
+        var text = text || this.options.notValidText || t('The current value is invalid.');
 
         this.invalidText = new Element('div', {
             'class': 'ka-field-invalid-text',

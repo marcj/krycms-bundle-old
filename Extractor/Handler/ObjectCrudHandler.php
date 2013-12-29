@@ -142,35 +142,5 @@ class ObjectCrudHandler implements HandlerInterface
             }
         }
 
-//
-//        foreach ($annotations as $annot) {
-//            if ($annot instanceof RequestParam) {
-//                $annotation->addParameter($annot->name, array(
-//                        'required'    => $annot->strict && $annot->default === null,
-//                        'dataType'    => $annot->requirements,
-//                        'description' => $annot->description,
-//                        'readonly'    => false
-//                    ));
-//            } elseif ($annot instanceof QueryParam) {
-//                if ($annot->strict && $annot->nullable === false && $annot->default === null) {
-//                    $annotation->addRequirement($annot->name, array(
-//                            'requirement'   => $annot->requirements,
-//                            'dataType'      => '',
-//                            'description'   => $annot->description,
-//                        ));
-//                } elseif ($annot->default !== null) {
-//                    $annotation->addFilter($annot->name, array(
-//                            'requirement'   => $annot->requirements,
-//                            'description'   => $annot->description,
-//                            'default'   => $annot->default,
-//                        ));
-//                } else {
-//                    $annotation->addFilter($annot->name, array(
-//                            'requirement'   => $annot->requirements,
-//                            'description'   => $annot->description,
-//                        ));
-//                }
-//            }
-//        }
     }
 }

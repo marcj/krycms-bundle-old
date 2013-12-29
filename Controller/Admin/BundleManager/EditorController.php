@@ -190,40 +190,37 @@ class EditorController extends ContainerAware
 
         $windows = array();
 
-        $bundles = $this->getKrynCore()->getBundles();
-        foreach ($bundles as $bundle) {
-            $path = $bundle->getPath() . '/Controller/';
+        $bundle = $this->getKrynCore()->getBundle($bundle);
+        $path = $bundle->getPath() . '/Controller/';
 
-            if (!file_exists($path)) {
-                continue;
-            }
+        if (!file_exists($path)) {
+            return [];
+        }
 
-            $finder = Finder::create()
-                ->in($path)
-                ->name('*Controller.php');
+        $finder = Finder::create()
+            ->in($path)
+            ->name('*Controller.php');
 
-            foreach ($finder as $class) {
-                $content = file_get_contents($class->getPathname());
+        foreach ($finder as $class) {
+            $content = file_get_contents($class->getPathname());
 
-                if (preg_match(
-                    '/class[\s\t]+([a-zA-Z0-9_]+)[\s\t]/',
-                    $content,
-                    $matches
-                )
-                ) {
-                    $clazz = $matches[1];
-                    preg_match('/namespace ([a-zA-Z0-9_\\\\]*)/', $content, $namespace);
-                    if (isset($namespace[1]) && $namespace[1]) {
-                        $clazz = $namespace[1] . '\\' . $clazz;
+            if (preg_match(
+                '/class[\s\t]+([a-zA-Z0-9_]+)[\s\t]/',
+                $content,
+                $matches
+            )
+            ) {
+                $clazz = $matches[1];
+                preg_match('/namespace ([a-zA-Z0-9_\\\\]*)/', $content, $namespace);
+                if (isset($namespace[1]) && $namespace[1]) {
+                    $clazz = $namespace[1] . '\\' . $clazz;
 
-                        $clazz = '\\' . $clazz;
+                    $clazz = '\\' . $clazz;
 
-                        if (class_exists($clazz)) {
-                            $reflection = new \ReflectionClass($clazz);
-                            $instances = $reflection->getInterfaceNames();
-                            if (in_array('Kryn\CmsBundle\Admin\ObjectCrudInterface', $instances)) {
-                                $windows[$class->getPathname()] = $clazz;
-                            }
+                    if (class_exists($clazz)) {
+                        $reflection = new \ReflectionClass($clazz);
+                        if (!$reflection->isAbstract() && $reflection->isSubclassOf('\Kryn\CmsBundle\Admin\ObjectCrudInterface')) {
+                            $windows[$class->getPathname()] = $clazz;
                         }
                     }
                 }
@@ -506,78 +503,19 @@ class EditorController extends ContainerAware
     /**
      * @ApiDoc(
      *  section="Bundle Editor",
-     *  description="Builds all necessary model files and updates database"
+     *  description="Builds all model files and updates their model schema"
      * )
      *
-     * @Rest\QueryParam(name="bundle", requirements=".*", strict=true, description="The bundle name")
+     * @Rest\Post("/admin/system/bundle/editor/model/build")
      *
-     * @Rest\Post("/admin/system/bundle/editor/model/from-objects")
-     *
-     * @param string $bundle
-     *
-     * @return array
+     * @return boolean
      * @throws ModelBuildException
      */
-    public function setModelFromObjectsAction($bundle)
+    public function setModelFromObjectsAction()
     {
-        $config = $this->getKrynCore()->getConfig($bundle);
-        if (!$config) {
-            return null;
-        }
-
         $modelBuilder = $this->getKrynCore()->getModelBuilder();
-        return $modelBuilder->build();
-
-
-        $errors = [];
-
-        foreach ($config->getObjects() as $object) {
-            try {
-                $modelBuilder->buildModel($object);
-            } catch (ModelBuildException $e) {
-                $error = [
-                    'error' => get_class($e),
-                    'message' => $e->getMessage()
-                ];
-
-                if ($this->getKrynCore()->isDebugMode() ) {
-                    $error['file'] = $e->getFile();
-                    $error['line'] = $e->getLine();
-                    $error['trace'] = Tools::getArrayTrace($e);
-                }
-
-                $errors[$object->getId()] = $error;
-            }
-        }
-
-//        $path = $this->getKrynCore()->getBundleDir($bundle) . 'Resources/config/kryn.propel.schema.xml';
-//        if (!file_exists($path) && !touch($path)) {
-//            throw new ModelBuildException(sprintf('File `%s` is not writeable.', $path));
-//        }
-//
-//        $result = array();
-//        foreach ($config->getObjects() as $object) {
-//            /** @var $object Object */
-//            try {
-//                $result[$object->getId()] = $this->setModelFromObject($object);
-//            } catch (ModelBuildException $e) {
-//                $result[$object->getId()] = $e->getMessage();
-//            }
-//        }
-//
-//        return $result;
-    }
-
-    /**
-     * @param BundleInterface $bundle
-     * @param Object $object
-     * @return bool
-     */
-    protected function setModelFromObject(Object $object)
-    {
-        $modelBuilder = $this->getModelBuilder();
-
-        return $modelBuilder->buildModel($object);
+        $modelBuilder->build();
+        return true;
     }
 
     /**
@@ -785,7 +723,7 @@ class EditorController extends ContainerAware
      *
      * Target path is specified in $general['file'].
      *
-     * @Rest\RequestParam(name="class", requirements=".*", strict=true, description="The PHP class name")
+     * @Rest\QueryParam(name="class", requirements=".*", strict=true, description="The PHP class name")
      * @Rest\RequestParam(name="list", strict=false, description="The `list` value array")
      * @Rest\RequestParam(name="add", strict=false, description="The `add` value array")
      * @Rest\RequestParam(name="general", strict=false, description="The `general` value array")
@@ -818,7 +756,11 @@ class EditorController extends ContainerAware
         $lSlash = strrpos($class, '\\');
         $class2Name = $lSlash !== -1 ? substr($class, $lSlash + 1) : $class;
 
-        $parentClass = '\Kryn\CmsBundle\Admin\ObjectCrud';
+        $parentClass = '\Kryn\CmsBundle\Controller\WindowController';
+        $objectDefinition = $this->getKrynCore()->getObjects()->getDefinition($general['object']);
+        if ($objectDefinition->isNested()) {
+            $parentClass = '\Kryn\CmsBundle\Controller\WindowNestedController';
+        }
 
         $namespace = substr(substr($class, 1), 0, $lSlash);
         if (substr($namespace, -1) == '\\') {
@@ -924,8 +866,8 @@ class EditorController extends ContainerAware
                 $endLine = $method->getEndLine();
                 for ($i = $startLine - 1; $i < $method->getEndLine(); $i++) {
 
-                    $code .= $parentContent[$i] . "\n";
-                    if (strpos($parentContent[$i], '{')) {
+                    $code .= @$parentContent[$i] . "\n";
+                    if (strpos(@$parentContent[$i], '{')) {
                         break;
                     }
 

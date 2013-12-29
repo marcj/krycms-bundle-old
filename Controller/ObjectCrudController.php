@@ -14,7 +14,7 @@ use Nelmio\ApiDocBundle\Annotation\ApiDoc;
  * RestController for the entry points which are from type store or framework window.
  *
  */
-class ObjectCrudController extends ObjectCrud
+abstract class ObjectCrudController extends ObjectCrud
 {
     protected $obj;
 
@@ -158,7 +158,7 @@ class ObjectCrudController extends ObjectCrud
 
         $primaryKey = $this->extractPrimaryKey($request);
 
-        return $obj->update($primaryKey, $request);
+        return $obj->update($request, $primaryKey);
     }
 
     /**

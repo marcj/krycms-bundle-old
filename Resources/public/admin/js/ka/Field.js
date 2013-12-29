@@ -61,6 +61,9 @@ ka.Field = new Class({
 
     fieldForm: null,
 
+    definition: {},
+    calledDefinition: {},
+
     /**
      *
      * @param  {Object} pDefinition
@@ -75,6 +78,7 @@ ka.Field = new Class({
         this.fieldForm = pFieldForm;
 
         this.field = Object.clone(pDefinition);
+        this.calledDefinition = Object.clone(pDefinition);
 
         if (pDefinition.type == 'predefined') {
             if (!pDefinition.object) {
@@ -100,7 +104,7 @@ ka.Field = new Class({
             this.field = Object.merge(field, this.field);
         }
 
-        this.calledDefinition = Object.clone(this.field);
+        this.definition = Object.clone(this.field);
 
         this.setOptions(this.field);
         this.container = pContainer;
@@ -295,7 +299,7 @@ ka.Field = new Class({
     },
 
     renderField: function() {
-        var options = Object.clone(this.calledDefinition);
+        var options = Object.clone(this.definition);
         options.type = this.options.type ? this.options.type : 'text';
         var clazz = ka.FieldTypes[options.type] || ka.FieldTypes[options.type.capitalize()];
 
@@ -415,24 +419,24 @@ ka.Field = new Class({
     /**
      * Sets the value.
      *
-     * @param {Mixed} pValue
-     * @param {Boolean} pInternal Fires fireChange() which fires the 'change' event. Default is false.
+     * @param {*} value
+     * @param {Boolean} internal Fires fireChange() which fires the 'change' event. Default is false.
      */
-    setValue: function(pValue, pInternal) {
+    setValue: function(value, internal) {
         if (!this.fieldObject) {
             return null;
         }
 
         this.setDirty(false);
-        if (typeOf(pValue) == 'null' && this.field['default']) {
-            pValue = this.field['default'];
+        if (typeOf(value) == 'null' && this.field['default']) {
+            value = this.field['default'];
         }
 
         if (this.fieldObject) {
-            this.fieldObject.setValue(pValue, pInternal);
+            this.fieldObject.setValue(value, internal);
         }
 
-        if (pInternal) {
+        if (internal) {
             this.fireChange();
         } else {
             this.fireEvent('check-depends');
@@ -441,6 +445,10 @@ ka.Field = new Class({
             }
         }
     },
+
+//    setValues: function(values) {
+//        this.setValue(values[this.getId()]);
+//    },
 
     /**
      * A binded function, that fires 'change', 'check-depends' events and isOk() method.
@@ -457,11 +465,9 @@ ka.Field = new Class({
     },
 
     updateCookieStorage: function(pValue) {
-
         if (this.options.cookieStorage) {
             Cookie.write(this.options.cookieStorage, JSON.encode(pValue));
         }
-
     },
 
     /**
@@ -892,9 +898,13 @@ ka.Field = new Class({
         return this.key;
     },
 
+    /**
+     * Returns the current definition of this field.
+     *
+     * @returns {Object}
+     */
     getDefinition: function() {
-
-        var definition = this.calledDefinition;
+        var definition = this.definition;
 
         var children = this.getChildren();
 
@@ -908,7 +918,15 @@ ka.Field = new Class({
         }
 
         return definition;
+    },
 
+    /**
+     * Returns the called definition (without modification. e.g. 'predefined')
+     *
+     * @return {Object}
+     */
+    getCalledDefinition: function() {
+        return this.calledDefinition;
     },
 
     /**
@@ -927,33 +945,6 @@ ka.Field = new Class({
 
         this._setValue = this.obj.setValue.bind(this.obj);
         this.getValue = this.obj.getValue.bind(this.obj);
-    },
-
-    setArrayValue: function(pValues, pKey, pInternal) {
-        if (typeOf(pValues) === 'null') {
-            this.setValue(null, true);
-            return;
-        }
-
-        var values = Object.clone(pValues);
-        pKey = pKey.replace('[', '.').replace(']', '');
-        var keys = pKey.split('.');
-        var notFound = false;
-        Array.each(keys, function(key) {
-            if (notFound) {
-                return;
-            }
-            if (values[key]) {
-                values = values[key];
-            } else {
-                notFound = true;
-            }
-
-        });
-
-        if (!notFound) {
-            this.setValue(values, pInternal);
-        }
     },
 
     /**

@@ -6,7 +6,7 @@ use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 use FOS\RestBundle\Request\ParamFetcher;
 use Symfony\Component\HttpFoundation\Request;
 
-class NestedObjectCrudController extends ObjectCrudController
+abstract class NestedObjectCrudController extends ObjectCrudController
 {
     /**
      * @ApiDoc(

@@ -41,7 +41,7 @@ class TypeObject extends AbstractType
                 ));
             }
 
-            /** @var $columns ColumnDefinitionInterface[] */
+            /** @var $columns ColumnDefinition[] */
             $columns = [];
 
             foreach ($foreignObjectDefinition->getPrimaryKeys() as $pk) {
@@ -57,6 +57,32 @@ class TypeObject extends AbstractType
 
             return $columns;
         }
+    }
+
+    /**
+     * @return array
+     */
+    public function getValue()
+    {
+        $value = [];
+        $columns = $this->getColumns();
+        $firstColumn = $columns[0];
+        if (1 === count($columns)) {
+            $value[$firstColumn->getName()] = $this->value;
+        } else {
+            if (is_array($this->value)) {
+                foreach ($this->getColumns() as $column) {
+                    $value[$column->getName()] = $this->value[$column->getName()];
+                }
+            }
+        }
+        return $value;
+    }
+
+    public function mapValues(array &$data)
+    {
+        $value = $this->getValue();
+        $data = array_merge($data, $value);
     }
 
     /**
@@ -86,7 +112,6 @@ class TypeObject extends AbstractType
     {
         //check for n-to-n relation and create crossTable
         //check for 1-to-n objectRelations and create cross object w/ relations
-
         $changed = false;
 
         if (ORMAbstract::MANY_TO_MANY == $this->getFieldDefinition()->getObjectRelation()) {
@@ -107,6 +132,7 @@ class TypeObject extends AbstractType
     }
 
     /**
+     * @param Object $objectDefinition
      * @param Configs $configs
      * @return bool
      */
@@ -136,6 +162,11 @@ class TypeObject extends AbstractType
                 $crossObject->setTable($objectDefinition->getTable() . '_' . Tools::camelcase2Underscore($foreignObjectDefinition->getId()));
                 $changed = true;
             }
+        }
+
+        if (!$crossObject->isCrossRef()) {
+            $crossObject->setCrossRef(true);
+            $changed = true;
         }
 
         if (!$crossObject->getField($objectDefinition->getId())) {

@@ -120,32 +120,8 @@ class Builder
     {
         $this->bootBuildTime();
 
-        $built = [];
-        foreach ($this->objects as $object) {
-            if ($builder = $this->getBuilder($object->getDataModel())) {
-                $built[$object->getDataModel()][] = $builder->build($object);
-            } else {
-                $built[$object->getDataModel()][] = 'no-found';
-            }
-        }
-
-        return $built;
-    }
-
-//    public function buildObject($objectKey)
-//    {
-//        $object = $this->getKrynCore()->getDefinition($objectKey);
-//
-//        return $this->buildModel($object);
-//    }
-//
-    public function buildModel(Object $object)
-    {
-        $this->bootBuildTime();
-
-        if ($builder = $this->getBuilder($object->getDataModel())) {
-            return $builder->build($object);
+        foreach ($this->builder as $builder) {
+            $builder->build($this->objects);
         }
     }
-
 }

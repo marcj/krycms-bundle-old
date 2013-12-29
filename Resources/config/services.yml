@@ -196,6 +196,6 @@ services:
 
      kryn_cms.model.builder.propel:
         class: %kryn_cms.model.builder.propel.class%
-        arguments: [@kryn_cms.filesystem.local, @kryn_cms.objects]
+        arguments: [@kryn_cms.filesystem.local, @kryn_cms.objects, @kernel]
         tags:
             - { name: kryn_cms.model.builder, alias: propel }

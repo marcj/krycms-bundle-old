@@ -66,8 +66,6 @@ var kryncms_system_module_editWindow = new Class({
             workspace: {
                 label: t('Workspace'),
                 type: 'checkbox',
-                needValue: 'object',
-                againstField: 'dataModel',
                 help: 'admin/extensions-object-workspace'
             },
 
@@ -810,7 +808,7 @@ var kryncms_system_module_editWindow = new Class({
                         return;
                     }
 
-                    children[field.instance.getKey()] = field.instance.getDefinition();
+                    children[field.instance.getKey()] = field.instance.getCalledDefinition();
                     delete children[field.instance.getKey()].designMode;
                     delete children[field.instance.getKey()].key;
 
@@ -842,127 +840,16 @@ var kryncms_system_module_editWindow = new Class({
 
         req.fields = fields;
 
-        logger(req);
-
-        this.saveBtn.startTip(t('Saving ...'));
-
         if (this.lastSaveReq) {
             this.lastSaveReq.cancel();
         }
 
-        this.lastSaveReq = new Request.JSON({url: _pathAdmin + 'admin/system/bundle/editor/window?class=' +
-            req.general['class'], noCache: 1,
-            onComplete: function (pResponse) {
-
-                if (pResponse.data) {
-                    this.saveBtn.stopTip(t('Done'));
-                } else {
-                    this.saveBtn.stopTip(t('Failed'));
-                }
-
-            }.bind(this)}).post(req);
-
-        return;
-
-        if (general['class'] == 'adminWindowEdit' || general['class'] == 'adminWindowAdd') {
-
-            var tabs = this.winTabPane.buttonGroup.box.getChildren();
-
-            var fields = {};
-
-            Array.each(tabs, function (button, idx) {
-
-                var definition = Object.clone(button.retrieve('definition'));
-                var key = button.retrieve('key');
-
-                if (!key && definition.label) {
-                    key = definition.label.toLowerCase().replace(/\W/, '-');
-                } else if (!key) {
-                    return;
-                }
-
-                fields[key] = definition;
-
-                //var children = {};
-                var iIdx = 0, kaFieldObj;
-
-                var extractFields = function (pDom, pDependsRef) {
-
-                    var subfields = pDom.getChildren('.ka-field-main');
-                    Array.each(subfields, function (field, idx) {
-
-                        var fKey = field.retrieve('key');
-                        var fField = Object.clone(field.retrieve('field'));
-
-                        kaFieldObj = field.retrieve('ka.Field');
-                        if (kaFieldObj.childContainer) {
-                            fField.children = {};
-                            extractFields(kaFieldObj.childContainer, fField.children);
-                        }
-
-                        if (false && fField.type == 'predefined' &&
-                            fField.object == this.generalObj.getValue('object')) {
-                            //if the type is predefeind and the object is the same as in the class
-                            //then we don't need to save the whole definition.
-                            //todo, what is with children? deactivated
-                            pDependsRef[iIdx] = fKey;
-                            iIdx++;
-                        } else {
-                            pDependsRef[fKey] = fField;
-                        }
-                    });
-
-                };
-
-                extractFields(button.pane, depends);
-
-                //fields[key]['children'] = children;
-
-            });
-
-            res.fields = fields;
-        }
-
-        if (general['class'] == 'adminWindowList' || general['class'] == 'adminWindowCombine') {
-
-            var fields = this.windowListObj.getValue();
-
-            Object.each(fields, function (value, key) {
-
-                res.general[key] = value;
-
-            });
-
-        }
-
-        logger(res);
-        return;
-
-        this.saveBtn.startTip(t('Saving ...'));
-
-        if (this.lastSaveReq) {
-            this.lastSaveReq.cancel();
-        }
-
-        this.lastSaveReq = new Request.JSON({url: _pathAdmin + 'admin/system/bundle/saveWindowClass', noCache: 1,
-
-            noErrorReporting: true,
-            onComplete: function (res) {
-
-                if (res.error == 'no_writeaccess') {
-                    this.win._alert(t('No writeaccess to file: %s').replace('%s', res.error_file));
-                    this.saveBtn.stopTip(t('Failed'));
-                    return;
-                }
-
-                if (res) {
-                    this.saveBtn.stopTip(t('Done'));
-                } else {
-                    this.saveBtn.stopTip(t('Failed'));
-                }
-
-            }.bind(this)}).post(res);
-
+        this.lastSaveReq = new Request.JSON({
+            url: _pathAdmin + 'admin/system/bundle/editor/window?class=' + req.general['class'],
+            noCache: 1,
+            progressButton: this.saveBtn,
+            saveStatusButton: this.saveBtn
+        }).post(req);
     },
 
     loadInfo: function () {
@@ -989,7 +876,7 @@ var kryncms_system_module_editWindow = new Class({
         this.definition = pDefinition.data;
 
         //compatibility
-        this.definition.properties.dataModel = this.definition.properties.object ? 'object' : 'table';
+//        this.definition.properties.dataModel = this.definition.properties.object ? 'object' : 'table';
 
         var generalValues = Object.clone(this.definition.properties);
         generalValues['class'] = this.definition['class'];
@@ -2010,12 +1897,11 @@ var kryncms_system_module_editWindow = new Class({
             );
         } catch (e) {
             var oldType = field.type;
-            field.type = 'text';
-            field.value = tf('ka.Field type `%s` is misconfigured: %s', oldType, e);
+            field.type = 'info';
+            field.label = tf('ka.Field type `%s` is misconfigured: %s', oldType, e);
             field = new ka.Field(
                 field,
-                target,
-                {win: this.win}
+                target
             );
         }
 

@@ -7,7 +7,7 @@ use Kryn\CmsBundle\Tools;
 
 class Object extends Model
 {
-    protected $attributes = ['id'];
+    protected $attributes = ['id', 'crossRef'];
     protected $_excludeFromExport = ['bundle'];
 
     /**
@@ -308,6 +308,10 @@ class Object extends Model
      */
     private $primaryKeys;
 
+    /**
+     * @var bool
+     */
+    protected $crossRef = false;
 
 //    public function syncRelations()
 //    {
@@ -348,13 +352,15 @@ class Object extends Model
     public function bootRunTime(Configs $configs)
     {
         $this->triggeredReboot = [];
-        foreach ($this->getFields() as $key => $field) {
-            if ($boots = $field->bootRunTime($this, $configs)) {
-                $count = (isset($this->triggeredReboot[$key]) ? $this->triggeredReboot[$key]['count'] : 0) + 1;
-                $this->triggeredReboot[$key] = [
-                    'count' => $count,
-                    'triggeredReboots' => $boots
-                ];
+        if ($this->getFields()) {
+            foreach ($this->getFields() as $key => $field) {
+                if ($boots = $field->bootRunTime($this, $configs)) {
+                    $count = (isset($this->triggeredReboot[$key]) ? $this->triggeredReboot[$key]['count'] : 0) + 1;
+                    $this->triggeredReboot[$key] = [
+                        'count' => $count,
+                        'triggeredReboots' => $boots
+                    ];
+                }
             }
         }
         return $this->triggeredReboot;
@@ -372,9 +378,11 @@ class Object extends Model
     public function bootBuildTime(Configs $configs)
     {
         $changed = false;
-        foreach ($this->getFields() as $field) {
-            if ($field->bootBuildTime($this, $configs)) {
-                $changed = true;
+        if ($this->getFields()) {
+            foreach ($this->getFields() as $field) {
+                if ($field->bootBuildTime($this, $configs)) {
+                    $changed = true;
+                }
             }
         }
         return $changed;
@@ -1277,4 +1285,27 @@ class Object extends Model
         return $this->bundle;
     }
 
+    /**
+     * @param boolean $crossRef
+     */
+    public function setCrossRef($crossRef)
+    {
+        $this->crossRef = $crossRef;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function getCrossRef()
+    {
+        return $this->crossRef;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCrossRef()
+    {
+        return !!$this->crossRef;
+    }
 }

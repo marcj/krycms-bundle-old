@@ -209,8 +209,8 @@ class Bundle extends Model
 
     public function getPropertyFilePath($property)
     {
-        if (!$this->imported[$property]) {
-            $path = $this->getBundleClass()->getPath() . 'Resources/config/' . (static::$propertyToFile[$property] ? : 'kryn.xml');
+        if (!isset($this->imported[$property])) {
+            $path = $this->getBundleClass()->getPath() . '/Resources/config/' . (static::$propertyToFile[$property] ? : 'kryn.xml');
             $root = realpath($this->getKrynCore()->getKernel()->getRootDir() . '/../');
 
             return substr($path, strlen($root) + 1);
@@ -678,6 +678,20 @@ class Bundle extends Model
 
             return isset($this->objects[$id]) ? $this->objects[$id] : null;
         }
+    }
+
+    /**
+     * Creates a new `Object` object and sets Object's Bundle to this instance.
+     *
+     * @param string $id
+     *
+     * @return Object
+     */
+    public function newObject($id){
+        $object = new Object(null, $this->getKrynCore());
+        $object->setId($id);
+        $this->addObject($id);
+        return $object;
     }
 
     /**

@@ -88,38 +88,6 @@ class PropelHelper
     }
 
     /**
-     * @param $cmd
-     *
-     * @return array|bool|string
-     */
-    public function callGen($cmd)
-    {
-        $errors = self::checkModelXml();
-        if ($errors) {
-            return array('errors' => $errors);
-        }
-
-        self::writeXmlConfig();
-        self::writeBuildProperties();
-        self::collectSchemas();
-
-        switch ($cmd) {
-            case 'models':
-                $result = self::generateClasses();
-                break;
-            case 'update':
-                $result = self::updateSchema();
-                break;
-            case 'environment':
-                return true;
-        }
-
-        self::cleanup();
-
-        return $result;
-    }
-
-    /**
      *
      */
     public function cleanup()

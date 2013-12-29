@@ -90,8 +90,9 @@ ka.FieldTable = new Class({
 
             var fieldProperty = item.retrieve('ka.FieldProperty');
             var value = fieldProperty.getValue();
-
-            result[value.key] = value.definition;
+			if (value && value.key) {
+                result[value.key] = value.definition;
+			}
 
         }.bind(this));
 

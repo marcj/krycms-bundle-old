@@ -92,5 +92,20 @@ interface TypeInterface
      */
     public function getValue();
 
+    /**
+     * Maps the internal value to $data.
+     *
+     * @param array $data
+     */
+    public function mapValues(array &$data);
+
+	/**
+	 * Returns the internal data type that is required for setValue or that is returned by getValue.
+	 *
+	 * Possible values: integer|float|string|array|bool
+	 *
+	 * @return string
+	 */
+	public function getPhpDataType();
 
 }

@@ -608,37 +608,82 @@ ka.FieldForm = new Class({
     /**
      * Set the value of all fields.
      *
-     * @param pValues
-     * @param pInternal
+     * @param values
+     * @param internal
      */
-    setValue: function (pValues, pInternal) {
-        if (typeOf(pValues) == 'string') {
+    setValue: function (values, internal) {
+        if (typeOf(values) == 'string') {
             try {
-                pValues = JSON.decode(pValues);
+                values = JSON.decode(values);
             } catch (e){
                 //(tf('Can not decode JSON `%s`', pValues), e);
             }
         }
 
-        this.value = Object.clone(pValues);
+        this.value = Object.clone(values);
 
         Object.each(this.fields, function (obj, id) {
+            var value, selection;
+
             if (instanceOf(obj, ka.FieldForm)) {
-                obj.setValue(pValues, pInternal);
+                obj.setValue(values, internal);
                 return;
             }
-
             id = id.replace('[', '.').replace(']', '');
-            if (id.indexOf('.') != -1) {
-                obj.setArrayValue(pValues, id, pInternal);
-            } else {
-                obj.setValue(pValues ? pValues[id] : null, pInternal);
-            }
-        });
 
-        if (true !== pInternal) {
+            selection = instanceOf(obj, ka.Field) ? obj.getDefinition().selection : null;
+
+            if (!selection || 1 === selection.length) {
+                if (selection && 1 === selection.length) {
+                    id = selection[0];
+                }
+                value = -1 !== id.indexOf('.') ? this.getArrayValue(values, id) : values[id];
+            } else {
+                value = {};
+                Array.each(selection, function(selection) {
+                    value[selection] = values[selection];
+                });
+            }
+
+            obj.setValue(value, internal);
+        }.bind(this));
+
+        if (true !== internal) {
             this.fireEvent('change', this.value);
             this.fireEvent('setValue', this.value);
+        }
+    },
+
+    /**
+     *
+     * @param {Object} values
+     * @param {String} path
+     * @returns {*}
+     */
+    getArrayValue: function(values, path) {
+        if (typeOf(values) === 'null') {
+            this.setValue(null, true);
+            return;
+        }
+
+        values = Object.clone(values);
+        path = path.replace('[', '.').replace(']', '');
+        var keys = path.split('.');
+        var notFound = false;
+        Array.each(keys, function(key) {
+            if (notFound) {
+                return;
+            }
+            if (values[key]) {
+                values = values[key];
+            } else {
+                notFound = true;
+            }
+
+        });
+
+        if (!notFound) {
+            return values;
         }
     },
 

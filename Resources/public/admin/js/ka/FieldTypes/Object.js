@@ -113,7 +113,6 @@ ka.FieldTypes.Object = new Class({
         }
 
         if (definition.chooserFieldJavascriptClass) {
-
             var clazz = ka.getClass(definition.chooserFieldJavascriptClass);
             if (!clazz) {
                 throw 'Can no load custom object field class "' + definition.chooserFieldJavascriptClass +
@@ -132,14 +131,12 @@ ka.FieldTypes.Object = new Class({
             this.highlight = this.customObj.highlight.bind(this.customObj);
 
         } else {
-
             if (this.options.objectRelation == 'nToM' || this.options.multi == 1) {
                 this.renderChooserMulti(this.options.objects);
             } else {
                 this.renderChooserSingle(this.options.objects);
             }
         }
-
     },
 
     renderObjectTableNoItems: function () {
@@ -153,7 +150,6 @@ ka.FieldTypes.Object = new Class({
     },
 
     renderObjectTable: function () {
-
         this.chooserTable.empty();
 
         this.objectTableLoaderQueue = {};

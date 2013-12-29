@@ -632,7 +632,7 @@ var kryncms_system_module_edit = new Class({
         }).inject(info);
 
         this.saveButton = buttonBar.addButton(t('Save'), this.saveDb.bind(this));
-        this.currentbutton = buttonBar.addButton(t('Save and update ORM'), this.saveDb.bind(this, [true]));
+        this.currentbutton = buttonBar.addButton(t('Save and build'), this.saveDb.bind(this, [true]));
         this.saveButton.setButtonStyle('blue');
     },
 
@@ -889,6 +889,12 @@ var kryncms_system_module_edit = new Class({
                         label: t('Icon (Optional)'),
                         desc: t('Relative to /web/'),
                         type: 'text'
+                    },
+                    system: {
+                        label: t('Is link under System menu?'),
+                        desc: t('Only in the first and second level.'),
+                        type: 'checkbox',
+                        needValue: 1
                     }
                 }
             },
@@ -1034,7 +1040,7 @@ var kryncms_system_module_edit = new Class({
 
                 tr.definition = fieldObject.getValue();
                 tr.typeField.setValue(tr.definition.type);
-                tr.titleField.setValue(tr.definition.title);
+                tr.titleField.setValue(tr.definition.label);
 
                 dialog.close();
 
@@ -1365,6 +1371,8 @@ var kryncms_system_module_edit = new Class({
             style: 'bottom: 40px;'
         }).inject(this.panes['themes']);
 
+	    var bundleName = ka.getBundleName(this.mod);
+
         this.themes = new ka.Field({
             type: 'array',
             width: 'auto',
@@ -1417,7 +1425,7 @@ var kryncms_system_module_edit = new Class({
                                         file: {
                                             type: 'view',
                                             fullPath: true,
-                                            directory: '@' + this.mod
+                                            directory: '@' + bundleName
                                         }
                                     }
                                 }
@@ -1428,21 +1436,59 @@ var kryncms_system_module_edit = new Class({
                             label: 'Page Layouts',
                             noWrapper: true,
                             children: {
+	                            '__info__': {
+		                            type: 'info',
+		                            label: t('Here you should define your page layouts. Use the predefined layouts to allow a user to change all layouts of their sites at once.')
+	                            },
+	                            'startpage': {
+		                            label: 'Startpage',
+		                            type: 'view',
+		                            fullPath: true,
+		                            directory: '@' + bundleName
+	                            },
+	                            'default': {
+		                            label: 'Default',
+		                            type: 'view',
+		                            fullPath: true,
+		                            directory: '@' + bundleName
+	                            },
+	                            'full': {
+		                            label: 'Full',
+		                            type: 'view',
+		                            fullPath: true,
+		                            directory: '@' + bundleName
+	                            },
+	                            'notFound': {
+		                            label: '404 - Not Found',
+		                            type: 'view',
+		                            fullPath: true,
+		                            directory: '@' + bundleName
+	                            },
+	                            'accessDenied': {
+		                            label: 'Access Denied',
+		                            type: 'view',
+		                            fullPath: true,
+		                            directory: '@' + bundleName
+	                            },
                                 layouts: {
-                                    label: 'Page Layouts',
+                                    label: 'Extra Layouts',
                                     type: 'array',
                                     columns: [
+                                        {label: t('key')},
                                         {label: t('Label')},
                                         {label: t('View')}
                                     ],
                                     fields: {
+                                        key: {
+                                            type: 'text'
+                                        },
                                         label: {
                                             type: 'text'
                                         },
                                         file: {
                                             type: 'view',
                                             fullPath: true,
-                                            directory: '@' + this.mod
+                                            directory: '@' + bundleName
                                         }
                                     }
                                 }
@@ -1467,7 +1513,7 @@ var kryncms_system_module_edit = new Class({
                                         file: {
                                             type: 'view',
                                             fullPath: true,
-                                            directory: '@' + this.mod
+                                            directory: '@' + bundleName
                                         }
                                     }
                                 }
@@ -1487,6 +1533,20 @@ var kryncms_system_module_edit = new Class({
         }
 
         if (themes) {
+	        var predefined = ['startpage', 'default', 'full', 'notFound', 'accessDenied'];
+	        Array.each(themes, function(theme, idx) {
+		        var layouts = [];
+		        Array.each(theme.layouts, function(layout) {
+			         if (predefined.contains(layout.key)) {
+				         theme[layout.key] = layout.file;
+			         } else {
+				         layouts.push(layout);
+			         }
+		        }.bind(this));
+		        theme.layouts = layouts;
+		        console.log(theme);
+	        }.bind(this));
+
             this.themes.setValue(themes);
         }
 
@@ -1498,6 +1558,19 @@ var kryncms_system_module_edit = new Class({
 
     saveThemes: function() {
         var themes = this.themes.getValue();
+	    var predefined = ['startpage', 'default', 'full', 'notFound', 'accessDenied'];
+
+	    Array.each(themes, function(theme){
+		    predefined.each(function(key){
+			    if (theme[key]) {
+				    theme.layouts.push({
+					    key: key,
+					    file: theme[key]
+				    });
+				    delete theme[key];
+			    }
+		    }.bind(this));
+	    }.bind(this));
 
         if (this.lr) {
             this.lr.cancel();
@@ -1864,7 +1937,7 @@ var kryncms_system_module_edit = new Class({
 
         this.saveButton = buttonBar.addButton(t('Save'), this.saveObjects.bind(this, false));
         this.saveButton.setButtonStyle('blue');
-        this.saveButtonORM = buttonBar.addButton(t('Save, build models and update schema'), this.saveObjects.bind(this, true));
+        this.saveButtonORM = buttonBar.addButton(t('Save and build'), this.saveObjects.bind(this, true));
 
         document.id(this.saveButton).addClass('ka-Button-blue');
         document.id(this.saveButtonORM).addClass('ka-Button-blue');
@@ -1883,24 +1956,14 @@ var kryncms_system_module_edit = new Class({
             }.bind(this)}).get({bundle: this.mod});
     },
 
-    updateOrm: function(pCmd, pCallback) {
-
-        if (this.lr) {
-            this.lr.cancel();
-        }
-
-        this.lr = new Request.JSON({url: _pathAdmin + 'admin/system/orm/' + pCmd, noCache: 1,
-            onComplete: pCallback}).get();
-    },
-
-    updateOrmWriteModel: function(pCallback) {
+    modelBuild: function(callback) {
 
         if (this.lr) {
             this.lr.cancel();
         }
 
         this.lr = new Request.JSON({
-            url: _pathAdmin + 'admin/system/bundle/editor/model/from-objects?bundle=' + this.mod,
+            url: _pathAdmin + 'admin/system/bundle/editor/model/build',
             noCache: 1,
             onComplete: function(response) {
                 if (response.data) {
@@ -1945,9 +2008,8 @@ var kryncms_system_module_edit = new Class({
 
                         var ok = new ka.Button(t('Ok')).addEvent('click', dialog.close).setButtonStyle('blue').inject(dialog.bottom);
 
-                        this.currentButton.stopTip(t('Failed.'));
                     } else {
-                        pCallback(response);
+                        callback(response);
                     }
                 }
             }.bind(this)}).post();
@@ -1981,29 +2043,12 @@ var kryncms_system_module_edit = new Class({
     },
 
     updateORM: function() {
+        this.currentButton.setProgress(50);
+        this.currentButton.startLoading(t('Saved. Write Models ...'));
 
-        this.currentButton.setProgress(25);
-        this.currentButton.startLoading(t('Object saved. Write model.xml ...'));
-
-        this.updateOrmWriteModel(function() {
-            this.currentButton.setProgress(50);
-            this.currentButton.startLoading(t('Saved. Update PHP models ...'));
-            this.updateOrm('models', function(response) {
-                if (response.error) {
-                    this.printOrmError(response);
-                } else {
-                    this.currentButton.setProgress(75);
-                    this.currentButton.startLoading(t('Saved. Update database tables ...'));
-                    this.updateOrm('update', function(response) {
-                        if (response.error) {
-                            this.printOrmError(response);
-                        } else {
-                            this.currentButton.setProgress(100);
-                            this.currentButton.doneLoading(t('Done.'));
-                        }
-                    }.bind(this));
-                }
-            }.bind(this));
+        this.modelBuild(function() {
+            this.currentButton.setProgress(100);
+            this.currentButton.doneLoading(t('Done.'));
         }.bind(this));
     },
 
@@ -2030,10 +2075,11 @@ var kryncms_system_module_edit = new Class({
         req.objects = objects;
         req.bundle = this.mod;
 
+        this.currentButton.startLoading(t('Saving ...'));
+
         this.lr = new Request.JSON({
             url: _pathAdmin + 'admin/system/bundle/editor/objects?bundle=' + this.mod,
             noCache: 1,
-            saveStatusButton: this.currentButton,
             onSuccess: function(response) {
                 ka.loadSettings(['configs']);
                 if (withBuildAndUpdate) {
@@ -2081,6 +2127,11 @@ var kryncms_system_module_edit = new Class({
                                 label: t('Table name'),
                                 modifier: 'underscore|trim',
                                 desc: t('A ORM needs usually a table name which is then created in the database.')
+                            },
+                            crossRef: {
+                                label: t('CrossRef'),
+                                type: 'checkbox',
+                                desc: t('If this is a cross table (usually used in n-to-n relations)')
                             },
                             labelField: {
                                 label: t('Label field'),
@@ -2622,7 +2673,6 @@ var kryncms_system_module_edit = new Class({
     },
 
     openObjectWizard: function(key, definition) {
-
 
         this.dialog = ka.Dialog(this.win, {
             minHeight: '80%',

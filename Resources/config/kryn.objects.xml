@@ -181,7 +181,7 @@
           <field id="startnode" type="object" required="true">
             <label>Startpage</label>
             <object>KrynCmsBundle:Node</object>
-            <objectRelation>1ToN</objectRelation>
+            <objectRelation>nTo1</objectRelation>
           </field>
           <field id="resourceCompression" type="checkbox">
             <label>Resource compression</label>
@@ -202,6 +202,9 @@
           </field>
           <field id="favicon" type="file">
             <label>Favicon path.</label>
+          </field>
+          <field id="theme" type="theme">
+            <label>Theme</label>
           </field>
         </fields>
       </object>
@@ -328,7 +331,6 @@
             <objectRelation>nToM</objectRelation>
             <objectLabel>name</objectLabel>
             <objectRelationTable>system_user_group</objectRelationTable>
-            <objectRelationPhpName>UserGroup</objectRelationPhpName>
           </field>
           <field id="firstName" type="text">
             <label>First name</label>
@@ -360,6 +362,19 @@
           </field>
           <field id="description" type="text"/>
         </browserColumns>
+      </object>
+      <object id="UserGroup" crossRef="true">
+        <table>system_user_group</table>
+        <fields>
+          <field id="user" type="object">
+            <object>kryncms/user</object>
+            <objectRelation>1To1</objectRelation>
+          </field>
+          <field id="group" type="object">
+            <object>kryncms/group</object>
+            <objectRelation>1To1</objectRelation>
+          </field>
+        </fields>
       </object>
     </objects>
   </bundle>

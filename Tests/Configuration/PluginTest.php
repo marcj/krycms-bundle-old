@@ -181,18 +181,21 @@ class PluginTest extends KernelAwareTestCase
                     'options' => array (
                         'directory' => '@PublicationBundle/news/list/',
                     ),
+                    'selection' => array('template')
                 ),
                 'itemsPerPage' => array (
                     'id' => 'itemsPerPage',
                     'label' => 'Items per page',
                     'type' => 'number',
                     'default' => 10,
+                    'selection' => array('itemsPerPage')
                 ),
                 'detailPage' => array (
                     'id' => 'detailPage',
                     'label' => 'Detail page',
                     'type' => 'object',
                     'object' => 'KrynCmsBundle:Node',
+                    'selection' => array()
                 ),
             ),
         );

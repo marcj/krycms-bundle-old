@@ -1,58 +1,85 @@
 <?php
 
 namespace Kryn\CmsBundle\Controller\Windows;
+ 
+class DomainCrudController extends \Kryn\CmsBundle\Controller\WindowController {
 
-use Kryn\CmsBundle\Controller\WindowController;
-
-/**
- * AUTO-GENERATED THROUGH KRYN WINDOW-EDITOR
- */
-class DomainCrudController extends WindowController
-{
-    public $fields = array(
-        '__General__' => array(
-            'label' => 'General',
-            'type' => 'tab',
-            'children' => array(
-                'domain' => array(
-                    'type' => 'predefined'
-                ),
-                'path' => array(
-                    'type' => 'predefined'
-                ),
-                'master' => array(
-                    'type' => 'predefined'
-                ),
-                'startnodeId' => array(
-                    'type' => 'predefined'
-                ),
-                'alias' => array(
-                    'type' => 'predefined'
-                ),
-                'redirect' => array(
-                    'type' => 'predefined'
-                ),
-            ),
-        ),
-        '__Extra__' => array(
-            'label' => 'Extra',
-            'type' => 'tab',
-            'children' => array(
-                'resourceCompression' => array(
-                    'type' => 'predefined'
-                ),
-                'favicon' => array(
-                    'type' => 'predefined'
-                ),
-                'robots' => array(
-                    'type' => 'predefined'
-                ),
-                'email' => array(
-                    'type' => 'predefined'
-                ),
-            )
-        )
-    );
+    public $fields = array (
+  '__General__' => array (
+    'label' => 'General',
+    'type' => 'tab',
+    'children' => array (
+      'domain' => array (
+        'type' => 'predefined',
+        'object' => 'KrynCmsBundle:Domain',
+        'field' => 'domain',
+      ),
+      'path' => array (
+        'type' => 'predefined',
+        'object' => 'KrynCmsBundle:Domain',
+        'field' => 'path',
+      ),
+      'lang' => array (
+        'type' => 'predefined',
+        'object' => 'kryncms/domain',
+        'field' => 'lang',
+      ),
+      'master' => array (
+        'type' => 'predefined',
+        'object' => 'KrynCmsBundle:Domain',
+        'field' => 'master',
+      ),
+      'startnode' => array (
+        'type' => 'predefined',
+        'object' => 'kryncms/domain',
+        'field' => 'startnode',
+      ),
+      'theme' => array (
+        'type' => 'predefined',
+        'object' => 'kryncms/domain',
+        'field' => 'theme',
+      ),
+    ),
+    'key' => '__General__',
+  ),
+  '__Extra__' => array (
+    'label' => 'Extra',
+    'type' => 'tab',
+    'children' => array (
+      'resourceCompression' => array (
+        'type' => 'predefined',
+        'object' => 'KrynCmsBundle:Domain',
+        'field' => 'resourceCompression',
+      ),
+      'favicon' => array (
+        'type' => 'predefined',
+        'object' => 'KrynCmsBundle:Domain',
+        'field' => 'favicon',
+      ),
+      'robots' => array (
+        'type' => 'predefined',
+        'object' => 'KrynCmsBundle:Domain',
+        'field' => 'robots',
+      ),
+      'email' => array (
+        'type' => 'predefined',
+        'object' => 'KrynCmsBundle:Domain',
+        'field' => 'email',
+      ),
+      'alias' => array (
+        'type' => 'predefined',
+        'object' => 'kryncms/domain',
+        'field' => 'alias',
+      ),
+      'redirect' => array (
+        'type' => 'predefined',
+        'object' => 'kryncms/domain',
+        'field' => 'redirect',
+      ),
+    ),
+    'key' => '__Extra__',
+  ),
+);
 
     public $defaultLimit = 15;
 
@@ -70,7 +97,7 @@ class DomainCrudController extends WindowController
 
     public $export = false;
 
-    public $object = 'KrynCmsBundle:Domain';
+    public $object = 'kryncms/domain';
 
     public $preview = false;
 
@@ -82,6 +109,5 @@ class DomainCrudController extends WindowController
 
     public $multiDomain = false;
 
-    public $versioning = false;
 
 }

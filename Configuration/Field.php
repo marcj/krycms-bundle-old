@@ -3,9 +3,9 @@
 namespace Kryn\CmsBundle\Configuration;
 
 use Kryn\CmsBundle\Admin\FieldTypes\TypeNotFoundException;
+use Kryn\CmsBundle\Exceptions\ObjectFieldNotFoundException;
 use Kryn\CmsBundle\Exceptions\ObjectNotFoundException;
 use Kryn\CmsBundle\Admin\Form\Form;
-use Kryn\CmsBundle\ORM\Builder\Builder;
 use Kryn\CmsBundle\Tools;
 
 class Field extends Model
@@ -285,15 +285,27 @@ class Field extends Model
     }
 
     /**
+     * @param bool $printDefaults
+     * @return array
+     */
+    public function toArray($printDefaults = false)
+    {
+        $array = parent::toArray($printDefaults);
+        $array['selection'] = $this->getFieldType()->getSelection();
+        return $array;
+    }
+
+    /**
      * @return \Kryn\CmsBundle\Admin\FieldTypes\TypeInterface
-     *
-     * @throws ObjectNotFoundException
-     * @throws TypeNotFoundException
+     * @throws \Kryn\CmsBundle\Exceptions\ObjectNotFoundException
+     * @throws \Kryn\CmsBundle\Exceptions\ObjectFieldNotFoundException
+     * @throws \Kryn\CmsBundle\Admin\FieldTypes\TypeNotFoundException
      */
     public function getFieldType()
     {
         if (null === $this->fieldType) {
             $type = $this->getType();
+            $field = null;
             if ('predefined' === strtolower($type)) {
                 $object = $this->getKrynCore()->getObjects()->getDefinition($this->getObject());
                 if (null === $object) {
@@ -303,7 +315,14 @@ class Field extends Model
                         $this->getId()
                     ));
                 }
-                $field = $object->getField($this->getField());
+                if (!$field = $object->getField($this->getField())) {
+                    throw new ObjectFieldNotFoundException(sprintf(
+                        'Field `%s` of Object `%s` for predefined field `%s` not found.',
+                        $this->getField(),
+                        $this->getObject(),
+                        $this->getId()
+                    ));
+                }
                 $type = $field->getType();
             }
             try {
@@ -311,7 +330,7 @@ class Field extends Model
             } catch (\Exception $e) {
                 throw new TypeNotFoundException(sprintf('FieldType `%s` for field `%s` not found.', $type, $this->getId()), 0, $e);
             }
-            $this->fieldType->setFieldDefinition($this);
+            $this->fieldType->setFieldDefinition($field ?: $this);
         }
 
         return $this->fieldType;
@@ -393,7 +412,6 @@ class Field extends Model
         return true == $this->virtual;
     }
 
-
     /**
      * @param Options $options
      */
@@ -454,6 +472,9 @@ class Field extends Model
         return $this->children;
     }
 
+    /**
+     * @return array
+     */
     public function getChildrenArray()
     {
         if (null !== $this->children) {
@@ -852,6 +873,11 @@ class Field extends Model
         return $this->getFieldType()->getValue();
     }
 
+    public function mapValues(array &$data)
+    {
+        return $this->getFieldType()->mapValues($data);
+    }
+
     public function canPropertyBeExported($k)
     {
         if ('requiredRegex' === $k) {
@@ -879,8 +905,18 @@ class Field extends Model
         return $this->requiredRegex;
     }
 
+	/**
+	 * Returns the internal data type.
+	 *
+	 * @return string
+	 */
+	public function getPhpDataType()
+	{
+		return $this->getFieldType()->getPhpDataType();
+	}
+
     /**
-     * Hidden means here if the `needValue` is correct with the parent or `getAgainstField`.
+     * Hidden means here if the `needValue` is correct with the value of parent or `getAgainstField`.
      *
      * @return bool
      */

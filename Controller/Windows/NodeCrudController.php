@@ -164,6 +164,7 @@ class NodeCrudController extends WindowNestedController
                     array('Navigation', '#icon-folder-4'),
                     array('Tray', '#icon-clipboard-2')
                 ),
+                'itemsLabelAsValue' => false
             ),
             'width' => 30
         ),

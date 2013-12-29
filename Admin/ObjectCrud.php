@@ -12,7 +12,7 @@ use Kryn\CmsBundle\Tools;
 use Symfony\Component\DependencyInjection\ContainerAware;
 use Symfony\Component\HttpFoundation\Request;
 
-class ObjectCrud extends ContainerAware
+class ObjectCrud extends ContainerAware implements ObjectCrudInterface
 {
     /**
      * Defines the table which should be accessed.
@@ -670,7 +670,7 @@ class ObjectCrud extends ContainerAware
     /**
      * Prepare fields. Loading tableItems by select and file fields.
      *
-     * @param array $fields
+     * @param array|Field $fields
      *
      * @throws \Exception
      */
@@ -693,38 +693,42 @@ class ObjectCrud extends ContainerAware
                 switch ($fields->getType()) {
                     case 'predefined':
 
-                        if (!$fields->getObject()) {
-                            throw new \Exception(tf(
+                        if (!$fields->getObject()) {//&& !$this->getObject()) {
+                            throw new \Exception(sprintf(
                                 'Fields of type `predefined` need a `object` option. [%s]',
-                                $fields->toArray()
+                                json_encode($fields->toArray(), JSON_PRETTY_PRINT)
                             ));
+//                        } else if (!$fields->getObject()) {
+//                            $fields->setObject($this->getObject());
                         }
 
-                        if (!$fields->getField()) {
-                            throw new \Exception(tf(
+                        if (!$fields->getField()) {//&& !$fields->getId()) {
+                            throw new \Exception(sprintf(
                                 'Fields of type `predefined` need a `field` option. [%s]',
-                                $fields->toArray()
+                                json_encode($fields->toArray(), JSON_PRETTY_PRINT)
                             ));
+//                        } else if (!$fields->getField()) {
+//                            $fields->setField($fields->getId());
                         }
 
                         $object = $this->getKrynCore()->getObjects()->getDefinition($fields->getObject());
                         if (!$object) {
-                            throw new \Exception(tf(
+                            throw new \Exception(sprintf(
                                 'Object `%s` does not exist [%s]',
                                 $fields->getObject(),
-                                $fields->toArray()
+                                json_encode($fields->toArray(), JSON_PRETTY_PRINT)
                             ));
                         }
                         $def = $object->getField($fields->getField());
                         if (!$def) {
                             $objectArray = $object->toArray();
                             $fields2 = $objectArray['fields'];
-                            throw new \Exception(tf(
+                            throw new \Exception(sprintf(
                                 "Object `%s` does not have field `%s`. \n[%s]\n[%s]",
                                 $fields->getObject(),
                                 $fields->getField(),
-                                $fields->toArray(),
-                                json_format($fields2)
+                                json_encode($fields->toArray(), JSON_PRETTY_PRINT),
+                                json_encode($fields2, JSON_PRETTY_PRINT)
                             ));
                         }
                         if ($def) {
@@ -1491,7 +1495,7 @@ class ObjectCrud extends ContainerAware
      *
      * @return bool
      */
-    public function update($pk, Request $request)
+    public function update(Request $request, $pk)
     {
         $this->primaryKey = $pk;
 
@@ -1616,8 +1620,9 @@ class ObjectCrud extends ContainerAware
 
             if (!$fieldsToReturn || isset($fieldsToReturn[$key])) {
                 if (!$errors = $field->validate()) {
-                    $data[$key] = $field->getValue();
+                    $field->mapValues($data);
                 } else {
+                    var_dump($field->getValue());
                     $restException = new ValidationFailedException(sprintf(
                         'Field `%s` has a invalid value.',
                         $key
