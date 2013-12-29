@@ -1039,7 +1039,7 @@ ka.Files = new Class({
         if (!this.currentFile) {
             //we entered a own path
             //check first what it is, and the continue;
-            console.log('load', pPath);
+//            console.log('load', pPath);
             this.curRequest = new Request.JSON({url: _pathAdmin + 'admin/file/single', noCache: 1,
                 noErrorReporting: ['FileNotExistException', 'AccessDeniedException'],
                 onComplete: function(pResponse) {
