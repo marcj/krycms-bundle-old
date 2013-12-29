@@ -123,7 +123,6 @@ Request.JSON = new Class({
                         '<br/><a class="ka-Button" onclick="ka.wm.open(\'admin/system/rest-logger\')">Details</a>',
                     15000
                 );
-                throw 'Request Error %s'.replace('%s', this.options.url);
             }
         }
     }
