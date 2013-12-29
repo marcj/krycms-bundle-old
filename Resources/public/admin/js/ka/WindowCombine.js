@@ -1452,10 +1452,6 @@ ka.WindowCombine = new Class({
             this.sortSelect.setValue(this.sortCombineField + '______' + ((this.sortComineDirection.toLowerCase() == 'desc') ? 'desc' : 'asc'));
         }
 
-        if (this.classProperties.startCombine) {
-            this.setView('combine', true, true);
-        }
-
         if (this.classProperties.asNested) {
             if (this.win.params && this.win.params.selected) {
                 this.setView('combine', true, true);
@@ -1475,6 +1471,8 @@ ka.WindowCombine = new Class({
             if ('rootAdd' === this.win.getParameter('type')) {
                 this.addNestedRoot();
             }
+        } else if (!this.win.getParameter('type') && this.classProperties.startCombine) {
+            this.setView('combine', true, true);
         }
     },
 
