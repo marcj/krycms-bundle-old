@@ -48,6 +48,8 @@
             <asset>@KrynCmsBundle/font/SourceSansPro/Regular/fonts.css</asset>
             <asset>@KrynCmsBundle/font/SourceSansPro/Semibold/fonts.css</asset>
             <assets>@KrynCmsBundle/admin/css/ai.css</assets>
+            <asset>@KrynCmsBundle/admin/css/ka/Button.css</asset>
+            <asset>@KrynCmsBundle/admin/css/ka/ButtonGroup.css</asset>
             <assets>@KrynCmsBundle/admin/css/ka/*.css</assets>
             <assets>@KrynCmsBundle/admin/css/ka/ui/*.css</assets>
         </adminAssets>

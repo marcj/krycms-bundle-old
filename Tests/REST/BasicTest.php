@@ -69,7 +69,6 @@ class BasicTest extends KernelAwareTestCase
 
         $this->assertEquals(200, $response['status']);
         $this->assertEquals($id2, $response['data']['id']);
-
     }
 
     public function testUpdating()
