@@ -71,7 +71,7 @@ You can either use the `kryncms:configuration:database` command or edit the `app
 Copy the installation script to your public folder:
 
 ```bash
-   cp vendor/kryncms/kryn.cms/Kryn/CmsBundle/Resources/meta/installation-wizard.php.dist web/install.php
+   cp vendor/kryncms/kryncms-bundle/Kryn/CmsBundle/Resources/meta/installation-wizard.php.dist web/install.php
 ```
 
 Open the `install.php` script in your browser and follow the wizard.
@@ -118,7 +118,7 @@ app/console kryncms:configuration:database mysql symfony root ''
 #### 3.2.3 or Editing the kryn configuration directly
 
 ```bash
-   cp vendor/kryncms/kryn.cms/Kryn/CmsBundle/Resources/meta/config.xml.dist app/config/config.kryn.xml
+   cp vendor/kryncms/kryncms-bundle/Kryn/CmsBundle/Resources/meta/config.xml.dist app/config/config.kryn.xml
 ```
 
    Either you define your database settings in the Symfony way (in`app/config/paramters.yml`) or
