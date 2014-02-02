@@ -145,7 +145,7 @@ class KrynHandler extends AbstractProcessingHandler
      */
     public function getLogRequest()
     {
-        if (!$this->logRequest) {
+        if (!$this->logRequest && $this->krynCore->getRequest()) {
 //            if (!$this->krynCore->has('profiler')) {
 //                $id = md5(mt_rand() . ':' . uniqid());
 //            } else {

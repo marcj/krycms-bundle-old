@@ -49,8 +49,7 @@ class AdminController extends Controller
      *  description="Returns a content template/view with placeholder for ka.Editor."
      * )
      *
-     * @Rest\QueryParam(name="template", requirements=".+", strict=true,
-     *      description="The template/view to be used for this content")
+     * @Rest\QueryParam(name="template", requirements=".+", strict=true, description="The template/view to be used for this content")
      *
      * @Rest\QueryParam(name="type", requirements=".+", strict=true, description="The content type")
      *

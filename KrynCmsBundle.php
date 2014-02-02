@@ -36,17 +36,17 @@ class KrynCmsBundle extends Bundle
         /** @var $krynCore Core */
         $krynCore = $this->container->get('kryn_cms');
 
+        $krynCore->prepareWebSymlinks();
+        $krynCore->loadBundleConfigs();
+
         /*
          * Propel orm initialisation.
          */
         $propelHelper = new PropelHelper($krynCore);
+        $propelHelper->loadConfig();
 
-        if (!$propelHelper->loadConfig()) {
-            $propelHelper->init();
-        }
+        $krynCore->getModelBuilder()->boot();
 
-        $krynCore->prepareWebSymlinks();
-        $krynCore->loadBundleConfigs();
 
         if ($krynCore->getSystemConfig()->getLogs(true)->isActive()) {
             /** @var $logger \Symfony\Bridge\Monolog\Logger */

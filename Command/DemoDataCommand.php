@@ -1,13 +1,5 @@
 <?php
 
-/**
- * This file is part of the Propel package.
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- *
- * @license    MIT License
- */
-
 namespace Kryn\CmsBundle\Command;
 
 use Symfony\Component\Console\Input\InputInterface;
@@ -16,11 +8,6 @@ use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 
 class DemoDataCommand extends AbstractCommand
 {
-    const DEFAULT_INPUT_DIRECTORY   = '.';
-    const DEFAULT_INPUT_FILE        = 'runtime-conf.xml';
-    const DEFAULT_OUTPUT_DIRECTORY  = './generated-conf';
-    const DEFAULT_OUTPUT_FILE       = 'config.php';
-
     /**
      * {@inheritdoc}
      */

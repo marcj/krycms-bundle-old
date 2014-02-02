@@ -110,6 +110,11 @@ ka.AdminInterface = new Class({
             autoClose: true
         });
 
+        this.btnOpenDashboard.addClass('ka-main-menu-active');
+        this.lastSystemDialog.addEvent('close', function(){
+            this.btnOpenDashboard.removeClass('ka-main-menu-active');
+        }.bind(this));
+
         new Element('h1', {
             text: t('Dashboard')
         }).inject(this.lastSystemDialog.getContentContainer());
@@ -129,7 +134,7 @@ ka.AdminInterface = new Class({
         if (!this.dialogContainer) {
             this.dialogContainer = new Element('div', {
                 'class': 'ka-main-dialog-container'
-            }).inject(this.mainMenuTop, 'after');
+            }).inject(this.getAppContainer(), 'after');
         }
         return this.dialogContainer;
     },
@@ -158,6 +163,12 @@ ka.AdminInterface = new Class({
         this.lastSystemDialog = new ka.SystemDialog(this.getDialogContainer(), {
             autoClose: true
         });
+
+
+        this.mainMenuStartButton.addClass('ka-main-menu-active');
+        this.lastSystemDialog.addEvent('close', function(){
+            this.mainMenuStartButton.removeClass('ka-main-menu-active');
+        }.bind(this));
 
         var lastBundleName;
         var currentContainer;
@@ -237,6 +248,11 @@ ka.AdminInterface = new Class({
             autoClose: true
         });
 
+        this.btnOpenSystem.addClass('ka-main-menu-active');
+        this.lastSystemDialog.addEvent('close', function(){
+            this.btnOpenSystem.removeClass('ka-main-menu-active');
+        }.bind(this));
+
         var system = new ka.System(this.lastSystemDialog.getContentContainer(), this.getMenuItems());
 
         system.addEvent('click', function(){
@@ -263,7 +279,7 @@ ka.AdminInterface = new Class({
             'class': 'ka-main-menu'
         }).inject(this.mainMenuTop);
 
-        new Element('a',{
+        this.btnOpenDashboard = new Element('a',{
             'class': 'icon-stats-up',
             text: tc('mainMenu', 'Dashboard')
         })
@@ -283,7 +299,7 @@ ka.AdminInterface = new Class({
         })
             .inject(this.mainMenuStartButton, 'top');
 
-        new Element('a',{
+        this.btnOpenSystem = new Element('a',{
             'class': 'icon-cog-2',
             text: tc('mainMenu', 'System')
         })

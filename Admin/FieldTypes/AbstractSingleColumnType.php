@@ -54,7 +54,6 @@ abstract class AbstractSingleColumnType extends AbstractType
         return [$columnDefinition];
     }
 
-
     public function bootBuildTime(Object $object, Configs $configs)
     {
         //nothing to do per default

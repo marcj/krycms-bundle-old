@@ -116,12 +116,40 @@ class Builder
         return @$this->builder[$id];
     }
 
+    /**
+     * Calls build on each builder.
+     */
     public function build()
     {
         $this->bootBuildTime();
 
         foreach ($this->builder as $builder) {
             $builder->build($this->objects);
+        }
+    }
+
+    /**
+     * Returns whether at least one orm builder needs a build.
+     *
+     * @return bool
+     */
+    public function needsBuild(){
+        foreach ($this->builder as $builder) {
+            if ($builder->needsBuild()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks if at least one orm builder needs a build and triggers the build then.
+     */
+    public function boot()
+    {
+        if ($this->needsBuild()) {
+            $this->build();
         }
     }
 }

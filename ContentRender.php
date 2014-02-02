@@ -111,6 +111,11 @@ class ContentRender
         return $this->cachedSlotContents[$nodeId.'.'.$slotId];
     }
 
+    public function renderView(&$contents, $view)
+    {
+        return json_encode(iterator_to_array($contents));
+    }
+
     /**
      * Build HTML for given contents.
      *

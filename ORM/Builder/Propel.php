@@ -13,6 +13,9 @@ use Kryn\CmsBundle\Objects;
 use Kryn\CmsBundle\ORM\ORMAbstract;
 use Kryn\CmsBundle\Propel\PropelHelper;
 use Kryn\CmsBundle\Tools;
+use Propel\Generator\Model\Column;
+use Propel\Generator\Model\Database;
+use Propel\Generator\Model\Table;
 use Symfony\Component\HttpKernel\Kernel;
 
 class Propel implements BuildInterface
@@ -28,6 +31,8 @@ class Propel implements BuildInterface
      */
     protected $objects;
 
+    protected $databases = [];
+
     function __construct(Filesystem $filesystem, Objects $objects, Kernel $kernel)
     {
         $this->filesystem = $filesystem;
@@ -40,16 +45,83 @@ class Propel implements BuildInterface
      */
     public function build(array $objects)
     {
+        /** @var $krynCore \Kryn\CmsBundle\Core */
+        $krynCore = $this->kernel->getContainer()->get('kryn_cms');
+
         foreach ($objects as $object) {
-            if ('propel' === $object->getDataModel()) {
-                $this->writeSchemaXml($object);
+            if ('propel' === strtolower($object->getDataModel())) {
+                $bundlePath = $krynCore->getBundleDir($object->getBundle()->getName());
+                $builtFile = $bundlePath . 'Resources/config/kryn.propel.schema.built.xml';
+
+                if (file_exists($builtFile)) {
+                    unlink($builtFile);
+                }
             }
         }
 
-        $krynCore = $this->kernel->getContainer()->get('kryn_cms');
-        $propelHelper = new PropelHelper($krynCore);
+        foreach ($objects as $object) {
+            if ('propel' === strtolower($object->getDataModel())) {
+                $bundlePath = $krynCore->getBundleDir($object->getBundle()->getName());
+                $modelsFile = $bundlePath . 'Resources/config/kryn.propel.schema.xml';
 
+                $xml = @$this->databases[$object->getBundle()->getBundleName()];
+                if (!$xml) {
+                    if (file_exists($modelsFile)) {
+                        $xml = @simplexml_load_file($modelsFile);
+                        if (false === $xml) {
+                            $errors = libxml_get_errors();
+                            throw new ModelBuildException(sprintf(
+                                'Parse error in %s: %s',
+                                $modelsFile,
+                                json_encode($errors, JSON_PRETTY_PRINT)
+                            ));
+                        }
+                    } else {
+                        $xml = simplexml_load_string('<database></database>');
+                    }
+
+                    $xml['namespace'] = $object->getBundle()->getNamespace();
+                    $this->databases[$object->getBundle()->getBundleName()] = $xml;
+                }
+                $this->declareTable($xml, $object);
+            }
+        }
+
+        $files = [];
+        foreach ($this->databases as $bundleName => $database) {
+            $xml = $this->getFormattedXml($database);
+            $bundlePath = $krynCore->getBundleDir($bundleName);
+            $modelsFile = $bundlePath . 'Resources/config/kryn.propel.schema.built.xml';
+            $files[$modelsFile] = $xml;
+        }
+
+
+        foreach ($files as $file => $xml) {
+            file_put_contents($file, $xml);
+        }
+
+        $propelHelper = new PropelHelper($krynCore);
         $propelHelper->init();
+    }
+
+    /**
+     * @param $xml
+     * @return string
+     */
+    protected function getFormattedXml($xml)
+    {
+        $dom = new \DOMDocument;
+        $dom->preserveWhiteSpace = false;
+        $dom->loadXML($xml->asXML());
+        $dom->formatOutput = true;
+
+        $xml = $dom->saveXML();
+        $prefix = '<?xml version="1.0"? >';
+        if (0 === strpos($xml, $prefix)) {
+            $xml = substr($xml, strlen($prefix));
+        }
+
+        return trim($xml);
     }
 
     /**
@@ -60,47 +132,32 @@ class Propel implements BuildInterface
         return !file_exists($this->kernel->getCacheDir() . '/propel-classes/');
     }
 
-    public function writeSchemaXml(Object $object)
+    public function declareTable(\SimpleXMLElement $database, Object $object)
     {
-        $bundlePath = $object->getKrynCore()->getBundleDir($object->getBundle()->getName());
-        $modelsFile = $bundlePath . 'Resources/config/kryn.propel.schema.xml';
-        $modelsFileOut = $bundlePath . 'Resources/config/kryn.propel.schema.built.xml';
 
-        $xml = null;
-        if ($this->filesystem->has($modelsFile) && $xmlString = $this->filesystem->read($modelsFile)) {
-            $xml = @simplexml_load_string($xmlString);
-
-            if ($xml === false) {
-                $errors = libxml_get_errors();
-                throw new ModelBuildException(sprintf(
-                    'Parse error in %s: %s',
-                    $modelsFile,
-                    json_encode($errors, JSON_PRETTY_PRINT)
-                ));
-            }
-        }
-
-        $schema = $this->getSchema($object, $xml);
-
-        return $this->filesystem->write($modelsFileOut, $schema);
+        $tables = $database->xpath('table[@name=\'' . $object->getTable() . '\']');
+        $xmlTable = $this->getXmlTable($object, @$tables[0]);
+        $this->sxml_append($database, $xmlTable);
     }
 
-    public function getSchema(Object $object, $xml = null)
+    protected function sxml_append(\SimpleXMLElement $to, \SimpleXMLElement $from) {
+        $toDom = dom_import_simplexml($to);
+        $fromDom = dom_import_simplexml($from);
+        $toDom->appendChild($toDom->ownerDocument->importNode($fromDom, true));
+    }
+
+    /**
+     * @param \Kryn\CmsBundle\Configuration\Object $object
+     * @param \SimpleXMLElement $objectTable
+     *
+     * @return \SimpleXMLElement
+     *
+     * @throws \Kryn\CmsBundle\Exceptions\ModelBuildException
+     */
+    public function getXmlTable(Object $object, \SimpleXMLElement $objectTable = null)
     {
-        if (!$xml) {
-            $xml = simplexml_load_string('<database></database>');
-        }
-        $bundle = $object->getBundle();
-
-        $xml['namespace'] = ucfirst($bundle->getNamespace());
-
-        //search if we've already the table defined.
-        $tables = $xml->xpath('table[@name=\'' . $object['table'] . '\']');
-
-        if (!$tables) {
-            $objectTable = $xml->addChild('table');
-        } else {
-            $objectTable = current($tables);
+        if (!$objectTable) {
+            $objectTable = new \SimpleXMLElement('<table />'); //simplexml_load_string('<database></database>');
         }
 
         if (!$object->getTable()) {
@@ -116,22 +173,9 @@ class Propel implements BuildInterface
 
         $columnsDefined = array();
 
-        //removed all non-custom foreign-keys
-        $foreignKeys = $objectTable->xpath("foreign-key[not(@custom='true')]");
-        foreach ($foreignKeys as $k => $fk) {
-            unset($foreignKeys[$k][0]);
-        }
-
-        //removed all non-custom behaviors
-        $items = $objectTable->xpath("behavior[not(@custom='true')]");
-        foreach ($items as $k => $v) {
-            unset($items[$k][0]);
-        }
-
         if (!$object->getFields()) {
             throw new ModelBuildException(sprintf('The object `%s` has no fields defined', $object->getId()));
         }
-
         foreach ($object->getFields() as $field) {
 
             if ($columns = $field->getFieldType()->getColumns()) {
@@ -159,7 +203,7 @@ class Propel implements BuildInterface
                     }
 
                     if ($field->isPrimaryKey()) {
-                        $newCol['primary'] = 'true';
+                        $newCol['primaryKey'] = 'true';
                     }
 
                     if ($field->isAutoIncrement()) {
@@ -169,28 +213,50 @@ class Propel implements BuildInterface
             }
         }
 
+        $relations = $object->getRelations();
         if ($relations = $object->getRelations()) {
             foreach ($relations as $relation) {
-                $this->addRelation($relation, $objectTable);
+                $this->addRelation($object, $relation, $objectTable);
             }
         }
 
-        //check for deleted columns
-        $columns = $objectTable->xpath("column[not(@custom='true')]");
-        foreach ($columns as $k => $column) {
-            if (!in_array($column['name'], $columnsDefined)) {
-                unset($columns[$k][0]);
-            }
-        }
-
-        if ($object['workspace']) {
-            $behaviors = $objectTable->xpath('behavior[@name=\'Kryn\CmsBundle\WorkspaceBehavior\']');
+        if ($object->isNested()) {
+            $behaviors = $objectTable->xpath('behavior[@name=\'nested_set\']');
             if ($behaviors) {
                 $behavior = current($behaviors);
             } else {
                 $behavior = $objectTable->addChild('behavior');
             }
-            $behavior['name'] = 'Kryn\CmsBundle\WorkspaceBehavior';
+            if (!$behavior['custom']) {
+                $behavior['name'] = 'nested_set';
+
+                $parameters = [
+                    'left_column' => 'lft',
+                    'right_column' => 'rgt',
+                    'level_column' => 'lvl'
+                ];
+
+                if ($object->getNestedRootAsObject()) {
+                    $parameters['use_scope'] = 'true';
+                    $parameters['scope_column'] = Tools::camelcase2Underscore($object->getNestedRootObjectField());
+                }
+
+                foreach ($parameters as $k => $v) {
+                    $parameter = $behavior->addChild('parameter');
+                    $parameter['name'] = $k;
+                    $parameter['value'] = $v;
+                }
+            }
+        }
+
+        if ($object['workspace']) {
+            $behaviors = $objectTable->xpath('behavior[@name=\'Kryn\CmsBundle\Propel\Behavior\WorkspaceBehavior\']');
+            if ($behaviors) {
+                $behavior = current($behaviors);
+            } else {
+                $behavior = $objectTable->addChild('behavior');
+            }
+            $behavior['name'] = 'Kryn\CmsBundle\Propel\Behavior\WorkspaceBehavior';
         }
 
         $vendors = $objectTable->xpath('vendor[@type=\'mysql\']');
@@ -213,35 +279,37 @@ class Propel implements BuildInterface
         $param['name'] = 'Charset';
         $param['value'] = 'utf8';
 
-        $dom = new \DOMDocument;
-        $dom->preserveWhiteSpace = false;
-        $dom->loadXML($xml->asXML());
-        $dom->formatOutput = true;
+        return $objectTable;
 
-        $xml = $dom->saveXML();
-        $prefix = '<?xml version="1.0"?>';
-        if (0 === strpos($xml, $prefix)) {
-            $xml = substr($xml, strlen($prefix));
-        }
-
-        return trim($xml);
+//        $dom = new \DOMDocument;
+//        $dom->preserveWhiteSpace = false;
+//        $dom->loadXML($xml->asXML());
+//        $dom->formatOutput = true;
+//
+//        $xml = $dom->saveXML();
+//        $prefix = '<?xml version="1.0"? >';
+//        if (0 === strpos($xml, $prefix)) {
+//            $xml = substr($xml, strlen($prefix));
+//        }
+//
+//        return trim($xml);
     }
 
-    protected function addRelation(RelationDefinitionInterface $relation, &$xmlTable)
+    protected function addRelation(Object $object, RelationDefinitionInterface $relation, &$xmlTable)
     {
         if (ORMAbstract::MANY_TO_ONE == $relation->getType()) {
-            $this->addForeignKey($relation, $xmlTable);
+            $this->addForeignKey($object, $relation, $xmlTable);
         }
     }
 
-    protected function addForeignKey(RelationDefinitionInterface $relation, &$xmlTable)
+    protected function addForeignKey(Object $object, RelationDefinitionInterface $relation, &$xmlTable)
     {
         $relationName = $relation->getName();
         $foreignObject = $this->objects->getDefinition($relation->getForeignObjectKey());
 
         if (!$foreignObject) {
             throw new ModelBuildException(sprintf(
-                'Object `%s` does not exist in relation `%s`',
+                'Foreign object `%s` does not exist in relation `%s`',
                 $relation->getForeignObjectKey(),
                 $relation->getName()
             ));
@@ -254,15 +322,19 @@ class Propel implements BuildInterface
             ));
         }
 
-        $foreigns = $xmlTable->xpath('foreign-key[@phpName=\'' . $relationName . '\']');
+        $foreigns = $xmlTable->xpath('foreign-key[@phpName=\'' . ucfirst($relationName) . '\']');
         if ($foreigns) {
             $foreignKey = current($foreigns);
         } else {
             $foreignKey = $xmlTable->addChild('foreign-key');
         }
 
-        $foreignKey['phpName'] = $relationName;
+        $foreignKey['phpName'] = ucfirst($relationName);
         $foreignKey['foreignTable'] = $foreignObject->getTable();
+
+        if ($refName = $relation->getRefName()) {
+            $foreignKey['refPhpName'] = ucfirst($refName);
+        }
 
         $foreignKey['onDelete'] = $relation->getOnDelete();
         $foreignKey['onUpdate'] = $relation->getOnUpdate();
@@ -285,6 +357,28 @@ class Propel implements BuildInterface
             $xmlReference['foreign'] = Tools::camelcase2Underscore($reference->getForeignColumn()->getName());
         }
 
+        if ($foreignObject->getWorkspace()) {
+            if (!$object->getWorkspace()) {
+                $columns = $xmlTable->xpath('column[@name=\'workspace_id\']');
+                if (!$columns) {
+                    $newCol = $xmlTable->addChild('column');
+                    $newCol['name'] = 'workspace_id';
+                    $newCol['type'] = 'INTEGER';
+                    $newCol['defaultValue'] = '1';
+                }
+            }
+
+            $localName = 'workspace_id';
+            $references = $foreignKey->xpath('reference[@local=\'' . $localName . '\']');
+            if ($references) {
+                $xmlReference = current($references);
+            } else {
+                $xmlReference = $foreignKey->addChild('reference');
+            }
+
+            $xmlReference['local'] = $localName;
+            $xmlReference['foreign'] = 'workspace_id';
+        }
     }
 
     protected function setupColumnAttributes(ColumnDefinitionInterface $column, $xmlColumn)

@@ -40,6 +40,22 @@ class RestExceptionListener
                 $view['data'] = $exception->getData();
             }
 
+            $previous = $exception;
+            while ($previous = $previous->getPrevious()) {
+                $prev = array(
+                    'error' => get_class($previous),
+                    'message' => $previous->getMessage()
+                );
+                if ($this->container->get('kernel')->isDebug()) {
+                    $trace = Tools::getArrayTrace($previous);
+
+                    $prev['file'] = $previous->getFile();
+                    $prev['line'] = $previous->getLine();
+                    $prev['trace'] = $trace;
+                }
+                $view['previous'][] = $prev;
+            }
+
             if ($this->container->get('kernel')->isDebug()) {
                 $trace = Tools::getArrayTrace($event->getException());
 

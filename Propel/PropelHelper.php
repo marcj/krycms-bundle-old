@@ -68,11 +68,11 @@ class PropelHelper
         try {
             $result = $this->fullGenerator();
         } catch (\Exception $e) {
-            self::cleanup();
+//            self::cleanup();
             throw new \Exception('Propel initialization Error.', 0, $e);
         }
 
-        self::cleanup();
+//        self::cleanup();
 
         return $result;
     }
@@ -133,7 +133,7 @@ class PropelHelper
         $content .= $this->generateClasses();
         $content .= $this->updateSchema();
 
-        self::cleanup();
+//        self::cleanup();
 
         $content .= "\n\n<b style='color: green'>Done.</b>";
 
@@ -352,7 +352,6 @@ class PropelHelper
         return true;
     }
 
-
     public function loadConfig()
     {
         $serviceContainer = Propel::getServiceContainer();
@@ -382,12 +381,6 @@ class PropelHelper
         $serviceContainer->setAdapterClass('default', $database->getMainConnection()->getType());
         $serviceContainer->setConnectionManager('default', $manager);
         $serviceContainer->setDefaultDatasource('default');
-
-        $classes = $this->getKrynCore()->getKernel()->getCacheDir() . '/propel-classes/';
-        if (file_exists($classes)) {
-            return true;
-        }
-        return false;
     }
 
     public function getManagerConfig(Connection $connection)
@@ -483,7 +476,6 @@ class PropelHelper
             unlink($file->getPathname());
         }
 
-
         $prefix = $this->getKrynCore()->getSystemConfig()->getDatabase()->getPrefix();
         $schemeData = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n  <database name=\"default\" tablePrefix=\"$prefix\" defaultIdMethod=\"native\"\n";
 
@@ -492,7 +484,7 @@ class PropelHelper
         $bundles = $this->getKrynCore()->getKernel()->getBundles();
 
         foreach ($bundles as $bundleName => $bundle) {
-            if (file_exists($schema = $bundle->getPath() . '/Resources/config/kryn.propel.schema.xml')) {
+            if (file_exists($schema = $bundle->getPath() . '/Resources/config/kryn.propel.schema.built.xml')) {
 
                 $extension = $bundle->getNamespace();
                 $tables = simplexml_load_file($schema);

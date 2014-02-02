@@ -317,10 +317,6 @@ span.selectable span, div.selectable div {
     transition:all 0.2s ease-out;
 }
 
-.ka-main-dialog-container > .ka-dialog-overlay {
-    background-color: #F5F5F5;
-}
-
 .ka-main-dialog-container > .ka-dialog-overlay > .ka-dialog {
     box-shadow: none;
     position: relative;
@@ -341,9 +337,21 @@ span.selectable span, div.selectable div {
 .ka-main-dialog-container {
     position: absolute;
     left: 0;
-    top: 61px;
+    top: 60px;
     right: 0;
     bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    display: none;
+
+    -webkit-transition: all 0.2s ease-out;
+    -moz-transition: all 0.2s ease-out;
+    -o-transition: all 0.2s ease-out;
+    transition: all 0.2s ease-out;
+    border-top: 5px solid #173244;
+}
+
+.ka-main-dialog-container-visible {
+    display: block;
 }
 
 .ka-main-menu-wm-tabs {
@@ -840,11 +848,15 @@ a.ka-menu-dialog-link:hover {
     padding: 6px 11px;
     border-top-right-radius: 4px;
     border-top-left-radius: 4px;
-    background-color: #236a97;
     background-color: #175074;
     font-size: 13px;
     color: white;
     line-height: 14px;
+}
+
+.ka-main-menu a.ka-main-menu-active,
+.ka-main-menu a.ka-main-menu-active:hover {
+    background-color: #173244;
 }
 
 .ka-main-menu a:before {

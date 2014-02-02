@@ -6,10 +6,17 @@ namespace Kryn\CmsBundle\Admin\FieldTypes;
 class RelationDefinition implements RelationDefinitionInterface {
 
     /**
-     *
+     * The actual relation name.
      * @var string
      */
     protected $name;
+
+    /**
+     * The relation name on the foreign object that points back.
+     *
+     * @var string
+     */
+    protected $refName;
 
     /**
      * @var string
@@ -119,6 +126,22 @@ class RelationDefinition implements RelationDefinitionInterface {
     public function getName()
     {
         return $this->name;
+    }
+
+    /**
+     * @param string $refName
+     */
+    public function setRefName($refName)
+    {
+        $this->refName = $refName;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRefName()
+    {
+        return $this->refName;
     }
 
     /**

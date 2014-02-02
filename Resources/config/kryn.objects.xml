@@ -178,7 +178,7 @@
             <label>Domain Redirects</label>
             <desc>A comma separated list of domain redirections.</desc>
           </field>
-          <field id="startnode" type="object" required="true">
+          <field id="startnode" type="object">
             <label>Startpage</label>
             <object>KrynCmsBundle:Node</object>
             <objectRelation>nTo1</objectRelation>
@@ -203,9 +203,12 @@
           <field id="favicon" type="file">
             <label>Favicon path.</label>
           </field>
+          <field id="searchIndexKey" type="text" />
+          <field id="themeProperties" type="properties"/>
           <field id="theme" type="theme">
             <label>Theme</label>
           </field>
+          <field id="titleFormat" type="text"/>
         </fields>
       </object>
       <object id="Language">
@@ -275,6 +278,10 @@
           <field id="type" type="text"/>
           <field id="hide" type="checkbox"/>
           <field id="unsearchable" type="text"/>
+          <field id="accessFrom" type="number"/>
+          <field id="accessTo" type="number"/>
+          <field id="accessFromGroups" type="text"/>
+          <field id="accessFromGroups" type="text"/>
         </fields>
       </object>
       <object id="View">
@@ -325,7 +332,7 @@
           <field id="lastLogin" type="number"/>
           <field id="created" type="datetime"/>
           <field id="modified" type="datetime"/>
-          <field id="group" type="object">
+          <field id="groupMembership" type="object">
             <label>Group membership</label>
             <object>kryncms/group</object>
             <objectRelation>nToM</objectRelation>
@@ -362,19 +369,6 @@
           </field>
           <field id="description" type="text"/>
         </browserColumns>
-      </object>
-      <object id="UserGroup" crossRef="true">
-        <table>system_user_group</table>
-        <fields>
-          <field id="user" type="object">
-            <object>kryncms/user</object>
-            <objectRelation>1To1</objectRelation>
-          </field>
-          <field id="group" type="object">
-            <object>kryncms/group</object>
-            <objectRelation>1To1</objectRelation>
-          </field>
-        </fields>
       </object>
     </objects>
   </bundle>

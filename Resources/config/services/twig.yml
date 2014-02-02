@@ -57,3 +57,9 @@ services:
          arguments: ["@kryn_cms.translator"]
          tags:
             - { name: twig.extension }
+
+     kryn_cms.twig.extension.renderContents:
+         class: Kryn\CmsBundle\Twig\RenderContentsExtension
+         arguments: ["@kryn_cms"]
+         tags:
+            - { name: twig.extension }

@@ -11,6 +11,11 @@ interface RelationDefinitionInterface
     public function getName();
 
     /**
+     * @return string
+     */
+    public function getRefName();
+
+    /**
      * The objectKey this relation points to.
      *
      * e.g. kryncms/node

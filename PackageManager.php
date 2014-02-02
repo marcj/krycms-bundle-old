@@ -100,6 +100,7 @@ class PackageManager extends ContainerAware {
         $root->setDomainId($domain->getId());
         $root->makeRoot();
         $root->setTitle('root');
+        $root->setUrn('');
         $root->save();
 
         //setup live workspace
@@ -438,7 +439,6 @@ class PackageManager extends ContainerAware {
             ->filterById($id)
             ->update(array('Id' => 1));
         $admin->setId(1);
-
         $admin->addGroupMembership($groupAdmin);
         $admin->save();
 
@@ -469,7 +469,6 @@ class PackageManager extends ContainerAware {
             $oNode->setTitle($Node[1]);
             $oNode->setLayout($Node[2]);
             $oNode->setUrn($Node[3]);
-            $oNode->setParentId($pNode->getId());
             $oNode->insertAsLastChildOf($pNode);
 
             if ($Node[4]) {

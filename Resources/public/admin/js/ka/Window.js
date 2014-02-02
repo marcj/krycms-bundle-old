@@ -991,7 +991,7 @@ ka.Window = new Class({
         window['contentCantLoaded_' + this.customId] = function (pFile) {
             this.content.empty();
             this._alert(t('Custom javascript file not found') + "\n" + pFile, function () {
-                this.close(true);
+                this.close();
             }.bind(this));
         }.bind(this);
 

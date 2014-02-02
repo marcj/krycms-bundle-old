@@ -716,6 +716,11 @@ class Object extends Model
     public function setBrowserColumns(array $fields = null)
     {
         $this->browserColumns = $fields;
+        if ($this->browserColumns) {
+            foreach ($this->browserColumns as $field) {
+                $field->setObjectDefinition($this);
+            }
+        }
     }
 
     /**
@@ -726,11 +731,15 @@ class Object extends Model
         return $this->browserColumns;
     }
 
+    /**
+     * @return array
+     */
     public function getBrowserColumnsArray()
     {
         $fields = array();
         if (null !== $this->browserColumns) {
             foreach ($this->browserColumns as $field) {
+                $field->setObjectDefinition($this);
                 $fields[lcfirst($field->getId())] = $field->toArray();
             }
         }

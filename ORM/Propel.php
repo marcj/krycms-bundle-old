@@ -445,88 +445,95 @@ class Propel extends ORMAbstract
             }
         }
 
-        if ($relations) {
-            foreach ($relations as $name => $relation) {
+        if (!$relations) {
+            return $newRow;
+        }
 
-                if ($relation->getType() != RelationMap::MANY_TO_MANY && $relation->getType() != RelationMap::ONE_TO_MANY
-                ) {
+        foreach ($relations as $name => $relation) {
 
-                    if (isset($relationFields[$name]) && is_array($relationFields[$name])) {
+            if ($relation->getType() != RelationMap::MANY_TO_MANY && $relation->getType() != RelationMap::ONE_TO_MANY) {
 
-                        $foreignClazz = $relation->getForeignTable()->getClassName();
-                        $foreignObj = new $foreignClazz();
+                if (isset($relationFields[$name]) && is_array($relationFields[$name])) {
+
+                    $foreignClazz = $relation->getForeignTable()->getClassName();
+                    $foreignObj = new $foreignClazz();
+                    $foreignRow = array();
+                    $allNull = true;
+
+                    foreach ($relationFields[$name] as $col) {
+                        if ($row[$name . "." . $col] !== null) {
+                            $foreignRow[$col] = $row[$name . "." . $col];
+                            $allNull = false;
+                        }
+                    }
+
+                    if ($allNull) {
+                        $newRow[lcfirst($name)] = null;
+                    } else {
+                        $foreignObj->fromArray($foreignRow);
                         $foreignRow = array();
-                        $allNull = true;
-
                         foreach ($relationFields[$name] as $col) {
-                            if ($row[$name . "." . $col] !== null) {
-                                $foreignRow[$col] = $row[$name . "." . $col];
-                                $allNull = false;
-                            }
+                            $foreignRow[lcfirst($col)] = $foreignObj->{'get' . $col}();
                         }
+                        $newRow[lcfirst($name)] = $foreignRow;
+                    }
+                }
+            } else {
+                //many-to-one and many-to-many, we need a extra query
+                if (is_array($relationFields[$name]) && $relationField = $this->getDefinition()->getField($name)) {
+                    if (!$relationObjectName = $relationField->getObject()) {
+                        $relationObjectName = $this->getDefinition()->getKey();
+//                            if (!$relationField->getObjectDefinition() || !$relationObjectName = $relationField->getObjectDefinition()->getKey()) {
+//                                throw new ObjectNotFoundException(sprintf('No object defined for relation `%s`.', $relationField->getId()));
+//                            }
+                    }
 
-                        if ($allNull) {
-                            $newRow[lcfirst($name)] = null;
-                        } else {
-                            $foreignObj->fromArray($foreignRow);
-                            $foreignRow = array();
-                            foreach ($relationFields[$name] as $col) {
-                                $foreignRow[lcfirst($col)] = $foreignObj->{'get' . $col}();
-                            }
-                            $newRow[lcfirst($name)] = $foreignRow;
+                    $sClazz = $relation->getRightTable()->getClassname();
+
+                    $queryName = $sClazz . 'Query';
+                    $filterBy = 'filterBy' . $relation->getSymmetricalRelation()->getName();
+//                    $filterBy = 'filterBy' . $relation->getName();
+
+                    $sQuery = $queryName::create()
+                        ->select($relationFields[$name])
+                        ->$filterBy(
+                            $item
+                        );
+
+                    $condition = null;
+                    if ($permissionCheck) {
+                        $condition = $this->getKrynCore()->getACL()->getListingCondition($relationObjectName);
+                    }
+                    $sStmt = $this->getStm($sQuery, $condition);
+
+                    $sItems = array();
+                    while ($subRow = $sStmt->fetch(\PDO::FETCH_ASSOC)) {
+
+                        $sItem = new $sClazz();
+                        $sItem->fromArray($subRow);
+
+                        $temp = array();
+                        foreach ($relationFields[$name] as $select) {
+                            $temp[lcfirst($select)] = $sItem->{'get' . $select}();
                         }
+                        $sItems[] = $temp;
                     }
                 } else {
-                    //many-toone and many-to-many, we need a extra query
-                    if (is_array($relationFields[$name]) && $relationField = $this->getDefinition()->getField($name)) {
-                        $relationObjectName = $relationField->getObject();
-                        $sClazz = $relation->getRightTable()->getClassname();
+                    $get = 'get' . $relation->getPluralName();
+                    $sItems = $item->$get();
+                }
 
-                        $queryName = $sClazz . 'Query';
-                        $filterBy = 'filterBy' . $relation->getSymmetricalRelation()->getName();
-
-                        $sQuery = $queryName::create()
-                            ->select($relationFields[$name])
-                            ->$filterBy(
-                                $item
-                            );
-
-                        $condition = null;
-                        if ($permissionCheck) {
-                            $condition = $this->getKrynCore()->getACL()->getListingCondition($relationObjectName);
-                        }
-                        $sStmt = $this->getStm($sQuery, $condition);
-
-                        $sItems = array();
-                        while ($subRow = $sStmt->fetch(\PDO::FETCH_ASSOC)) {
-
-                            $sItem = new $sClazz();
-                            $sItem->fromArray($subRow);
-
-                            $temp = array();
-                            foreach ($relationFields[$name] as $select) {
-                                $temp[lcfirst($select)] = $sItem->{'get' . $select}();
-                            }
-                            $sItems[] = $temp;
-                        }
-                    } else {
-                        $get = 'get' . $relation->getPluralName();
-                        $sItems = $item->$get();
-                    }
-
-                    if ($sItems instanceof ObjectCollection) {
-                        $newRow[lcfirst($name)] = $sItems->toArray(null, null, TableMap::TYPE_STUDLYPHPNAME) ? : null;
-                    } else if (is_array($sItems) && $sItems) {
-                        $newRow[lcfirst($name)] = $sItems;
-                    } else {
-                        $newRow[lcfirst($name)] = null;
-                    }
+                if ($sItems instanceof ObjectCollection) {
+                    $newRow[lcfirst($name)] = $sItems->toArray(null, null, TableMap::TYPE_STUDLYPHPNAME) ? : null;
+                } else if (is_array($sItems) && $sItems) {
+                    $newRow[lcfirst($name)] = $sItems;
+                } else {
+                    $newRow[lcfirst($name)] = null;
                 }
             }
         }
 
         return $newRow;
-
     }
 
     /**

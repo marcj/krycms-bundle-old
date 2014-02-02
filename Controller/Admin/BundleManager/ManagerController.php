@@ -448,10 +448,10 @@ This is the bundle $bundleClassName.
     }
 
     /**
-     * @param Finder $finder
+     * @param \Symfony\Component\Finder\Finder $finder
      * @return array
      */
-    protected function getBundles($finder)
+    protected function getBundles(\Symfony\Component\Finder\Finder $finder)
     {
         $bundles = array();
         /** @var \Symfony\Component\Finder\SplFileInfo $file */

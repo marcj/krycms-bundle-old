@@ -25,101 +25,15 @@
             <parameter name="Charset" value="utf8"/>
         </vendor>
     </table>
-    <table name="system_content" phpName="Content" idMethod="native">
-        <column name="id" type="INTEGER" primaryKey="true" autoIncrement="true" required="true"/>
-        <column name="node_id" type="INTEGER"/>
-        <column name="box_id" type="INTEGER"/>
-        <column name="sort" type="INTEGER"/>
-        <column name="title" type="VARCHAR" size="255" required="false"/>
-        <column name="content" type="LONGVARCHAR" required="false"/>
-        <column name="template" type="VARCHAR" size="64" required="false"/>
-        <column name="type" type="VARCHAR" size="64" required="false"/>
-        <column name="hide" type="BOOLEAN" required="false"/>
-        <column name="owner_id" type="INTEGER" required="false"/>
-        <column name="access_from" type="INTEGER" required="false"/>
-        <column name="access_to" type="INTEGER" required="false"/>
-        <column name="access_from_groups" type="VARCHAR" size="32" required="false"/>
-        <column name="unsearchable" type="VARCHAR" required="false"/>
-        <column name="workspace_id" type="INTEGER"/>
-        <index>
-            <index-column name="box_id"/>
-        </index>
-        <index>
-            <index-column name="hide"/>
-        </index>
-        <index>
-            <index-column name="node_id"/>
-        </index>
-        <behavior name="Kryn\CmsBundle\Propel\Behavior\WorkspaceBehavior"/>
-        <behavior name="sortable">
-            <parameter name="rank_column" value="sort"/>
-            <parameter name="use_scope" value="true"/>
-            <parameter name="scope_column" value="box_id"/>
-        </behavior>
-        <vendor type="mysql">
-            <parameter name="Charset" value="utf8"/>
-        </vendor>
-        <foreign-key phpName="Node" foreignTable="system_node" onDelete="cascade" onUpdate="cascade">
-            <reference local="node_id" foreign="id"/>
-        </foreign-key>
-    </table>
-    <table name="system_domain" phpName="Domain" idMethod="native">
+    <table name="system_file" phpName="File">
         <column name="id" type="INTEGER" primaryKey="true" autoIncrement="true"/>
-        <column name="domain" type="VARCHAR" size="255" required="false"/>
-        <column name="title_format" type="VARCHAR" size="255" required="false"/>
-        <column name="lang" type="VARCHAR" size="3" required="false"/>
-        <column name="startnode_id" type="INTEGER" required="false"/>
-        <column name="alias" type="VARCHAR" size="255" required="false"/>
-        <column name="redirect" type="VARCHAR" size="255" required="false"/>
-        <column name="page404_id" phpName="Page404id" type="INTEGER" required="false"/>
-        <column name="page404_interface" phpName="Page404interface" type="VARCHAR" size="128" required="false"/>
-        <column name="master" type="BOOLEAN" required="false"/>
-        <column name="resource_compression" type="BOOLEAN" required="false"/>
-        <column name="layouts" type="LONGVARCHAR" required="false"/>
-        <column name="phplocale" type="VARCHAR" size="128" required="false"/>
-        <column name="path" type="VARCHAR" size="64" required="false"/>
-        <column name="theme_properties" type="OBJECT" phpType="\Kryn\CmsBundle\Properties" required="false"/>
-        <column name="extension_properties" type="OBJECT" phpType="\Kryn\CmsBundle\Properties" required="false"/>
-        <column name="session_properties" type="OBJECT" phpType="\Kryn\CmsBundle\Properties" required="false"/>
-        <column name="email" type="VARCHAR" size="64" required="false"/>
-        <column name="search_index_key" type="VARCHAR" size="255" required="false"/>
-        <column name="robots" type="LONGVARCHAR" required="false"/>
-        <column name="favicon" type="VARCHAR" size="255" required="false"/>
-        <index>
-            <index-column name="domain"/>
-        </index>
-        <index>
-            <index-column name="lang"/>
-        </index>
-        <index>
-            <index-column name="master"/>
-        </index>
-        <vendor type="mysql">
-            <parameter name="Charset" value="utf8"/>
-        </vendor>
-        <foreign-key phpName="startnode" foreignTable="system_node" onDelete="cascade" onUpdate="cascade">
-            <reference local="startnode_id" foreign="id"/>
-        </foreign-key>
-    </table>
-    <table name="system_framework_version" phpName="FrameworkVersion" idMethod="native">
-        <column name="id" type="INTEGER" primaryKey="true" autoIncrement="true" required="true"/>
-        <column name="code" type="VARCHAR" size="128" required="false"/>
-        <column name="content" type="LONGVARCHAR" required="false"/>
-        <column name="version" type="INTEGER" required="false"/>
-        <column name="cdate" type="INTEGER" required="false"/>
-        <column name="user_id" type="INTEGER" required="false"/>
-        <index>
-            <index-column name="code"/>
-        </index>
-        <vendor type="mysql">
-            <parameter name="Charset" value="utf8"/>
-        </vendor>
-    </table>
-    <table name="system_fs" phpName="Fs" idMethod="native">
-        <column name="id" type="INTEGER" primaryKey="true" autoIncrement="true" required="true"/>
-        <column name="name" type="VARCHAR" size="128" required="false"/>
-        <column name="fs_class" type="VARCHAR" size="64" required="false"/>
-        <column name="fs_params" type="LONGVARCHAR" required="false"/>
+        <column name="path" type="VARCHAR" size="255"/>
+        <column name="hash" type="VARCHAR" size="64"/>
+        <column name="type" type="VARCHAR" size="16"/>
+        <column name="size" type="INTEGER"/>
+        <column name="created_time" type="BIGINT"/>
+        <column name="modified_time" type="BIGINT"/>
+        <column name="mount_point" type="VARCHAR" size="128"/>
         <vendor type="mysql">
             <parameter name="Charset" value="utf8"/>
         </vendor>
@@ -150,203 +64,12 @@
             <parameter name="Charset" value="utf8"/>
         </vendor>
     </table>
-    <table name="system_log" phpName="Log" idMethod="native">
-        <column name="id" type="INTEGER" primaryKey="true" autoIncrement="true" required="true"/>
-        <column name="request_id" type="VARCHAR" size="64" required="false"/>
-        <!--<column name="username" type="VARCHAR" size="64" required="false"/>-->
-        <column name="date" type="DOUBLE" required="false"/>
-        <column name="level" type="VARCHAR" required="false"/>
-        <!--<column name="context" type="VARCHAR" required="false"/>-->
-        <!--<column name="stack_trace" type="LONGVARCHAR" required="false"/>-->
-        <!--<column name="performance" type="VARCHAR" required="false"/>-->
-        <column name="message" type="LONGVARCHAR" required="false"/>
-        <foreign-key foreignTable="system_log_request">
-            <reference foreign="id" local="request_id"/>
-        </foreign-key>
-        <vendor type="mysql">
-            <parameter name="Charset" value="utf8"/>
-        </vendor>
-    </table>
-    <table name="system_log_request" phpName="LogRequest" idMethod="native">
-        <column name="id" type="VARCHAR" size="64" primaryKey="true"/>
-        <column name="date" type="DOUBLE" required="false"/>
-        <column name="username" type="VARCHAR" size="64" required="false"/>
-        <column name="path" type="VARCHAR" size="255" required="false"/>
-        <column name="ip" type="VARCHAR" size="32" required="false"/>
-        <column name="counts" type="LONGVARCHAR" required="false"/>
-        <column name="profile_token" type="VARCHAR" size="32" required="false"/>
-        <vendor type="mysql">
-            <parameter name="Charset" value="utf8"/>
-        </vendor>
-    </table>
-    <table name="system_node" phpName="Node" idMethod="native">
-        <column name="id" type="INTEGER" primaryKey="true" autoIncrement="true"/>
-        <column name="parent_id" type="INTEGER"/>
-        <column name="domain_id" type="INTEGER"/>
-        <column name="lft" type="INTEGER"/>
-        <column name="rgt" type="INTEGER"/>
-        <column name="lvl" type="INTEGER"/>
-        <column name="type" type="INTEGER" required="false"/>
-        <column name="title" type="VARCHAR" size="255" required="false"/>
-        <column name="alternative_title" type="VARCHAR" size="255" required="false"/>
-        <column name="urn" type="VARCHAR" size="255" required="false"/>
-        <column name="link" type="VARCHAR" size="255" required="false"/>
-        <column name="layout" type="VARCHAR" size="64" required="false"/>
-        <column name="sort" type="INTEGER" required="false"/>
-        <column name="sort_mode" type="VARCHAR" size="8" required="false"/>
-        <column name="target" type="VARCHAR" size="64" required="false"/>
-        <column name="visible" type="BOOLEAN" required="false"/>
-        <column name="access_denied" type="BOOLEAN" required="false"/>
-        <column name="meta" type="VARCHAR" required="false"/>
-        <column name="properties" type="LONGVARCHAR" required="false"/>
-        <column name="cdate" type="INTEGER" required="false"/>
-        <column name="mdate" type="INTEGER" required="false"/>
-        <column name="draft_exist" type="INTEGER" required="false"/>
-        <column name="force_https" type="BOOLEAN" required="false"/>
-        <column name="access_from" type="BIGINT" required="false"/>
-        <column name="access_to" type="BIGINT" required="false"/>
-        <column name="access_nohidenavi" type="BOOLEAN" required="false"/>
-        <column name="access_need_via" type="INTEGER" required="false"/>
-        <column name="access_from_groups" type="VARCHAR" size="32" required="false"/>
-        <column name="access_redirect_to" type="INTEGER"/>
-        <column name="cache" type="INTEGER" required="false"/>
-        <column name="search_words" type="VARCHAR" required="false"/>
-        <column name="unsearchable" type="BOOLEAN" required="false"/>
-        <column name="active_version_id" type="INTEGER" required="false"/>
-        <index>
-            <index-column name="access_denied"/>
-        </index>
-        <index>
-            <index-column name="domain_id"/>
-        </index>
-        <index>
-            <index-column name="type"/>
-        </index>
-        <index>
-            <index-column name="visible"/>
-        </index>
-        <behavior name="nested_set">
-            <parameter name="left_column" value="lft"/>
-            <parameter name="right_column" value="rgt"/>
-            <parameter name="level_column" value="lvl"/>
-            <parameter name="use_scope" value="true"/>
-            <parameter name="scope_column" value="domain_id"/>
-        </behavior>
-        <foreign-key foreignTable="system_domain" onDelete="cascade">
-            <reference local="domain_id" foreign="id"/>
-        </foreign-key>
-        <foreign-key foreignTable="system_node" onDelete="cascade">
-            <reference local="parent_id" foreign="id"/>
-        </foreign-key>
-        <vendor type="mysql">
-            <parameter name="Charset" value="utf8"/>
-        </vendor>
-        <column name="pid" type="INTEGER"/>
-        <column name="page_title" type="VARCHAR"/>
-    </table>
-    <table name="system_search" phpName="Search" idMethod="native">
-        <column name="url" type="VARCHAR" size="255" primaryKey="true" required="true"/>
-        <column name="title" type="VARCHAR" size="255" required="false"/>
-        <column name="md5" phpName="Md5" type="VARCHAR" size="255" required="false"/>
-        <column name="mdate" type="INTEGER" required="false"/>
-        <column name="blacklist" type="INTEGER" required="false"/>
-        <column name="node_id" type="INTEGER" required="false"/>
-        <column name="domain_id" type="INTEGER" primaryKey="true" required="true"/>
-        <column name="content" type="LONGVARCHAR" required="false"/>
-        <vendor type="mysql">
-            <parameter name="Charset" value="utf8"/>
-        </vendor>
-    </table>
-    <table name="system_search_stats" phpName="SearchStats" idMethod="native">
-        <column name="word" type="VARCHAR" size="255" primaryKey="true" required="true"/>
-        <column name="searchcount" type="INTEGER" required="false"/>
-        <column name="found" type="INTEGER" primaryKey="true" required="true"/>
-        <index>
-            <index-column name="searchcount"/>
-        </index>
-        <vendor type="mysql">
-            <parameter name="Charset" value="utf8"/>
-        </vendor>
-    </table>
-    <table name="system_node_alias" phpName="NodeAlias" idMethod="native">
-        <column name="id" type="INTEGER" primaryKey="true" autoIncrement="true" required="true"/>
-        <column name="url" type="VARCHAR" size="255" required="false"/>
-        <column name="node_id" type="INTEGER" required="false"/>
-        <column name="domain_id" type="INTEGER" required="false"/>
-        <index>
-            <index-column name="domain_id"/>
-        </index>
-        <index>
-            <index-column name="url"/>
-        </index>
-        <foreign-key foreignTable="system_node" onDelete="cascade">
-            <reference local="node_id" foreign="id"/>
-        </foreign-key>
-        <vendor type="mysql">
-            <parameter name="Charset" value="utf8"/>
-        </vendor>
-    </table>
-    <table name="system_file" phpName="File">
-        <column name="id" type="INTEGER" primaryKey="true" autoIncrement="true"/>
-        <column name="path" type="VARCHAR" size="255"/>
-        <column name="hash" type="VARCHAR" size="64"/>
-        <column name="type" type="VARCHAR" size="16"/>
-        <column name="size" type="INTEGER"/>
-        <column name="created_time" type="BIGINT"/>
-        <column name="modified_time" type="BIGINT"/>
-        <column name="mount_point" type="VARCHAR" size="128"/>
-        <vendor type="mysql">
-            <parameter name="Charset" value="utf8"/>
-        </vendor>
-    </table>
     <table name="system_langs" phpName="Language">
         <column name="code" type="VARCHAR" primaryKey="true"/>
         <column name="title" type="VARCHAR"/>
         <column name="langtitle" type="VARCHAR"/>
         <column name="userdefined" type="BOOLEAN"/>
         <column name="visible" type="BOOLEAN"/>
-        <vendor type="mysql">
-            <parameter name="Charset" value="utf8"/>
-        </vendor>
-    </table>
-    <table name="system_workspace" phpName="Workspace">
-        <column name="id" type="INTEGER" primaryKey="true" autoIncrement="true"/>
-        <column name="title" type="VARCHAR"/>
-        <column name="owner_id" type="INTEGER"/>
-        <column name="created" type="BIGINT"/>
-        <vendor type="mysql">
-            <parameter name="Charset" value="utf8"/>
-        </vendor>
-        <foreign-key phpName="owner" foreignTable="system_user" onDelete="cascade" onUpdate="cascade">
-            <reference local="owner_id" foreign="id"/>
-        </foreign-key>
-    </table>
-    <table name="system_user" phpName="User">
-        <column name="id" type="INTEGER" primaryKey="true" autoIncrement="true"/>
-        <column name="username" type="VARCHAR"/>
-        <column name="auth_class" type="VARCHAR"/>
-        <column name="passwd" type="LONGVARCHAR"/>
-        <column name="passwd_salt" type="VARCHAR"/>
-        <column name="activation_key" type="VARCHAR"/>
-        <column name="email" type="VARCHAR"/>
-        <column name="desktop" type="OBJECT"/>
-        <column name="settings" type="OBJECT"/>
-        <column name="widgets" type="OBJECT"/>
-        <column name="activate" type="BOOLEAN"/>
-        <column name="logins" type="INTEGER"/>
-        <column name="last_login" type="INTEGER"/>
-        <column name="created" type="BIGINT"/>
-        <column name="modified" type="BIGINT"/>
-        <column name="first_name" type="VARCHAR"/>
-        <column name="last_name" type="VARCHAR"/>
-        <vendor type="mysql">
-            <parameter name="Charset" value="utf8"/>
-        </vendor>
-    </table>
-    <table name="system_group" phpName="Group">
-        <column name="id" type="INTEGER" primaryKey="true" autoIncrement="true"/>
-        <column name="name" type="VARCHAR"/>
-        <column name="description" type="VARCHAR"/>
         <vendor type="mysql">
             <parameter name="Charset" value="utf8"/>
         </vendor>
@@ -364,19 +87,6 @@
         <column name="created" type="INTEGER" required="false"/>
         <foreign-key foreignTable="system_user" onDelete="cascade">
             <reference local="user_id" foreign="id"/>
-        </foreign-key>
-        <vendor type="mysql">
-            <parameter name="Charset" value="utf8"/>
-        </vendor>
-    </table>
-    <table name="system_user_group" isCrossRef="true" phpName="UserGroup">
-        <column name="user_id" type="INTEGER" primaryKey="true" required="true"/>
-        <column name="group_id" type="INTEGER" primaryKey="true" required="true"/>
-        <foreign-key foreignTable="system_user" onDelete="cascade" phpName="GroupMembershipUser">
-            <reference local="user_id" foreign="id"/>
-        </foreign-key>
-        <foreign-key foreignTable="system_group" phpName="GroupMembership" onDelete="cascade">
-            <reference local="group_id" foreign="id"/>
         </foreign-key>
         <vendor type="mysql">
             <parameter name="Charset" value="utf8"/>

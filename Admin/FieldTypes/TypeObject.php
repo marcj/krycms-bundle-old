@@ -102,7 +102,6 @@ class TypeObject extends AbstractType
         return $selection;
     }
 
-
     public function bootBuildTime(Object $object, Configs $configs)
     {
 
@@ -123,7 +122,7 @@ class TypeObject extends AbstractType
         if (ORMAbstract::MANY_TO_ONE == $this->getFieldDefinition()->getObjectRelation() ||
             ORMAbstract::ONE_TO_ONE == $this->getFieldDefinition()->getObjectRelation()
         ) {
-            if ($this->defineCrossReference($object, $configs)) {
+            if ($this->defineRelation($object, $configs)) {
                 $changed = true;
             }
         }
@@ -132,7 +131,7 @@ class TypeObject extends AbstractType
     }
 
     /**
-     * @param Object $objectDefinition
+     * @param \Kryn\CmsBundle\Configuration\Object $objectDefinition
      * @param Configs $configs
      * @return bool
      */
@@ -175,16 +174,19 @@ class TypeObject extends AbstractType
             $leftObjectField->setType('object');
             $leftObjectField->setObject($objectDefinition->getKey());
             $leftObjectField->setObjectRelation(ORMAbstract::ONE_TO_ONE);
+            $leftObjectField->setPrimaryKey(true);
             $crossObject->addField($leftObjectField);
             $changed = true;
         }
 
-        if (!$crossObject->getField($foreignObjectDefinition->getId())) {
+        if (!$crossObject->getField($this->getFieldDefinition()->getId())) {
             $rightObjectField = new Field(null, $objectDefinition->getKrynCore());
-            $rightObjectField->setId($foreignObjectDefinition->getId());
+            $rightObjectField->setId($this->getFieldDefinition()->getId());
             $rightObjectField->setType('object');
             $rightObjectField->setObject($foreignObjectDefinition->getKey());
             $rightObjectField->setObjectRelation(ORMAbstract::ONE_TO_ONE);
+//            $rightObjectField->setObjectRefRelationName($this->getFieldDefinition()->getId());
+            $rightObjectField->setPrimaryKey(true);
             $crossObject->addField($rightObjectField);
             $changed = true;
         }
@@ -197,10 +199,10 @@ class TypeObject extends AbstractType
         return $changed;
     }
 
-    protected function defineCrossReference(Object $objectDefinition, Configs $configs)
+    protected function defineRelation(Object $objectDefinition, Configs $configs)
     {
         $relation = $this->getRelation();
-        if (!$objectDefinition->hasRelation($relation->getName())) {
+        if ($relation && !$objectDefinition->hasRelation($relation->getName())) {
             $objectDefinition->addRelation($relation);
 
             return true;
@@ -208,7 +210,8 @@ class TypeObject extends AbstractType
     }
 
     /**
-     * @return RelationDefinition
+     * @return RelationDefinition|null
+     * @throws \Kryn\CmsBundle\Exceptions\ModelBuildException
      */
     protected function getRelation()
     {
@@ -229,6 +232,10 @@ class TypeObject extends AbstractType
         $relation->setName($field->getId());
         $relation->setType(ORMAbstract::MANY_TO_ONE);
         $relation->setForeignObjectKey($field->getObject());
+
+        if ($refName = $field->getObjectRefRelationName()) {
+            $relation->setRefName($refName);
+        }
 
         foreach ($foreignObjectDefinition->getPrimaryKeys() as $pk) {
             $fieldColumns = $pk->getFieldType()->getColumns();

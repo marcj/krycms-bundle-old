@@ -174,7 +174,7 @@ class ACL
 
             if (count($userGroups) > 0) {
                 foreach ($userGroups as $group) {
-                    $inGroups[] = $group->getGroupId();
+                    $inGroups[] = $group->getGroupMembershipId();
                 }
                 $inGroups = implode(', ', $inGroups);
             } else {

@@ -5,7 +5,7 @@
     top: 0;
     bottom: 0;
     overflow: hidden;
-    background-color: rgba(34, 124, 160, 0.1);
+    background-color: rgba(236, 236, 236, 0.7);
 }
 
 .ka-dialog {
@@ -73,4 +73,12 @@
 
 .ka-dialog-plain-content {
     white-space: pre-wrap;
+}
+
+.ka-dialog-system {
+    -webkit-transition: all 0.2s ease-out;
+    -moz-transition: all 0.2s ease-out;
+    -o-transition: all 0.2s ease-out;
+    transition: all 0.2s ease-out;
+    opacity: 0;
 }

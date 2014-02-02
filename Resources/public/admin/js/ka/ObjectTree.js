@@ -629,7 +629,7 @@ ka.ObjectTree = new Class({
             id = ka.getObjectUrlId(this.options.objectKey, pPk);
         } else {
             id = ka.getCroppedObjectId(pPk);
-            objectKey = ka.getObjectKey(pPk) || this.options.objectKey;
+            objectKey = ka.getCroppedObjectKey(pPk) || this.options.objectKey;
         }
 
         if (pTargetObjectKey && pTargetObjectKey != this.options.objectKey) {
@@ -674,7 +674,7 @@ ka.ObjectTree = new Class({
             id = ka.getObjectUrlId(this.options.objectKey, pPk);
         } else {
             id = ka.getCroppedObjectId(pPk);
-            objectKey = ka.getObjectKey(pPk) || this.options.objectKey;
+            objectKey = ka.getCroppedObjectKey(pPk) || this.options.objectKey;
         }
 
         if (this.items[objectKey + '/' + id]) {

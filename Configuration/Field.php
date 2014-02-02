@@ -308,6 +308,9 @@ class Field extends Model
             $field = null;
             if ('predefined' === strtolower($type)) {
                 $object = $this->getKrynCore()->getObjects()->getDefinition($this->getObject());
+                if (!$object && $this->getObjectDefinition()) {
+                    $object = $this->getObjectDefinition();
+                }
                 if (null === $object) {
                     throw new ObjectNotFoundException(sprintf(
                         'Object `%s` for predefined field `%s` not found.',
@@ -315,11 +318,15 @@ class Field extends Model
                         $this->getId()
                     ));
                 }
-                if (!$field = $object->getField($this->getField())) {
+                if (!$fieldId = $this->getField()) {
+                    $fieldId = $this->getId();
+                }
+
+                if (!$field = $object->getField($fieldId)) {
                     throw new ObjectFieldNotFoundException(sprintf(
                         'Field `%s` of Object `%s` for predefined field `%s` not found.',
-                        $this->getField(),
-                        $this->getObject(),
+                        $fieldId,
+                        $object->getKey(),
                         $this->getId()
                     ));
                 }
@@ -328,7 +335,12 @@ class Field extends Model
             try {
                 $this->fieldType = $this->getKrynCore()->getFieldTypes()->newType($type);
             } catch (\Exception $e) {
-                throw new TypeNotFoundException(sprintf('FieldType `%s` for field `%s` not found.', $type, $this->getId()), 0, $e);
+                if ($this->getObjectDefinition()) {
+                    $message = sprintf('FieldType `%s` for field `%s` in object `%s` not found.', $type, $this->getId(), $this->getObjectDefinition()->getId());
+                } else {
+                    $message = sprintf('FieldType `%s` for field `%s` not found.', $type, $this->getId());
+                }
+                throw new TypeNotFoundException($message, 0, $e);
             }
             $this->fieldType->setFieldDefinition($field ?: $this);
         }

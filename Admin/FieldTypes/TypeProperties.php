@@ -8,6 +8,5 @@ class TypeProperties extends AbstractSingleColumnType
 
     protected $phpDataType = 'object';
 
-    protected $sqlDataType = 'LONGVARCHAR';
-
+    protected $sqlDataType = 'OBJECT';
 }

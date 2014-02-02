@@ -68,11 +68,11 @@ class Navigation
 
         $themeProperties = $kryn->getCurrentDomain()->getThemeProperties();
 
-        if (!$options['noCache'] && $themeProperties->getByPath('core/cacheNavigations') !== 0) {
+        if (!$options['noCache'] && $themeProperties && $themeProperties->getByPath('core/cacheNavigations') !== 0) {
 
             $cache = $kryn->getDistributedCache($cacheKey);
             if ($cache && is_array($cache) && $cache['html'] !== null && $cache['mtime'] == $mtime) {
-                return $cache['html'];
+                //return $cache['html'];
             }
         }
 
@@ -119,7 +119,7 @@ class Navigation
 
             $html = $kryn->getTemplating()->render($view, $data);
 
-            if (!$options['noCache'] && $themeProperties->getByPath('core/cacheNavigations') !== 0) {
+            if (!$options['noCache'] && $themeProperties && $themeProperties->getByPath('core/cacheNavigations') !== 0) {
                 $kryn->setDistributedCache($cacheKey, array('mtime' => $mtime, 'html' => $html));
             } elseif (!$fromCache) {
                 $kryn->setDistributedCache($cacheKey, array('mtime' => $mtime, 'object' => serialize($navigation)));

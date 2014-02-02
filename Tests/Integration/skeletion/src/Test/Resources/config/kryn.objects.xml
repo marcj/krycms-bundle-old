@@ -82,6 +82,7 @@
             <type>object</type>
             <object>test/itemCategory</object>
             <objectRelation>nTo1</objectRelation>
+            <objectRefRelationName>OneItem</objectRefRelationName>
           </field>
         </fields>
       </object>

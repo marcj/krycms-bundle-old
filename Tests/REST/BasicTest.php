@@ -6,7 +6,7 @@ use Kryn\CmsBundle\Tests\KernelAwareTestCase;
 use Test\Model\Item;
 use Test\Model\ItemQuery;
 
-class BasicTest extends KernelAwareTestCase
+class BasicTestX extends KernelAwareTestCase
 {
     public function setUp()
     {
@@ -71,6 +71,9 @@ class BasicTest extends KernelAwareTestCase
         $this->assertEquals($id2, $response['data']['id']);
     }
 
+    /**
+     * @group test
+     */
     public function testUpdating()
     {
         ItemQuery::create()->deleteAll();
@@ -82,6 +85,8 @@ class BasicTest extends KernelAwareTestCase
 
         $response = $this->restCall('/kryn/admin/object/test/item/' . $id . '?fields=title');
         $this->assertEquals('Item 1', $response['data']['title']);
+
+        $item = $this->getKrynCore()->getObjects()->get('test/item', $id);
 
         $response = $this->restCall(
             '/kryn/admin/object/test/item/' . $id,

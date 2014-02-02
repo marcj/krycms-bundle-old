@@ -1,7 +1,7 @@
 .ka-helpsystem-container {
     position: absolute;
-    right: 5px;
-    bottom: 7px;
+    left: 20px;
+    bottom: 25px;
     overflow: hidden;
     width: 270px;
     z-index: 5000000;
@@ -11,7 +11,6 @@ a.ka-helpsystem-bubble-closer {
     position: absolute;
     right: 4px;
     top: 3px;
-    color: white;
     font-weight: bold;
     font-size: 9px;
     height: 15px;
@@ -19,26 +18,25 @@ a.ka-helpsystem-bubble-closer {
 }
 
 a.ka-helpsystem-bubble-closer:hover {
-    color: #bbb;
+    color: black;
 }
 
 .ka-helpsystem-bubble {
-    -moz-border-radius: 7px;
-    -webkit-border-radius: 7px;
-    border-radius: 7px;
-    background-color: #333;
-    padding: 8px;
-    padding-top: 4px;
-    color: #eee;
+    -moz-border-radius: 2px;
+    -webkit-border-radius: 2px;
+    border-radius: 2px;
+    background-color: #dadada;
+    padding: 10px 10px;
     font-size: 11px;
     margin-top: 5px;
     line-height: 20px;
     position: relative;
+    border-left: 5px solid #265F85;
+    color: #444;
 }
 
 .ka-helpsystem-bubble h3 {
-    color: white;
-    margin: 4px 0px;
     margin-top: 0px;
-    border-bottom: 1px solid #666;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #999;
 }

@@ -27,37 +27,69 @@ ka.SystemDialog = new Class({
                 this.close();
             }.bind(this))
             .inject(this.main);
+
+        this.main.addClass('ka-dialog-system');
     },
 
     /**
      * Position the dialog to the correct position.
      *
-     * @param {Boolean} pAnimated position the dialog out of the viewport and animate it into it.
+     * @param {Boolean} animated position the dialog out of the viewport and animate it into it.
      */
-    center: function (pAnimated) {
+    center: function (animated) {
         if (!this.overlay.getParent()) {
             this.overlay.inject(this.container);
         }
 
-        var size = this.container.getSize();
-
         this.main.setStyles({
             left: 0,
             minWidth: null,
-            top: 0,
+            top: -100,
             bottom: 0
         });
 
-        ka.adminInterface.hideAppContainer();
+        this.showDialogContainer();
+
+        setTimeout(function(){
+            if (Modernizr.csstransforms && Modernizr.csstransitions) {
+                var styles = {
+                    opacity: 1
+                };
+                styles[Modernizr.prefixed('transform')] = 'translate(0px, 100px)';
+                this.main.setStyles(styles);
+            } else {
+                this.main.morph({
+                    'top': 0
+                });
+            }
+        }.bind(this, 50));
     },
 
-    doClose: function(pAnimated) {
+    getContainer: function() {
+        return ka.getAdminInterface().getDialogContainer()
+    },
+
+    doClose: function(animated) {
         if (this.options.destroyOnClose) {
             this.overlay.destroy();
         } else {
             this.overlay.dispose();
         }
 
-        ka.adminInterface.showAppContainer();
+        if (!this.getContainer().getChildren().length) {
+            this.hideDialogContainer();
+        }
+
+        this.fireEvent('close');
+    },
+
+    showDialogContainer: function() {
+        if (!this.getContainer().hasClass('ka-main-dialog-container-visible')) {
+            this.getContainer().addClass('ka-main-dialog-container-visible');
+        }
+    },
+
+    hideDialogContainer: function() {
+        this.getContainer().removeClass('ka-main-dialog-container-visible');
     }
 });

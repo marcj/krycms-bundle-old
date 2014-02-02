@@ -21,7 +21,7 @@ interface TypeInterface
      * This changes won't be saved, but only be used for the model building/schema migration.
      *
      * Make sure that this method does only change stuff once, because we call it frequently, depends
-     * if another boot has something changed or not.
+     * if another boot has something changed.
      *
      * @param \Kryn\CmsBundle\Configuration\Object $object
      * @param Configs $configs
@@ -36,10 +36,10 @@ interface TypeInterface
      *
      * e.g. create cross foreignKeys for 1-to-n relations.
      *
-     * This changes will be cached, but won't saved.
+     * This changes will be saved.
      *
      * Make sure that this method does only change stuff once, because we call it frequently, depends
-     * if another boot has something changed or not.
+     * if another boot has something changed.
      *
      * @param \Kryn\CmsBundle\Configuration\Object $object
      * @param Configs $configs
