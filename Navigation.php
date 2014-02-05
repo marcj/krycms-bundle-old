@@ -72,7 +72,7 @@ class Navigation
 
             $cache = $kryn->getDistributedCache($cacheKey);
             if ($cache && is_array($cache) && $cache['html'] !== null && $cache['mtime'] == $mtime) {
-                //return $cache['html'];
+                return $cache['html'];
             }
         }
 

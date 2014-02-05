@@ -730,6 +730,9 @@ class Core extends Controller
             }
 
             $bundlePath = $bundle->getPath();
+            if ('/' !== substr($bundlePath, 0, -1)) {
+                $bundlePath .= '/';
+            }
 
             $path = $bundlePath . $suffix . $path;
         } else {

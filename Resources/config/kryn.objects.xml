@@ -205,6 +205,7 @@
           </field>
           <field id="searchIndexKey" type="text" />
           <field id="themeProperties" type="properties"/>
+          <field id="sessionProperties" type="properties"/>
           <field id="theme" type="theme">
             <label>Theme</label>
           </field>

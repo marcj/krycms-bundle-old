@@ -92,4 +92,45 @@
             <parameter name="Charset" value="utf8"/>
         </vendor>
     </table>
+    <table name="system_content" phpName="Content" idMethod="native">
+        <index>
+            <index-column name="box_id"/>
+        </index>
+        <index>
+            <index-column name="hide"/>
+        </index>
+        <index>
+            <index-column name="node_id"/>
+        </index>
+        <behavior name="sortable" custom="true">
+            <parameter name="rank_column" value="sort"/>
+            <parameter name="use_scope" value="true"/>
+            <parameter name="scope_column" value="box_id"/>
+        </behavior>
+    </table>
+    <table name="system_log" phpName="Log" idMethod="native">
+        <column name="id" type="INTEGER" primaryKey="true" autoIncrement="true" required="true"/>
+        <column name="request_id" type="VARCHAR" size="64" required="false"/>
+        <column name="date" type="DOUBLE" required="false"/>
+        <column name="level" type="VARCHAR" required="false"/>
+        <column name="message" type="LONGVARCHAR" required="false"/>
+        <foreign-key foreignTable="system_log_request">
+            <reference foreign="id" local="request_id"/>
+        </foreign-key>
+        <vendor type="mysql">
+            <parameter name="Charset" value="utf8"/>
+        </vendor>
+    </table>
+    <table name="system_log_request" phpName="LogRequest" idMethod="native">
+        <column name="id" type="VARCHAR" size="64" primaryKey="true"/>
+        <column name="date" type="DOUBLE" required="false"/>
+        <column name="username" type="VARCHAR" size="64" required="false"/>
+        <column name="path" type="VARCHAR" size="255" required="false"/>
+        <column name="ip" type="VARCHAR" size="32" required="false"/>
+        <column name="counts" type="LONGVARCHAR" required="false"/>
+        <column name="profile_token" type="VARCHAR" size="32" required="false"/>
+        <vendor type="mysql">
+            <parameter name="Charset" value="utf8"/>
+        </vendor>
+    </table>
 </database>

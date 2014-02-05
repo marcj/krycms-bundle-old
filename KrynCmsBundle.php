@@ -47,7 +47,6 @@ class KrynCmsBundle extends Bundle
 
         $krynCore->getModelBuilder()->boot();
 
-
         if ($krynCore->getSystemConfig()->getLogs(true)->isActive()) {
             /** @var $logger \Symfony\Bridge\Monolog\Logger */
             $logger = $this->container->get('logger');
