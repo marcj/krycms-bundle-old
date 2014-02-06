@@ -196,6 +196,12 @@ ka.wm = {
                 'class': 'ka-wm-tab' + (win.isInFront() ? ' ka-wm-tab-active' : ''),
                 text: win.getTitle() || (win.getEntryPointDefinition() || {}).label
             })
+            .addEvent('mouseup', function(e){
+                if(e.isMiddleClick()){
+                    win.close();
+                    e.stop();
+                }
+            })
             .addEvent('click', function(){ win.toFront(); });
 
             if (icon = (win.getEntryPointDefinition() || {}).icon) {
@@ -210,7 +216,6 @@ ka.wm = {
                 'class': 'icon-cancel-8'
             }).addEvent('click', function(e){
                 win.close();
-                e.stopPropagation();
                 e.stop();
             }).inject(el);
 
