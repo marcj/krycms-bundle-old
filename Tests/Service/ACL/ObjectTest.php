@@ -223,7 +223,7 @@ class ObjectTest extends KernelAwareTestCase
 
         $group = new Group();
         $group->setName('ACL Test group');
-        $group->addGroupMembershipUser($user);
+        $group->addUser($user);
         $group->save();
 
         $cat1 = new ItemCategory();
@@ -231,7 +231,7 @@ class ObjectTest extends KernelAwareTestCase
 
         $item1 = new Item();
         $item1->setTitle('Item 1');
-        $item1->addItemCategory($cat1);
+        $item1->addCategory($cat1);
         $item1->save();
 
         $cat2 = new ItemCategory();
@@ -239,7 +239,7 @@ class ObjectTest extends KernelAwareTestCase
 
         $item2 = new Item();
         $item2->setTitle('Item 2');
-        $item2->addItemCategory($cat2);
+        $item2->addCategory($cat2);
         $item2->save();
 
         $this->getACL()->removeObjectRules('test/item');

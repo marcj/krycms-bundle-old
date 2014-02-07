@@ -108,7 +108,7 @@
           <field id="alternativeTitle" type="text">
             <label>Page title</label>
           </field>
-          <field id="urn" type="text" required="true">
+          <field id="urn" type="text">
             <label>URN</label>
           </field>
           <field id="link" type="text">

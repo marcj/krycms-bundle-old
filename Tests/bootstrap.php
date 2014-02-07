@@ -14,6 +14,5 @@ $autoload = require_once $file;
 
 AnnotationRegistry::registerLoader(array($autoload, 'loadClass'));
 
-
 $autoload->add('', realpath(__DIR__ . '/../../../'));
 $autoload->add('', realpath(__DIR__ . '/Integration/skeletion/src/'));

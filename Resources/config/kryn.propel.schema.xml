@@ -133,4 +133,5 @@
             <parameter name="Charset" value="utf8"/>
         </vendor>
     </table>
+    
 </database>

@@ -77,6 +77,7 @@
             <type>object</type>
             <object>test/itemCategory</object>
             <objectRelation>nToM</objectRelation>
+            <objectRefRelationName>multiCategory</objectRefRelationName>
           </field>
           <field id="oneCategory">
             <type>object</type>

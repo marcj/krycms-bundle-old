@@ -80,9 +80,9 @@ class PropelBuilderTest extends KernelAwareTestCase
 </object>
 ';
 
-        $expected = '<database namespace="Test">
+        $expected = '<database>
   <table name="test_object1" phpName="Object1">
-    <column name="id" type="INTEGER" primary="true" autoIncrement="true"/>
+    <column name="id" type="INTEGER" primaryKey="true" autoIncrement="true"/>
     <column name="title" type="VARCHAR" size="255"/>
     <vendor type="mysql">
       <parameter name="Charset" value="utf8"/>
@@ -111,9 +111,9 @@ class PropelBuilderTest extends KernelAwareTestCase
 </object>
 ';
 
-        $expected = '<database namespace="Test">
+        $expected = '<database>
   <table name="test_object1" phpName="Object1">
-    <column name="id" type="INTEGER" primary="true" autoIncrement="true"/>
+    <column name="id" type="INTEGER" primaryKey="true" autoIncrement="true"/>
     <column name="title" type="VARCHAR" size="255"/>
     <column name="visible" type="BOOLEAN"/>
     <column name="file" type="LONGVARCHAR"/>
@@ -146,12 +146,12 @@ class PropelBuilderTest extends KernelAwareTestCase
 </object>
 ';
 
-        $expected = '<database namespace="Test">
+        $expected = '<database>
   <table name="test_object1" phpName="Object1">
-    <column name="id" type="INTEGER" primary="true" autoIncrement="true"/>
+    <column name="id" type="INTEGER" primaryKey="true" autoIncrement="true"/>
     <column name="title" type="VARCHAR" size="255"/>
     <column name="owner_id" type="INTEGER"/>
-    <foreign-key phpName="owner" foreignTable="system_user" onDelete="cascade" onUpdate="cascade">
+    <foreign-key phpName="Owner" foreignTable="system_user" onDelete="cascade" onUpdate="cascade">
       <reference local="owner_id" foreign="id"/>
     </foreign-key>
     <vendor type="mysql">
@@ -181,9 +181,9 @@ class PropelBuilderTest extends KernelAwareTestCase
 </object>
 ';
 
-        $expected = '<database namespace="Test">
+        $expected = '<database>
   <table name="test_object_one" phpName="ObjectOne">
-    <column name="id" type="INTEGER" primary="true" autoIncrement="true"/>
+    <column name="id" type="INTEGER" primaryKey="true" autoIncrement="true"/>
     <column name="title" type="VARCHAR" size="255"/>
     <vendor type="mysql">
       <parameter name="Charset" value="utf8"/>
@@ -203,10 +203,10 @@ class PropelBuilderTest extends KernelAwareTestCase
         $this->assertCount(2, $object1User->getFields());
         $schema = $this->getBuilder()->getSchema($object1User);
 
-        $expectedCrossSchema = '<database namespace="Test">
+        $expectedCrossSchema = '<database>
   <table name="test_object_one_user" phpName="ObjectOneUser" isCrossRef="true">
-    <column name="object_one_id" type="INTEGER"/>
-    <column name="user_id" type="INTEGER"/>
+    <column name="object_one_id" type="INTEGER" primaryKey="true"/>
+    <column name="owner_id" type="INTEGER" primaryKey="true"/>
     <vendor type="mysql">
       <parameter name="Charset" value="utf8"/>
     </vendor>

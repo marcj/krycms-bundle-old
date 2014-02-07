@@ -451,6 +451,7 @@ class Propel extends ORMAbstract
 
         foreach ($relations as $name => $relation) {
 
+            /** @var $relation \Propel\Runtime\Map\RelationMap */
             if ($relation->getType() != RelationMap::MANY_TO_MANY && $relation->getType() != RelationMap::ONE_TO_MANY) {
 
                 if (isset($relationFields[$name]) && is_array($relationFields[$name])) {
@@ -491,8 +492,11 @@ class Propel extends ORMAbstract
                     $sClazz = $relation->getRightTable()->getClassname();
 
                     $queryName = $sClazz . 'Query';
-                    $filterBy = 'filterBy' . $relation->getSymmetricalRelation()->getName();
-//                    $filterBy = 'filterBy' . $relation->getName();
+                    if ($relation->getType() === RelationMap::MANY_TO_MANY) {
+                        $filterBy = 'filterBy' . $this->getDefinition()->getId();
+                    } else {
+                        $filterBy = 'filterBy' . $relation->getSymmetricalRelation()->getName();
+                    }
 
                     $sQuery = $queryName::create()
                         ->select($relationFields[$name])

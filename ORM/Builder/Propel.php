@@ -104,6 +104,14 @@ class Propel implements BuildInterface
         $propelHelper->init();
     }
 
+    public function getSchema(Object $object)
+    {
+        $xml = simplexml_load_string('<database></database>');
+        $this->declareTable($xml, $object);
+
+        return $this->getFormattedXml($xml);
+    }
+
     /**
      * @param $xml
      * @return string
@@ -116,7 +124,7 @@ class Propel implements BuildInterface
         $dom->formatOutput = true;
 
         $xml = $dom->saveXML();
-        $prefix = '<?xml version="1.0"? >';
+        $prefix = '<?xml version="1.0"?>';
         if (0 === strpos($xml, $prefix)) {
             $xml = substr($xml, strlen($prefix));
         }
