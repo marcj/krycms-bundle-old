@@ -41,12 +41,6 @@
             <asset>@KrynCmsBundle/codemirror/lib/codemirror.js</asset>
             <asset>@KrynCmsBundle/codemirror/addon/mode/loadmode.js</asset>
             <asset>@KrynCmsBundle/codemirror/lib/codemirror.css</asset>
-
-        <!--<asset>@KrynCmsBundle/font/SourceCodePro/Light/fonts.css</asset>
-            <asset>@KrynCmsBundle/font/SourceCodePro/Regular/fonts.css</asset>
-            <asset>@KrynCmsBundle/font/SourceSansPro/Light/fonts.css</asset>
-            <asset>@KrynCmsBundle/font/SourceSansPro/Regular/fonts.css</asset>
-            <asset>@KrynCmsBundle/font/SourceSansPro/Semibold/fonts.css</asset>-->
             <asset>@KrynCmsBundle/font/OpenSans/open-sans.css</asset>
             <asset>@KrynCmsBundle/font/OpenSans/open-sans-condensed.css</asset>
             <assets>@KrynCmsBundle/admin/css/ai.css</assets>

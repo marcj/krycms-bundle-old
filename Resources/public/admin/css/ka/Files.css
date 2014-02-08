@@ -326,7 +326,6 @@ div.ka-Files-addressFaker + .ka-buttonGroup-item {
     border-radius: 4px;
     cursor: default;
     margin-top: 10px;
-    font-size: 14px;
     word-wrap: break-word;
 }
 
@@ -462,10 +461,9 @@ table.ka-files-search-table tr:hover td {
 
 .ka-Files-sidebar-more-information-title {
     padding: 5px;
-    font-weight: bold;
-    font-family: "SourceSansPro-Semibold";
+    font-weight: normal;
+    font-family: "Open Sans";
     margin-top: 5px;
-    font-size: 14px;
     word-wrap: break-word;
 }
 
