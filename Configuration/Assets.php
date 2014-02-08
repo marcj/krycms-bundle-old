@@ -107,7 +107,8 @@ class Assets extends Model implements \IteratorAggregate
                 ->name(basename($path))
                 ->files()
                 ->depth(!$this->getRecursive() ? '== 0' : null)
-                ->in(dirname($path));
+                ->in(dirname($path))
+                ->sortByName();
 
             foreach ($files as $file) {
                 $asset = new Asset(null, $this->getKrynCore());
