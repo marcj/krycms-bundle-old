@@ -41,47 +41,10 @@ var kryncms_system_module = new Class({
             'class': 'kwindow-win-buttonBar ka-ActionBar'
         }).inject(this.panes['installed']);
 
-        new Element('h2', {
-            html: _('Bundles'),
-            'class': 'light',
-            style: 'margin-left: 5px;'
-        }).inject(this.installedPane);
 
-        this.tableInstalledBundles = new ka.Table([
-            [_('Name'), null, 'html'],
-            [_('Status'), 100],
-            [_('Action'), 150]
-        ], {
-            absolute: false,
-            valign: 'middle'
-        }).inject(this.installedPane);
-        document.id(this.tableInstalledBundles).setStyle('margin', 10);
 
-        new Element('h2', {
-            html: _('Composer Packages'),
-            'class': 'light',
-            style: 'margin-left: 5px;'
-        }).inject(this.installedPane);
-        this.tableInstalledPackages = new ka.Table([
-            [_('Name'), null, 'html'],
-            [_('Version'), 100],
-            [_('Installed'), 150],
-            [_('Action'), 150]
-        ], {
-            absolute: false,
-            valign: 'middle'
-        }).inject(this.installedPane);
-        document.id(this.tableInstalledPackages).setStyle('margin', 10);
+        this._createInstalledLayout();
 
-        new ka.Button(t('Update Packages'))
-            .inject(this.installedActionBar);
-
-        new ka.Button(t('Install Package'))
-            .setButtonStyle('blue')
-            .addEvent('click', function(){
-                this.installComposerPackage();
-            }.bind(this))
-            .inject(this.installedActionBar);
 
         this.categories = {};
         [
@@ -116,6 +79,50 @@ var kryncms_system_module = new Class({
         }
     },
 
+    _createInstalledLayout:function(){
+        var paddedPane = new Element('div',{
+            'class': 'ka-content-row'
+        }).inject(this.installedPane);
+        var p = paddedPane;
+
+        new Element('h2', {
+            html: _('Bundles'),
+            'class': 'light'
+        }).inject(p);
+
+        this.tableInstalledBundles = new ka.Table([
+            [_('Name'), null, 'html'],
+            [_('Status'), 100],
+            [_('Action'), 150]
+        ], {
+            absolute: false,
+            valign: 'middle'
+        }).inject(p);
+
+        new Element('h2', {
+            html: _('Composer Packages'),
+            'class': 'light'
+        }).inject(p);
+        this.tableInstalledPackages = new ka.Table([
+            [_('Name'), null, 'html'],
+            [_('Version'), 100],
+            [_('Installed'), 150],
+            [_('Action'), 150]
+        ], {
+            absolute: false,
+            valign: 'middle'
+        }).inject(p);
+
+        new ka.Button(t('Update Packages'))
+            .inject(this.installedActionBar);
+
+        new ka.Button(t('Install Package'))
+            .setButtonStyle('blue')
+            .addEvent('click', function(){
+                this.installComposerPackage();
+            }.bind(this))
+            .inject(this.installedActionBar);
+    },
     changeType: function (pType) {
         this.lastType = pType;
         Object.each(this.tabButtons, function (button, id) {
@@ -324,18 +331,21 @@ var kryncms_system_module = new Class({
 
         this.lc = new Request.JSON({url: _pathAdmin +
             'admin/system/bundle/manager/local', noCache: 1, onComplete: function (res) {
-            this.win.setLoading(false);
             this.renderLocal(res.data);
+            this.win.setLoading(false);
         }.bind(this)}).get();
     },
-
+    // Todo - separate createLayout from loading
     renderLocal: function (pMods) {
         this.panes['local'].empty();
-
-        this.localePane = new Element('div', {
+        /*Development*/
+        this.localPane = new Element('div', {
             'class': 'ka-kwindow-content-withBottomBar'
         }).inject(this.panes['local']);
-        var p = this.localePane;
+        var paddedPane = new Element('div',{
+            'class': 'ka-content-row'
+        }).inject(this.localPane);
+        var p = paddedPane;
 
         if (ka.settings.system.communityId + 0 > 0) {
             new Element('h3', {
@@ -479,7 +489,7 @@ var kryncms_system_module = new Class({
 
         if (ka.settings.system.communityId + 0 > 0) {
             //if connected
-            tableMyDiv = new Element('div', {style: 'position: relative; margin: 10px;'}).inject(p);
+            tableMyDiv = new Element('div', {style: 'position: relative;'}).inject(p);
             tables['my'] = new ka.Table([
                 [_('Title'), null, 'html'],
                 [_('Activated'), 50, 'html'],
@@ -491,11 +501,10 @@ var kryncms_system_module = new Class({
 
         new Element('h2', {
             html: _('Local bundles'),
-            'class': 'light',
-            style: 'margin-left: 5px;'
+            'class': 'light'
         }).inject(p);
 
-        tableLocalDiv = new Element('div', {style: 'position: relative; margin: 10px;'}).inject(p);
+        tableLocalDiv = new Element('div', {style: 'position: relative;'}).inject(p);
         tables['local'] = new ka.Table([
             [_('Title'), null, 'html'],
             [_('Activated'), 50, 'html'],
@@ -506,11 +515,10 @@ var kryncms_system_module = new Class({
 
         new Element('h2', {
             html: _('External bundles'),
-            'class': 'light',
-            style: 'margin-left: 5px;'
+            'class': 'light'
         }).inject(p);
 
-        tableLocalDiv = new Element('div', {style: 'position: relative; margin: 10px;'}).inject(p);
+        tableLocalDiv = new Element('div', {style: 'position: relative;'}).inject(p);
         tables['external'] = new ka.Table([
             [_('Title'), null, 'html'],
             [_('Activated'), 50, 'html'],
@@ -675,10 +683,15 @@ var kryncms_system_module = new Class({
             return this.installComposerPackage(this.directInput.value);
         }.bind(this)).inject(this.searchPane);
 
+        var paddedPane = new Element('div',{
+            'class': 'ka-content-row'
+        }).inject(this.panes['install']);
+        var p = paddedPane;
+
         this.mainPane = new Element('div', {
             'style': 'position: absolute; top: 46px; left: 0px; right: 0px; bottom: 0px; background-color: #f4f4f4; padding: 5px; overflow: auto;',
             text: 'TODO'
-        }).inject(this.panes['install']);
+        }).inject(p);
 
         //this.viewPath();
 

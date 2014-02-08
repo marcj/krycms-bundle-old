@@ -121,16 +121,14 @@
 
 .ka-editor-slot-infobubble {
     background: #22638E;
-    padding: 15px;
+    padding: 5px 15px;
     color: white;
 
     position: absolute;
 
-    border-radius: 5px;
-    -moz-border-radius: 5px;
-    -webkit-border-radius: 5px;
-
-    box-shadow: 1px 1px 1px white;
+    border-radius: 2px;
+    -moz-border-radius: 2px;
+    -webkit-border-radius: 2px;
 }
 
 .ka-editor-slot-infobubble:after, .ka-editor-slot-infobubble:before {
@@ -145,19 +143,10 @@
 .ka-editor-slot-infobubble:after {
     border-color: rgba(81, 169, 213, 0);
     border-top-color: #22638E;
-    border-width: 15px;
+    border-width: 10px;
     left: 50%;
     margin-left: -15px;
 }
-
-.ka-editor-slot-infobubble:before {
-    border-color: rgba(56, 189, 255, 0);
-    border-top-color: #3E9BCB;
-    border-width: 21px;
-    left: 50%;
-    margin-left: -21px;
-}
-
 .ka-editor-drag-placeholder {
     height: 2px;
     background-color: #22638E;
