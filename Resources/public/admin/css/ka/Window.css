@@ -493,6 +493,15 @@ h3.kryn-headline {
     background-color: #3d3d3d;
 }
 
+
+.ka-Window-sidebar a.ka-Button-deactivate,
+.ka-Window-sidebar a.ka-Button-deactivate:link,
+.ka-Window-sidebar a.ka-Button-deactivate:active,
+.ka-Window-sidebar a.ka-Button-deactivate:hover {
+    cursor: default;
+    color: #808080;
+    background-color: rgba(0, 0, 0, 0);
+}
 .ka-Window-sidebar .ka-Splitter-main {
     left: -20px;
     border-left: 0;
