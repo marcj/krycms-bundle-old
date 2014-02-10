@@ -221,7 +221,6 @@ class Propel implements BuildInterface
             }
         }
 
-        $relations = $object->getRelations();
         if ($relations = $object->getRelations()) {
             foreach ($relations as $relation) {
                 $this->addRelation($object, $relation, $objectTable);

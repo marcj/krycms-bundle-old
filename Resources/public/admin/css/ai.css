@@ -85,6 +85,10 @@ td {
     -webkit-perspective: 1000;
 }
 
+.ka-description {
+    color: #a5a5a5;
+}
+
 .ka-Full {
     position: absolute;
     left: 0;
@@ -265,7 +269,7 @@ a:link {
     color: gray;
 }
 
-aa:hover {
+a:hover {
     color: #333;
 }
 

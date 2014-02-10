@@ -24,6 +24,7 @@ use Kryn\CmsBundle\Configuration\ThemeContent;
 use Kryn\CmsBundle\Configuration\ThemeLayout;
 use Kryn\CmsBundle\Configuration\TreeIconMapping;
 use Kryn\CmsBundle\Tests\KernelAwareTestCase;
+use Tests\FileImport\TestsFileImportBundle;
 
 class BundleConfigTest extends KernelAwareTestCase
 {
@@ -64,9 +65,6 @@ class BundleConfigTest extends KernelAwareTestCase
         return $root . static::$krynXml;
     }
 
-    /**
-     * @group test
-     */
     public function testFileImport()
     {
         $configs = new Configs($this->getKrynCore());
@@ -74,10 +72,11 @@ class BundleConfigTest extends KernelAwareTestCase
         $this->setupFiles();
         $this->assertTrue($this->getKrynCore()->isActiveBundle('TestsFileImportBundle'));
 
-        $configStrings = $configs->getXmlConfigsForBundle('TestsFileImportBundle');
+        $bundle = new TestsFileImportBundle();
+        $configStrings = $configs->getXmlConfigsForBundle($bundle);
         $configObjects = $configs->parseConfig($configStrings);
 
-        $testBundleConfig = $configObjects['testsfileimportbundle'];
+        $testBundleConfig = $configObjects['testsfileimport'];
         $this->assertNotNull($testBundleConfig);
 
         $this->assertEquals(static::$krynXml, $testBundleConfig->getPropertyFilePath('caches'));
@@ -92,10 +91,11 @@ class BundleConfigTest extends KernelAwareTestCase
 
         $this->setupFiles();
 
-        $configStrings = $configs->getXmlConfigsForBundle('TestsFileImportBundle');
+        $bundle = new TestsFileImportBundle();
+        $configStrings = $configs->getXmlConfigsForBundle($bundle);
         $configObjects = $configs->parseConfig($configStrings);
 
-        $testBundleConfig = $configObjects['testsfileimportbundle'];
+        $testBundleConfig = $configObjects['testsfileimport'];
         $this->assertNotNull($testBundleConfig);
 
         $export = $testBundleConfig->exportFileBased('objects');
@@ -140,10 +140,11 @@ class BundleConfigTest extends KernelAwareTestCase
 
         $this->setupFiles();
 
-        $configStrings = $configs->getXmlConfigsForBundle('TestsFileImportBundle');
+        $bundle = new TestsFileImportBundle();
+        $configStrings = $configs->getXmlConfigsForBundle($bundle);
         $configObjects = $configs->parseConfig($configStrings);
 
-        $testBundleConfig = $configObjects['testsfileimportbundle'];
+        $testBundleConfig = $configObjects['testsfileimport'];
         $this->assertNotNull($testBundleConfig);
 
         $export = $testBundleConfig->exportFileBased('objects');
@@ -257,10 +258,11 @@ class BundleConfigTest extends KernelAwareTestCase
 
         $this->assertStringEqualsFile($this->getRoot() . $testBundleConfig->getPropertyFilePath('events'), $xmlEvents);
 
-        $configStrings = $configs->getXmlConfigsForBundle('TestsFileImportBundle');
+        $bundle = new TestsFileImportBundle();
+        $configStrings = $configs->getXmlConfigsForBundle($bundle);
         $configObjects = $configs->parseConfig($configStrings);
 
-        $testBundleConfig = $configObjects['testsfileimportbundle'];
+        $testBundleConfig = $configObjects['testsfileimport'];
         $this->assertNotNull($testBundleConfig);
 
         $this->assertCount(1, $testBundleConfig->getObjects());
@@ -277,7 +279,7 @@ class BundleConfigTest extends KernelAwareTestCase
 
     public function testBundle()
     {
-        $config = new Bundle(null, null, $this->getKrynCore());
+        $config = new Bundle('DummyBundle', null, $this->getKrynCore());
 
         $events = [
             ['key' => 'core/object/modify', 'desc' => 'foo'],

@@ -1921,43 +1921,74 @@ var kryncms_system_module_edit = new Class({
             style: 'bottom: 40px;'
         }).inject(this.panes['objects']);
 
+        new Element('h2', {
+            text: t('Objects'),
+            'class': 'light'
+        }).inject(this.objectsPane);
+
+        new Element('div', {
+            'class': 'ka-description',
+            text: t('Define your own objects.'),
+            style: 'margin: 8px 0;'
+        }).inject(this.objectsPane);
+
         this.objectsTable = new ka.Table([
-            //    ['', 20],
             [t('Object key'), 260],
             [t('Object label'), 260],
             [t('Actions')]
-        ]).inject(this.objectsPane);
+        ], {
+            absolute: false
+        }).inject(this.objectsPane);
+
+        this.objectsPaneButtons = new Element('div', {
+            style: 'margin-top: 5px; margin-bottom: 15px;'
+        }).inject(this.objectsPane);
+
+        new ka.Button([t('Add object'), '#icon-plus-alt'])
+            .addEvent('click', function(){
+                this.addObject();
+            }.bind(this))
+            .inject(this.objectsPaneButtons);
 
         this.objectTBody = this.objectsTable.getBody();
 
+        new Element('h2', {
+            text: t('Attributes'),
+            'class': 'light'
+        }).inject(this.objectsPane);
+
+        new Element('div', {
+            'class': 'ka-description',
+            text: t('Here you can add additional fields to foreign objects.'),
+            style: 'margin: 8px 0;'
+        }).inject(this.objectsPane);
+
+        this.attributesTable = new ka.ObjectAttributeTable(this.objectsPane, this.win, {
+            addLabel: t('Add attribute'),
+            asModel: true
+        });
+
         var buttonBar = new ka.ButtonBar(this.panes['objects']);
-        buttonBar.addButton([t('Add object'), '#icon-plus-alt'], function() {
-            this.addObject();
-        }.bind(this));
-
         this.saveButton = buttonBar.addButton(t('Save'), this.saveObjects.bind(this, false));
-        this.saveButton.setButtonStyle('blue');
         this.saveButtonORM = buttonBar.addButton(t('Save and build'), this.saveObjects.bind(this, true));
-
-        document.id(this.saveButton).addClass('ka-Button-blue');
-        document.id(this.saveButtonORM).addClass('ka-Button-blue');
+        this.saveButtonORM.setButtonStyle('blue');
 
         this.lr = new Request.JSON({url: _pathAdmin + 'admin/system/bundle/editor/objects', noCache: 1,
-            onComplete: function(pResult) {
-
-                if (pResult.data) {
-                    Object.each(pResult.data, function(item, key) {
-                        this.addObject(item, key);
-                    }.bind(this));
-                }
-
+            onComplete: function(response) {
                 this.win.setLoading(false);
 
+                if (response.data) {
+                    Object.each(response.data.objects, function(item, key) {
+                        this.addObject(item, key);
+                    }.bind(this));
+                    Object.each(response.data.attributes, function(item, key) {
+                        this.attributesTable.add(key, item);
+                    }.bind(this));
+                }
             }.bind(this)}).get({bundle: this.mod});
     },
 
     modelBuild: function(callback) {
-
         if (this.lr) {
             this.lr.cancel();
         }
@@ -2073,6 +2104,7 @@ var kryncms_system_module_edit = new Class({
 
         var req = {};
         req.objects = objects;
+        req.objectAttributes = this.attributesTable.getValue();
         req.bundle = this.mod;
 
         this.currentButton.startLoading(t('Saving ...'));
@@ -2080,6 +2112,7 @@ var kryncms_system_module_edit = new Class({
         this.lr = new Request.JSON({
             url: _pathAdmin + 'admin/system/bundle/editor/objects?bundle=' + this.mod,
             noCache: 1,
+            saveButton: this.currentButton,
             onSuccess: function(response) {
                 ka.loadSettings(['configs']);
                 if (withBuildAndUpdate) {
@@ -2553,15 +2586,6 @@ var kryncms_system_module_edit = new Class({
     addObject: function(pDefinition, pKey) {
         var row = [];
 
-        //        tr.definition = pDefinition || {};
-
-        //        var helpText = new Element('td', {
-        //            style: 'text-align: right; color: gray; padding-left: 3px;',
-        //            text: this.mod.charAt(0).toUpperCase() + this.mod.slice(1) + '\\'
-        //        });
-        //
-        //        row.push(helpText);
-
         var actions = new Element('div');
         var iKey = new ka.Field({
             type: 'text',
@@ -2581,6 +2605,125 @@ var kryncms_system_module_edit = new Class({
         row.push(actions);
 
         var tr = this.objectsTable.addRow(row);
+        tr.addClass('object');
+        tr.definition = pDefinition || {};
+        tr.store('key', iKey);
+
+        var fieldsBtn = new ka.Button(t('Fields')).inject(actions);
+
+        new ka.Button(t('Settings')).addEvent('click', this.openObjectSettings.bind(this, tr)).inject(actions);
+
+        if (pDefinition) {
+            new ka.Button(t('Window wizard')).addEvent('click', this.openObjectWizard.bind(this, pKey, pDefinition)).inject(actions);
+        }
+
+        new Element('a', {
+            style: "cursor: pointer; font-family: 'icomoon'; padding: 0px 2px;",
+            title: _('Remove'),
+            html: '&#xe26b;'
+        }).addEvent('click', function() {
+                this.win._confirm(t('Really delete'), function(ok) {
+                    if (!ok) {
+                        return;
+                    }
+                    tr.destroy();
+                });
+            }.bind(this)).inject(actions);
+
+        fieldsBtn.addEvent('click', function() {
+
+            var dialog = this.win.newDialog('', true);
+            dialog.setStyles({
+                width: '90%',
+                height: '95%'
+            });
+
+            new ka.Button(t('Cancel')).addEvent('click',function() {
+                dialog.closeAnimated();
+            }).inject(dialog.bottom);
+
+            new Element('div', {
+                style: 'padding: 5px; color: gray',
+                text: t("You have to enter the keys as camelCased. In the real table we convert it to underscore, but you will work always with the camelCased name.")
+            }).inject(dialog.content);
+
+            var fieldTable = new ka.FieldTable(dialog.content, this.win, {
+                addLabel: t('Add field'),
+                mode: 'object',
+                keyModifier: 'camelcase|trim|lcfirst',
+                asModel: true,
+                withoutChildren: true
+            });
+
+            new Element('th', {
+                text: t('Column name'),
+                width: 150
+            }).inject(fieldTable.headerTr.getFirst(), 'after');
+
+            fieldTable.addEvent('add', function(item) {
+                item.underscoreDisplay = new Element('td', {
+                    'text': '',
+                    style: 'color: gray',
+                    width: 150
+                }).inject(item.tdType, 'before');
+
+                var updateUnderscore = function() {
+                    var ucv = item.iKey.getValue().replace(/([^a-z0-9])/g, function($1) {
+                        return "_" + $1.toLowerCase().replace(/[^a-z0-9]/, '');
+                    });
+                    item.underscoreDisplay.set('text', ucv);
+                };
+
+                item.iKey.addEvent('change', updateUnderscore);
+                item.addEvent('set', updateUnderscore);
+
+                updateUnderscore();
+            });
+
+            if (tr.definition.fields) {
+                fieldTable.setValue(tr.definition.fields);
+            }
+
+            new ka.Button(t('Apply')).addEvent('click',function() {
+
+                tr.definition.fields = fieldTable.getValue();
+                dialog.closeAnimated();
+
+            }).setButtonStyle('blue').inject(dialog.bottom);
+
+            dialog.center(true);
+
+        }.bind(this));
+    },
+
+    addAttribute: function(definition) {
+        var row = [];
+
+        var actions = new Element('div');
+        var iTarget = new ka.Field({
+            type: 'text',
+            noWrapper: true,
+            modifier: 'camelcase|trim|ucfirst',
+            value: definition ? definition.target : ''
+        });
+
+        var iFieldKey = new ka.Field({
+            type: 'text',
+            noWrapper: true,
+            value: definition ? definition.id : ''
+        });
+
+        var iFieldType = new ka.Field({
+            type: 'select',
+            noWrapper: true,
+            value: definition ? definition.id : ''
+        });
+
+        row.push(iTarget);
+        row.push(iFieldKey);
+        row.push(actions);
+
+        var tr = this.attributesTable.addRow(row);
         tr.addClass('object');
         tr.definition = pDefinition || {};
         tr.store('key', iKey);

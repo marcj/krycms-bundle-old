@@ -328,7 +328,7 @@ ka.FieldTypes.Content = new Class({
     },
 
     getUrl: function() {
-        return _pathAdmin + 'admin/object/kryncms/node/' + this.editor.options.node.id;
+        return _pathAdmin + 'object/kryncms/node/' + this.editor.options.node.id;
     },
 
     selectElement: function(element) {

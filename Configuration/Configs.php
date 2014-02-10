@@ -5,6 +5,7 @@ namespace Kryn\CmsBundle\Configuration;
 use Kryn\CmsBundle\Core;
 use Kryn\CmsBundle\Exceptions\BundleNotFoundException;
 use Kryn\CmsBundle\Objects;
+use Symfony\Component\HttpKernel\Bundle\BundleInterface;
 
 class Configs implements \IteratorAggregate
 {
@@ -28,13 +29,19 @@ class Configs implements \IteratorAggregate
     {
         $this->setCore($core);
         if ($bundles) {
-            foreach ($bundles as $bundleName) {
-                $configs = $this->getXmlConfigsForBundle($bundleName);
-                $this->configElements = array_merge($this->configElements, $configs);
-            }
-
-            $this->configElements = $this->parseConfig($this->configElements);
+            $this->loadBundles($bundles);
         }
+    }
+
+    public function loadBundles(array $bundles)
+    {
+        foreach ($bundles as $bundleName) {
+            $bundle = $this->getCore()->getBundle($bundleName);
+            $configs = $this->getXmlConfigsForBundle($bundle);
+            $this->configElements = array_merge($this->configElements, $configs);
+        }
+
+        $this->configElements = $this->parseConfig($this->configElements);
     }
 
     /**
@@ -62,7 +69,8 @@ class Configs implements \IteratorAggregate
     public function getConfigHash($bundleName)
     {
         $hash = [];
-        foreach ($this->getConfigFiles($bundleName) as $file) {
+        $bundle = $this->getCore()->getBundle($bundleName);
+        foreach ($this->getConfigFiles($bundle) as $file) {
             $hash[] = filemtime($file);
         }
 
@@ -70,16 +78,12 @@ class Configs implements \IteratorAggregate
     }
 
     /**
-     * @param string $bundleName
+     * @param BundleInterface $bundle
      * @return string[]
      */
-    public function getConfigFiles($bundleName)
+    public function getConfigFiles(BundleInterface $bundle)
     {
-        try {
-            $configDir = $this->getCore()->getKernel()->locateResource("@$bundleName/Resources/config/");
-        } catch (\InvalidArgumentException $e) {
-            return [];
-        }
+        $configDir = $bundle->getPath() . '/Resources/config/';
         $baseFile = $configDir . 'kryn.xml';
 
         $files = [];
@@ -99,57 +103,39 @@ class Configs implements \IteratorAggregate
      *
      *   array[$bundleName][$priority][$file] = $bundle
      *
-     * @param string $bundleName
+     * @param BundleInterface $bundle
      * @return array
      */
-    public function getXmlConfigsForBundle($bundleName)
+    public function getXmlConfigsForBundle(BundleInterface $bundle)
     {
         $configs = array();
-        $rename = [];
-        foreach ($this->getConfigFiles($bundleName) as $file) {
+
+        foreach ($this->getConfigFiles($bundle) as $file) {
             if (file_exists($file) && file_get_contents($file)) {
                 $doc = new \DOMDocument();
                 $doc->load($file);
 
-                $rename[strtolower($bundleName)] = $bundleName;
-
                 $bundles = $doc->getElementsByTagName('bundle');
-                foreach ($bundles as $bundle) {
-                    if ($bundle->attributes->getNamedItem('name')) {
-                        $bundleName = $bundle->attributes->getNamedItem('name')->nodeValue;
+                $bundleToImport = $bundle;
+                foreach ($bundles as $bundleXml) {
+                    if ($bundleXml->attributes->getNamedItem('name')) {
+                        $bundleName = $bundleXml->attributes->getNamedItem('name')->nodeValue;
+                        if (!$bundleToImport = $this->getCore()->getBundle($bundleName)) {
+                            continue;
+                        }
                     }
                     $priority = 0;
-                    if ($bundle->attributes->getNamedItem('priority')) {
-                        $priority = (int)$bundle->attributes->getNamedItem('priority')->nodeValue;
+                    if ($bundleXml->attributes->getNamedItem('priority')) {
+                        $priority = (int)$bundleXml->attributes->getNamedItem('priority')->nodeValue;
                     }
 
-                    $configs[strtolower($bundleName)][$priority][$file] = $bundle;
+                    $configs[get_class($bundleToImport)][$priority][$file] = $bundleXml;
                 }
-            }
-        }
-
-        foreach ($configs as $key => $val) {
-            if (isset($rename[$key]) && $rename[$key] !== $key) {
-                $configs[$rename[$key]] = $val;
-                unset($configs[$key]);
             }
         }
 
         return $configs;
     }
-
-//    /**
-//     * Handles the <modify> element.
-//     * Calls on each config object the setup method.
-//     */
-//    public function setup()
-//    {
-//        foreach ($this->configElements as $config) {
-//
-//            //todo, handle modify tag.
-//            $config->setup($this);
-//        }
-//    }
 
     /**
      * @return bool
@@ -181,6 +167,8 @@ class Configs implements \IteratorAggregate
     /**
      * $configs = $configs[$bundleName][$priority][] = $bundleDomElement;
      *
+     * Parses and merges(imports) bundle configurations.
+     *
      * @param array $configs
      *
      * @return \Kryn\CmsBundle\Configuration\Bundle[]
@@ -193,17 +181,17 @@ class Configs implements \IteratorAggregate
 
             foreach ($priorities as $configs) {
                 foreach ($configs as $file => $bundleElement) {
-                    if (!isset($bundleConfigs[strtolower($bundleName)])) {
-                        $bundleConfigs[strtolower($bundleName)] = new Bundle($bundleName, null, $this->getCore());
+
+                    $bundle = $this->getCore()->getBundle($bundleName);
+                    $indexName = $this->normalizeBundleName($bundle->getName());
+                    if (!isset($bundleConfigs[$indexName])) {
+                        $bundleConfigs[$indexName] = new Bundle($bundle, null, $this->getCore());
                     }
 
-                    $bundleConfigs[strtolower($bundleName)]->import($bundleElement, $file);
+                    $bundleConfigs[$indexName]->import($bundleElement, $file);
                 }
             }
 
-            if ($bundleConfigs[strtolower($bundleName)]) {
-//                $bundleConfigs[strtolower($bundleName)]->setupObject($this->getCore());
-            }
         }
 
         return $bundleConfigs;
@@ -216,10 +204,30 @@ class Configs implements \IteratorAggregate
      */
     public function getConfig($bundleName)
     {
-        $bundleName = preg_replace('/bundle$/', '', strtolower($bundleName));
-        $bundleName .= 'bundle';
-
+        $bundleName = $this->normalizeBundleName($bundleName);
         return isset($this->configElements[$bundleName]) ? $this->configElements[$bundleName] : null;
+    }
+
+    /**
+     * @param string $bundleName short version, long bundle name of full php class name
+     * @return string short lowercased bundle name
+     */
+    public function normalizeBundleName($bundleName)
+    {
+        $bundleName = preg_replace('/bundle$/', '', strtolower($bundleName));
+        if (false !== $pos = strrpos($bundleName, '\\')) {
+            //it's a php class name
+            $bundleName = substr($bundleName, $pos + 1);
+        }
+        return $bundleName;
+    }
+
+    /**
+     * @param Bundle $bundle
+     */
+    public function addConfig(Bundle $bundle)
+    {
+        $this->configElements[$this->normalizeBundleName($bundle->getBundleName())] = $bundle;
     }
 
     /**
@@ -228,9 +236,15 @@ class Configs implements \IteratorAggregate
      */
     public function getObject($objectKey)
     {
-        list($bundleName, $objectName) = explode('/', Objects::normalizeObjectKey($objectKey));
+        $objectKey = Objects::normalizeObjectKey($objectKey);
+        if (false === strpos($objectKey, '/')) {
+            return null;
+        }
+        list($bundleName, $objectName) = explode('/', $objectKey);
 
-        $bundleName .= 'bundle';
+        if ('bundle' !== substr($bundleName, -6)) {
+            $bundleName .= 'bundle';
+        }
 
         if (!$config = $this->getConfig($bundleName)) {
             throw new BundleNotFoundException(sprintf('Bundle `%s` not found. [%s]', $bundleName, $objectKey));

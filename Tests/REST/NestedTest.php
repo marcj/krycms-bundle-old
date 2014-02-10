@@ -29,7 +29,7 @@ class NestedTest extends KernelAwareTestCase
             '_targetObjectKey' => 'KrynCmsBundle:Node'
         );
 
-        $response = $this->restCall('/kryn/admin/object/kryncms/node/:multiple', 'POST', $post);
+        $response = $this->restCall('/kryn/object/kryncms/node/:multiple', 'POST', $post);
 
         $this->assertEquals(200, $response['status']);
         $this->assertGreaterThan(1, $response['data'][0]['id']);
@@ -62,7 +62,7 @@ class NestedTest extends KernelAwareTestCase
             '_targetObjectKey' => 'KrynCmsBundle:Node'
         );
 
-        $response = $this->restCall('/kryn/admin/object/kryncms/node/:multiple', 'POST', $post);
+        $response = $this->restCall('/kryn/object/kryncms/node/:multiple', 'POST', $post);
 
         $this->assertEquals(200, $response['status']);
         $this->assertGreaterThan(1, $response['data'][0]['id']);

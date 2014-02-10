@@ -447,7 +447,7 @@ ka.Select = new Class({
     },
 
     getObjectUrl: function() {
-        var uri = _pathAdmin + 'admin/object/' + ka.normalizeObjectKey(this.options.object) +'/';
+        var uri = _pathAdmin + 'object/' + ka.normalizeObjectKey(this.options.object) +'/';
 
         if (this.options.objectBranch) {
             if (this.options.objectBranch === true) {
@@ -1047,7 +1047,7 @@ ka.Select = new Class({
 //                } else
                 if (this.options.object) {
                     this.lastLabelRequest = new Request.JSON({
-                        url: _pathAdmin + 'admin/object/' + ka.normalizeObjectKey(this.options.object) + '/' + ka.urlEncode(pId),
+                        url: _pathAdmin + 'object/' + ka.normalizeObjectKey(this.options.object) + '/' + ka.urlEncode(pId),
                         onComplete: function(response) {
 
                             if (!response.error) {

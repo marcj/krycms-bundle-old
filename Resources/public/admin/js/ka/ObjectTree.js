@@ -280,7 +280,7 @@ ka.ObjectTree = new Class({
     },
 
     getUrl: function() {
-        return _pathAdmin + (this.options.entryPoint ? this.options.entryPoint : 'admin/object/' + ka.normalizeObjectKey(this.options.objectKey) ) + '/';
+        return _pathAdmin + (this.options.entryPoint ? this.options.entryPoint : 'object/' + ka.normalizeObjectKey(this.options.objectKey) ) + '/';
     },
 
     /**

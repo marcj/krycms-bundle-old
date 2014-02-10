@@ -10,7 +10,7 @@ use Kryn\CmsBundle\Tools;
 
 class Field extends Model
 {
-    protected $attributes = ['id', 'type', 'required', 'primaryKey', 'autoIncrement'];
+    protected $attributes = ['id', 'type', 'target', 'required', 'primaryKey', 'autoIncrement'];
     protected $arrayKey = 'id';
 
     /**
@@ -121,6 +121,13 @@ class Field extends Model
      * @var string
      */
     protected $target;
+
+    /**
+     * Whether this field is a attribute.
+     *
+     * @var boolean
+     */
+    protected $attribute = false;
 
     /**
      * @var mixed
@@ -683,6 +690,30 @@ class Field extends Model
     public function getTarget()
     {
         return $this->target;
+    }
+
+    /**
+     * @param boolean $attribute
+     */
+    public function setAttribute($attribute)
+    {
+        $this->attribute = $attribute;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function getAttribute()
+    {
+        return $this->attribute;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isAttribute()
+    {
+        return !!$this->attribute;
     }
 
     /**

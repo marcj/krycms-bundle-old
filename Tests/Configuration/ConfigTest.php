@@ -30,6 +30,9 @@ class ConfigTest extends KernelAwareTestCase
         }
     }
 
+    /**
+     * @group test
+     */
     public function testBundleConfigs()
     {
         foreach ($this->getKrynCore()->getBundles() as $bundle => $obj) {

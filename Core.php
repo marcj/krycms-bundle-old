@@ -531,6 +531,13 @@ class Core extends Controller
                 return $bundle;
             }
         }
+
+        if (class_exists($bundleName)) {
+            $reflection = new \ReflectionClass($bundleName);
+            if ($reflection->implementsInterface('Symfony\Component\HttpKernel\Bundle\BundleInterface')) {
+                return $reflection->newInstance();
+            }
+        }
     }
 
     /**

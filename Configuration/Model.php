@@ -937,9 +937,7 @@ class Model implements \ArrayAccess
                     if (!class_exists($clazz = $returnType)) {
                         if (!class_exists($clazz = $namespace . $returnType)) {
                             if (!class_exists($clazz = $namespace . $key)) {
-                                if (!class_exists($clazz = $namespace . $key)) {
-                                    $clazz = null;
-                                }
+                                $clazz = null;
                             }
                         }
                     }

@@ -109,16 +109,16 @@ class TypeObject extends AbstractType
 
     public function bootRunTime(Object $object, Configs $configs)
     {
-        //check for n-to-n relation and create crossTable
-        //check for 1-to-n objectRelations and create cross object w/ relations
         $changed = false;
 
+        //check for n-to-n relation and create crossTable
         if (ORMAbstract::MANY_TO_MANY == $this->getFieldDefinition()->getObjectRelation()) {
             if ($this->defineCrossTable($object, $configs)) {
                 $changed = true;
             }
         }
 
+        //check for x-to-1 objectRelations and create cross object w/ relations
         if (ORMAbstract::MANY_TO_ONE == $this->getFieldDefinition()->getObjectRelation() ||
             ORMAbstract::ONE_TO_ONE == $this->getFieldDefinition()->getObjectRelation()
         ) {
@@ -159,6 +159,7 @@ class TypeObject extends AbstractType
                 $crossObject = new Object(null, $objectDefinition->getKrynCore());
                 $crossObject->setId($possibleObjectName);
                 $crossObject->setTable($objectDefinition->getTable() . '_' . Tools::camelcase2Underscore($foreignObjectDefinition->getId()));
+                $crossObject->setExcludeFromREST(true);
                 $changed = true;
             }
         }

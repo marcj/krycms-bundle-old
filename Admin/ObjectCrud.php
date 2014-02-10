@@ -770,12 +770,12 @@ class ObjectCrud extends ContainerAware implements ObjectCrudInterface
     public function getDefaultFieldList()
     {
         $fields = array();
-
         $objectFields = array_flip(array_keys($this->getObjectDefinition()->getFieldsArray()));
 
         foreach ($this->_fields as $key => $field) {
             if (isset($objectFields[$key]) && !$field->getCustomSave() && !$field->getStartEmpty()) {
                 $columnNames = $field->getFieldType()->getSelection();
+                $fields[] = $key;
                 $fields = array_merge($fields, $columnNames);
             }
         }
@@ -873,7 +873,7 @@ class ObjectCrud extends ContainerAware implements ObjectCrudInterface
             }
         }
 
-        //check against additionaly our own custom condition
+        //check against additionally our own custom condition
         if ($item && ($condition = $this->getCondition()) && $condition->hasRules()) {
             if (!$condition->satisfy($item, $this->getObject())) {
                 $item = null;
@@ -1622,7 +1622,6 @@ class ObjectCrud extends ContainerAware implements ObjectCrudInterface
                 if (!$errors = $field->validate()) {
                     $field->mapValues($data);
                 } else {
-                    var_dump($field->getValue());
                     $restException = new ValidationFailedException(sprintf(
                         'Field `%s` has a invalid value.',
                         $key

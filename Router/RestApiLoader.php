@@ -175,8 +175,12 @@ class RestApiLoader extends Loader
                 if ($objects = $config->getObjects()) {
                     foreach ($objects as $object) {
 
+                        if ($object->getExcludeFromREST()) {
+                            continue;
+                        }
+
                         $objectName = $config->getName() . '/' . lcfirst($object->getId());
-                        $pattern = '%kryn_admin_prefix%/admin/object/' . $objectName;
+                        $pattern = '%kryn_admin_prefix%/object/' . $objectName;
 
                         $this->setupRoutes(
                             $config,

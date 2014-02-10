@@ -3,7 +3,9 @@
 namespace Kryn\CmsBundle\Controller\Admin\BundleManager;
 
 use FOS\RestBundle\Request\ParamFetcher;
+use Kryn\CmsBundle\Configuration\Configs;
 use Kryn\CmsBundle\ContainerHelperTrait;
+use Kryn\CmsBundle\Exceptions\BundleNotFoundException;
 use Kryn\CmsBundle\Exceptions\ModelBuildException;
 use Kryn\CmsBundle\Configuration\Asset;
 use Kryn\CmsBundle\Configuration\Assets;
@@ -45,6 +47,14 @@ class EditorController extends ContainerAware
 
             return $config;
         }
+    }
+
+    protected function getConfig($bundle)
+    {
+        $configs = new Configs($this->getKrynCore());
+        $configs->loadBundles([$bundle]);
+
+        return $configs->getConfig($bundle);
     }
 
     /**
@@ -179,6 +189,8 @@ class EditorController extends ContainerAware
      * @Rest\Get("/admin/system/bundle/editor/windows")
      *
      * @param ParamFetcher $paramFetcher
+     * @throws BundleNotFoundException
+     *
      * @return array
      */
     public function getWindowsAction(ParamFetcher $paramFetcher)
@@ -190,7 +202,10 @@ class EditorController extends ContainerAware
 
         $windows = array();
 
-        $bundle = $this->getKrynCore()->getBundle($bundle);
+        $bundle = $this->getKrynCore()->getBundle($oriName = $bundle);
+        if (!$bundle) {
+            throw new BundleNotFoundException(sprintf('Bundle `%s` not found.', $oriName));
+        }
         $path = $bundle->getPath() . '/Controller/';
 
         if (!file_exists($path)) {
@@ -404,18 +419,20 @@ class EditorController extends ContainerAware
      *
      * @Rest\Get("/admin/system/bundle/editor/objects")
      *
-     * @param ParamFetcher $paramFetcher
+     * @param string $bundle
      * @return array
      */
-    public function getObjectsAction(ParamFetcher $paramFetcher)
+    public function getObjectsAction($bundle)
     {
-        $bundle = $paramFetcher->get('bundle');
-        $config = $this->getKrynCore()->getConfig($bundle);
+        $config = $this->getConfig($bundle);
         if (!$config) {
-            return null;
+            throw new BundleNotFoundException(sprintf('Bundle `%s` not found', $bundle));
         }
 
-        return $config->getObjectsArray();
+        return [
+            'objects' => $config->getObjectsArray(),
+            'attributes' => $config->getObjectAttributesArray()
+        ];
     }
 
     /**
@@ -426,19 +443,21 @@ class EditorController extends ContainerAware
      *
      * @Rest\QueryParam(name="bundle", requirements=".*", strict=true, description="The bundle name")
      * @Rest\RequestParam(name="objects", strict=false, description="The `objects` value array")
+     * @Rest\RequestParam(name="objectAttributes", strict=false, description="The `objects` value array")
      *
      * @Rest\Post("/admin/system/bundle/editor/objects")
      *
      * @param string $bundle
      * @param array $objects
+     * @param array $objectAttributes
      *
      * @return bool
      */
-    public function setObjectsAction($bundle, $objects = null)
+    public function setObjectsAction($bundle, $objects = null, $objectAttributes = null)
     {
-        $config = $this->getKrynCore()->getConfig($bundle);
+        $config = $this->getConfig($bundle);
         if (!$config) {
-            return null;
+            throw new BundleNotFoundException(sprintf('Bundle `%s` not found', $bundle));
         }
 
         if (is_string($objects)) {
@@ -446,8 +465,9 @@ class EditorController extends ContainerAware
         }
 
         $config->propertyFromArray('objects', $objects);
+        $config->propertyFromArray('objectAttributes', $objectAttributes);
 
-        return $config->saveFileBased('objects');
+        return $config->saveFileBased('objects') && $config->saveFileBased('objectAttributes');
     }
 
     /**

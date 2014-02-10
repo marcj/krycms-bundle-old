@@ -39,14 +39,14 @@ class BasicTestX extends KernelAwareTestCase
 
     public function testListing()
     {
-        $response = $this->restCall('/kryn/admin/object/kryncms/node/');
+        $response = $this->restCall('/kryn/object/kryncms/node/');
 
         $this->assertEquals(200, $response['status']);
         $this->assertEquals(14, count($response['data']), "we have 14 nodes from the installation script.");
 
         ItemQuery::create()->deleteAll();
 
-        $response = $this->restCall('/kryn/admin/object/test/item/');
+        $response = $this->restCall('/kryn/object/test/item/');
 
         $this->assertEquals(200, $response['status']);
         $this->assertNull($response['data'], 'if we have no items, we should get NULL.');
@@ -60,12 +60,12 @@ class BasicTestX extends KernelAwareTestCase
         $item2->save();
         $id2 = $item2->getId();
 
-        $response = $this->restCall('/kryn/admin/object/test/item/');
+        $response = $this->restCall('/kryn/object/test/item/');
 
         $this->assertEquals(200, $response['status']);
         $this->assertEquals(2, count($response['data']));
 
-        $response = $this->restCall('/kryn/admin/object/test/item/' . $id2);
+        $response = $this->restCall('/kryn/object/test/item/' . $id2);
 
         $this->assertEquals(200, $response['status']);
         $this->assertEquals($id2, $response['data']['id']);
@@ -83,13 +83,13 @@ class BasicTestX extends KernelAwareTestCase
         $item1->save();
         $id = $item1->getId();
 
-        $response = $this->restCall('/kryn/admin/object/test/item/' . $id . '?fields=title');
+        $response = $this->restCall('/kryn/object/test/item/' . $id . '?fields=title');
         $this->assertEquals('Item 1', $response['data']['title']);
 
         $item = $this->getKrynCore()->getObjects()->get('test/item', $id);
 
         $response = $this->restCall(
-            '/kryn/admin/object/test/item/' . $id,
+            '/kryn/object/test/item/' . $id,
             'PUT',
             array(
                  'title' => 'Item 1 modified'
@@ -100,7 +100,7 @@ class BasicTestX extends KernelAwareTestCase
         $this->assertTrue($response['data']);
 
         //did we really store the new value?
-        $response = $this->restCall('/kryn/admin/object/test/item/' . $id);
+        $response = $this->restCall('/kryn/object/test/item/' . $id);
         $this->assertEquals('Item 1 modified', $response['data']['title']);
     }
 
@@ -113,16 +113,16 @@ class BasicTestX extends KernelAwareTestCase
         $item1->save();
         $id = $item1->getId();
 
-        $response = $this->restCall('/kryn/admin/object/test/item/' . $id);
+        $response = $this->restCall('/kryn/object/test/item/' . $id);
         $this->assertEquals('Item 1', $response['data']['title']);
 
-        $response = $this->restCall('/kryn/admin/object/test/item/' . $id, 'DELETE');
+        $response = $this->restCall('/kryn/object/test/item/' . $id, 'DELETE');
 
         $this->assertEquals(200, $response['status']);
         $this->assertTrue($response['data']);
 
         //did we really delete it?
-        $response = $this->restCall('/kryn/admin/object/test/item/' . $id);
+        $response = $this->restCall('/kryn/object/test/item/' . $id);
         $this->assertNull($response['data']);
     }
 
@@ -135,11 +135,11 @@ class BasicTestX extends KernelAwareTestCase
         $item1->save();
         $id = $item1->getId();
 
-        $response = $this->restCall('/kryn/admin/object/test/item/' . $id);
+        $response = $this->restCall('/kryn/object/test/item/' . $id);
         $this->assertEquals('Item 1', $response['data']['title']);
 
         $response = $this->restCall(
-            '/kryn/admin/object/test/item/',
+            '/kryn/object/test/item/',
             'POST',
             array(
                  'title' => 'Item 2'
@@ -150,7 +150,7 @@ class BasicTestX extends KernelAwareTestCase
         $this->assertEquals($id + 1, $response['data']['id'] + 0);
 
         //did we really inserted it?
-        $response = $this->restCall('/kryn/admin/object/test/item/' . $response['data']['id']);
+        $response = $this->restCall('/kryn/object/test/item/' . $response['data']['id']);
         $this->assertEquals($id + 1, $response['data']['id'] + 0);
 
     }

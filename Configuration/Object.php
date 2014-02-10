@@ -311,6 +311,11 @@ class Object extends Model
     /**
      * @var bool
      */
+    protected $excludeFromREST = false;
+
+    /**
+     * @var bool
+     */
     protected $crossRef = false;
 
 //    public function syncRelations()
@@ -386,6 +391,22 @@ class Object extends Model
             }
         }
         return $changed;
+    }
+
+    /**
+     * @param boolean $excludeFromREST
+     */
+    public function setExcludeFromREST($excludeFromREST)
+    {
+        $this->excludeFromREST = $excludeFromREST;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function getExcludeFromREST()
+    {
+        return $this->excludeFromREST;
     }
 
     /**

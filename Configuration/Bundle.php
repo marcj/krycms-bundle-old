@@ -2,8 +2,11 @@
 
 namespace Kryn\CmsBundle\Configuration;
 
+use Kryn\CmsBundle\Exceptions\BundleNotFoundException;
 use Kryn\CmsBundle\Exceptions\FileNotWritableException;
+use Kryn\CmsBundle\Exceptions\ObjectNotFoundException;
 use Kryn\CmsBundle\Objects;
+use Kryn\CmsBundle\Tools;
 use Symfony\Component\HttpKernel\Bundle\BundleInterface;
 
 class Bundle extends Model
@@ -12,6 +15,7 @@ class Bundle extends Model
 
     public static $propertyToFile = [
         'objects' => 'kryn.objects.xml',
+        'objectAttributes' => 'kryn.objects.xml',
         'entryPoints' => 'kryn.entryPoints.xml',
         'themes' => 'kryn.themes.xml',
         'plugins' => 'kryn.plugins.xml',
@@ -45,6 +49,11 @@ class Bundle extends Model
      * @var \Kryn\CmsBundle\Configuration\Object[]
      */
     protected $objects;
+
+    /**
+     * @var \Kryn\CmsBundle\Configuration\Field[]
+     */
+    protected $objectAttributes;
 
     /**
      * @var EntryPoint[]
@@ -94,16 +103,38 @@ class Bundle extends Model
     private $triggeredReboot = [];
 
     /**
-     * @param string $bundleName
+     * @param string|BundleInterface $bundleClass
      * @param \DOMElement $bundleDoc
      * @param null $krynCore
      */
-    public function __construct($bundleName = '', \DOMElement $bundleDoc = null, $krynCore = null)
+    public function __construct($bundleClass, \DOMElement $bundleDoc = null, $krynCore = null)
     {
         $this->element = $bundleDoc;
-        $this->bundleName = $bundleName;
+        if (!$bundleClass) {
+            throw new \InvalidArgumentException('$bundleClass needs to be set.');
+        }
+
+        if ($bundleClass instanceof BundleInterface) {
+            $bundleClass = get_class($bundleClass);
+        }
+
+        $this->bundleClass = $bundleClass;
+        $this->bundleName = $bundleClass;
+        if (false !== $pos = strrpos($bundleClass, '\\')) {
+            $this->bundleName = substr($bundleClass, $pos + 1);
+        }
         $this->rootName = 'bundle';
         $this->setKrynCore($krynCore);
+    }
+
+    /**
+     * @return array
+     */
+    public function __sleep()
+    {
+        $vars = parent::__sleep();
+        $vars[] = 'bundleClass';
+        return $vars;
     }
 
     /**
@@ -116,6 +147,28 @@ class Bundle extends Model
     public function boot(Configs $configs)
     {
         $this->triggeredReboot = [];
+        $reboot = false;
+
+        if ($this->objectAttributes) {
+            foreach ($this->objectAttributes as $attribute){
+                $key = $attribute->getId();
+                try {
+                    $targetObject = $configs->getObject($attribute->getTarget());
+                } catch (BundleNotFoundException $e) {
+                    continue;
+                }
+                if (!$attribute->getTarget() || !$targetObject) {
+                    continue;
+                }
+                $field = $targetObject->getField($key);
+                if (!$field) {
+                    //does not exists, so attach it
+                    $attribute->setAttribute(true);
+                    $targetObject->addField($attribute);
+                    $reboot = true;
+                }
+            }
+        }
 
         if ($this->getObjects()) {
             foreach ($this->getObjects() as $key => $object) {
@@ -129,7 +182,7 @@ class Bundle extends Model
             }
         }
 
-        return $this->triggeredReboot;
+        return $this->triggeredReboot ?: $reboot;
     }
 
     /**
@@ -210,7 +263,7 @@ class Bundle extends Model
     public function getPropertyFilePath($property)
     {
         if (!isset($this->imported[$property])) {
-            $path = $this->getBundleClass()->getPath() . '/Resources/config/' . (static::$propertyToFile[$property] ? : 'kryn.xml');
+            $path = $this->getBundleClass()->getPath() . '/Resources/config/' . (@static::$propertyToFile[$property] ? : 'kryn.xml');
             $root = realpath($this->getKrynCore()->getKernel()->getRootDir() . '/../');
 
             return substr($path, strlen($root) + 1);
@@ -321,11 +374,7 @@ class Bundle extends Model
      */
     public function getBundleClass()
     {
-        if (!$this->bundleClass) {
-            $this->bundleClass = $this->getKrynCore()->getBundle($this->getBundleName());
-        }
-
-        return $this->bundleClass;
+        return $this->getKrynCore()->getBundle($this->bundleClass);
     }
 
     public function getPath()
@@ -338,7 +387,7 @@ class Bundle extends Model
      */
     public function setBundleClass(BundleInterface $class)
     {
-        $this->bundleClass = $class;
+        $this->bundleClass = get_class($class);
     }
 
     /**
@@ -353,6 +402,9 @@ class Bundle extends Model
         return $this->getKrynCore()->getShortBundleName($this->getBundleClass()->getName());
     }
 
+    /**
+     * @return string
+     */
     public function getNamespace()
     {
         return $this->getBundleClass()->getNamespace();
@@ -368,10 +420,8 @@ class Bundle extends Model
             $imported = $this->importNode($node);
 
             $root = realpath($this->getKrynCore()->getKernel()->getRootDir() . '/../');
-            $file = substr($file, strlen($root) + 1);
-
             foreach ($imported as $property) {
-                $this->imported[$property] = $file;
+                $this->imported[$property] = Tools::getRelativePath($file, $root);
             }
         }
     }
@@ -647,13 +697,30 @@ class Bundle extends Model
     }
 
     /**
+     * @return array
+     */
+    public function getObjectAttributesArray()
+    {
+        if (null !== $this->objectAttributes) {
+            $objects = array();
+            foreach ($this->objectAttributes as $field) {
+                $objects[strtolower($field->getId())] = $field->toArray();
+            }
+
+            return $objects;
+        }
+    }
+
+    /**
      * @param \Kryn\CmsBundle\Configuration\Object[] $objects
      */
     public function setObjects(array $objects = null)
     {
         $this->objects = [];
-        foreach ($objects as $object) {
-            $this->addObject($object);
+        if ($objects) {
+            foreach ($objects as $object) {
+                $this->addObject($object);
+            }
         }
     }
 
@@ -692,6 +759,22 @@ class Bundle extends Model
         $object->setId($id);
         $this->addObject($id);
         return $object;
+    }
+
+    /**
+     * @param \Kryn\CmsBundle\Configuration\Field[] $objectAttributes
+     */
+    public function setObjectAttributes(array $objectAttributes = null)
+    {
+        $this->objectAttributes = $objectAttributes;
+    }
+
+    /**
+     * @return \Kryn\CmsBundle\Configuration\Field[]
+     */
+    public function getObjectAttributes()
+    {
+        return $this->objectAttributes;
     }
 
     /**

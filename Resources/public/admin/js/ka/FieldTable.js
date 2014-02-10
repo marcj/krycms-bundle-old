@@ -10,9 +10,11 @@ ka.FieldTable = new Class({
         asFrameworkColumn: false, //for column definition, with width field. renders all fields of ka.LabelTypes.
         asFrameworkSearch: false, //Remove some option fields, like 'visibility condition', 'required', etc
         withoutChildren: false, //deactivate children?
+
+        allTableItems: true, //all items as TRs instead of Divs
         tableItemLabelWidth: 330,
-        allTableItems: true,
-        withActions: true,
+
+        withActions: true, //with move/remove etc.
 
         withWidth: false, //is enabled if asFrameworkColumn is active. otherwise you can enable it here manually.
 
@@ -21,7 +23,7 @@ ka.FieldTable = new Class({
 
         keyModifier: '',
 
-        asTableItem: true,
+        asTableItem: true, //should not be overwritten here
 
         noActAsTableField: false, //Remove the field 'Acts as a table item'
         arrayKey: false //allows key like foo[bar], foo[barsen], foo[bar][sen]
@@ -50,13 +52,14 @@ ka.FieldTable = new Class({
         }).inject(this.main);
 
         this.headerTr = new Element('tr').inject(this.header);
-        new Element('th', {text: 'Key'}).inject(this.headerTr);
+        this.thKey = new Element('th', {text: 'Key'}).inject(this.headerTr);
+
         if (this.options.asFrameworkColumn || this.options.withWidth) {
             this.widthTd = new Element('th', {width: 80, text: 'Width'}).inject(this.headerTr);
         }
-        new Element('th', {width: 150, text: 'Type'}).inject(this.headerTr);
-        new Element('th', {width: 150, text: 'Properties'}).inject(this.headerTr);
-        new Element('th', {width: 80, text: 'Actions'}).inject(this.headerTr);
+        this.thType = new Element('th', {width: 150, text: 'Type'}).inject(this.headerTr);
+        this.thProperties = new Element('th', {width: 150, text: 'Properties'}).inject(this.headerTr);
+        this.thActions = new Element('th', {width: 80, text: 'Actions'}).inject(this.headerTr);
 
         this.table = new Element('table', {
             width: '100%',
