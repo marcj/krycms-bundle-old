@@ -147,7 +147,6 @@ var kryncms_system_module = new Class({
 
         this.llir = new Request.JSON({url: _pathAdmin + 'admin/system/bundle/manager/installed', noCache: 1,
             onComplete: function (pResult) {
-                this.win.setLoading(false);
                 var bundles = pResult.data.bundles;
                 var packages = pResult.data.packages;
 
@@ -176,6 +175,7 @@ var kryncms_system_module = new Class({
 
                     this.tableInstalledPackages.addRow([packageDef.name, packageDef.version, installed, actions]);
                 }.bind(this));
+
 
                 var systemModules = ['KrynCmsBundle'];
                 Array.each(bundles, function(bundle) {
@@ -215,10 +215,14 @@ var kryncms_system_module = new Class({
                     ]);
 
                 }.bind(this));
+
+                this.win.setLoading(false);
             }.bind(this)}).get();
     },
 
-    installComposerPackage: function(name, version, withBundles) {
+    installComposerPackage: function(name, version, withBundles)
+    {
+
         if ('string' !== typeOf(name) || name.length <= 1 || !version) {
             var dialog;
 
@@ -318,8 +322,8 @@ var kryncms_system_module = new Class({
         }
         this.win.setLoading(true);
 
-        this.lc = new Request.JSON({url: _pathAdmin + 'admin/system/bundle/manager/local', noCache: 1,
-        onComplete: function (res) {
+        this.lc = new Request.JSON({url: _pathAdmin +
+            'admin/system/bundle/manager/local', noCache: 1, onComplete: function (res) {
             this.win.setLoading(false);
             this.renderLocal(res.data);
         }.bind(this)}).get();
