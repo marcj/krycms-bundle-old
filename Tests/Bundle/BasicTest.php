@@ -34,4 +34,17 @@ class BasicTest extends KernelAwareTestCase
         $this->assertTrue($this->getKrynCore()->isActiveBundle('Kryn\DemoTheme\KrynDemoThemeBundle'));
     }
 
+    public function testResolvePath()
+    {
+        $path = $this->getKrynCore()->resolvePath('@KrynPublicationBundle/Test', 'Resources/views', true);
+        $this->assertEquals('../../../vendor/kryncms/publication-bundle/Kryn/Publication/Resources/views/Test', $path);
+
+        $path = $this->getKrynCore()->resolvePath('@KrynPublicationBundle', '', true);
+        $this->assertEquals('../../../vendor/kryncms/publication-bundle/Kryn/Publication', $path);
+
+        $path = $this->getKrynCore()->resolvePath('@KrynPublicationBundle/Resources/views/News/list/default.html.twig', '', true);
+        $this->assertEquals('../../../vendor/kryncms/publication-bundle/Kryn/Publication/Resources/views/News/list/default.html.twig', $path);
+
+    }
+
 }

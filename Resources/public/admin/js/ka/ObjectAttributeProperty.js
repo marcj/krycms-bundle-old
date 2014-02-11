@@ -7,8 +7,10 @@ ka.ObjectAttributeProperty = new Class({
 
         this.tdTargetObject = new Element('td').inject(this.main, 'top');
         this.iTargetObject = new ka.Field({
-            type: 'text',
-            modifier: 'camelcase|trim|ucfirst',
+            type: 'objectKey',
+            options: {
+                combobox: true
+            },
             noWrapper: true
         }, this.tdTargetObject);
     },

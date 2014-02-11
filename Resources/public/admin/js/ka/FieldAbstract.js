@@ -10,7 +10,7 @@ ka.FieldAbstract = new Class({
     options: {
 
         /**
-         * Can be a number, a number+'px' etc or number+'%'.
+         * Can be a number, a number+'px' or number+'%'.
          *
          * @var {Mixed}
          */

@@ -726,10 +726,6 @@ class Core extends Controller
                 ), 0, $e);
             }
 
-            if ($suffix && '/' !== $suffix[0]) {
-                $suffix = '/' . $suffix;
-            }
-
             $path = substr($path, strlen($matches[1]) + 1);
 
             if ((!$suffix || '/' === substr($suffix, -1)) && '/' === $path[0]) {

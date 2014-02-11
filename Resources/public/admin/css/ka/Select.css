@@ -162,7 +162,7 @@ a.ka-Select-box-focus {
     min-width: 50px;
     min-height: 15px;
     max-height: 200px;
-    max-width: 400px;
+    max-width: 100%;
     overflow: auto;
     background-color: #fefefe;
 }

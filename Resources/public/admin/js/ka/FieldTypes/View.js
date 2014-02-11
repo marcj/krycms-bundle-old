@@ -54,7 +54,7 @@ ka.FieldTypes.View = new Class({
     },
 
     getValue: function () {
-        var value = this.parent();
+        var value = this.parent() || '';
         return this.options.fullPath ? value : value.substr(this.directory.length);
     },
 

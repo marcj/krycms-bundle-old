@@ -50,7 +50,6 @@ class AdminController extends Controller
      * )
      *
      * @Rest\QueryParam(name="template", requirements=".+", strict=true, description="The template/view to be used for this content")
-     *
      * @Rest\QueryParam(name="type", requirements=".+", strict=true, description="The content type")
      *
      * @Rest\Get("/admin/content/template")
@@ -95,7 +94,6 @@ class AdminController extends Controller
      *      description="The node id in which context this content should be rendered")
      * @Rest\QueryParam(name="domainId", requirements="[0-9]+", strict=true,
      *      description="The domain id in which context this content should be rendered")
-     *
      * @Rest\RequestParam(name="content", requirements=".*", strict=true, description="The actual content")
      *
      * @Rest\Post("/admin/content/preview")

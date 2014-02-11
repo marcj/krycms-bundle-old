@@ -390,7 +390,7 @@ ka.urlDecode = function(value) {
  *
  * @param {String} objectKey
  *
- * @returns {string}
+ * @returns {String|Null}
  */
 ka.normalizeObjectKey = function(objectKey) {
     objectKey = objectKey.replace('\\', '/').replace('.', '/').replace(':', '/');
@@ -398,7 +398,7 @@ ka.normalizeObjectKey = function(objectKey) {
     var objectName = objectKey.split('/')[1];
 
     if (!bundleName || !objectName) {
-        throw tf('objectKey `%s` is not a valid object idefntifier (bundlename/objectName)', objectKey);
+        return null;
     }
 
     return bundleName + '/' + objectName.lcfirst();

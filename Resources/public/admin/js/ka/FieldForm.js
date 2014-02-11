@@ -620,6 +620,8 @@ ka.FieldForm = new Class({
             }
         }
 
+        values = values || {};
+
         this.value = Object.clone(values);
 
         Object.each(this.fields, function (obj, id) {
