@@ -728,16 +728,21 @@ class Core extends Controller
 
             $path = substr($path, strlen($matches[1]) + 1);
 
-            if ((!$suffix || '/' === substr($suffix, -1)) && '/' === $path[0]) {
-                $path = substr($path, 1);
-            }
-
             $bundlePath = $bundle->getPath();
-            if ('/' !== substr($bundlePath, 0, -1)) {
-                $bundlePath .= '/';
-            }
+            $suffix = trim($suffix, '/');
+            $path = trim($path, '/');
+            $bundlePath = '/' . trim($bundlePath, '/');
+//
+//
+//            if ((!$suffix || '/' === substr($suffix, -1)) && '/' === $path[0]) {
+//                $path = substr($path, 1);
+//            }
+//
+//            if ('/' !== substr($bundlePath, 0, -1) && $suffix && '/' !== $suffix[0]) {
+//                $bundlePath .= '/';
+//            }
 
-            $path = $bundlePath . $suffix . $path;
+            $path = $bundlePath . ($suffix ? '/' . $suffix : '' ) . '/' . $path;
         } else {
             $path = $root . $path;
         }
