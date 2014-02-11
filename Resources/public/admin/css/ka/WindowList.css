@@ -213,7 +213,7 @@
     font-size: 36px;
     color: #797979;
     line-height: 50px;
-    font-family: "SourceSansPro-Light", "SourceSansPro-Regular", "Lucida Grande", "DejaVu Sans", "Bitstream Vera Sans", "Segoe UI", "Tahoma", sans-serif;
+    font-weight:300;
 }
 
 .ka-WindowList-combine-searchicon {
