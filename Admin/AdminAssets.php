@@ -65,7 +65,7 @@ class AdminAssets
         $response = $this->getKrynCore()->getPageResponse();
         $prefix = substr($this->getKrynCore()->getAdminPrefix(), 1);
 
-        $response->addJsFile($prefix . '/admin/ui/languages?noCache=978699877');
+        $response->addJsFile($prefix . '/admin/ui/languages');
         $response->addJsFile($prefix . '/admin/ui/language?lang=en&javascript=1');
         $response->addJsFile($prefix . '/admin/ui/language-plural?lang=en');
     }
@@ -84,19 +84,22 @@ class AdminAssets
         window._pathAdmin = ' . json_encode($request->getBaseUrl() . '/' . $prefix . '/')
         );
 
-        if ($this->getKrynCore()->getKernel()->isDebug()) {
+//        if ($this->getKrynCore()->getKernel()->isDebug()) {
             foreach ($this->getKrynCore()->getConfigs() as $bundleConfig) {
-                if (!$options['noJs']) {
-                    foreach ($bundleConfig->getAdminAssetsPaths(false, '.*\.js', true) as $assetPath) {
-                        $response->addJsFile($assetPath);
+                foreach ($bundleConfig->getAdminAssetsPaths(false) as $assetPath) {
+                    $response->loadAssetFile($assetPath);
+                }
+               /* if (!$options['noJs']) {
+                    foreach ($bundleConfig->getAdminAssetsPaths(false) as $assetPath) {
+                        $response->loadAssetFile($assetPath);
                     }
                 }
                 foreach ($bundleConfig->getAdminAssetsPaths(false, '.*\.css', true)
                          as $assetPath) {
                     $response->addCssFile($assetPath);
-                }
+                }*/
             }
-        } else {
+        /*} else {
             $response->addCssFile($prefix . '/admin/backend/css');
             if (!$options['noJs']) {
                 $response->addJsFile($prefix . '/admin/backend/script');
@@ -128,7 +131,7 @@ class AdminAssets
                     $response->addCssFile($assetPath);
                 }
             }
-        }
+        }*/
 
         $response->addHeader('<meta name="viewport" content="initial-scale=1.0" >');
         $response->addHeader('<meta name="apple-mobile-web-app-capable" content="yes">');

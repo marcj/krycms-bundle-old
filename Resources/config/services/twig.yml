@@ -17,8 +17,8 @@ services:
          tags:
             - { name: twig.extension }
 
-     kryn_cms.twig.extension.addCss:
-         class: Kryn\CmsBundle\Twig\AddCssExtension
+     kryn_cms.twig.extension.loadAsset:
+         class: Kryn\CmsBundle\Twig\LoadAssetExtension
          arguments: ["@kryn_cms"]
          tags:
             - { name: twig.extension }

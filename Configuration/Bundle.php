@@ -513,8 +513,8 @@ class Bundle extends Model
      */
     public function getAdminAssets($filter = '', $regex = false)
     {
-        if ('' === $filter) {
-            return $this->adminAssets;
+        if (!$filter) {
+            return $this->adminAssets ?: [];
         } else {
             $result = array();
             if ($regex) {

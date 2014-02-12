@@ -1,11 +1,20 @@
 html, body {
     margin: 0;
     padding: 0;
+
+}
+
+$base-font-size: 13px;
+
+@import "compass";
+
+* {
+  @include box-sizing(border-box);
 }
 
 .ka-admin, .ka-normalize {
     font-family: "Open Sans", "Lucida Grande", "DejaVu Sans", "Bitstream Vera Sans", "Segoe UI", "Tahoma", sans-serif;
-    font-size: 13px;
+    font-size: $base-font-size;
     margin: 0px;
     padding: 0px;
     color:#444;
@@ -177,11 +186,6 @@ span {
     -moz-user-select: -moz-none;
     -o-user-select: none;
     user-select: none;
-}
-
-{
-    -webkit-tap-highlight-color: transparent;
-    background-color: #eee;
 }
 
 a,
