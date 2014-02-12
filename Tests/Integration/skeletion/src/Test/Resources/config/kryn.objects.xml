@@ -7,8 +7,6 @@
         <nested>false</nested>
         <dataModel>propel</dataModel>
         <multiLanguage>true</multiLanguage>
-        <domainDepended>false</domainDepended>
-        <treeFixedIcon>false</treeFixedIcon>
         <browserColumns>
           <field id="name">
             <type>text</type>
@@ -33,11 +31,6 @@
       <object id="Item2">
         <table>test_item2</table>
         <labelField>title</labelField>
-        <nested>false</nested>
-        <dataModel>propel</dataModel>
-        <multiLanguage>false</multiLanguage>
-        <domainDepended>false</domainDepended>
-        <treeFixedIcon>false</treeFixedIcon>
         <fields>
           <field id="id" primaryKey="true" autoIncrement="true">
             <type>number</type>
@@ -60,12 +53,8 @@
         <label>title</label>
         <table>test_item</table>
         <labelField>title</labelField>
-        <nested>false</nested>
         <dataModel>propel</dataModel>
-        <multiLanguage>false</multiLanguage>
         <workspace>true</workspace>
-        <domainDepended>false</domainDepended>
-        <treeFixedIcon>false</treeFixedIcon>
         <fields>
           <field id="id" primaryKey="true" autoIncrement="true">
             <type>number</type>
@@ -73,17 +62,17 @@
           <field id="title">
             <type>text</type>
           </field>
-          <field id="category">
+          <field id="categories">
             <type>object</type>
             <object>test/itemCategory</object>
             <objectRelation>nToM</objectRelation>
-            <objectRefRelationName>multiCategory</objectRefRelationName>
+            <objectRefRelationName>CrossItems</objectRefRelationName>
           </field>
           <field id="oneCategory">
             <type>object</type>
             <object>test/itemCategory</object>
             <objectRelation>nTo1</objectRelation>
-            <objectRefRelationName>OneItem</objectRefRelationName>
+            <objectRefRelationName>Items</objectRefRelationName>
           </field>
         </fields>
       </object>
@@ -91,12 +80,9 @@
         <label>ItemCategory</label>
         <table>test_item_category</table>
         <labelField>name</labelField>
-        <nested>false</nested>
         <dataModel>propel</dataModel>
         <multiLanguage>false</multiLanguage>
         <workspace>true</workspace>
-        <domainDepended>false</domainDepended>
-        <treeFixedIcon>false</treeFixedIcon>
         <fields>
           <field id="id" primaryKey="true" autoIncrement="true">
             <type>number</type>

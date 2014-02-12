@@ -1,30 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Fresh installation | Kryn.cms Administration</title>
-    <base href="{{ baseUrl }}">
-    <meta http-equiv="content-type" content="text/html; charset=utf-8">
-    <link rel="shortcut icon" type="image/x-icon" href="bundles/core/images/favicon.ico">
-    <meta name="viewport" content="initial-scale=1.0">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    {{ cssFiles }}
-    <script type="text/javascript">
-        window._path = window._baseUrl = "{{ baseUrl }}";
-        window._pathAdmin = "{{ prefix }}";
-    </script>
-    {{ jsFiles }}
-    <script type="text/javascript">
-        window._session = {{ session|json_encode }};
-    </script>
-    <script type="text/javascript">
+    <title>{{ pageResponse.getTitle() }}</title>
+    <base href="{{ pageResponse.getBaseHref() }}" >
+    <meta name="language" content="{{ pageResponse.getLanguage() }}" >
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" >
+    <link rel="shortcut icon" href="{{ pageResponse.getFaviconPath() }}" type="image/x-icon" >
+    <meta content='width=device-width' name='viewport'>
 
-        window.addEvent('domready', function() {
-            ka.adminInterface = new ka.AdminInterface();
-        });
-
-    </script>
-
+    {{ headerTags|raw }}
+    {{ cssTags|raw }}
+    {{ jsTags|raw }}
 </head>
 <body>
+{{ body|raw }}
+{{ jsTagsBottom|raw }}
 </body>
 </html>

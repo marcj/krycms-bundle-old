@@ -318,33 +318,6 @@ class Object extends Model
      */
     protected $crossRef = false;
 
-//    public function syncRelations()
-//    {
-//        ///resolve relations
-//        //if a object has a MANY_TO_ONE relation to another, then we create a virtual field to the other.
-//        foreach ($this->getFields() as $field) {
-//            if ($field->getObjectRelation() == \Kryn\CmsBundle\ORM\ORMAbstract::MANY_TO_ONE) {
-//                $objectName = $this->getKrynCore()->getObjects()->getName($field['object']);
-//                $bundleName = strtolower($this->getKrynCore()->getObjects()->getBundleName($field['object']));
-//                $fieldName = lcfirst($field->getObjectRefRelationName() ? : $this->getId());
-//
-//                $bundle = $this->getKrynCore()->getConfig($bundleName);
-//                if ($bundle && $object = $bundle->getObject($objectName)) {
-//                    $objectName = $this->getBundle()->getBundleName() . ':' . $this->getId();
-//                    $virtualField = new Field(array(
-//                        'id' => $fieldName,
-//                        'virtual' => true,
-//                        'label' => 'Auto Object Relation (' . $objectName . ')',
-//                        'object' => $objectName,
-//                        'objectRelation' => \Kryn\CmsBundle\ORM\ORMAbstract::ONE_TO_MANY
-//                    ), $this->getKrynCore());
-//
-//                    $object->addVirtualField($virtualField);
-//                }
-//            }
-//        }
-//    }
-
     /**
      * Do whatever is needed to setup the runtime environment correctly.
      *
@@ -391,6 +364,17 @@ class Object extends Model
             }
         }
         return $changed;
+    }
+
+    /**
+     * @return array
+     */
+    public function __sleep()
+    {
+        $vars = parent::__sleep();
+        $vars[] = 'relations';
+        $vars[] = 'indexes';
+        return $vars;
     }
 
     /**
@@ -460,7 +444,6 @@ class Object extends Model
     {
         return isset($this->relations[strtolower($name)]);
     }
-
 
 //    /**
 //     * @param Field[] $virtualFields

@@ -12,6 +12,7 @@ use Kryn\CmsBundle\Filesystem\Filesystem;
 use Kryn\CmsBundle\Objects;
 use Kryn\CmsBundle\ORM\ORMAbstract;
 use Kryn\CmsBundle\Propel\PropelHelper;
+use Kryn\CmsBundle\Propel\StandardEnglishPluralizer;
 use Kryn\CmsBundle\Tools;
 use Propel\Generator\Model\Column;
 use Propel\Generator\Model\Database;
@@ -184,6 +185,7 @@ class Propel implements BuildInterface
         if (!$object->getFields()) {
             throw new ModelBuildException(sprintf('The object `%s` has no fields defined', $object->getId()));
         }
+
         foreach ($object->getFields() as $field) {
 
             if ($columns = $field->getFieldType()->getColumns()) {
@@ -336,11 +338,13 @@ class Propel implements BuildInterface
             $foreignKey = $xmlTable->addChild('foreign-key');
         }
 
-        $foreignKey['phpName'] = ucfirst($relationName);
+        $pluralizer = new StandardEnglishPluralizer();
+
+        $foreignKey['phpName'] = ucfirst($pluralizer->getSingularForm(lcfirst($relationName)));
         $foreignKey['foreignTable'] = $foreignObject->getTable();
 
         if ($refName = $relation->getRefName()) {
-            $foreignKey['refPhpName'] = ucfirst($refName);
+            $foreignKey['refPhpName'] = ucfirst($pluralizer->getSingularForm(lcfirst($refName)));
         }
 
         $foreignKey['onDelete'] = $relation->getOnDelete();

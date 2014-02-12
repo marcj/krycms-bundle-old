@@ -7,6 +7,7 @@ use Kryn\CmsBundle\Configuration\ConditionSubSelect;
 use Kryn\CmsBundle\Exceptions\FileNotFoundException;
 use Kryn\CmsBundle\Exceptions\ObjectNotFoundException;
 use Kryn\CmsBundle\Objects;
+use Kryn\CmsBundle\Propel\StandardEnglishPluralizer;
 use Kryn\CmsBundle\Tools;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
@@ -863,7 +864,7 @@ class Propel extends ORMAbstract
 
     public function mapValues(&$item, &$values, $setUndefinedAsNull = true)
     {
-        $pluralizer = new \Propel\Common\Pluralizer\StandardEnglishPluralizer;
+        $pluralizer = new StandardEnglishPluralizer();
         $setted = [];
 
         foreach ($this->definition->getFields(true) as $field) {
@@ -888,7 +889,7 @@ class Propel extends ORMAbstract
             if ($field['type'] == 'object' || $this->tableMap->hasRelation($fieldName)) {
                 if ($field['objectRelation'] == ORMAbstract::MANY_TO_MANY || $field['objectRelation'] == ORMAbstract::ONE_TO_MANY) {
 
-                    $name = $pluralizer->getPluralForm(Tools::underscore2Camelcase($fieldName));
+                    $name = $pluralizer->getPluralForm($pluralizer->getSingularForm(Tools::underscore2Camelcase($fieldName)));
                     $setItems = 'set' . $name;
 //                    $getItems = 'get' . $name;
                     $clearItems = 'clear' . $name;

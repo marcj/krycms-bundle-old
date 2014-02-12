@@ -654,7 +654,7 @@ class Objects
     /**
      * Returns the class object for $objectKey
      *
-     * @param $objectKey
+     * @param string $objectKey
      *
      * @return \Kryn\CmsBundle\ORM\ORMAbstract
      * @throws ObjectNotFoundException
@@ -1374,7 +1374,7 @@ class Objects
         }
 
         list($bundleName, $objectName) = explode('/', $key);
-        $bundleName = str_replace('bundle/', '/', strtolower($bundleName));
+        $bundleName = preg_replace('/bundle$/', '', strtolower($bundleName));
         $objectName = lcfirst($objectName);
         return $bundleName. '/' . $objectName;
     }

@@ -60,32 +60,6 @@ class TypeObject extends AbstractType
     }
 
     /**
-     * @return array
-     */
-    public function getValue()
-    {
-        $value = [];
-        $columns = $this->getColumns();
-        $firstColumn = $columns[0];
-        if (1 === count($columns)) {
-            $value[$firstColumn->getName()] = $this->value;
-        } else {
-            if (is_array($this->value)) {
-                foreach ($this->getColumns() as $column) {
-                    $value[$column->getName()] = $this->value[$column->getName()];
-                }
-            }
-        }
-        return $value;
-    }
-
-    public function mapValues(array &$data)
-    {
-        $value = $this->getValue();
-        $data = array_merge($data, $value);
-    }
-
-    /**
      * Returns the field names to select from the object model as array.
      *
      * @return string[]
@@ -110,20 +84,48 @@ class TypeObject extends AbstractType
     public function bootRunTime(Object $object, Configs $configs)
     {
         $changed = false;
+        $field = $this->getFieldDefinition();
 
         //check for n-to-n relation and create crossTable
-        if (ORMAbstract::MANY_TO_MANY == $this->getFieldDefinition()->getObjectRelation()) {
+        if (ORMAbstract::MANY_TO_MANY == $field->getObjectRelation()) {
             if ($this->defineCrossTable($object, $configs)) {
                 $changed = true;
             }
         }
 
         //check for x-to-1 objectRelations and create cross object w/ relations
-        if (ORMAbstract::MANY_TO_ONE == $this->getFieldDefinition()->getObjectRelation() ||
-            ORMAbstract::ONE_TO_ONE == $this->getFieldDefinition()->getObjectRelation()
+        if (ORMAbstract::MANY_TO_ONE == $field->getObjectRelation() ||
+            ORMAbstract::ONE_TO_ONE == $field->getObjectRelation()
         ) {
             if ($this->defineRelation($object, $configs)) {
                 $changed = true;
+            }
+        }
+
+        //create virtual reference-field for many-to-one relations
+        if ($this->getFieldDefinition()->getObjectRelation() == \Kryn\CmsBundle\ORM\ORMAbstract::MANY_TO_ONE) {
+            if ($object = $configs->getObject($field->getObject())) {
+
+                if (!$refName = $field->getObjectRefRelationName()) {
+                    $refName = $field->getObjectDefinition()->getId();
+                }
+
+                $refName = lcfirst($refName);
+                $virtualField = $object->getField($refName);
+
+                if (!$virtualField) {
+
+                    $virtualField = new Field(null, $object->getKrynCore());
+                    $virtualField->setVirtual(true);
+                    $virtualField->setId($refName);
+                    $virtualField->setType('object');
+                    $virtualField->setLabel('Auto Object Relation (' . $field->getObject() . ')');
+                    $virtualField->setObject($field->getObjectDefinition()->getKey());
+                    $virtualField->setObjectRelation(\Kryn\CmsBundle\ORM\ORMAbstract::ONE_TO_MANY);
+                    $object->addField($virtualField);
+
+                    $changed = true;
+                }
             }
         }
 
@@ -169,13 +171,15 @@ class TypeObject extends AbstractType
             $changed = true;
         }
 
-        if (!$crossObject->getField($objectDefinition->getId())) {
+        $leftFieldName = $this->getFieldDefinition()->getObjectRefRelationName() ?: $objectDefinition->getId();
+        if (!$crossObject->getField($leftFieldName)) {
             $leftObjectField = new Field(null, $objectDefinition->getKrynCore());
-            $leftObjectField->setId($objectDefinition->getId());
+            $leftObjectField->setId($leftFieldName);
             $leftObjectField->setType('object');
             $leftObjectField->setObject($objectDefinition->getKey());
             $leftObjectField->setObjectRelation(ORMAbstract::ONE_TO_ONE);
             $leftObjectField->setPrimaryKey(true);
+
             $crossObject->addField($leftObjectField);
             $changed = true;
         }
@@ -186,8 +190,8 @@ class TypeObject extends AbstractType
             $rightObjectField->setType('object');
             $rightObjectField->setObject($foreignObjectDefinition->getKey());
             $rightObjectField->setObjectRelation(ORMAbstract::ONE_TO_ONE);
-//            $rightObjectField->setObjectRefRelationName($this->getFieldDefinition()->getId());
             $rightObjectField->setPrimaryKey(true);
+
             $crossObject->addField($rightObjectField);
             $changed = true;
         }

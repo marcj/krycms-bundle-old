@@ -141,12 +141,6 @@
           <field id="searchWords" type="text"/>
           <field id="unsearchable" type="checkbox"/>
           <field id="layout" type="layout"/>
-          <field id="content" type="object">
-            <label>Contents</label>
-            <object>kryncms/content</object>
-            <objectRelation>1ToN</objectRelation>
-            <objectRelationTable>system_content</objectRelationTable>
-          </field>
         </fields>
         <publicUrlGenerator>Core\PageController::getPublicUrl</publicUrlGenerator>
       </object>
@@ -203,7 +197,7 @@
           <field id="favicon" type="file">
             <label>Favicon path.</label>
           </field>
-          <field id="searchIndexKey" type="text" />
+          <field id="searchIndexKey" type="text"/>
           <field id="themeProperties" type="properties"/>
           <field id="sessionProperties" type="properties"/>
           <field id="theme" type="theme">
@@ -270,6 +264,7 @@
             <object>kryncms/node</object>
             <objectRelation>nTo1</objectRelation>
             <objectLabel>title</objectLabel>
+            <objectRefRelationName>Content</objectRefRelationName>
           </field>
           <field id="boxId" type="number"/>
           <field id="sort" type="number"/>
@@ -281,7 +276,6 @@
           <field id="unsearchable" type="text"/>
           <field id="accessFrom" type="number"/>
           <field id="accessTo" type="number"/>
-          <field id="accessFromGroups" type="text"/>
           <field id="accessFromGroups" type="text"/>
         </fields>
       </object>

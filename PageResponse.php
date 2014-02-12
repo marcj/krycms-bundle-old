@@ -366,6 +366,7 @@ class PageResponse extends Response
             [
                 'pageResponse' => $this,
                 'body' => $body,
+                'headerTags' => $this->getAdditionalHeaderTags(),
                 'cssTags' => $this->getCssTags('top'),
                 'jsTags' => $this->getScriptTags('top'),
                 'jsTagsBottom' => $this->getScriptTags('bottom')

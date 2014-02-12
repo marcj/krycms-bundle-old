@@ -24,8 +24,7 @@ class KrynUsers extends ClientAbstract
 
         $con = Propel::getWriteConnection('default');
 
-        $stmt = $con->prepare(
-            "
+        $sql = "
             SELECT id, passwd, passwd_salt
             FROM " . $this->getKrynCore()->getSystemConfig()->getDatabase()->getPrefix() . "system_user
             WHERE
@@ -33,8 +32,9 @@ class KrynUsers extends ClientAbstract
                 AND $userColumn = ?
                 AND passwd IS NOT NULL AND passwd != ''
                 AND passwd_salt IS NOT NULL AND passwd_salt != ''
-                AND (auth_class IS NULL OR auth_class = 'kryn')"
-        );
+                AND (auth_class IS NULL OR auth_class = 'kryn')";
+
+        $stmt = $con->prepare($sql);
 
         if ($stmt->execute([$login])) {
             $row = $stmt->fetch(\PDO::FETCH_ASSOC);

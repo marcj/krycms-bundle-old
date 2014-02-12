@@ -279,6 +279,13 @@ class Field extends Model
      */
     protected $virtual = false;
 
+    public function __sleep()
+    {
+        $vars = parent::__sleep();
+        $vars[] = 'objectDefinition';
+        return $vars;
+    }
+
     /**
      * @param array $values
      * @param string $key

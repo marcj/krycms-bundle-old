@@ -130,6 +130,7 @@ class AdminAssets
             }
         }
 
+        $response->setDocType('KrynCmsBundle:Admin:index.html.twig');
         $response->addHeader('<meta name="viewport" content="initial-scale=1.0" >');
         $response->addHeader('<meta name="apple-mobile-web-app-capable" content="yes">');
 
