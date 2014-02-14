@@ -2,7 +2,7 @@
 
 namespace Kryn\CmsBundle\Configuration;
 
-use \Kryn\CmsBundle\Core as Kryn;
+use Kryn\CmsBundle\AssetHandler\AssetInfo;
 
 /**
  * Class Asset
@@ -61,23 +61,13 @@ class Asset extends Model
     }
 
     /**
-     * Returns the full path relative to web root.
-     *
-     * @return string
+     * @return AssetInfo
      */
-    public function getLocalPath()
+    public function getAssetInfo()
     {
-        return Kryn::resolvePath($this->path, 'Resources/public');
+        $assetInfo = new AssetInfo();
+        $assetInfo->setFile($this->getPath());
+        $assetInfo->setAllowCompression($this->getCompression());
+        return $assetInfo;
     }
-
-    /**
-     * Returns the public accessible path (`bundle/...`) through `Kryn::resolvePublicPath()`.
-     *
-     * @return string
-     */
-    public function getPublicPath()
-    {
-        return Kryn::resolvePublicPath($this->path);
-    }
-
 }

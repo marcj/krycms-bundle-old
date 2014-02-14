@@ -5,7 +5,7 @@ namespace Kryn\CmsBundle\Twig;
 use Kryn\CmsBundle\Core;
 use Kryn\CmsBundle\Model\Node;
 
-class AddCssExtension extends \Twig_Extension
+class LoadAssetExtension extends \Twig_Extension
 {
     /**
      * @var Core
@@ -27,19 +27,25 @@ class AddCssExtension extends \Twig_Extension
 
     public function getName()
     {
-        return 'addCss';
+        return 'loadAsset';
     }
 
     public function getFunctions()
     {
         return array(
-            'addCss' => new \Twig_Function_Method($this, 'addCss')
+            'loadAsset' => new \Twig_Function_Method($this, 'loadAsset'),
+            'loadAssetAtBottom' => new \Twig_Function_Method($this, 'loadAssetAtBottom')
         );
     }
 
-    public function addCss($cssFile)
+    public function loadAsset($asset)
     {
-        return $this->getKrynCore()->getPageResponse()->addCssFile($cssFile);
+        $this->getKrynCore()->getPageResponse()->loadAssetFile($asset);
+    }
+
+    public function loadAssetAtBottom($asset)
+    {
+        $this->getKrynCore()->getPageResponse()->loadAssetFileAtBottom($asset);
     }
 
 }

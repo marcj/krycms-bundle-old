@@ -65,7 +65,7 @@ class AdminAssets
         $response = $this->getKrynCore()->getPageResponse();
         $prefix = substr($this->getKrynCore()->getAdminPrefix(), 1);
 
-        $response->addJsFile($prefix . '/admin/ui/languages?noCache=978699877');
+        $response->addJsFile($prefix . '/admin/ui/languages');
         $response->addJsFile($prefix . '/admin/ui/language?lang=en&javascript=1');
         $response->addJsFile($prefix . '/admin/ui/language-plural?lang=en');
     }
@@ -86,14 +86,12 @@ class AdminAssets
 
         if ($this->getKrynCore()->getKernel()->isDebug()) {
             foreach ($this->getKrynCore()->getConfigs() as $bundleConfig) {
-                if (!$options['noJs']) {
-                    foreach ($bundleConfig->getAdminAssetsPaths(false, '.*\.js', true) as $assetPath) {
-                        $response->addJsFile($assetPath);
+                foreach ($bundleConfig->getAdminAssetsInfo() as $assetInfo) {
+                    if ($options['noJs'] && $assetInfo->isJavaScript()) {
+                        continue;
                     }
-                }
-                foreach ($bundleConfig->getAdminAssetsPaths(false, '.*\.css', true)
-                         as $assetPath) {
-                    $response->addCssFile($assetPath);
+
+                    $response->addAsset($assetInfo);
                 }
             }
         } else {
@@ -103,29 +101,30 @@ class AdminAssets
             }
 
             foreach ($this->getKrynCore()->getConfigs() as $bundleConfig) {
-                if (!$options['noJs']) {
-                    foreach ($bundleConfig->getAdminAssetsPaths(false, '.*\.js', true) as $assetPath) {
-                        $path = $this->getKrynCore()->resolvePath($assetPath, 'Resources/public');
+                foreach ($bundleConfig->getAdminAssetsInfo() as $assetInfo) {
+                    if ($options['noJs'] && $assetInfo->isJavaScript()) {
+                        continue;
+                    }
+
+                    if ($assetInfo->getFile()) {
+                        // load javascript files, that are not accessible (means those are points to a controller)
+                        // because those can't not be compressed
+                        $path = $this->getKrynCore()->resolveWebPath($assetInfo->getFile());
                         if (!file_exists($path)) {
-                            $response->addJsFile($assetPath);
+                            $response->addAsset($assetInfo);
+                            continue;
                         }
                     }
 
-                    foreach ($bundleConfig->getAdminAssetsPaths(false, '.*\.js', true, false)as $assetPath) {
-                        $response->addJsFile($assetPath);
+                    if ($assetInfo->getContent()) {
+                        // load inline assets because we can't compress those
+                        $response->addAsset($assetInfo);
+                        continue;
                     }
-                }
 
-                foreach ($bundleConfig->getAdminAssetsPaths(false, '.*\.css', true) as $assetPath) {
-                    $path = $this->getKrynCore()->resolvePath($assetPath, 'Resources/public');
-                    if (!file_exists($path)) {
-                        $response->addCssFile($assetPath);
+                    if (!$assetInfo->getAllowCompression()) {
+                        $response->addAsset($assetInfo);
                     }
-                }
-
-                foreach ($bundleConfig->getAdminAssetsPaths(false, '.*\.css', true, false)
-                         as $assetPath) {
-                    $response->addCssFile($assetPath);
                 }
             }
         }
@@ -170,9 +169,8 @@ class AdminAssets
             $options['standalone'] = filter_var($options['standalone'], FILTER_VALIDATE_BOOLEAN);
         }
 
-        $response->addJs(
-            'window.editor = new parent.ka.Editor(' . json_encode($options) . ', document.documentElement);',
-            'bottom'
+        $response->addJsAtBottom(
+            'window.editor = new parent.ka.Editor(' . json_encode($options) . ', document.documentElement);'
         );
     }
 

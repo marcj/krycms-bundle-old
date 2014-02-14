@@ -38,6 +38,11 @@ parameters:
 
      kryn_cms.configuration.database.connection.main.class: Kryn\CmsBundle\Configuration\Connection
 
+     kryn_cms.asset_handler.scss.class: Kryn\CmsBundle\AssetHandler\ScssHandler
+     kryn_cms.asset_handler.css.class: Kryn\CmsBundle\AssetHandler\CssHandler
+     kryn_cms.asset_handler.js.class: Kryn\CmsBundle\AssetHandler\JsHandler
+     kryn_cms.asset_handler.container.class: Kryn\CmsBundle\AssetHandler\Container
+
      database_table_prefix: kryn_
      kryn_admin_prefix: /kryn
 
@@ -199,3 +204,25 @@ services:
         arguments: [@kryn_cms.filesystem.local, @kryn_cms.objects, @kernel]
         tags:
             - { name: kryn_cms.model.builder, alias: propel }
+
+     kryn_cms.asset_handler.container:
+        arguments: ["@service_container"]
+        class: %kryn_cms.asset_handler.container.class%
+
+     kryn_cms.asset_handler.scss:
+        class: %kryn_cms.asset_handler.scss.class%
+        arguments: ["@kryn_cms"]
+        tags:
+            - { name: kryn_cms.asset_handler.compiler, extension: css.scss }
+
+     kryn_cms.asset_handler.css:
+        class: %kryn_cms.asset_handler.css.class%
+        arguments: ["@kryn_cms"]
+        tags:
+            - { name: kryn_cms.asset_handler.loader, contentType: 'text/css', extension: css }
+
+     kryn_cms.asset_handler.js:
+        class: %kryn_cms.asset_handler.js.class%
+        arguments: ["@kryn_cms"]
+        tags:
+            - { name: kryn_cms.asset_handler.loader, contentType: 'text/javascript', extension: js }

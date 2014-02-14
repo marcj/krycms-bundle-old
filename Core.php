@@ -732,15 +732,6 @@ class Core extends Controller
             $suffix = trim($suffix, '/');
             $path = trim($path, '/');
             $bundlePath = '/' . trim($bundlePath, '/');
-//
-//
-//            if ((!$suffix || '/' === substr($suffix, -1)) && '/' === $path[0]) {
-//                $path = substr($path, 1);
-//            }
-//
-//            if ('/' !== substr($bundlePath, 0, -1) && $suffix && '/' !== $suffix[0]) {
-//                $bundlePath .= '/';
-//            }
 
             $path = $bundlePath . ($suffix ? '/' . $suffix : '' ) . '/' . $path;
         } else {
@@ -755,10 +746,12 @@ class Core extends Controller
     }
 
     /**
+     * Shortcut for $this->resolvePath($path, 'Resources/public')
+     *
      * @param string $path
      * @return mixed
      */
-    public function resolvePublicPath($path)
+    public function resolveInternalPublicPath($path)
     {
         return $this->resolvePath($path, 'Resources/public');
     }
@@ -770,6 +763,10 @@ class Core extends Controller
      */
     public function resolveWebPath($path)
     {
+        if ($path && '@' !== $path[0]) {
+            return 'web/' . $path;
+        }
+
         preg_match('/(\@?[a-zA-Z0-9\-_\.\\\\]+)/', $path, $matches);
         if ($matches && isset($matches[1])) {
             try {
@@ -781,9 +778,38 @@ class Core extends Controller
                     $path
                 ), 0, $e);
             }
-            $targetDir = 'bundles/' . $this->getShortBundleName($bundle->getName());
+            $targetDir = 'web/bundles/' . $this->getShortBundleName($bundle->getName());
 
             return $targetDir . substr($path, strlen($matches[0]));
+        }
+
+        return 'web/' . $path;
+    }
+
+    public function resolvePublicWebPath($path)
+    {
+        if ($path && '@' !== $path[0]) {
+            return $path;
+        }
+
+        $webDir = realpath($this->getKernel()->getRootDir().'/../web') . '/';
+        try {
+            $path = $this->resolveWebPath($path);
+            $path = substr($path, strpos($path, '/') + 1);
+            if (file_exists($webDir . $path)) {
+                return $path;
+            }
+        } catch (BundleNotFoundException $e) {
+        }
+
+        //do we need to add app_dev.php/ or something?
+        $prefix = substr(
+            $this->getRequest()->getBaseUrl(),
+            strlen($this->getRequest()->getBasePath())
+        );
+
+        if (false !== $prefix) {
+            $path = substr($prefix, 1) . '/' . $path;
         }
 
         return $path;

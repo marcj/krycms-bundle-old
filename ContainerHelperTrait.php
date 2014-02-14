@@ -21,6 +21,14 @@ trait ContainerHelperTrait
     }
 
     /**
+     * @return AssetHandler\Container
+     */
+    public function getAssetCompilerContainer()
+    {
+        return $this->container->get('kryn_cms.asset_handler.container');
+    }
+
+    /**
      * Returns a Filesystem interface for the root folder (where your composer.json is placed)
      *
      * @return \Kryn\CmsBundle\Filesystem\FilesystemInterface

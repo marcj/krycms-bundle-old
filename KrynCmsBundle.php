@@ -3,6 +3,7 @@
 namespace Kryn\CmsBundle;
 
 use Doctrine\Common\Annotations\AnnotationRegistry;
+use Kryn\CmsBundle\DependencyInjection\AssetCompilerCompilerPass;
 use Kryn\CmsBundle\DependencyInjection\ContentTypesCompilerPass;
 use Kryn\CmsBundle\DependencyInjection\FieldTypesCompilerPass;
 use Kryn\CmsBundle\DependencyInjection\ModelBuilderCompilerPass;
@@ -24,6 +25,7 @@ class KrynCmsBundle extends Bundle
         $container->addCompilerPass(new ContentTypesCompilerPass());
         $container->addCompilerPass(new FieldTypesCompilerPass());
         $container->addCompilerPass(new ModelBuilderCompilerPass());
+        $container->addCompilerPass(new AssetCompilerCompilerPass());
     }
 
     public function boot()

@@ -103,6 +103,10 @@ class Propel implements BuildInterface
 
         $propelHelper = new PropelHelper($krynCore);
         $propelHelper->init();
+
+        foreach ($files as $file => $xml) {
+            unlink($file);
+        }
     }
 
     public function getSchema(Object $object)

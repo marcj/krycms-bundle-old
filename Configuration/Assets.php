@@ -99,7 +99,7 @@ class Assets extends Model implements \IteratorAggregate
             $prefixPath = $bundleName ? $this->getKrynCore()->resolvePath("$bundleName/Resources/public/") : '';
             $offset = strlen($prefixPath);
 
-            $path = $this->getKrynCore()->resolvePublicPath($this->getPath());
+            $path = $this->getKrynCore()->resolveInternalPublicPath($this->getPath());
             if (!$path) {
                 return [];
             }

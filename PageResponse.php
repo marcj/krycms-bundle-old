@@ -2,7 +2,11 @@
 
 namespace Kryn\CmsBundle;
 
+use Kryn\CmsBundle\AssetHandler\AssetInfo;
+use Kryn\CmsBundle\AssetHandler\CssHandler;
+use Kryn\CmsBundle\AssetHandler\JsHandler;
 use Kryn\CmsBundle\Exceptions\BundleNotFoundException;
+use Kryn\CmsBundle\File\FileInfo;
 use Kryn\CmsBundle\Model\Content;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -41,24 +45,24 @@ class PageResponse extends Response
      *
      * @var array
      */
-    protected $pluginResponse = array();
+    protected $pluginResponse = [];
 
     /**
-     * CSS files.
+     * Asset files.
      *
      * @var array
      */
-    protected $css = array(
-        array('path' => '@KrynCmsBundle/css/normalize.css', 'type' => 'text/css'),
-        array('path' => '@KrynCmsBundle/css/defaults.css', 'type' => 'text/css')
-    );
+    protected $assets = [];
 
     /**
-     * Javascript files and scripts.
-     *
-     * @var array
+     * @var AssetInfo[]
      */
-    protected $js = array();
+    protected $assetsInfo = [];
+
+    /**
+     * @var AssetInfo[]
+     */
+    protected $assetsInfoBottom = [];
 
     /**
      * @var string
@@ -243,58 +247,96 @@ class PageResponse extends Response
      * Adds a css file to the page.
      *
      * @param string $path
-     * @param string $type
+     * @param string $contentType
      */
-    public function addCssFile($path, $type = 'text/css')
+    public function loadAssetFile($path, $contentType = null)
     {
-        $insert = array('path' => $path, 'type' => $type);
-        if (array_search($insert, $this->css) === false) {
-            $this->css[] = $insert;
+        $this->injectAsset(array('path' => $path, 'contentType' => $contentType));
+    }
+
+    protected function injectAsset($definition)
+    {
+        $assetInfo = new AssetInfo();
+        $assetInfo->setFile(@$definition['path']);
+        $assetInfo->setContent(@$definition['content']);
+        $assetInfo->setContentType(@$definition['contentType']);
+
+        $this->handleAsset($assetInfo);
+
+        if ('bottom' === strtolower(@$definition['position'])) {
+            $this->assetsInfoBottom[] = $assetInfo;
+        } else {
+            $this->assetsInfo[] = $assetInfo;
         }
     }
 
     /**
-     * Adds css source to the page.
+     * If needed the given asset gets compiled and $assetInfo will be modified.
      *
-     * @param string $content
-     * @param string $type
+     * @param AssetInfo $assetInfo
      */
-    public function addCss($content, $type = 'text/css')
+    public function handleAsset(&$assetInfo)
     {
-        $insert = array('content' => $content, 'type' => $type);
-        if (array_search($insert, $this->css) === false) {
-            $this->css[] = $insert;
+        $assetHandlerContainer = $this->getKrynCore()->getAssetCompilerContainer();
+        if ($assetInfo->getFile() && $compiler = $assetHandlerContainer->getCompileHandlerByFileExtension($assetInfo->getFile())) {
+            if ($compiledAssetInfo = $compiler->compileFile($assetInfo->getFile())) {
+                $assetInfo = $compiledAssetInfo;
+            }
         }
     }
 
     /**
-     * Adds a javascript file to the page.
+     * Adds a css file to the page.
      *
      * @param string $path
-     * @param string $position
-     * @param string $type
+     * @param string $contentType
      */
-    public function addJsFile($path, $position = 'top', $type = 'text/javascript')
+    public function loadAssetFileAtBottom($path, $contentType = null)
     {
-        $insert = array('path' => $path, 'position' => $position, 'type' => $type);
-        if (array_search($insert, $this->js) === false) {
-            $this->js[] = $insert;
+        $this->injectAsset(array('path' => $path, 'contentType' => $contentType, 'position' => 'bottom'));
+    }
+
+    /**
+     * @param AssetInfo $assetInfo
+     */
+    public function addAsset(AssetInfo $assetInfo)
+    {
+        if (array_search($assetInfo, $this->assetsInfo) === false) {
+            $this->handleAsset($assetInfo);
+            $this->assetsInfo[] = $assetInfo;
         }
     }
 
     /**
-     * Adds javascript source to the page.
-     *
-     * @param string $content
-     * @param string $position
-     * @param string $type
+     * @param string $file path to javascript file
      */
-    public function addJs($content, $position = 'top', $type = 'text/javascript')
+    public function addJsFile($file)
     {
-        $insert = array('content' => $content, 'position' => $position, 'type' => $type);
-        if (array_search($insert, $this->js) === false) {
-            $this->js[] = $insert;
-        }
+        $this->loadAssetFile($file, 'text/javascript');
+    }
+
+    /**
+     * @param string $script the actual javascript
+     */
+    public function addJs($script)
+    {
+        $this->injectAsset(array('content' => $script, 'contentType' => 'text/javascript'));
+    }
+
+    /**
+     * @param string $script the actual javascript
+     */
+    public function addJsAtBottom($script)
+    {
+        $this->injectAsset(array('content' => $script, 'contentType' => 'text/javascript', 'position' => 'bottom'));
+    }
+
+    /**
+     * @param string $file path to css file
+     */
+    public function addCssFile($file)
+    {
+        $this->loadAssetFile($file, 'text/css');
     }
 
     /**
@@ -361,16 +403,16 @@ class PageResponse extends Response
 
         $templating = $this->getKrynCore()->getTemplating();
 
+        $data = [
+            'pageResponse' => $this,
+            'body' => $body,
+            'additionalHeaderTags' => $this->getAdditionalHeaderTags()
+        ];
+        $data = array_merge($data, $this->getAssetTags());
+
         $html = $templating->render(
             $this->getDocType(),
-            [
-                'pageResponse' => $this,
-                'body' => $body,
-                'headerTags' => $this->getAdditionalHeaderTags(),
-                'cssTags' => $this->getCssTags('top'),
-                'jsTags' => $this->getScriptTags('top'),
-                'jsTagsBottom' => $this->getScriptTags('bottom')
-            ]
+            $data
         );
 
         $html = preg_replace(
@@ -615,6 +657,23 @@ class PageResponse extends Response
     }
 
     /**
+     * @param array $assets
+     */
+    public function setAssets($assets)
+    {
+        $this->assets = $assets;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAssets()
+    {
+        return $this->assets;
+    }
+
+
+    /**
      * Compares two PageResponses and returns the difference as array/
      *
      * @param  PageResponse $response
@@ -709,38 +768,6 @@ class PageResponse extends Response
     }
 
     /**
-     * @param array $css
-     */
-    public function setCss($css)
-    {
-        $this->css = $css;
-    }
-
-    /**
-     * @return array
-     */
-    public function getCss()
-    {
-        return $this->css;
-    }
-
-    /**
-     * @param array $js
-     */
-    public function setJs($js)
-    {
-        $this->js = $js;
-    }
-
-    /**
-     * @return array
-     */
-    public function getJs()
-    {
-        return $this->js;
-    }
-
-    /**
      *
      *
      * @param  PluginResponse $response
@@ -757,6 +784,87 @@ class PageResponse extends Response
     }
 
     /**
+     * @return string
+     */
+    public function getAssetTags()
+    {
+        $assetHandlerContainer = $this->getKrynCore()->getAssetCompilerContainer();
+
+        /** @var $assets \Kryn\CmsBundle\AssetHandler\AssetInfo[] */
+        $assetsTop = $this->assetsInfo;
+        $assetsBottom = $this->assetsInfoBottom;
+
+        $tagsJsTop = '';
+        $tagsCssTop = '';
+        $tagsJsBottom = '';
+        $tagsAssets = '';
+
+        $assetsTopGrouped =[];
+        $assetsBottomGrouped = [];
+
+        $loaderMap = [];
+
+        // group all asset per loader
+        foreach ($assetsTop as $asset) {
+            if ($asset->getContentType()) {
+                $loader = $assetHandlerContainer->getLoaderHandlerByContentType($asset->getContentType());
+            } else {
+                $loader = $assetHandlerContainer->getLoaderHandlerByExtension($asset->getFile());
+            }
+
+            if ($loader) {
+                $loaderMap[spl_object_hash($loader)] = $loader;
+                $assetsTopGrouped[spl_object_hash($loader)][] = $asset;
+            }
+        }
+
+        // todo, remove duplicate code
+        foreach ($assetsBottom as $asset) {
+            if ($asset->getContentType()) {
+                $loader = $assetHandlerContainer->getLoaderHandlerByContentType($asset->getContentType());
+            } else {
+                $loader = $assetHandlerContainer->getLoaderHandlerByExtension($asset->getFile());
+            }
+
+            if ($loader) {
+                $loaderMap[spl_object_hash($loader)] = $loader;
+                $assetsBottomGrouped[spl_object_hash($loader)][] = $asset;
+            }
+        }
+
+        // generate tags top
+        foreach ($assetsTopGrouped as $loaderHash => $assets) {
+            $loader = $loaderMap[$loaderHash];
+            $tags = implode("\n", (array)$loader->getTags($assets, $this->getResourceCompression()));
+
+            if ($loader instanceof CssHandler) {
+                $tagsCssTop = $tags;
+            } else if ($loader instanceof JsHandler) {
+                $tagsJsTop = $tags;
+            } else {
+                $tagsAssets = $tags;
+            }
+        }
+
+        // generate tags bottom
+        foreach ($assetsBottomGrouped as $loaderHash => $assets) {
+            $loader = $loaderMap[$loaderHash];
+            $tags = implode("\n", (array)$loader->getTags($assets, $this->getResourceCompression()));
+
+            if ($loader instanceof JsHandler) {
+                $tagsJsBottom = $tags;
+            }
+        }
+
+        return [
+            'jsTags' => $tagsJsTop,
+            'cssTags' => $tagsCssTop,
+            'jsTagsBottom' => $tagsJsBottom,
+            'assetTags' => $tagsAssets
+        ];
+    }
+
+    /**
      *
      * @param Content $content
      *
@@ -770,249 +878,6 @@ class PageResponse extends Response
         }
 
         return isset($this->pluginResponse[$id]) ? $this->pluginResponse[$id] : '';
-    }
-
-    /**
-     * Returns all <link> tags based on the attached css files.
-     *
-     * @return string
-     * @throws \FileNotFoundException
-     */
-    public function getCssTags()
-    {
-        $result = '';
-
-        if ($this->getResourceCompression()) {
-
-            $cssCode = '';
-            foreach ($this->css as $css) {
-                if ($css['path']) {
-                    if (false !== strpos($css['path'], "://")) {
-                        $result .= sprintf(
-                            '<link rel="stylesheet" type="text/css" href="%s" %s',
-                            $css['path'],
-                            $this->getTagEndChar()
-                        );
-                    } else {
-                        //local
-                        $file = $this->getAssetPath($css['path']);
-
-                        if (file_exists($file) && $modifiedTime = filemtime($file)) {
-                            $cssCode .= $file . '_' . $modifiedTime;
-                        } else {
-                            $this->getKrynCore()->getLogger()->error(sprintf('CSS file `%s` [%s] not found.', $file, $css['path']));
-                        }
-                    }
-                } else {
-                    $cssCode .= '_' . $css['content'] . '_';
-                }
-            }
-
-            $cssMd5 = md5($cssCode);
-            $cssCachedFile = 'cachedCss_' . $cssMd5 . '.css';
-
-            if (!file_exists($this->getKrynCore()->getWebCacheDir() . $cssCachedFile)) {
-                $compressFiles = array();
-                foreach ($this->css as $css) {
-                    if ($css['path']) {
-                        if (false !== strpos($css['path'], "://")) {
-                            $result .= sprintf(
-                                PHP_EOL . '    <link rel="stylesheet" type="text/css" href="%s" %s',
-                                $css['path'],
-                                $this->getTagEndChar()
-                            );
-                        } else {
-                            $compressFiles[] = $css['path'];
-                        }
-                    } else {
-                        $result .= sprintf(
-                            PHP_EOL . '    <style type="text/css">' . chr(10) . '%s' . chr(10) . '</style>' . chr(10),
-                            $css['content']
-                        );
-                    }
-                }
-                $cssContent = $this->getKrynCore()->getUtils()->compressCss($compressFiles, 'cache/');
-                $this->getKrynCore()->getWebFilesystem()->write('cache/' . $cssCachedFile, $cssContent);
-            }
-            $result .= sprintf(
-                '<link rel="stylesheet" type="text/css" href="cache/%s" %s',
-                $cssCachedFile,
-                $this->getTagEndChar()
-            );
-        } else {
-            foreach ($this->css as $css) {
-                if ($css['path']) {
-                    if (false !== strpos($css['path'], "://")) {
-                        $result .= sprintf(
-                            PHP_EOL . '    <link rel="stylesheet" type="text/css" href="%s" %s',
-                            $css['path'],
-                            $this->getTagEndChar()
-                        );
-                    } else {
-
-                        $file = $this->getAssetPath($css['path']);
-                        $public = $this->getPublicAssetPath($css['path']);
-
-                        $modifiedTime = file_exists($file) ? filemtime($file) : null;
-
-                        $result .= sprintf(
-                            PHP_EOL . '    <link rel="stylesheet" type="%s" href="%s" %s',
-                            $css['type'],
-                            $public . ($modifiedTime ? '?c=' . $modifiedTime : ''),
-                            $this->getTagEndChar()
-                        );
-                    }
-                } else {
-                    $result .= sprintf(
-                        '<style type="text/css">' . chr(10) . '%s' . chr(10) . '</style>' . chr(10),
-                        $css['content']
-                    );
-                }
-            }
-        }
-
-        return $result;
-
-    }
-
-    /**
-     * Generates the <script> tags based on all attached js files/scripts.
-     *
-     * @param string $position
-     *
-     * @return string
-     * @throws \FileNotFoundException
-     */
-    public function getScriptTags($position = 'top')
-    {
-        $result = '';
-
-        if ($this->getResourceCompression()) {
-            $jsCode = '';
-            foreach ($this->js as $js) {
-                if ($js['position'] != $position) {
-                    continue;
-                }
-
-                if ($js['path']) {
-                    if (false !== strpos($js['path'], "http://")) {
-                        $result .= '<script type="text/javascript" src="' . $js['path'] . '" ></script>' . "\n";
-                    } else {
-                        //local
-                        $file = $this->getKrynCore()->resolvePath($js['path'], 'Resources/public');
-                        if (file_exists($file) && $modifiedTime = filemtime($file)) {
-                            $jsCode .= $file . '_' . $modifiedTime;
-                        } else {
-                            $this->getKrynCore()->getLogger()->error(
-                                sprintf('JavaScript file `%s` [%s] not found.', $file, $js['path'])
-                            );
-                        }
-                    }
-                } else {
-                    $jsCode .= '_' . $js['content'] . '_';
-                }
-            }
-
-            $jsMd5 = md5($jsCode);
-            $jsCachedFile = 'cachedJs_' . $jsMd5 . '.js';
-            $jsContent = '';
-
-            if (!file_exists($this->getKrynCore()->getWebCacheDir() . $jsCachedFile)) {
-                foreach ($this->js as $js) {
-                    if ($js['position'] != $position) {
-                        continue;
-                    }
-
-                    if ($js['path']) {
-                        if (false !== strpos($js['path'], "://")) {
-                            $result .= sprintf(
-                                '<script type="%s" src="%s"></script>' . chr(10),
-                                $js['type'],
-                                $js['path']
-                            );
-                        } else {
-                            $file = $this->getAssetPath($js['path']);
-                            $public = $this->getPublicAssetPath($js['path']);
-
-                            if (file_exists($file)) {
-                                $jsContent .= "/* ($public, {$js['path']}) - $file */\n\n";
-                                $jsContent .= file_get_contents($file) . "\n\n\n";
-                            }
-                        }
-                    } else {
-                        $jsContent .= "/* javascript block */\n\n";
-                        $jsContent .= $js['content'] . "\n\n\n";
-                    }
-                }
-                $this->getKrynCore()->getWebFileSystem()->write('cache/' . $jsCachedFile, $jsContent);
-            }
-
-            $result .= '<script type="text/javascript" src="cache/' . $jsCachedFile . '" ></script>' . "\n";
-        } else {
-            foreach ($this->js as $js) {
-                if ($js['position'] != $position) {
-                    continue;
-                }
-
-                if (isset($js['path'])) {
-                    if (false !== strpos($js['path'], "://")) {
-                        $result .= sprintf('<script type="%s" src="%s"></script>' . chr(10), $js['type'], $js['path']);
-                    } else {
-
-                        $file = $this->getAssetPath($js['path']);
-                        $public = $this->getPublicAssetPath($js['path']);
-
-                        $modifiedTime = file_exists($file) ? filemtime($file) : null;
-
-                        $result .= sprintf(
-                            '<script type="%s" src="%s"></script>' . chr(10),
-                            $js['type'],
-                            $public . ($modifiedTime ? '?c=' . $modifiedTime : '')
-                        );
-                    }
-                } else {
-                    $result .= sprintf(
-                        '<script type="%s">' . chr(10) . '%s' . chr(10) . '</script>' . chr(10),
-                        $js['type'],
-                        $js['content']
-                    );
-                }
-            }
-        }
-
-        return $result;
-    }
-
-    public function getAssetPath($path)
-    {
-        try {
-            return $this->getKrynCore()->resolvePath($path, 'Resources/public');
-        } catch (BundleNotFoundException $e) {
-            return $path;
-        }
-    }
-
-    public function getPublicAssetPath($path)
-    {
-        $webDir = realpath($this->getKrynCore()->getKernel()->getRootDir().'/../web') .'/';
-        try {
-            $path = $this->getKrynCore()->resolveWebPath($path);
-            if (file_exists($webDir . $path)) {
-                return $path;
-            }
-        } catch (BundleNotFoundException $e) {
-        }
-
-        //do we need to add app_dev.php/ or something?
-        $prefix = substr(
-            $this->getKrynCore()->getRequest()->getBaseUrl(),
-            strlen($this->getKrynCore()->getRequest()->getBasePath())
-        );
-        if (false !== $prefix) {
-            $path = substr($prefix, 1) . '/' . $path;
-        }
-
-        return $path;
     }
 
 }
