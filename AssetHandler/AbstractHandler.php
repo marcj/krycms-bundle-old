@@ -44,15 +44,7 @@ abstract class AbstractHandler
      */
     protected function getAssetPath($path)
     {
-        if ($path && '@' !== $path[0]) {
-            return $path;
-        }
-
-        try {
-            return $this->getKrynCore()->resolvePath($path, 'Resources/public', true);
-        } catch (BundleNotFoundException $e) {
-            return $path;
-        }
+        return $this->getKrynCore()->resolveWebPath($path);
     }
 
     /**
@@ -62,29 +54,6 @@ abstract class AbstractHandler
      */
     protected function getPublicAssetPath($path)
     {
-        if ($path && '@' !== $path[0]) {
-            return $path;
-        }
-
-        $webDir = realpath($this->getKrynCore()->getKernel()->getRootDir().'/../web') . '/';
-        try {
-            $path = $this->getKrynCore()->resolveWebPath($path);
-            if (file_exists($webDir . $path)) {
-                return $path;
-            }
-        } catch (BundleNotFoundException $e) {
-        }
-
-        //do we need to add app_dev.php/ or something?
-        $prefix = substr(
-            $this->getKrynCore()->getRequest()->getBaseUrl(),
-            strlen($this->getKrynCore()->getRequest()->getBasePath())
-        );
-
-        if (false !== $prefix) {
-            $path = substr($prefix, 1) . '/' . $path;
-        }
-
-        return $path;
+        return $this->getKrynCore()->resolvePublicWebPath($path);
     }
 }

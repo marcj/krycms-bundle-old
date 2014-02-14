@@ -255,34 +255,12 @@ class Utils
      */
     public function compressCss(array $files, $includePath = '')
     {
-        $toGecko = array(
-            "-moz-border-radius-topleft",
-            "-moz-border-radius-topright",
-            "-moz-border-radius-bottomleft",
-            "-moz-border-radius-bottomright",
-            "-moz-border-radius",
-        );
-
-        $toWebkit = array(
-            "-webkit-border-top-left-radius",
-            "-webkit-border-top-right-radius",
-            "-webkit-border-bottom-left-radius",
-            "-webkit-border-bottom-right-radius",
-            "-webkit-border-radius",
-        );
-        $from = array(
-            "border-top-left-radius",
-            "border-top-right-radius",
-            "border-bottom-left-radius",
-            "border-bottom-right-radius",
-            "border-radius",
-        );
 
         $webDir = realpath($this->getKrynCore()->getKernel()->getRootDir().'/../web') .'/';
         $content = '';
         foreach ($files as $assetPath) {
 
-            $cssFile = $this->getKrynCore()->resolveWebPath($assetPath); //bundles/kryncms/css/style.css
+            $cssFile = $this->getKrynCore()->resolvePublicWebPath($assetPath); //bundles/kryncms/css/style.css
             $cssDir = dirname($cssFile) . '/'; //admin/css/...
             $cssDir = str_repeat('../', substr_count($includePath, '/')) . $cssDir;
 
@@ -296,19 +274,12 @@ class Utils
                         $buffer = preg_replace('/@import \'([^\/].*)\'/', '@import \'' . $cssDir . '$1\'', $buffer);
                         $buffer = preg_replace('/@import "([^\/].*)"/', '@import "' . $cssDir . '$1"', $buffer);
                         $buffer = preg_replace('/url\(\'([^\/][^\)]*)\'\)/', 'url(\'' . $cssDir . '$1\')', $buffer);
+                        $buffer = preg_replace('/url\("([^\/][^\)]*)"\)/', 'url("' . $cssDir . '$1")', $buffer);
                         $buffer = preg_replace('/url\((?!data:image)([^\/\'].*)\)/', 'url(' . $cssDir . '$1)', $buffer);
                         $buffer = str_replace(array('  ', '    ', "\t", "\n", "\r"), '', $buffer);
                         $buffer = str_replace(': ', ':', $buffer);
 
                         $content .= $buffer;
-                        $newLine = str_replace($from, $toWebkit, $buffer);
-                        if ($newLine != $buffer) {
-                            $content .= $newLine;
-                        }
-                        $newLine = str_replace($from, $toGecko, $buffer);
-                        if ($newLine != $buffer) {
-                            $content .= $newLine;
-                        }
                     }
                     fclose($h);
                 }

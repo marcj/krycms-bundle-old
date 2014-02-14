@@ -84,54 +84,50 @@ class AdminAssets
         window._pathAdmin = ' . json_encode($request->getBaseUrl() . '/' . $prefix . '/')
         );
 
-//        if ($this->getKrynCore()->getKernel()->isDebug()) {
+        if ($this->getKrynCore()->getKernel()->isDebug()) {
             foreach ($this->getKrynCore()->getConfigs() as $bundleConfig) {
-                foreach ($bundleConfig->getAdminAssetsPaths(false) as $assetPath) {
-                    $response->loadAssetFile($assetPath);
-                }
-               /* if (!$options['noJs']) {
-                    foreach ($bundleConfig->getAdminAssetsPaths(false) as $assetPath) {
-                        $response->loadAssetFile($assetPath);
+                foreach ($bundleConfig->getAdminAssetsInfo() as $assetInfo) {
+                    if ($options['noJs'] && $assetInfo->isJavaScript()) {
+                        continue;
                     }
+
+                    $response->addAsset($assetInfo);
                 }
-                foreach ($bundleConfig->getAdminAssetsPaths(false, '.*\.css', true)
-                         as $assetPath) {
-                    $response->addCssFile($assetPath);
-                }*/
             }
-        /*} else {
+        } else {
             $response->addCssFile($prefix . '/admin/backend/css');
             if (!$options['noJs']) {
                 $response->addJsFile($prefix . '/admin/backend/script');
             }
 
             foreach ($this->getKrynCore()->getConfigs() as $bundleConfig) {
-                if (!$options['noJs']) {
-                    foreach ($bundleConfig->getAdminAssetsPaths(false, '.*\.js', true) as $assetPath) {
-                        $path = $this->getKrynCore()->resolvePath($assetPath, 'Resources/public');
+                foreach ($bundleConfig->getAdminAssetsInfo() as $assetInfo) {
+                    if ($options['noJs'] && $assetInfo->isJavaScript()) {
+                        continue;
+                    }
+
+                    if ($assetInfo->getFile()) {
+                        // load javascript files, that are not accessible (means those are points to a controller)
+                        // because those can't not be compressed
+                        $path = $this->getKrynCore()->resolveWebPath($assetInfo->getFile());
                         if (!file_exists($path)) {
-                            $response->addJsFile($assetPath);
+                            $response->addAsset($assetInfo);
+                            continue;
                         }
                     }
 
-                    foreach ($bundleConfig->getAdminAssetsPaths(false, '.*\.js', true, false)as $assetPath) {
-                        $response->addJsFile($assetPath);
+                    if ($assetInfo->getContent()) {
+                        // load inline assets because we can't compress those
+                        $response->addAsset($assetInfo);
+                        continue;
                     }
-                }
 
-                foreach ($bundleConfig->getAdminAssetsPaths(false, '.*\.css', true) as $assetPath) {
-                    $path = $this->getKrynCore()->resolvePath($assetPath, 'Resources/public');
-                    if (!file_exists($path)) {
-                        $response->addCssFile($assetPath);
+                    if (!$assetInfo->getAllowCompression()) {
+                        $response->addAsset($assetInfo);
                     }
-                }
-
-                foreach ($bundleConfig->getAdminAssetsPaths(false, '.*\.css', true, false)
-                         as $assetPath) {
-                    $response->addCssFile($assetPath);
                 }
             }
-        }*/
+        }
 
         $response->addHeader('<meta name="viewport" content="initial-scale=1.0" >');
         $response->addHeader('<meta name="apple-mobile-web-app-capable" content="yes">');
@@ -172,9 +168,8 @@ class AdminAssets
             $options['standalone'] = filter_var($options['standalone'], FILTER_VALIDATE_BOOLEAN);
         }
 
-        $response->addJs(
-            'window.editor = new parent.ka.Editor(' . json_encode($options) . ', document.documentElement);',
-            'bottom'
+        $response->addJsAtBottom(
+            'window.editor = new parent.ka.Editor(' . json_encode($options) . ', document.documentElement);'
         );
     }
 

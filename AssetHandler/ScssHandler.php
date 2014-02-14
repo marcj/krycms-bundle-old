@@ -9,27 +9,36 @@ class ScssHandler extends AbstractHandler implements CompileHandlerInterface
     public function compileFile($assetPath)
     {
         $localPath = $this->getAssetPath($assetPath);
+        if (!file_exists($localPath)){
+            return null;
+        }
+
         $publicPath = $this->getPublicAssetPath($assetPath);
 
-        $scss = new \scssc();
-        $scss->addImportPath(realpath(dirname($localPath)));
-
-//        $content = file_get_contents($localPath);
-//        try {
-//            $compiled = $scss->compile($content);
-//        } catch (\Exception $e) {
-//            throw new \Exception(sprintf('Parse error in file `%s`', $assetPath), 0, $e);
-//        }
-        $options = [
-
-        ];
-        $parser = new \SassParser($options);
-        $compiled = $parser->toCss($localPath);
-
         $targetPath = 'cache/scss/' . substr($publicPath, 0, strrpos($publicPath, '.'));
+        $needsCompilation = true;
+        $sourceMTime = filemtime($localPath);
 
-        $compiled = $this->replaceRelativePaths($publicPath, $targetPath, $compiled);
-        $this->getKrynCore()->getWebFileSystem()->write($targetPath, $compiled);
+        if (file_exists('web/' . $targetPath)) {
+            $fh = fopen('web/' . $targetPath, 'r+');
+            if ($fh) {
+                $firstLine = fgets($fh);
+                $lastSourceMTime = (int) substr($firstLine, strlen('/* compiled at '), -3);
+
+                $needsCompilation = $lastSourceMTime !== $sourceMTime;
+            }
+        }
+
+        if ($needsCompilation) {
+            $options = [
+            ];
+            $parser = new \SassParser($options);
+            $compiled = $parser->toCss($localPath);
+
+            $compiled = $this->replaceRelativePaths($publicPath, $targetPath, $compiled);
+            $compiled = "/* compiled at $sourceMTime */\n".$compiled;
+            $this->getKrynCore()->getWebFileSystem()->write($targetPath, $compiled);
+        }
 
         $assetInfo = new AssetInfo();
         $assetInfo->setFile($targetPath);

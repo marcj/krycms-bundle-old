@@ -276,10 +276,12 @@ class BackendController extends Controller
 
         $files = [];
         foreach ($this->getKrynCore()->getConfigs() as $bundleConfig) {
-            foreach ($bundleConfig->getAdminAssetsPaths(false, '.*\.css', true, true) as $assetPath) {
-                $path = $this->getKrynCore()->resolvePath($assetPath, 'Resources/public');
+            foreach ($bundleConfig->getAdminAssetsInfo() as $assetInfo) {
+                if (!$assetInfo->isStylesheet()) continue;
+
+                $path = $this->getKrynCore()->resolveWebPath($assetInfo->getFile());
                 if (file_exists($path)) {
-                    $files[] = $assetPath;
+                    $files[] = $assetInfo->getFile();
                     $md5String .= filemtime($path);
                 }
             }
@@ -297,7 +299,7 @@ class BackendController extends Controller
             }
         }
 
-        if (!$fileUpToDate) {
+        if (true || !$fileUpToDate) {
             $content = $this->getKrynCore()->getUtils()->compressCss($files, $this->getKrynCore()->getAdminPrefix() . 'admin/backend/');
             $content = $md5Line . $content;
             file_put_contents($oFile, $content);
@@ -340,18 +342,20 @@ class BackendController extends Controller
 
 
         foreach ($this->getKrynCore()->getConfigs() as $bundleConfig) {
-            foreach ($bundleConfig->getAdminAssetsPaths(false, '.*\.js', true, true) as $assetPath) {
-                $path = $this->getKrynCore()->resolvePath($assetPath, 'Resources/public');
+
+            foreach ($bundleConfig->getAdminAssetsInfo() as $assetInfo) {
+                if (!$assetInfo->isJavaScript()) continue;
+
+                $path = $this->getKrynCore()->resolveWebPath($assetInfo->getFile());
                 if (file_exists($path)) {
-                    $assets[] = $assetPath;
-                    $files[] = '--js ' . escapeshellarg($this->getKrynCore()->resolvePublicPath($assetPath));
+                    $assets[] = $assetInfo->getFile();
+                    $files[] = '--js ' . escapeshellarg($this->getKrynCore()->resolveInternalPublicPath($assetInfo->getFile()));
                     $mtime = filemtime($path);
                     $newestMTime = max($newestMTime, $mtime);
                     $md5String .= ">$path.$mtime<";
                 }
             }
         }
-//        chdir($web);
 
         $ifModifiedSince = $this->getKrynCore()->getRequest()->headers->get('If-Modified-Since');
         if (isset($ifModifiedSince) && (strtotime($ifModifiedSince) == $newestMTime)) {

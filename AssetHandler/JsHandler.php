@@ -2,8 +2,6 @@
 
 namespace Kryn\CmsBundle\AssetHandler;
 
-use Kryn\CmsBundle\File\FileInfo;
-
 class JsHandler extends AbstractHandler implements LoaderHandlerInterface
 {
     protected function getTag(AssetInfo $assetInfo)

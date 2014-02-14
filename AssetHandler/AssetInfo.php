@@ -7,19 +7,24 @@ class AssetInfo
     /**
      * @var string
      */
-    public $file;
+    protected $file;
 
     /**
      * @var string
      */
-    public $content;
+    protected $originalFile;
+
+    /**
+     * @var string
+     */
+    protected $content;
 
     /**
      * Mimetype
      *
      * @var string
      */
-    public $contentType;
+    protected $contentType;
 
     /**
      * Additional information
@@ -27,6 +32,11 @@ class AssetInfo
      * @var array
      */
     protected $additionalData;
+
+    /**
+     * @var boolean
+     */
+    protected $allowCompression = true;
 
     /**
      * @param string $key
@@ -43,7 +53,23 @@ class AssetInfo
      */
     public function get($key)
     {
-        return @$this->additionalData($key);
+        return @$this->additionalData[$key];
+    }
+
+    /**
+     * @param string $originalFile
+     */
+    public function setOriginalFile($originalFile)
+    {
+        $this->originalFile = $originalFile;
+    }
+
+    /**
+     * @return string
+     */
+    public function getOriginalFile()
+    {
+        return $this->originalFile;
     }
 
     /**
@@ -92,6 +118,63 @@ class AssetInfo
     public function getFile()
     {
         return $this->file;
+    }
+
+    /**
+     * @param boolean $allowCompression
+     */
+    public function setAllowCompression($allowCompression)
+    {
+        $this->allowCompression = filter_var($allowCompression, FILTER_VALIDATE_BOOLEAN);
+    }
+
+    /**
+     * @return boolean
+     */
+    public function getAllowCompression()
+    {
+        return $this->allowCompression;
+    }
+
+    public function isCompressionAllowed()
+    {
+        return !!$this->allowCompression;
+    }
+
+    /**
+     * Returns true if this is a javascript asset.
+     *
+     * @return bool
+     */
+    public function isJavaScript()
+    {
+        if ($this->getContentType()) {
+            return 'text/javascript' === strtolower($this->getContentType());
+        }
+
+        if ($this->getFile()) {
+            $exploded = explode('.', $this->getFile());
+            return 'js' === strtolower(array_pop($exploded));
+        }
+
+        return false;
+    }
+
+    /**
+     * Returns true fi this is a stylesheet asset.
+     *
+     * @return bool
+     */
+    public function isStylesheet()
+    {
+        if ($this->getContentType()) {
+            return 'text/css' === strtolower($this->getContentType());
+        }
+
+        if ($this->getFile()) {
+            $exploded = explode('.', $this->getFile());
+            return 'css' === strtolower(array_pop($exploded));
+        }
     }
 
 }

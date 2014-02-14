@@ -8,10 +8,6 @@ $base-font-size: 13px;
 
 @import "compass";
 
-* {
-  @include box-sizing(border-box);
-}
-
 .ka-admin, .ka-normalize {
     font-family: "Open Sans", "Lucida Grande", "DejaVu Sans", "Bitstream Vera Sans", "Segoe UI", "Tahoma", sans-serif;
     font-size: $base-font-size;

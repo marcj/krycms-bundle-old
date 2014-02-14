@@ -55,6 +55,16 @@ class PageResponse extends Response
     protected $assets = [];
 
     /**
+     * @var AssetInfo[]
+     */
+    protected $assetsInfo = [];
+
+    /**
+     * @var AssetInfo[]
+     */
+    protected $assetsInfoBottom = [];
+
+    /**
      * @var string
      */
     protected $title;
@@ -241,9 +251,59 @@ class PageResponse extends Response
      */
     public function loadAssetFile($path, $contentType = null)
     {
-        $insert = array('path' => $path, 'contentType' => $contentType);
-        if (array_search($insert, $this->assets) === false) {
-            $this->assets[] = $insert;
+        $this->injectAsset(array('path' => $path, 'contentType' => $contentType));
+    }
+
+    protected function injectAsset($definition)
+    {
+        $assetInfo = new AssetInfo();
+        $assetInfo->setFile(@$definition['path']);
+        $assetInfo->setContent(@$definition['content']);
+        $assetInfo->setContentType(@$definition['contentType']);
+
+        $this->handleAsset($assetInfo);
+
+        if ('bottom' === strtolower(@$definition['position'])) {
+            $this->assetsInfoBottom[] = $assetInfo;
+        } else {
+            $this->assetsInfo[] = $assetInfo;
+        }
+    }
+
+    /**
+     * If needed the given asset gets compiled and $assetInfo will be modified.
+     *
+     * @param AssetInfo $assetInfo
+     */
+    public function handleAsset(&$assetInfo)
+    {
+        $assetHandlerContainer = $this->getKrynCore()->getAssetCompilerContainer();
+        if ($assetInfo->getFile() && $compiler = $assetHandlerContainer->getCompileHandlerByFileExtension($assetInfo->getFile())) {
+            if ($compiledAssetInfo = $compiler->compileFile($assetInfo->getFile())) {
+                $assetInfo = $compiledAssetInfo;
+            }
+        }
+    }
+
+    /**
+     * Adds a css file to the page.
+     *
+     * @param string $path
+     * @param string $contentType
+     */
+    public function loadAssetFileAtBottom($path, $contentType = null)
+    {
+        $this->injectAsset(array('path' => $path, 'contentType' => $contentType, 'position' => 'bottom'));
+    }
+
+    /**
+     * @param AssetInfo $assetInfo
+     */
+    public function addAsset(AssetInfo $assetInfo)
+    {
+        if (array_search($assetInfo, $this->assetsInfo) === false) {
+            $this->handleAsset($assetInfo);
+            $this->assetsInfo[] = $assetInfo;
         }
     }
 
@@ -256,14 +316,19 @@ class PageResponse extends Response
     }
 
     /**
-     * @param string $script the acutal javascript
+     * @param string $script the actual javascript
      */
     public function addJs($script)
     {
-        $insert = array('content' => $script, 'contentType' => 'text/javascript');
-        if (array_search($insert, $this->assets) === false) {
-            $this->assets[] = $insert;
-        }
+        $this->injectAsset(array('content' => $script, 'contentType' => 'text/javascript'));
+    }
+
+    /**
+     * @param string $script the actual javascript
+     */
+    public function addJsAtBottom($script)
+    {
+        $this->injectAsset(array('content' => $script, 'contentType' => 'text/javascript', 'position' => 'bottom'));
     }
 
     /**
@@ -272,21 +337,6 @@ class PageResponse extends Response
     public function addCssFile($file)
     {
         $this->loadAssetFile($file, 'text/css');
-    }
-
-
-    /**
-     * Adds a css file to the page.
-     *
-     * @param string $path
-     * @param string $contentType
-     */
-    public function loadAssetFileAtBottom($path, $contentType = null)
-    {
-        $insert = array('path' => $path, 'contentType' => $contentType, 'position' => 'bottom');
-        if (array_search($insert, $this->assets) === false) {
-            $this->assets[] = $insert;
-        }
     }
 
     /**
@@ -741,29 +791,8 @@ class PageResponse extends Response
         $assetHandlerContainer = $this->getKrynCore()->getAssetCompilerContainer();
 
         /** @var $assets \Kryn\CmsBundle\AssetHandler\AssetInfo[] */
-        $assetsTop = [];
-        $assetsBottom = [];
-
-        // collect assets and compile
-        foreach ($this->assets as $asset) {
-            $assetInfo = null;
-
-            if (isset($asset['path']) && $compiler = $assetHandlerContainer->getCompileHandlerByFileExtension($asset['path'])) {
-                $assetInfo = $compiler->compileFile($asset['path']);
-            } else {
-                $assetInfo = new AssetInfo();
-                $assetInfo->setFile(@$asset['path'] ?: null);
-                $assetInfo->setContent(@$asset['content'] ?: null);
-                $assetInfo->setContentType(@$asset['contentType'] ?: null);
-            }
-            if ($assetInfo) {
-                if (!isset($asset['position']) || $asset['position'] !== 'bottom') {
-                    $assetsTop[] = $assetInfo;
-                } else {
-                    $assetsBottom[] = $assetInfo;
-                }
-            }
-        }
+        $assetsTop = $this->assetsInfo;
+        $assetsBottom = $this->assetsInfoBottom;
 
         $tagsJsTop = '';
         $tagsCssTop = '';

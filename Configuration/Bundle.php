@@ -2,6 +2,7 @@
 
 namespace Kryn\CmsBundle\Configuration;
 
+use Kryn\CmsBundle\AssetHandler\AssetInfo;
 use Kryn\CmsBundle\Exceptions\BundleNotFoundException;
 use Kryn\CmsBundle\Exceptions\FileNotWritableException;
 use Kryn\CmsBundle\Exceptions\ObjectNotFoundException;
@@ -514,7 +515,7 @@ class Bundle extends Model
     public function getAdminAssets($filter = '', $regex = false)
     {
         if (!$filter) {
-            return $this->adminAssets ?: [];
+            return $this->adminAssets;
         } else {
             $result = array();
             if ($regex) {
@@ -544,37 +545,51 @@ class Bundle extends Model
     }
 
     /**
-     *
-     * @param bool $localPath Return the real local accessible path or the defined.
-     * @param string $filter a filter value
-     * @param bool $regex if you pass a own regex as $filter set this to true
-     * @param bool $compression if true or false it returns only assets with this compression value. null returns all
-     *
-     * @return string[]
+     * @return AssetInfo[]
      */
-    public function getAdminAssetsPaths($localPath = false, $filter = '', $regex = false, $compression = null)
+    public function collectAdminAssetsInfo()
     {
-        $files = array();
-        $method = $localPath ? 'getLocalPath' : 'getPath';
-        foreach ($this->getAdminAssets($filter, $regex) as $asset) {
-            if ($asset instanceof Asset) {
-                if (null !== $compression && $compression !== $asset->getCompression()) {
-                    continue;
-                }
-                $files[] = $asset->$method();
-            } else {
-                if ($asset instanceof Assets) {
-                    foreach ($asset as $subAsset) {
-                        if (null !== $compression && $compression !== $subAsset->getCompression()) {
-                            continue;
+        $assetsInfo = array();
+
+        if ($this->getAdminAssets()) {
+            foreach ($this->getAdminAssets() as $asset) {
+                if ($asset instanceof Asset) {
+                    $assetsInfo[] = $asset->getAssetInfo();
+                } else {
+                    if ($asset instanceof Assets) {
+                        foreach ($asset as $subAsset) {
+                            $assetsInfo[] = $subAsset->getAssetInfo();
                         }
-                        $files[] = $subAsset->$method();
                     }
                 }
             }
         }
 
-        return array_unique($files);
+        return $assetsInfo;
+    }
+
+    /**
+     * @return AssetInfo[]
+     */
+    public function getAdminAssetsInfo()
+    {
+        $assets = $this->collectAdminAssetsInfo();
+        $assetHandlerContainer = $this->getKrynCore()->getAssetCompilerContainer();
+        $result = [];
+
+        // collect assets and compile
+        foreach ($assets as $asset) {
+            if ($asset->getFile() && $compiler = $assetHandlerContainer->getCompileHandlerByFileExtension($asset->getFile())) {
+                if ($assetInfo = $compiler->compileFile($asset->getFile())) {
+                    $assetInfo->setAllowCompression($asset->getAllowCompression());
+                    $result[] = $assetInfo;
+                }
+            } else {
+                $result[] = $asset;
+            }
+        }
+
+        return $result;
     }
 
     /**
