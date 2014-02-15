@@ -788,16 +788,18 @@ class Core extends Controller
 
     public function resolvePublicWebPath($path)
     {
+        $webDir = realpath($this->getKernel()->getRootDir().'/../web') . '/';
+
         if ($path && '@' === $path[0]) {
-            $webDir = realpath($this->getKernel()->getRootDir().'/../web') . '/';
             try {
                 $path = $this->resolveWebPath($path);
                 $path = substr($path, strpos($path, '/') + 1);
-                if (file_exists($webDir . $path)) {
-                    return $path;
-                }
             } catch (BundleNotFoundException $e) {
             }
+        }
+
+        if (file_exists($webDir . $path)) {
+            return $path;
         }
 
         if ($this->getRequest()) {
