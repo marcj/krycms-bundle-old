@@ -83,6 +83,14 @@ trait ContainerHelperTrait
     }
 
     /**
+     * @return \Symfony\Component\HttpFoundation\RequestStack
+     */
+    public function getRequestStack()
+    {
+        return $this->container->get('request_stack');
+    }
+
+    /**
      * @return PageResponse
      */
     public function getPageResponse()

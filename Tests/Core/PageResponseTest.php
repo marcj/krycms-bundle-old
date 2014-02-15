@@ -3,6 +3,7 @@
 namespace Kryn\CmsBundle\Tests\Core;
 
 use Kryn\CmsBundle\Tests\KernelAwareTestCase;
+use Symfony\Component\HttpFoundation\Request;
 
 class PageResponseTest extends KernelAwareTestCase
 {
@@ -97,6 +98,44 @@ body {font-size: 12px;}
 EOF;
 
         $this->assertRegExp("#$expected#", $assetsTags['cssTags']);
+    }
+
+    public function testPrefixingDifferentEntryPointDev()
+    {
+        $request = new Request();
+        $request->server->set('BASE', '/symfony-24/web');
+        $request->server->set('REQUEST_URI', '/symfony-24/web/app_dev.php/kryn');
+        $request->server->set('SCRIPT_FILENAME', '/Users/marc/bude/symfony-24/web/app_dev.php');
+        $request->server->set('SCRIPT_NAME', '/symfony-24/web/app_dev.php');
+        $request->getBasePath();
+        $this->getKrynCore()->getRequestStack()->push($request);
+        $response = $this->getKrynCore()->getPageResponse();
+        $prefix = substr($this->getKrynCore()->getAdminPrefix(), 1);
+
+        $response->addJsFile($prefix . '/admin/ui/languages');
+        $assetsTags = $response->getAssetTags();
+
+        $expected = '<script type="text/javascript" src="app_dev.php/kryn/admin/ui/languages"></script>';
+        $this->assertEquals($expected, $assetsTags['jsTags']);
+    }
+
+    public function testPrefixingDifferentEntryPointProd()
+    {
+        $request = new Request();
+        $request->server->set('BASE', '/symfony-24/web');
+        $request->server->set('REQUEST_URI', '/symfony-24/web/kryn');
+        $request->server->set('SCRIPT_FILENAME', '/Users/marc/bude/symfony-24/web/app.php');
+        $request->server->set('SCRIPT_NAME', '/symfony-24/web/app.php');
+        $request->getBasePath();
+        $this->getKrynCore()->getRequestStack()->push($request);
+        $response = $this->getKrynCore()->getPageResponse();
+        $prefix = substr($this->getKrynCore()->getAdminPrefix(), 1);
+
+        $response->addJsFile($prefix . '/admin/ui/languages');
+        $assetsTags = $response->getAssetTags();
+
+        $expected = '<script type="text/javascript" src="kryn/admin/ui/languages"></script>';
+        $this->assertEquals($expected, $assetsTags['jsTags']);
     }
 
 }
