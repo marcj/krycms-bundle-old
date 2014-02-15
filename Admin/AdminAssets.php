@@ -107,8 +107,8 @@ class AdminAssets
                     }
 
                     if ($assetInfo->getFile()) {
-                        // load javascript files, that are not accessible (means those are points to a controller)
-                        // because those can't not be compressed
+                        // load javascript files, that are not accessible (means those point to a controller)
+                        // because those can't be compressed
                         $path = $this->getKrynCore()->resolveWebPath($assetInfo->getFile());
                         if (!file_exists($path)) {
                             $response->addAsset($assetInfo);

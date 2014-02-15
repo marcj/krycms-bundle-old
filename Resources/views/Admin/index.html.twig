@@ -7,10 +7,11 @@
     <meta http-equiv="content-type" content="text/html; charset=utf-8" >
     <link rel="shortcut icon" href="{{ pageResponse.getFaviconPath() }}" type="image/x-icon" >
     <meta content='width=device-width' name='viewport'>
+    {{ additionalHeaderTags|raw }}
 
-    {{ headerTags|raw }}
     {{ cssTags|raw }}
     {{ jsTags|raw }}
+    {{ assetTags|raw }}
 </head>
 <body>
 {{ body|raw }}

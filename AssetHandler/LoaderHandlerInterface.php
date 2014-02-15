@@ -4,10 +4,11 @@ namespace Kryn\CmsBundle\AssetHandler;
 
 interface LoaderHandlerInterface
 {
+
     /**
-     * @param AssetInfo[] $assetInfo
-     * @param bool        $concatenation
+     * @param AssetInfo[] $assetsInfo
+     * @param bool $concatenation
      * @return string
      */
-    public function getTags(array $assetInfo = array(), $concatenation = false);
+    public function getTags(array $assetsInfo = array(), $concatenation = false);
 }

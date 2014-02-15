@@ -390,6 +390,7 @@ class FrontendRouter
         $title = sprintf('Searching Domain [%s]', $hostname);
         $stopwatch->start($title);
 
+        /** @var \Kryn\CmsBundle\Model\Domain $domain */
         $domain = null;
         $possibleLanguage = $this->getPossibleLanguage();
         $hostnameWithLanguage = $hostname . '/' . $possibleLanguage;
@@ -465,6 +466,7 @@ class FrontendRouter
         }
 
         $this->getKrynCore()->setCurrentDomain($domain);
+        $this->getKrynCore()->getPageResponse()->setResourceCompression($domain->getResourceCompression());
         $domain->setRealDomain($hostname);
 
         $stopwatch->stop($title);

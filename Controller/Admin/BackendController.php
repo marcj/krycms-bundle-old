@@ -299,7 +299,7 @@ class BackendController extends Controller
             }
         }
 
-        if (true || !$fileUpToDate) {
+        if (!$fileUpToDate) {
             $content = $this->getKrynCore()->getUtils()->compressCss($files, $this->getKrynCore()->getAdminPrefix() . 'admin/backend/');
             $content = $md5Line . $content;
             file_put_contents($oFile, $content);
@@ -340,9 +340,7 @@ class BackendController extends Controller
         $md5String = '';
         $newestMTime = 0;
 
-
         foreach ($this->getKrynCore()->getConfigs() as $bundleConfig) {
-
             foreach ($bundleConfig->getAdminAssetsInfo() as $assetInfo) {
                 if (!$assetInfo->isJavaScript()) continue;
 
@@ -366,7 +364,6 @@ class BackendController extends Controller
             $response->headers->set('Last-Modified', gmdate('D, d M Y H:i:s', $newestMTime).' GMT');
             return $response;
         }
-
 
         $expires = 60 * 60 * 24 * 14; //2 weeks
         $response = new Response();
@@ -421,7 +418,7 @@ class BackendController extends Controller
                 $output = shell_exec($cmd);
                 if (0 !== strpos($output, 'Unable to access jarfile')) {
                     if (false !== strpos($output, 'ERROR - Parse error')) {
-                        $content = 'alert(\'Parse Error\;);';
+                        $content = 'alert(\'Parse Error\');';
                         $content .= $output;
                         $response->setContent($content);
                         return $response;
@@ -448,7 +445,6 @@ class BackendController extends Controller
             $response->setContent($content);
             return $response;
         }
-
     }
 
     /**

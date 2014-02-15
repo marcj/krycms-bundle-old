@@ -324,6 +324,14 @@ class PageResponse extends Response
     }
 
     /**
+     * @param string $style the actual css
+     */
+    public function addCss($style)
+    {
+        $this->injectAsset(array('content' => $style, 'contentType' => 'text/css'));
+    }
+
+    /**
      * @param string $script the actual javascript
      */
     public function addJsAtBottom($script)
@@ -337,6 +345,38 @@ class PageResponse extends Response
     public function addCssFile($file)
     {
         $this->loadAssetFile($file, 'text/css');
+    }
+
+    /**
+     * @param \Kryn\CmsBundle\AssetHandler\AssetInfo[] $assetsInfo
+     */
+    public function setAssetsInfo($assetsInfo)
+    {
+        $this->assetsInfo = $assetsInfo;
+    }
+
+    /**
+     * @return \Kryn\CmsBundle\AssetHandler\AssetInfo[]
+     */
+    public function getAssetsInfo()
+    {
+        return $this->assetsInfo;
+    }
+
+    /**
+     * @param \Kryn\CmsBundle\AssetHandler\AssetInfo[] $assetsInfoBottom
+     */
+    public function setAssetsInfoBottom($assetsInfoBottom)
+    {
+        $this->assetsInfoBottom = $assetsInfoBottom;
+    }
+
+    /**
+     * @return \Kryn\CmsBundle\AssetHandler\AssetInfo[]
+     */
+    public function getAssetsInfoBottom()
+    {
+        return $this->assetsInfoBottom;
     }
 
     /**
@@ -802,6 +842,7 @@ class PageResponse extends Response
         $assetsTopGrouped =[];
         $assetsBottomGrouped = [];
 
+        /** @var \Kryn\CmsBundle\AssetHandler\LoaderHandlerInterface[] $loaderMap */
         $loaderMap = [];
 
         // group all asset per loader

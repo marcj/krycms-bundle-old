@@ -255,7 +255,6 @@ class Utils
      */
     public function compressCss(array $files, $includePath = '')
     {
-
         $webDir = realpath($this->getKrynCore()->getKernel()->getRootDir().'/../web') .'/';
         $content = '';
         foreach ($files as $assetPath) {
@@ -275,7 +274,7 @@ class Utils
                         $buffer = preg_replace('/@import "([^\/].*)"/', '@import "' . $cssDir . '$1"', $buffer);
                         $buffer = preg_replace('/url\(\'([^\/][^\)]*)\'\)/', 'url(\'' . $cssDir . '$1\')', $buffer);
                         $buffer = preg_replace('/url\("([^\/][^\)]*)"\)/', 'url("' . $cssDir . '$1")', $buffer);
-                        $buffer = preg_replace('/url\((?!data:image)([^\/\'].*)\)/', 'url(' . $cssDir . '$1)', $buffer);
+                        $buffer = preg_replace('/url\((?!data:image)([^\/][^\)]*)\)/', 'url(' . $cssDir . '$1)', $buffer);
                         $buffer = str_replace(array('  ', '    ', "\t", "\n", "\r"), '', $buffer);
                         $buffer = str_replace(': ', ':', $buffer);
 
@@ -292,6 +291,86 @@ class Utils
         }
 
         return $content;
+    }
+
+    public function compressJs(array $assets, $targetPath)
+    {
+        $oFile = $targetPath;
+
+        $files = [];
+        $md5String = '';
+        $newestMTime = 0;
+
+        foreach ($assets as $assetPath) {
+
+            $path = $this->getKrynCore()->resolveWebPath($assetPath);
+            $files[] = '--js ' . escapeshellarg($path);
+            $mtime = filemtime($path);
+            $newestMTime = max($newestMTime, $mtime);
+            $md5String .= ">$path.$mtime<";
+        }
+
+        $sourceMap = $oFile . '.map';
+        $cmdTest = 'java -version 2>&1';
+        $closure = 'vendor/google/closure-compiler/compiler.jar';
+        $compiler = escapeshellarg(realpath('../' . $closure));
+        $cmd = 'java -jar ' . $compiler . ' --js_output_file ' . escapeshellarg('web/' . $oFile);
+        $returnVal = 0;
+        $debugMode = false;
+
+        $handle = @fopen($oFile, 'r');
+        $fileUpToDate = false;
+        $md5Line = '//' . md5($md5String) . "\n";
+
+        if ($handle) {
+            $line = fgets($handle);
+            fclose($handle);
+            if ($line === $md5Line) {
+                $fileUpToDate = true;
+            }
+        }
+
+        if (false && $fileUpToDate) {
+            return true;
+        } else {
+            if (!$debugMode) {
+                exec($cmdTest, $outputTest, $returnVal);
+            }
+
+            if (0 === $returnVal) {
+                $cmd .= ' --create_source_map ' . escapeshellarg('web/' . $sourceMap);
+                $cmd .= ' --source_map_format=V3';
+
+                $cmd .= ' ' . implode(' ', $files);
+                $cmd .= ' 2>&1';
+                $output = [];
+                exec($cmd, $output, $returnVal);
+                if (0 === $returnVal) {
+//                    if (false === strpos($output, 'ERROR - Parse error')) {
+                    $content = file_get_contents('web/' . $oFile);
+                    $sourceMapUrl = '//@ sourceMappingURL=' . basename($sourceMap);
+                    $content = $md5Line . $content . $sourceMapUrl;
+                    file_put_contents('web/' . $oFile, $content);
+                    return true;
+//                    }
+                }
+
+            }
+
+            $content = '';
+            foreach ($assets as $assetPath) {
+                $content .= "\n/* $assetPath */\n\n";
+                $path = $this->getKrynCore()->resolveWebPath($assetPath);
+                $content .= file_get_contents($path);
+            }
+
+            if ($content) {
+                $this->getKrynCore()->getWebFileSystem()->write($oFile, $content);
+                return true;
+            }
+
+            return false;
+        }
     }
 
     /**
