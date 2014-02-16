@@ -93,6 +93,7 @@ class PackageManager extends ContainerAware {
         $domain->setMaster(1);
         $domain->setLang('en');
         $domain->setResourcecompression(1);
+        $domain->setTheme('krynDemoTheme');
         $domain->setSearchIndexKey(md5(time() . '-' . rand()));
         $domain->save();
 
@@ -116,7 +117,7 @@ class PackageManager extends ContainerAware {
                 ->update(array('Id' => 1));
         }
 
-        $defaultLayout = 'KrynDemoThemeBundle.krynDemoTheme:Layout:default.html.twig';
+        $defaultLayout = 'default';
         $defaultContentTemplate = 'KrynCmsBundle:Default:content.html.twig';
         $Nodes = array(
 

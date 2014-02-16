@@ -42,7 +42,6 @@ class ContentSlotExtension extends \Twig_Extension
 
     public function contentSlot($id, $name = 'Content')
     {
-        $params['id'] = $id;
         $params['name'] = $name;
 
         $render = $this->getKrynCore()->getContentRender();

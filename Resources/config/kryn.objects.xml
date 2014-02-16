@@ -96,8 +96,10 @@
           <field id="pid" type="number">
             <label>Parent ID</label>
           </field>
-          <field id="domainId" type="number">
+          <field id="domain" type="object">
             <label>Domain ID</label>
+            <object>KrynCmsBundle/Domain</object>
+            <objectRelation>nTo1</objectRelation>
           </field>
           <field id="type" type="number">
             <label>Type</label>
@@ -141,6 +143,7 @@
           <field id="searchWords" type="text"/>
           <field id="unsearchable" type="checkbox"/>
           <field id="layout" type="layout"/>
+          <field id="theme" type="text"/>
         </fields>
         <publicUrlGenerator>Core\PageController::getPublicUrl</publicUrlGenerator>
       </object>

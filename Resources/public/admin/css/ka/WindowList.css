@@ -29,42 +29,8 @@
     margin-left: 0px;
 }
 
-/*
-.ka-WindowList-head > table th {
-    line-height: 19px;
-}
-
-.ka-WindowList-head table th:hover {
-    background-color: #c7c7c7;
-}
-
-
-.ka-WindowList-head > table th,
-.ka-WindowList-main > table td {
-    cursor: default;
-    border-left: 1px solid #ddd;
-    padding-left: 3px;
-    font-weight: normal;
-}
-
-.ka-WindowList-main > table tr td {
-    color: #555;
-}
-
-
-.ka-WindowList-main > table tr td.edit img {
-    cursor: pointer;
-}
-
-.ka-WindowList-main > table tr.active td {
-    background-color: #112a6a;
-    color: white;
-}
-*/
-
 .ka-windowCombine-treeContainer {
-    top: 35px;
-    border: 1px solid #ddd;
+    top: 15px;
     position: absolute;
     left: 0;
     right: 0;
@@ -72,6 +38,7 @@
     overflow: auto;
     -webkit-overflow-scrolling: touch;
     background-color: #FBFBFB;
+    padding-top: 15px;
 }
 
 .ka-windowCombine-treeContainer + .ka-Splitter-main {
@@ -84,8 +51,6 @@
     right: 0;
     top: 0;
     bottom: 0;
-    background-color: white;
-    border: 1px solid #dcdcdc;
 }
 
 .ka-Table-windowList th:before {
@@ -193,7 +158,7 @@
     left: 0;
     top: 0;
     bottom: 0;
-    border: 1px solid #DDD;
+    border-left: 1px solid #DDD;
     background-color: #fbfbfb;
 }
 
@@ -290,7 +255,7 @@
 }
 
 .ka-WindowList-combine-left + .ka-Splitter-main {
-    right: -16px;
+    right: -15px;
     width: 15px;
     border: 0;
 }

@@ -4,6 +4,7 @@ namespace Kryn\CmsBundle\Admin;
 
 
 use Kryn\CmsBundle\Core;
+use Kryn\CmsBundle\Model\DomainQuery;
 
 class AdminAssets
 {
@@ -158,10 +159,20 @@ class AdminAssets
         $nodeArray['id'] = $page->getId();
         $nodeArray['title'] = $page->getTitle();
         $nodeArray['domainId'] = $page->getDomainId();
+        $nodeArray['theme'] = $page->getTheme();
+        $nodeArray['layout'] = $request->query->get('_kryn_editor_layout') ?: $page->getLayout();
+
+        $domain = DomainQuery::create()->findPk($page->getDomainId());
+        $domainArray['id'] = $domain->getId();
+        $domainArray['domain'] = $domain->getDomain();
+        $domainArray['path'] = $domain->getPath();
+        $domainArray['theme'] = $domain->getTheme();
+        $domainArray['themeProperties'] = $domain->getThemeProperties();
 
         $options = [
             'id' => $request->query->get('_kryn_editor_id'),
-            'node' => $nodeArray
+            'node' => $nodeArray,
+            'domain' => $domainArray
         ];
 
         if (is_array($extraOptions = $request->query->get('_kryn_editor_options'))) {

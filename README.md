@@ -71,7 +71,6 @@ PHPUnit
 ```bash
   Tests/Integration/skeletion/app/console kryncms:configuration:database --help
   Tests/Integration/skeletion/app/console kryncms:models:build
-  Tests/Integration/skeletion/app/console kryncms:schema:update
   Tests/Integration/skeletion/app/console kryncms:install:demo localhost /
 ```
 

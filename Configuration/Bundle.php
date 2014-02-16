@@ -601,7 +601,7 @@ class Bundle extends Model
     {
         if (null !== $this->themes) {
             foreach ($this->themes as $theme) {
-                if ($theme->getId() == $id) {
+                if (strtolower($theme->getId()) == strtolower($id)) {
                     return $theme;
                 }
             }

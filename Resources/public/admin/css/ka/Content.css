@@ -180,3 +180,10 @@
     width: auto;
     margin-right: 15px;
 }
+
+.ka-Content-inspector-window {
+    position: absolute;
+    width: 250px;
+    min-height: 50px;
+    border: 5px solid #222;
+}

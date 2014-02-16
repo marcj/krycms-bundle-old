@@ -43,14 +43,6 @@ ka.Editor = new Class({
         document.body.dispatchEvent(evObj);
     },
 
-//    getScroll: function() {
-//        return this.container.getScroll();
-//    },
-//
-//    setScroll: function(positions) {
-//        return this.container.scrollTo(positions.x, positions.y);
-//    },
-
     /**
      * @return {ka.Window}
      */
@@ -76,6 +68,14 @@ ka.Editor = new Class({
 
     getNodeId: function() {
         return this.options.node.id;
+    },
+
+    getTheme: function() {
+        return this.options.node.theme || this.options.domain.theme;
+    },
+
+    getLayout: function() {
+        return this.options.node.layout;
     },
 
     getDomainId: function() {
@@ -105,15 +105,15 @@ ka.Editor = new Class({
     },
 
     adjustAnchors: function() {
-        var params = {};
-        params._kryn_editor = 1;
-        params._kryn_editor_id = this.options.id;
 
-        var options = Object.clone(this.options);
-        delete options.id;
-        delete options.node;
-        params._kryn_editor_options = options;
-
+        var params = {
+            '_kryn_editor': 1,
+            '_kryn_editor_id': this.options.id,
+            '_kryn_editor_domain': this.options.domain.id,
+            '_kryn_editor_options': {
+                standalone: this.options.standalone
+            }
+        };
         params = Object.toQueryString(params);
 
         this.container.getElements('a').each(function(a) {

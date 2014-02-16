@@ -98,7 +98,6 @@ ka.Button = new Class({
 
             this.main.addClass('ka-Button-deactivate');
         }
-
     },
 
     toElement: function() {
@@ -261,5 +260,9 @@ ka.Button = new Class({
         } else {
             this.main.removeClass('ka-Button-pressed');
         }
+    },
+
+    isPressed: function() {
+        return this.main.hasClass('ka-Button-pressed');
     }
 });

@@ -50,7 +50,7 @@ ka.FieldTypes.Select = new Class({
                 combobox: true,
                 type: 'objectKey',
                 desc: t('The key of the object')
-            },
+            }
         }
     },
 
@@ -94,5 +94,13 @@ ka.FieldTypes.Select = new Class({
 
     getValue: function () {
         return this.select.getValue();
+    },
+
+    setDisabled: function(disabled) {
+        this.select.setEnabled(!disabled);
+    },
+
+    isDisabled: function() {
+        return !this.select.isEnabled();
     }
 });

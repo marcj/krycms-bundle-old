@@ -689,19 +689,23 @@ ka.Select = new Class({
 
     },
 
-    addItemToChooser: function(pItem) {
+    /**
+     * @param {Object} item
+     * @returns {boolean}
+     */
+    addItemToChooser: function(item) {
         var a;
 
-        if (pItem.isSplit) {
+        if (item.isSplit) {
             a = new Element('div', {
-                html: pItem.label,
+                html: item.label,
                 'class': 'group'
             }).inject(this.chooser);
 
         } else {
             a = new Element('a', {
                 'class': 'ka-select-chooser-item',
-                html: this.renderLabel(pItem.label)
+                html: this.renderLabel(item.label)
             });
 
             if (this.searchValue.trim()) {
@@ -718,39 +722,43 @@ ka.Select = new Class({
 
             a.inject(this.chooser);
 
-            this.checkIfCurrentValue(pItem, a);
+            this.checkIfCurrentValue(item, a);
 
-            a.kaSelectId = pItem.id;
-            a.kaSelectItem = pItem;
-            this.currentItems[pItem.id] = a;
+            a.kaSelectId = item.id;
+            a.kaSelectItem = item;
+            this.currentItems[item.id] = a;
         }
 
     },
 
-    checkIfCurrentValue: function(pItem, pA) {
-        if (pItem.id == this.value) {
-            pA.addClass('icon-checkmark-6');
-            pA.addClass('ka-select-chooser-item-selected');
+    /**
+     * @param {Object} item
+     * @param {Element} a
+     */
+    checkIfCurrentValue: function(item, a) {
+        if (item.id == this.value) {
+            a.addClass('icon-checkmark-6');
+            a.addClass('ka-select-chooser-item-selected');
         }
     },
 
-    renderLabel: function(pData) {
-        if (typeOf(pData) == 'null') {
+    renderLabel: function(data) {
+        if (typeOf(data) == 'null') {
             return '';
         }
 
-        var data = pData;
+        var oriData = data;
 
         if (this.options.object && !this.options.labelTemplate) {
             //just return ka.getObjectLabel
-            return ka.getObjectLabelByItem(this.options.object, data);
+            return ka.getObjectLabelByItem(this.options.object, oriData);
         }
 
-        if (typeOf(data) == 'string') {
-            data = {label: data};
-        } else if (typeOf(data) == 'array') {
+        if (typeOf(oriData) == 'string') {
+            oriData = {label: oriData};
+        } else if (typeOf(oriData) == 'array') {
             //image
-            data = {label: data[0], kaSelectImage: data[1]};
+            oriData = {label: oriData[0], kaSelectImage: oriData[1]};
         }
 
         var template = this.labelTemplate;
@@ -767,30 +775,30 @@ ka.Select = new Class({
             //we have no custom layout, but objectFields
             var label = [];
             Array.each(this.objectFields, function(field) {
-                label.push(pData[field]);
+                label.push(data[field]);
             });
-            data.label = label.join(', ');
+            oriData.label = label.join(', ');
         }
 
-        if (!data.kaSelectImage) {
-            data.kaSelectImage = '';
+        if (!oriData.kaSelectImage) {
+            oriData.kaSelectImage = '';
         }
 
-        if (typeOf(data.label) == 'null') {
-            data.label = '';
+        if (typeOf(oriData.label) == 'null') {
+            oriData.label = '';
         }
 
-        return mowla.fetch(template, data);
+        return mowla.fetch(template, oriData);
     },
 
-    selectFirst: function(pOffset, pInternal) {
+    selectFirst: function(offset, internal) {
         this.duringFirstSelectLoading = true;
 
-        if (!pOffset) {
-            pOffset = 0;
+        if (!offset) {
+            offset = 0;
         }
 
-        this.dataProxy(pOffset, function(items) {
+        this.dataProxy(offset, function(items) {
             this.duringFirstSelectLoading = false;
 
             if (items && items.length > 0) {
@@ -799,7 +807,7 @@ ka.Select = new Class({
                     var item = items[i];
                     if (item && !item.isSplit) {
                         if (null === this.value) {
-                            this.chooseItem(item.id, pInternal);
+                            this.chooseItem(item.id, internal);
                         }
                         this.fireEvent('firstItemLoaded', item.id);
                         this.fireEvent('selectFirst', item.id);
@@ -807,32 +815,32 @@ ka.Select = new Class({
                     }
                 }
             }
-        }.bind(this), pOffset + 5);
+        }.bind(this), offset + 5);
     },
 
     /**
      * Returns always max this.options.maxItemsPerLoad (20 default) items.
      *
-     * @param {Integer}  pOffset
-     * @param {Function} pCallback
+     * @param {Integer}  offset
+     * @param {Function} callback
+     * @param {Number}   count
      */
-    dataProxy: function(pOffset, pCallback, pCount) {
-
-        if (!pCount) {
-            pCount = this.options.maxItemsPerLoad;
+    dataProxy: function(offset, callback, count) {
+        if (!count) {
+            count = this.options.maxItemsPerLoad;
         }
 
         if (this.items.length > 0) {
             //we have static items
             var items = [];
-            var i = pOffset - 1;
+            var i = offset - 1;
 
             while (++i >= 0) {
 
                 if (i >= this.items.length) {
                     break;
                 }
-                if (items.length == pCount) {
+                if (items.length == count) {
                     break;
                 }
                 if (this.options.objectLanguage && this.items[i].lang != this.options.objectLanguage) {
@@ -846,22 +854,22 @@ ka.Select = new Class({
                 items.push(this.items[i]);
             }
 
-            pCallback(items);
+            callback(items);
         } else if (this.options.object || this.options.store) {
             //we have object items
-            this.loadObjectItems(pOffset, pCallback, pCount);
+            this.loadObjectItems(offset, callback, count);
         } else {
-            pCallback(false);
+            callback(false);
         }
 
     },
 
-    setEnabled: function(pEnabled) {
-        if (this.enabled === pEnabled) {
+    setEnabled: function(enabled) {
+        if (this.enabled === enabled) {
             return;
         }
 
-        this.enabled = pEnabled;
+        this.enabled = enabled;
 
         if (this.enabled) {
             //add back all events
@@ -882,6 +890,13 @@ ka.Select = new Class({
         }
     },
 
+    /**
+     * @returns {boolean}
+     */
+    isEnabled: function() {
+        return  !!this.enabled;
+    },
+
     inject: function(p, p2) {
         this.box.inject(p, p2);
 
@@ -895,12 +910,12 @@ ka.Select = new Class({
         this.box = null;
     },
 
-    remove: function(pId) {
+    remove: function(id) {
         var removed = null;
         Array.each(this.items, function(item) {
             if (null !== removed) return;
 
-            if (item.id === pId) {
+            if (item.id === id) {
                 var pos = this.items.indexOf(item);
                 this.items.splice(pos, 1);
                 removed = item.id;
@@ -913,27 +928,27 @@ ka.Select = new Class({
         }
     },
 
-    addSplit: function(pLabel) {
+    addSplit: function(label) {
         this.items.push({
-            label: pLabel,
+            label: label,
             isSplit: true
         });
 
         this.loadItems();
     },
 
-    showOption: function(pId) {
+    showOption: function(id) {
         if (!this.hideOptions) {
             this.hideOptions = [];
         }
-        this.hideOptions.push(pId);
+        this.hideOptions.push(id);
     },
 
-    hideOption: function(pId) {
+    hideOption: function(id) {
         if (!this.hideOptions) {
             return;
         }
-        var idx = this.hideOptions.indexOf(pId);
+        var idx = this.hideOptions.indexOf(id);
         if (idx === -1) {
             return;
         }

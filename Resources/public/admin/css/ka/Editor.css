@@ -40,7 +40,8 @@
 .ka-editor-sidebar + .ka-Splitter-main {
     left: -15px;
     width: 15px;
-    border: 0;
+    border-left: 0;
+    border-right: 1px solid #eee;
 }
 
 .ka-editor-inspector-title,

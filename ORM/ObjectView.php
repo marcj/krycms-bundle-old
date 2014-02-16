@@ -198,6 +198,10 @@ class ObjectView extends Propel
         $path = str_replace('//', '/', $path);
         $path = preg_replace('/\/|:/', ':', $path, 2);
 
+        if (1 === substr_count($path, ':')) {
+            $path = str_replace(':', '::', $path);
+        }
+
         return $path;
     }
 

@@ -1089,6 +1089,13 @@ ka.Window = new Class({
         return this.title;
     },
 
+    /**
+     * @returns {ka.Layout}
+     */
+    getMainLayout: function() {
+        return this.mainLayout;
+    },
+
     extendHead: function () {
     },
 

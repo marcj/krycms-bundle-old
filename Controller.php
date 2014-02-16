@@ -20,8 +20,16 @@ class Controller extends sController implements ContainerAwareInterface {
         return (0 === strpos($this->getRequest()->getPathInfo(), $adminPrefix.'/'));
     }
 
-    public function isEditMode()
+    public function isEditMode($nodeId = null)
     {
+        if ($nodeId) {
+            return $this->getRequest() && 1 == $this->getRequest()->get('_kryn_editor')
+            && $this->getACL()->checkUpdate(
+                'KrynCmsBundle:Node',
+                $nodeId
+            );
+        }
+
         return $this->getRequest() && 1 == $this->getRequest()->get('_kryn_editor')
         && $this->getKrynCore()->getCurrentPage()
         && $this->getACL()->checkUpdate(

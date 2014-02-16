@@ -4,6 +4,7 @@ parameters:
      kryn_cms.content.types.image.class: Kryn\CmsBundle\ContentTypes\TypeImage
      kryn_cms.content.types.plugin.class: Kryn\CmsBundle\ContentTypes\TypePlugin
      kryn_cms.content.types.markdown.class: Kryn\CmsBundle\ContentTypes\TypeMarkdown
+     kryn_cms.content.types.tray.class: Kryn\CmsBundle\ContentTypes\TypeTray
 
 services:
      kryn_cms.content.types:
@@ -31,3 +32,9 @@ services:
          arguments: ["@kryn_cms"]
          tags:
              - { name: kryn_cms.content.type, alias: markdown }
+
+     kryn_cms.content.types.tray:
+         class: %kryn_cms.content.types.tray.class%
+         arguments: ["@kryn_cms.content.render"]
+         tags:
+             - { name: kryn_cms.content.type, alias: tray }

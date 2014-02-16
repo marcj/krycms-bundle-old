@@ -54,12 +54,11 @@
 .ka-Table > thead > tr > th,
 .ka-Table-head > tr > th {
     font-weight: normal;
-    font-size: 14px;
+    font-size: 13px;
     text-align: left;
     padding: 5px;
     color: #555;
     border-top: 1px solid #ececec;
-    border-bottom: 1px solid #d6d6d6;
     line-height: 20px;
     background: #f2f2f2;
 }

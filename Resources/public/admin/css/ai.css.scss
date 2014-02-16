@@ -23,6 +23,7 @@ $base-font-size: 13px;
 
 table {
     border-collapse: separate;
+    border-spacing: 0px;
 }
 
 .CodeMirror-gutter {
@@ -175,6 +176,10 @@ td {
     box-shadow: none;
 }
 
+.kryn_wysiwyg_toolbar .mce-btn {
+  background-color: #fafafa;
+}
+
 div,
 span {
     -webkit-user-select: none;
@@ -310,7 +315,7 @@ span.selectable span, div.selectable div {
     display: block;
     height: 12px;
     padding: 2px;
-    line-height: 12px;
+    line-height: 13px;
     text-decoration: none;
 }
 
@@ -338,7 +343,7 @@ a.ka-wm-tab:hover {
 
 .ka-wm-tab-active,
 .ka-wm-tab-active:hover {
-    background-color: #eee;
+    background-color: #fafafa;
     height: 31px;
     color: #333;
 }

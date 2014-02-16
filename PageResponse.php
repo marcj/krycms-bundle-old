@@ -491,66 +491,31 @@ class PageResponse extends Response
     public function buildBody()
     {
         $this->getKrynCore()->getStopwatch()->start('Build PageBody');
-        $page = $this->getKrynCore()->getCurrentPage();
-        if (!$page) {
+        if (!$page = $this->getKrynCore()->getCurrentPage()) {
             return '';
         }
 
-//        Kryn::$themeProperties = array();
-        $propertyPath = '';
+        $themeId = $page->getTheme() ?: $this->getKrynCore()->getCurrentDomain()->getTheme();
+        $theme = $this->getKrynCore()->getConfigs()->getTheme($themeId);
 
-        $layout = $layoutPath = $page->getLayout();
-        if (false !== ($pos = strpos($layoutPath, ':'))) {
-            $layout = substr($layoutPath, 0, $pos);
-            $layoutPath = substr($layoutPath, $pos + 1);
+        if (!$layout = $theme->getLayoutByKey($page->getLayout())) {
+            throw new \Exception(sprintf('Layout for `%s` in theme `%s` not found.', $page->getLayout(), $themeId));
         }
-        $layoutSplitted = explode('.', $layout);
-        $bundleName = $layoutSplitted[0];
-
-        try {
-            $layoutBundle = $this->getKrynCore()->getKernel()->getBundle($bundleName);
-        } catch (\Exception $e) {
-            throw new \LogicException(sprintf(
-                'Could not found bundle `%s` for layout `%s`.',
-                $bundleName,
-                $layoutPath
-            ), 0, $e);
-        }
-
-        $bundleConfig = $this->getKrynCore()->getConfig($layoutBundle->getName());
-
-        $theme = $bundleConfig->getTheme($layoutSplitted[1]);
-        if ($theme) {
-            $propertyPath = '@' . $bundleName . '/' . $theme->getId();
-        }
-
-        if ($propertyPath) {
-//            if ($themeProperties = kryn::$domain->getThemeProperties()) {
-//                Kryn::$themeProperties = $themeProperties->getByPath($propertyPath);
-//            }
-        }
-
-        $layoutPath = str_replace('/', ':', $layoutPath);
+        $layoutPath = $layout->getFile();
 
         $template = $this->getKrynCore()->getTemplating();
-
-        $oldPage = $this->getKrynCore()->getCurrentPage();
-        $this->getKrynCore()->getCurrentPage($page);
-
         try {
             $html = $template->render(
-                $bundleName . ':' . $layoutPath,
+                $layoutPath,
                 array(
                     'baseUrl' => $this->getBaseHref(),
                     'themeProperties' => [] //Kryn::$themeProperties
                 )
             );
         } catch(\Exception $e) {
-            $this->getKrynCore()->setCurrentPage($oldPage);
-            throw new \Exception(sprintf('Cant render view %s.', $bundleName . ':' . $layoutPath), 0, $e);
+            throw new \Exception(sprintf('Cant render view `%s` of theme `%s`.', $layoutPath, $themeId), 0, $e);
         }
 
-        $this->getKrynCore()->setCurrentPage($oldPage);
         $this->getKrynCore()->getStopwatch()->stop('Build PageBody');
 
         return $html;

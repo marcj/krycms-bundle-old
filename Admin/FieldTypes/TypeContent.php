@@ -15,6 +15,6 @@ class TypeContent extends AbstractSingleColumnType
      */
     public function getSelection()
     {
-        return [$this->getFieldDefinition()->getId().'.*', 'layout'];
+        return [$this->getFieldDefinition()->getId().'.*', 'layout', 'theme'];
     }
 }

@@ -10,6 +10,7 @@ ka.FieldTypes.Content = new Class({
 
     preview: 0,
     currentNode: null,
+    currentDomain: null,
 
     lastContents: null,
 
@@ -24,7 +25,7 @@ ka.FieldTypes.Content = new Class({
             ]
         });
 
-        this.mainLayout.getCell(1, 1).addClass('ka-ActionBar');
+        this.mainLayout.getCell(1, 1).addClass('ka-ActionBar ka-Field-Content-ActionBar');
         this.mainLayout.getTd(1, 1).set('colspan', 2);
 
         this.headerLayout = new ka.Layout(this.mainLayout.getCell(1, 1), {
@@ -35,26 +36,26 @@ ka.FieldTypes.Content = new Class({
         });
         this.headerLayout.getCell(1, 1).addClass('ka-ActionBar-left');
 
+        if (this.options.standalone) {
+            this.treeButtonGroup = new ka.ButtonGroup(this.headerLayout.getCell(1, 1));
+            this.treeBtn = this.treeButtonGroup.addButton(t('Tree'), '#icon-tree', this.toggleTree.bind(this));
+        }
+
         this.buttonGroup = new ka.ButtonGroup(this.headerLayout.getCell(1, 1));
-        this.layoutBtn = this.buttonGroup.addButton(t('Layout'), '#icon-layout');
-        this.listBtn = this.buttonGroup.addButton(t('List'), '#icon-list-4');
+        this.layoutBtn = this.buttonGroup.addButton(t(''), '#icon-layout');
+        this.listBtn = this.buttonGroup.addButton(t(''), '#icon-list-4');
 
         this.layoutBtn.setPressed(true);
 
         this.headerLayout.getCell(1, 2).setStyle('text-align', 'right');
         this.headerLayout.getCell(1, 2).setStyle('white-space', 'nowrap');
 
-        new Element('span', {
+        this.layoutSelectionLabel = new Element('span', {
             text: t('Layout:'),
             style: 'line-height: 30px; display: inline-block; padding-right: 5px;'
         }).inject(this.headerLayout.getCell(1, 2));
 
-        this.layoutSelection = new ka.Field({
-            noWrapper: true,
-            type: 'layout',
-            onChange: this.onLayoutChange.bind(this),
-            onSelectFirst: this.onLayoutSelectFirst.bind(this)
-        }, this.headerLayout.getCell(1, 2));
+        this.layoutSelectionContainer = new Element('span').inject(this.headerLayout.getCell(1, 2));
 
         if (this.options.standalone) {
             this.actionGroup = new ka.ButtonGroup(this.headerLayout.getCell(1, 2));
@@ -68,16 +69,6 @@ ka.FieldTypes.Content = new Class({
         }
 
         this.win.setTitle(t('Home'));
-
-        this.mainLayout.getCell(2, 1).setStyles({
-            'border': '1px solid silver'
-            //'background': 'url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAAIklEQVQIW2NkQAL37t37zwjjgzhKSkqMYAEYB8RmROaABAAGgA+evuWXiAAAAABJRU5ErkJggg==) repeat'
-        });
-
-        this.mainLayout.getCell(2, 2).setStyles({
-            'border': '1px solid silver',
-            'border-left': 0
-        });
 
         this.editableAreaContainer = new Element('div', {
             style: 'position: absolute; left: 0px; right: 15px; top: 0px; bottom: 0px;'
@@ -125,7 +116,7 @@ ka.FieldTypes.Content = new Class({
             style: 'display: block; border: 0; height: 100%; width: 100%;'
         }).inject(iframeContainer);
 
-        iframeContainer.setStyle('border', '1px solid #d5d5d5');
+        iframeContainer.setStyle('border-top', '1px solid #E9E9E9');
         iframeContainer.addClass('ka-scrolling');
 
         if (this.options.standalone) {
@@ -162,8 +153,32 @@ ka.FieldTypes.Content = new Class({
         }.bind(this));
 
         this.renderSidebar();
-
         this.setupEvents();
+    },
+
+    toggleTree: function() {
+        if (this.treeBtn.isPressed()) {
+            this.treeBtn.setPressed(false);
+            this.hideTree();
+        } else {
+            this.treeBtn.setPressed(true);
+            this.showTree();
+        }
+    },
+
+    hideTree: function() {
+        if (this.treeContainer) {
+            this.treeContainer.destroy();
+            delete this.treeContainer;
+        }
+    },
+
+    showTree: function() {
+        this.hideTree();
+
+        this.treeContainer = new Element('div', {
+
+        });
     },
 
     /**
@@ -177,22 +192,40 @@ ka.FieldTypes.Content = new Class({
     setupEvents: function() {
         var typeField;
         if (this.getField().getForm() && (typeField = this.getField().getForm().getField('type'))) {
-            typeField.addEvent('change', function() {
-                this.setValue();
-            }.bind(this));
+//            typeField.addEvent('change', function() {
+//                this.setValue();
+//            }.bind(this));
         }
     },
 
-    setValue: function(contents, internal) {
-        var originValue = this.getField().getForm().getOriginValue();
+    setValue: function(value, internal) {
+        if (this.getField().getForm()) {
+            this.setValueFromForm(value, internal);
+        } else {
+            this.setValueDefault(value, internal);
+        }
+    },
 
+    setValueDefault: function(contents, internal) {
         if (!contents) {
-            if (!this.currentNode || this.currentNode == originValue.id) {
-                contents = this.lastContents;
-            }
+            contents = this.lastContents;
         } else {
             this.lastContents = contents;
         }
+
+        this.loadEditor(this.domainSelection.getValue(), this.currentNode, contents);
+    },
+
+    setValueFromForm: function(value, internal) {
+        var originValue = this.getField().getForm().getOriginValue();
+
+//        if (!value) {
+//            if (!this.currentNode || this.currentNode == originValue.id) {
+//                value = this.lastContents;
+//            }
+//        } else {
+        this.lastContents = value.content;
+//        }
 
         var typeValue = this.getField().getForm().getValue('type');
 
@@ -200,10 +233,11 @@ ka.FieldTypes.Content = new Class({
             return;
         }
 
-        this.layoutSelection.setValue(originValue.layout || null, internal);
+        this.reloadLayoutSelection(value.theme || originValue.domain.theme, value.layout);
 
         this.currentNode = originValue.id;
-        this.loadEditor(originValue.domainId, originValue.id, contents);
+        this.currentDomain = originValue.domainId;
+        this.loadEditor(originValue.domainId, originValue.id, value.content);
     },
 
     onLayoutSelectFirst: function(layout) {
@@ -215,30 +249,58 @@ ka.FieldTypes.Content = new Class({
         this.setValue(contents);
     },
 
+    reloadLayoutSelection: function(themeId, layoutId) {
+        this.layoutSelectionContainer.empty();
+
+        this.layoutSelection = new ka.Field({
+            noWrapper: true,
+            type: 'layout',
+            value: layoutId,
+            options: {
+                onChange: this.onLayoutChange.bind(this),
+                onSelectFirst: this.onLayoutSelectFirst.bind(this),
+                theme: themeId
+            }
+        }, this.layoutSelectionContainer);
+    },
+
     loadEditor: function(domainId, nodeId, contents) {
         var options = {
             standalone: this.options.standalone
         };
 
-        var targetLayout = this.layoutSelection.getValue() || this.firstSelectedLayout;
+        var targetLayout = this.layoutSelection ? this.layoutSelection.getValue() : this.firstSelectedLayout;
 
         if (this.currentNode && this.currentNode == nodeId && this.currentLayout == targetLayout && this.getEditor()) {
             this.getEditor().setValue(contents);
             return;
         }
 
-        var id = (Math.random() * 10 * (Math.random() * 10)).toString(36).slice(2);
+//        console.log('loadEditor', this.currentLayout, targetLayout, '/', this.currentNode, nodeId);
 
-        window.addEvent('krynEditorLoaded', function(editor) {
+        var id = (Math.random() * 10 * (Math.random() * 10)).toString(36).slice(3);
+
+        if (this.lastKrynEditorLoader) {
+            window.removeEvent('krynEditorLoaded', this.lastKrynEditorLoader);
+        }
+        this.lastKrynEditorLoader = function(editor) {
             if (editor && editor.getId() == id) {
                 this.setEditor(editor);
                 editor.setContentField(this);
+
+                this.currentNode = editor.getNodeId();
+                this.currentLayout = editor.getLayout();
+//                console.log('krynEditorLoaded', this.currentLayout, this.currentNode);
+
                 if (!this.options.standalone) {
                     editor.deactivateLinks();
                     editor.setValue(contents);
+                } else {
+                    this.reloadLayoutSelection(editor.getTheme(), editor.getLayout());
                 }
             }
-        }.bind(this));
+        }.bind(this);
+        window.addEvent('krynEditorLoaded', this.lastKrynEditorLoader);
 
         if (!nodeId && this.currentNode) {
             nodeId = this.currentNode;
@@ -248,15 +310,12 @@ ka.FieldTypes.Content = new Class({
             domainId = this.currentDomain;
         }
 
-        this.currentLayout = targetLayout;
         var params = {
             '_kryn_editor': 1,
             '_kryn_editor_id': id,
             '_kryn_editor_node': nodeId,
             '_kryn_editor_domain': domainId,
-            '_kryn_editor_path': location.pathname,
-            '_kryn_editor_host': location.host,
-            '_kryn_editor_layout': targetLayout,
+            '_kryn_editor_layout': !this.layoutSelection || this.layoutSelection.isDisabled() ? null : targetLayout,
             '_kryn_editor_options': options
         };
 
@@ -288,7 +347,7 @@ ka.FieldTypes.Content = new Class({
                             this.saveBtn.doneLoading(t('Saved!'));
                             this.saveBtn.setProgress(false);
                         }.bind(this)
-                    }).post({_method: 'patch', content: value});
+                    }).post({_method: 'patch', content: value, layout: this.layoutSelection.getValue()});
                 }.bind(this),
 
                 onAllProgress: function(progress) {

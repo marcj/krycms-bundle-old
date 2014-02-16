@@ -87,6 +87,14 @@ ka.FieldAbstract = new Class({
         /* Override it to your needs */
     },
 
+    /**
+     *
+     * @return {Boolean}
+     */
+    isDisabled: function() {
+        /* Override it to your needs */
+    },
+
     getContainer: function() {
         return this.fieldInstance.fieldPanel;
     },

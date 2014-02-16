@@ -6,7 +6,7 @@
     bottom: 0;
     overflow: auto;
     min-height: 250px;
-    background-color: #eee;
+    background-color: #fafafa;
 }
 
 .kwindow-border > .ka-Layout-main-fixed {
@@ -452,7 +452,7 @@ h3.kryn-headline {
     position: absolute;
     right: 0;
     top: 25px;
-    bottom: 35px;
+    bottom: 0;
     width: 150px;
     background-color: #5c5c5c;
 }

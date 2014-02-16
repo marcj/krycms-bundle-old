@@ -12,6 +12,11 @@ class Node extends BaseNode
     protected $parents_cached;
 
     /**
+     * @var string
+     */
+    protected $path;
+
+    /**
      * Same as getChildren but returns only visible pages and non-folder nodes
      *
      * @param  boolean                 $pWithFolders
@@ -86,16 +91,27 @@ class Node extends BaseNode
      */
     public function getPath($pDelimiter = ' » ')
     {
-        $parents = $this->getParents();
+        if (null === $this->path) {
+            $parents = $this->getParents();
 
-        $path = $this->getDomain()->getDomain();
-        foreach ($parents as &$parent) {
-            $path .= $pDelimiter . $parent->getTitle();
+            $path = $this->getDomain()->getDomain();
+            foreach ($parents as &$parent) {
+                $path .= $pDelimiter . $parent->getTitle();
+            }
+
+            $path .= $pDelimiter . $this->getTitle();
+            $this->path = $path;
         }
 
-        $path .= $pDelimiter . $this->getTitle();
+        return $this->path;
+    }
 
-        return $path;
+    /**
+     * @param string $path
+     */
+    public function setPath($path)
+    {
+        $this->path = $path;
     }
 
 }

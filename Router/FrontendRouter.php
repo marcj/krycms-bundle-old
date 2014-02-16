@@ -3,11 +3,12 @@
 namespace Kryn\CmsBundle\Router;
 
 use Kryn\CmsBundle\Core;
-use Kryn\CmsBundle\Model\Base\Node;
+use Kryn\CmsBundle\Model\NodeQuery;
+use Kryn\CmsBundle\Model\Node;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 
-use Kryn\CmsBundle\Model\Base\DomainQuery;
+use Kryn\CmsBundle\Model\DomainQuery;
 use Kryn\CmsBundle\Model\Content;
 use Kryn\CmsBundle\Model\ContentQuery;
 use Symfony\Component\Routing\Route as SyRoute;
@@ -33,7 +34,15 @@ class FrontendRouter
      */
     protected $routes;
 
+    /**
+     * @var string
+     */
     protected $foundPageUrl;
+
+    /**
+     * @var bool
+     */
+    protected $editorMode = false;
 
     function __construct(Core $krynCore, Request $request)
     {
@@ -91,15 +100,15 @@ class FrontendRouter
 
     public function loadRoutes(RouteCollection $routes)
     {
-        $uri = $this->getRequest()->getPathInfo();
+        $pathInfo = $this->getRequest()->getPathInfo();
 
         if ($this->getKrynCore()->isAdmin()) {
             return null;
         }
 
-        if ($this->searchDomain() && $this->searchPage($uri)) {
+        if ($this->searchDomain() && $this->searchPage($pathInfo)) {
             if ($response = $this->checkPageAccess()) {
-                //return $response;
+                return $response;
             }
             $this->routes = $routes;
             $this->registerMainPage();
@@ -192,13 +201,11 @@ class FrontendRouter
         $clazz = 'Kryn\\CmsBundle\\Controller\\PageController';
         $domainUrl = (!$domain->getMaster()) ? '/' . $domain->getLang() : '';
 
-        $urls =& $this->getKrynCore()->getUtils()->getCachedPageToUrl($domain->getId());
-        $id = $page->getId();
-        $url = $domainUrl . isset($urls[$id]) ? $urls[$id] : '';
+        $url = $this->foundPageUrl;
 
         $controller = $clazz . '::handleAction';
 
-        if ('' !== $url && '/' !== $url && $domain && $domain->getStartnodeId() == $page->getId()) {
+        if (!$this->editorMode && '' !== $url && '/' !== $url && $domain && $domain->getStartnodeId() == $page->getId()) {
             //This is the start page, so add a redirect controller
             $this->routes->add(
                 'kryn_page_redirect_to_startpage',
@@ -220,8 +227,6 @@ class FrontendRouter
         );
     }
 
-    /**
-     */
     public function registerPluginRoutes()
     {
         $this->getKrynCore()->getStopwatch()->start('Register Plugin Routes');
@@ -379,10 +384,10 @@ class FrontendRouter
         $request = $this->getRequest();
         $dispatcher = $this->getKrynCore()->getEventDispatcher();
 
-        if ($this->getKrynCore()->isEditMode() && $domainId = $request->get('_kryn_editor_domain')) {
+        if ($domainId = $request->get('_kryn_editor_domain')) {
             $hostname = DomainQuery::create()->select('domain')->findPk($domainId);
         } else {
-            $hostname = $request->get('_kryn_domain') ? : $request->getHost();
+            $hostname = $request->getHost();
         }
 
         $stopwatch = $this->getKrynCore()->getStopwatch();
@@ -461,8 +466,7 @@ class FrontendRouter
 
         if (!$domain) {
             $dispatcher->dispatch('core/domain-not-found', new GenericEvent($hostname));
-
-            return;
+            return null;
         }
 
         $this->getKrynCore()->setCurrentDomain($domain);
@@ -474,62 +478,76 @@ class FrontendRouter
         return $domain;
     }
 
-    protected function searchPage()
+    protected function searchPage($pathInfo)
     {
-        $url = self::getRequest()->getPathInfo();
+        $url = $this->getRequest()->getPathInfo();
         $stopwatch = $this->getKrynCore()->getStopwatch();
 
+        $page = null;
         $title = sprintf('Searching Page [%s]', $url);
+
+        if ($nodeId = (int)$this->getRequest()->get('_kryn_editor_node')) {
+            if ($this->getKrynCore()->isEditMode($nodeId)) {
+                $title = sprintf('Use Page from Editor [%s]', $nodeId);
+                $page = NodeQuery::create()->findPk($nodeId);
+                $this->foundPageUrl = $pathInfo;
+                $this->editorMode = true;
+                if ($layout = $this->getRequest()->get('_kryn_editor_layout')) {
+                    $page->setLayout($layout);
+                }
+                $this->getKrynCore()->setCurrentPage($page);
+            }
+        }
+
         $stopwatch->start($title);
+        if (!$page) {
+            $domain = $this->getKrynCore()->getCurrentDomain();
+            $urls = $this->getKrynCore()->getUtils()->getCachedUrlToPage($domain->getId());
 
-        $domain = $this->getKrynCore()->getCurrentDomain();
-        $urls = $this->getKrynCore()->getUtils()->getCachedUrlToPage($domain->getId());
+            $possibleUrl = $url;
+            $id = false;
 
-        $possibleUrl = $url;
-        $id = false;
+            while (1) {
+                if (isset($urls[$possibleUrl])) {
+                    $id = $urls[$possibleUrl];
+                    break;
+                }
 
-        while (1) {
-
-            if (isset($urls[$possibleUrl])) {
-                $id = $urls[$possibleUrl];
-                break;
+                if (false !== $pos = strrpos($possibleUrl, '/')) {
+                    $possibleUrl = substr($possibleUrl, 0, $pos);
+                } else {
+                    break;
+                }
             }
 
-            if (false !== $pos = strrpos($possibleUrl, '/')) {
-                $possibleUrl = substr($possibleUrl, 0, $pos);
+            if (!$id) {
+                //set to startpage
+                $id = $domain->getStartnodeId();
+                $possibleUrl = '/';
+            }
+
+            $this->foundPageUrl = $possibleUrl;
+
+            $url = $possibleUrl;
+
+            if ($url == '/') {
+                $pageId = $this->getKrynCore()->getCurrentDomain()->getStartnodeId();
+
+                if (!$pageId > 0) {
+                    $this->getKrynCore()->getEventDispatcher()->dispatch('core/domain-no-start-page');
+                }
+
             } else {
-                break;
+                $pageId = $id;
             }
+            /** @var \Kryn\CmsBundle\Model\Node $page */
+            $page = $this->getKrynCore()->getUtils()->getPage($pageId);
+            $this->getKrynCore()->setCurrentPage($page);
         }
-
-        if (!$id) {
-            //set to startpage
-            $id = $domain->getStartnodeId();
-            $possibleUrl = '/';
-        }
-
-        $this->foundPageUrl = $possibleUrl;
-
-        $url = $possibleUrl;
-
-        if ($url == '/') {
-            $pageId = $this->getKrynCore()->getCurrentDomain()->getStartnodeId();
-
-            if (!$pageId > 0) {
-                $this->getKrynCore()->getEventDispatcher()->dispatch('core/domain-no-start-page');
-            }
-
-        } else {
-            $pageId = $id;
-        }
-
-        $page = $this->getKrynCore()->getUtils()->getPage($pageId);
-
-        $this->getKrynCore()->setCurrentPage($page);
 
         $stopwatch->stop($title);
 
-        return $page ? $pageId : null;
+        return $page ? $page->getId() : null;
     }
 
 }

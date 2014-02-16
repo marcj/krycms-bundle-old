@@ -66,36 +66,36 @@ ka.Field = new Class({
 
     /**
      *
-     * @param  {Object} pDefinition
-     * @param  {Element} pContainer
-     * @param  {String} pKey Optional
-     * @param  {ka.FieldForm} pFieldForm
+     * @param {Object} definition
+     * @param {Element} container
+     * @param {String} key Optional
+     * @param {ka.FieldForm} fieldForm
      */
-    initialize: function(pDefinition, pContainer, pKey, pFieldForm) {
-        pContainer = document.id(pContainer);
-        this.key = pKey;
+    initialize: function(definition, container, key, fieldForm) {
+        container = document.id(container);
+        this.key = key;
 
-        this.fieldForm = pFieldForm;
+        this.fieldForm = fieldForm;
 
-        this.field = Object.clone(pDefinition);
-        this.calledDefinition = Object.clone(pDefinition);
+        this.field = Object.clone(definition);
+        this.calledDefinition = Object.clone(definition);
 
-        if (pDefinition.type == 'predefined') {
-            if (!pDefinition.object) {
+        if (definition.type == 'predefined') {
+            if (!definition.object) {
                 throw 'Fields of type `predefined` need a `object` value.'
             }
-            if (!pDefinition.field) {
+            if (!definition.field) {
                 throw 'Fields of type `predefined` need a `field` value.'
             }
 
-            var definition, field;
-            definition = ka.getObjectDefinition(this.field.object);
-            if (!definition) {
+            var targetDefinition, field;
+            targetDefinition = ka.getObjectDefinition(this.field.object);
+            if (!targetDefinition) {
                 throw 'Object `%s` not found'.sprintf(this.field.object);
             }
 
-            if (!(field = definition.fields[pDefinition.field.lcfirst()])) {
-                throw 'Field `%s` in object `%s` not found'.sprintf(pDefinition.field, this.field.object);
+            if (!(field = targetDefinition.fields[definition.field.lcfirst()])) {
+                throw 'Field `%s` in object `%s` not found'.sprintf(definition.field, this.field.object);
             }
 
             delete this.field.type;
@@ -107,11 +107,11 @@ ka.Field = new Class({
         this.definition = Object.clone(this.field);
 
         this.setOptions(this.field);
-        this.container = pContainer;
+        this.container = container;
 
         if (this.options.noWrapper) {
 
-            if (this.options.tableItem || (pContainer && (pContainer.get('tag') == 'table' || pContainer.get('tag') == 'tbody'))) {
+            if (this.options.tableItem || (container && (container.get('tag') == 'table' || container.get('tag') == 'tbody'))) {
 
                 //we should be appear as a non-table element but got a table element as contain.
                 //so create a tr>td[colspan=2] and set this.options.tableItem to true, that
@@ -132,7 +132,7 @@ ka.Field = new Class({
                 }).inject(this.tr);
 
             } else {
-                this.main = pContainer || new Element('div', {'class': 'ka-field'});
+                this.main = container || new Element('div', {'class': 'ka-field'});
                 this.main.instance = this;
                 this.main.store('ka.Field', this);
             }
@@ -140,8 +140,7 @@ ka.Field = new Class({
             this.fieldPanel = this.main;
 
         } else {
-
-            if (!this.options.tableItem && pContainer && (pContainer.get('tag') == 'table' || pContainer.get('tag') == 'tbody')) {
+            if (!this.options.tableItem && container && (container.get('tag') == 'table' || container.get('tag') == 'tbody')) {
 
                 //we should be appear as a non-table element but got a table element as contain.
                 //so create a tr>td[colspan=2] and set this.options.tableItem to true, that
@@ -251,8 +250,8 @@ ka.Field = new Class({
 
         this.toElement().addClass('ka-field-type-' + this.options.type);
 
-        if (pContainer && pContainer != this.toElement()) {
-            this.inject(pContainer);
+        if (container && container != this.toElement()) {
+            this.inject(container);
         }
 
         //        if (this.options.fieldWidth) {
@@ -276,10 +275,10 @@ ka.Field = new Class({
         this.renderField();
 
         if (!this.options.startEmpty && typeOf(this.options.value) != 'null') {
-            this.setValue(this.options.value, true);
+            this.setValue(this.options.value);
 
         } else if (typeOf(this.field['default']) != 'null') {
-            this.setValue(this.field['default'], true);
+            this.setValue(this.field['default']);
 
         } else if (this.options.cookieStorage) {
             var cookieValue = Cookie.read(this.options.cookieStorage);
@@ -292,6 +291,20 @@ ka.Field = new Class({
             this.fieldObject.setDisabled(true);
         }
 
+    },
+
+    /**
+     * @return {Boolean}
+     */
+    isDisabled: function() {
+        this.fieldObject.isDisabled();
+    },
+
+    /**
+     * @param {Boolean} disabled
+     */
+    setDisabled: function(disabled) {
+        this.fieldObject.setDisabled(disabled);
     },
 
     getFieldForm: function() {
@@ -777,7 +790,6 @@ ka.Field = new Class({
      *
      */
     destroy: function() {
-
         var field = this.toElement();
 
         //are we between 2 ka-field-autotables ? maybe we can merge it
@@ -793,7 +805,6 @@ ka.Field = new Class({
         field.destroy();
 
         if (this.options.tableItem) {
-
             if (this.containerAutoTable && this.containerAutoTable.hasClass('ka-field-autotable')) {
 
                 var tbody = this.containerAutoTable.getChildren('tbody').length > 0 ? this.containerAutoTable.getChildren('tbody')[0] : this.containerAutoTable;
@@ -803,8 +814,6 @@ ka.Field = new Class({
                     this.containerAutoTable.destroy();
                 }
             }
-        } else {
-
         }
 
         if (this.getChildrenContainer()) {

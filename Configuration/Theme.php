@@ -72,6 +72,21 @@ class Theme extends Model
     }
 
     /**
+     * @param string $key
+     * @return ThemeLayout|null
+     */
+    public function getLayoutByKey($key)
+    {
+        foreach ($this->layouts as $layout) {
+            if (strtolower($layout->getKey()) === strtolower($key)) {
+                return $layout;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * @param string $id
      */
     public function setId($id)

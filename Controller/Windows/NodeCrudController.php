@@ -151,7 +151,7 @@ class NodeCrudController extends WindowNestedController
         ),
     );
 
-    public $extraSelection = 'domainId';
+    public $extraSelection = 'domain, domain.theme';
 
     public $columns = array(
         'type' => array(

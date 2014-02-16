@@ -254,6 +254,21 @@ class Configs implements \IteratorAggregate
     }
 
     /**
+     * @param string $themeId
+     * @return Theme|null
+     */
+    public function getTheme($themeId)
+    {
+        foreach ($this->configElements as $config) {
+            if ($theme = $config->getTheme($themeId)) {
+                return $theme;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * @return Bundle[]
      */
     public function getConfigs()

@@ -642,8 +642,9 @@ ka.FieldForm = new Class({
                 value = -1 !== id.indexOf('.') ? this.getArrayValue(values, id) : values[id];
             } else {
                 value = {};
-                Array.each(selection, function(selection) {
-                    value[selection] = values[selection];
+                Array.each(selection, function(idx) {
+                    idx = idx.split('.')[0];
+                    value[idx] = values[idx];
                 });
             }
 
@@ -676,7 +677,9 @@ ka.FieldForm = new Class({
             if (notFound) {
                 return;
             }
-            if (values[key]) {
+            if ('*' === key) {
+                //
+            } else if (values[key]) {
                 values = values[key];
             } else {
                 notFound = true;

@@ -4,28 +4,50 @@ ka.FieldTypes.Layout = new Class({
 
     Statics: {
         label: 'Page Layout',
-        asModel: true
+        asModel: true,
+        options: {
+            theme: {
+                label: 'Theme key',
+                type: 'text',
+                required: true
+            }
+        }
+    },
+
+    options: {
+        theme: null
     },
 
     createLayout: function () {
         this.parent();
 
+        var defaultKeys = {
+            startpage: t('Startpage'),
+            default: t('Default'),
+            404: t('404 Not Found'),
+            accessDenied: t('Access Denied')
+        };
+
         Object.each(ka.settings.configs, function(config, key) {
+
             if (config.themes) {
                 Object.each(config.themes, function(theme){
                     var layouts = {};
+                    if (theme.id !== this.options.theme) {
+                        return;
+                    }
+
                     if (theme.layouts) {
                         Array.each(theme.layouts, function(layout){
-                            layouts[layout.file] = layout.label;
+                            layouts[layout.key] = layout.label || defaultKeys[layout.key] || layout.key;
                         });
                     }
 
                     if (Object.getLength(layouts) > 0) {
                         this.select.addSplit(theme.label);
                         Object.each(layouts, function(label, id) {
-                            id = id.replace(/@([^\/]*)/, '@$1.'+theme.id);
                             this.select.add(id, label);
-                        }.bind(this))
+                        }.bind(this));
                     }
                 }.bind(this))
             }

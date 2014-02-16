@@ -29,11 +29,14 @@ class Propel extends ORMAbstract
      */
     public $objectKey;
 
-    public $query;
+    protected $query;
 
-    public $tableMap;
+    /**
+     * @var TableMap
+     */
+    protected $tableMap;
 
-    public $propelPrimaryKeys;
+    protected $propelPrimaryKeys;
 
     public function init()
     {
@@ -440,6 +443,7 @@ class Propel extends ORMAbstract
         $item = new $clazz();
         $item->fromArray($row);
 
+        $newRow = [];
         foreach ($selects as $select) {
             if (strpos($select, '.') === false) {
                 $newRow[lcfirst($select)] = $item->{'get' . $select}();
@@ -886,14 +890,13 @@ class Propel extends ORMAbstract
                 continue;
             }
 
-            if ($field['type'] == 'object' || $this->tableMap->hasRelation($fieldName)) {
+            if ($field['type'] == 'object') {
+
                 if ($field['objectRelation'] == ORMAbstract::MANY_TO_MANY || $field['objectRelation'] == ORMAbstract::ONE_TO_MANY) {
 
                     $name = $pluralizer->getPluralForm($pluralizer->getSingularForm(Tools::underscore2Camelcase($fieldName)));
                     $setItems = 'set' . $name;
-//                    $getItems = 'get' . $name;
                     $clearItems = 'clear' . $name;
-//                    $addItem = 'add' . Tools::underscore2Camelcase($fieldName);
 
                     if ($fieldValue) {
                         $foreignQuery = $this->getQueryClass($field['object']);
@@ -943,6 +946,25 @@ class Propel extends ORMAbstract
                     }
                     continue;
                 }
+
+                if ($field['objectRelation'] == ORMAbstract::MANY_TO_ONE || $field['objectRelation'] == ORMAbstract::ONE_TO_ONE) {
+                    $relation = $this->tableMap->getRelation($fieldName);
+                    $localColumns = $relation->getLocalColumns();
+                    if (is_array($fieldValue)) {
+                        foreach ($localColumns as $column) {
+                            $setter = 'set' . ucfirst($column->getPhpName());
+                            $key = lcfirst($column->getPhpName());
+                            $item->$setter($fieldValue[$key]);
+                        }
+                    } else {
+                        $firstColumn = current($localColumns);
+
+                        $setter = 'set' . ucfirst($firstColumn->getPhpName());
+                        $item->$setter($fieldValue);
+                    }
+
+                    continue;
+                }
             }
 
             if ($methodExist) {
@@ -986,9 +1008,7 @@ class Propel extends ORMAbstract
         $query = $this->getQueryClass();
 
         $query->clearSelectColumns()->addSelectColumn('COUNT(*)');
-
         $stmt = $this->getStm($query, $condition);
-
         $row = $stmt->fetch(\PDO::FETCH_ASSOC);
 
         return current($row) + 0;

@@ -74,6 +74,7 @@ class ContentRender
      */
     public function renderSlot($nodeId, $slotId = 1, $params = array())
     {
+        $params['id'] = $slotId;
         if ($this->getKrynCore()->isEditMode()) {
             return '<div class="ka-slot" params="' . htmlspecialchars(json_encode($params)) . '"></div>';
         }
@@ -127,7 +128,7 @@ class ContentRender
      */
     public function renderContents(&$contents, $slotProperties)
     {
-        $title = sprintf('Slot %s [%d]', $slotProperties['name'], $slotProperties['id']);
+        $title = sprintf('Slot %s [%d]', @$slotProperties['name'], @$slotProperties['id']);
         $this->stopwatch->start($title, 'Kryn');
 
         $filteredContents = array();
@@ -187,8 +188,8 @@ class ContentRender
         $data['layoutContentsMax'] = $count;
         $data['layoutContentsIsFirst'] = true;
         $data['layoutContentsIsLast'] = false;
-        $data['layoutContentsId'] = $slotProperties['id'];
-        $data['layoutContentsName'] = $slotProperties['name'];
+        $data['layoutContentsId'] = @$slotProperties['id'];
+        $data['layoutContentsName'] = @$slotProperties['name'];
 
         $i = 0;
 
