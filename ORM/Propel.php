@@ -724,7 +724,7 @@ class Propel extends ORMAbstract
 
         $this->mapPk($query, $pk);
         $item = $query->findOne();
-        $this->mapValues($item, $values, false);
+        $this->mapValues($item, $values, true);
 
         return $item->save() ? true : false;
     }
@@ -866,7 +866,12 @@ class Propel extends ORMAbstract
         return $newPk;
     }
 
-    public function mapValues(&$item, &$values, $setUndefinedAsNull = true)
+    /**
+     * @param $item propel object
+     * @param array $values
+     * @param bool $ignoreNotExistingValues
+     */
+    public function mapValues(&$item, &$values, $ignoreNotExistingValues = false)
     {
         $pluralizer = new StandardEnglishPluralizer();
         $setted = [];
@@ -875,6 +880,10 @@ class Propel extends ORMAbstract
             $fieldName = $field->getId();
             $fieldName = lcfirst($fieldName);
             $setted[] = $fieldName;
+
+            if (!isset($values[$fieldName]) && $ignoreNotExistingValues) {
+                continue;
+            }
 
             $fieldValue = @$values[$fieldName];
 
@@ -941,7 +950,7 @@ class Propel extends ORMAbstract
                             $collItems = $foreignQuery->findPks($propelPks);
                             $item->$setItems($collItems);
                         }
-                    } elseif ($setUndefinedAsNull) {
+                    } elseif ($ignoreNotExistingValues) {
                         $item->$clearItems();
                     }
                     continue;
@@ -968,10 +977,6 @@ class Propel extends ORMAbstract
             }
 
             if ($methodExist) {
-                if ($fieldValue === null && !$setUndefinedAsNull) {
-                    continue;
-                }
-
                 $item->$set($fieldValue);
             }
         }

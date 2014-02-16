@@ -219,14 +219,6 @@ ka.FieldTypes.Content = new Class({
     setValueFromForm: function(value, internal) {
         var originValue = this.getField().getForm().getOriginValue();
 
-//        if (!value) {
-//            if (!this.currentNode || this.currentNode == originValue.id) {
-//                value = this.lastContents;
-//            }
-//        } else {
-        this.lastContents = value.content;
-//        }
-
         var typeValue = this.getField().getForm().getValue('type');
 
         if (0 != typeValue && 1 != typeValue) {
@@ -237,7 +229,7 @@ ka.FieldTypes.Content = new Class({
 
         this.currentNode = originValue.id;
         this.currentDomain = originValue.domainId;
-        this.loadEditor(originValue.domainId, originValue.id, value.content);
+        this.loadEditor(originValue.domainId, originValue.id, value  ? value.content : null);
     },
 
     onLayoutSelectFirst: function(layout) {
@@ -245,8 +237,7 @@ ka.FieldTypes.Content = new Class({
     },
 
     onLayoutChange: function(layout) {
-        var contents = this.getValue();
-        this.setValue(contents);
+        this.reloadEditor();
     },
 
     reloadLayoutSelection: function(themeId, layoutId) {
@@ -264,10 +255,20 @@ ka.FieldTypes.Content = new Class({
         }, this.layoutSelectionContainer);
     },
 
+    reloadEditor: function() {
+        this.loadEditor();
+    },
+
     loadEditor: function(domainId, nodeId, contents) {
         var options = {
             standalone: this.options.standalone
         };
+
+        if (!contents) {
+            contents = this.lastContents;
+        }
+
+        this.lastContents = contents;
 
         var targetLayout = this.layoutSelection ? this.layoutSelection.getValue() : this.firstSelectedLayout;
 
@@ -310,6 +311,7 @@ ka.FieldTypes.Content = new Class({
             domainId = this.currentDomain;
         }
 
+        console.log(this.layoutSelection);
         var params = {
             '_kryn_editor': 1,
             '_kryn_editor_id': id,

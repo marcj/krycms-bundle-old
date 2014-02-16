@@ -2,10 +2,14 @@
 
 namespace Tests\Object;
 
+use Kryn\CmsBundle\Model\DomainQuery;
+use Kryn\CmsBundle\Model\NodeQuery;
 use Kryn\CmsBundle\Tests\KernelAwareTestCase;
 
 class CreateTest extends KernelAwareTestCase
 {
+    protected $nodePk = null;
+
     public function testObject()
     {
         $this->getObjects()->clear('Test\\Test');
@@ -65,4 +69,44 @@ class CreateTest extends KernelAwareTestCase
         $this->assertNull($this->getObjects()->get('KrynPublicationBundle:News', $pk));
     }
 
+    protected function getNewNodeItem()
+    {
+        $domain = DomainQuery::create()->findOne();
+
+        $values = array(
+            'title' => 'Test page',
+            'domain' => $domain->getId(),
+            'type' => 0
+        );
+
+        $pk = $this->getObjects()->add(
+            'kryncms/node',
+            $values,
+            $domain->getId(),
+            'first',
+            'kryncms/domain'
+        );
+        return $this->nodePk = $pk;
+    }
+
+    public function testPatch()
+    {
+        $nodePk = $this->getNewNodeItem();
+
+        $ori = clone NodeQuery::create()->findOneById($nodePk['id']);
+        $this->getObjects()->patch('kryncms/node', $nodePk, [
+           'title' => 'Test page changed'
+        ]);
+
+        $node = NodeQuery::create()->findOneById($nodePk['id']);
+        $this->assertEquals('Test page changed', $node->getTitle());
+        $this->assertEquals($ori->getDomainId(), $node->getDomainId());
+    }
+
+    public function tearDown()
+    {
+        if ($this->nodePk) {
+            NodeQuery::create()->filterById($this->nodePk['id'])->delete();
+        }
+    }
 }
