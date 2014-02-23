@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\HttpKernel\EventListener\RouterListener;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\RequestContext;
@@ -28,9 +29,9 @@ class FrontendRouteListener extends RouterListener
     protected $routes;
 
     /**
-     * @var bool
+     * @var array
      */
-    protected $loaded = false;
+    protected $loaded = [];
 
     function __construct(Core $krynCore)
     {
@@ -77,13 +78,18 @@ class FrontendRouteListener extends RouterListener
 
     public function onKernelRequest(GetResponseEvent $event)
     {
-        if (false === $this->loaded) {
-            $router = new FrontendRouter($this->getKrynCore(), $event->getRequest());
-            if ($response = $router->loadRoutes($this->routes)) {
-                $event->setResponse($response);
-                return;
+        if (HttpKernelInterface::MASTER_REQUEST === $event->getRequestType()) {
+            //prepare for new master request: clear the PageResponse object
+            $this->getKrynCore()->prepareNewMasterRequest();
+
+            if (!isset($this->loaded[$event->getRequest()->getPathInfo()])) {
+                $router = new FrontendRouter($this->getKrynCore(), $event->getRequest());
+                if ($response = $router->loadRoutes($this->routes)) {
+                    $event->setResponse($response);
+                    return;
+                }
+                $this->loaded[$event->getRequest()->getPathInfo()] = true;
             }
-            $this->loaded = true;
         }
 
         try {

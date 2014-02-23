@@ -159,6 +159,12 @@ class PluginController extends Controller
         $cache = $this->getKrynCore()->getDistributedCache($cacheKey);
         $mTime = $this->getViewMTime($view);
 
+        if (!is_string($cache)) {
+            $cache = null;
+        } else {
+            $cache = unserialize($cache);
+        }
+
         if ($force || !$cache || !$cache['content'] || !is_array($cache) || $mTime != $cache['fileMTime']) {
 
             $oldResponse = clone $this->getKrynCore()->getPageResponse();
@@ -184,7 +190,7 @@ class PluginController extends Controller
                 'responseDiff' => $diff
             );
 
-            $this->getKrynCore()->setDistributedCache($cacheKey, $cache, $lifeTime ?: 3600);
+            $this->getKrynCore()->setDistributedCache($cacheKey, serialize($cache), $lifeTime ?: 3600);
 
         } else if ($cache['responseDiff']) {
             $this->getKrynCore()->getPageResponse()->patch($cache['responseDiff']);

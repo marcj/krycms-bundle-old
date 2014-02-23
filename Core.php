@@ -14,6 +14,7 @@ use Kryn\CmsBundle\Propel\PropelHelper;
 use Symfony\Component\EventDispatcher\GenericEvent;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\DependencyInjection\Container;
 
 class Core extends Controller
 {
@@ -90,11 +91,16 @@ class Core extends Controller
     /**
      * @param $container
      */
-    function __construct($container)
+    function __construct(Container $container)
     {
         $this->container = $container;
 
         Configuration\Model::$serialisationKrynCore = $this;
+    }
+
+    public function prepareNewMasterRequest()
+    {
+        $this->container->set('kryn_cms.page.response', null);
     }
 
     /**
@@ -103,7 +109,6 @@ class Core extends Controller
      */
     public function prepareWebSymlinks()
     {
-        $cwdir = getcwd();
         chdir($this->getKernel()->getRootDir() . '/..');
         $bundles = 'web/bundles/';
         if (!is_dir($bundles)) {
@@ -318,9 +323,6 @@ class Core extends Controller
     public function getSystemConfig($withCache = true)
     {
         if (null === $this->systemConfig) {
-            //$fastestCacheClass = Cache\AbstractCache::getFastestCacheClass();
-//            $fastCache = $this->getFastCache();
-//            $cacheKey = 'core/config/' . $this->getKernel()->getEnvironment();
 
             $configFile = $this->getKernel()->getRootDir() . '/config/config.kryn.xml';
             $configEnvFile = $this->getKernel()->getRootDir() . '/config/config.kryn_' . $this->getKernel()->getEnvironment() . '.xml';
@@ -339,10 +341,6 @@ class Core extends Controller
 
             $systemConfigHash = file_exists($configFile) ? md5(filemtime($configFile)) : -1;
 
-            Model::$serialisationKrynCore = $this;
-//            $systemConfigCached = $systemConfigCached ? unserialize($systemConfigCached) : ['md5' => 0, 'data' => false];
-            Model::$serialisationKrynCore = null;
-
             if ($withCache && $systemConfigCached && $cachedSum === $systemConfigHash) {
                 Model::$serialisationKrynCore = $this;
                 $this->systemConfig = @unserialize($systemConfigCached);
@@ -352,12 +350,6 @@ class Core extends Controller
             if (!$this->systemConfig) {
                 $configXml = file_exists($configFile) ? file_get_contents($configFile) : [];
                 $this->systemConfig = new SystemConfig($configXml, $this);
-
-//                $cached = serialize([
-//                        'md5'  => $systemConfigHash,
-//                        'data' => $this->systemConfig
-//                    ]);
-//                $fastCache->set($cacheKey, $cached);
                 file_put_contents($cacheFile, $systemConfigHash . "\n" . serialize($this->systemConfig));
             }
 
