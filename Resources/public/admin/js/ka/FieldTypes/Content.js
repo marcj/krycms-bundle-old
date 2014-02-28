@@ -311,7 +311,13 @@ ka.FieldTypes.Content = new Class({
             domainId = this.currentDomain;
         }
 
-        console.log(this.layoutSelection);
+        var path = _pathAdmin;
+        if ('/' === path.substr(-1)) {
+            path = path.substr(0, path.length - 1);
+        }
+
+        path = path.dirname();
+
         var params = {
             '_kryn_editor': 1,
             '_kryn_editor_id': id,
@@ -321,7 +327,7 @@ ka.FieldTypes.Content = new Class({
             '_kryn_editor_options': options
         };
 
-        this.iframe.set('src', _path + '?' + Object.toQueryString(params));
+        this.iframe.set('src', path + '?' + Object.toQueryString(params));
     },
 
     saveStandalone: function() {
