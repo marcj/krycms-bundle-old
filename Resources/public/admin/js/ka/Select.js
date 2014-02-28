@@ -18,6 +18,8 @@ ka.Select = new Class({
      */
     hideItems: {},
 
+    cache: {},
+
     /**
      * Items that are currently visible in the chooser.
      * @type {Object}
@@ -347,67 +349,37 @@ ka.Select = new Class({
         this.close();
     },
 
-    loadObjectItems: function(pOffset, pCallback, pCount) {
-        if (!pCount) {
-            pCount = this.options.maxItemsPerLoad;
+    /**
+     *
+     * @param {Number} offset
+     * @param {Function} callback
+     * @param {Number} count
+     */
+    loadObjectItems: function(offset, callback, count) {
+        if (!count) {
+            count = this.options.maxItemsPerLoad;
         }
 
         if (this.lastRq) {
             this.lastRq.cancel();
         }
 
-//        if (this.options.store) {
-//            var storePath = this.options.store;
-//
-//            this.lastRq = new Request.JSON({url: _pathAdmin + storePath,
-//                noErrorReporting: ['NoAccessException'],
-//                onCancel: function() {
-//                    pCallback(false);
-//                },
-//                onComplete: function(response) {
-//                    if (response.error) {
-//                        //todo, handle error
-//                        return false;
-//                    } else {
-//
-//                        var items = [];
-//
-//                        if (null !== response.data) {
-//                            Object.each(response.data, function(item, id) {
-//
-//                                items.push({
-//                                    id: id,
-//                                    label: item
-//                                });
-//
-//                                this.cachedObjectItems[id] = item;
-//
-//                            }.bind(this));
-//                        }
-//
-//                        pCallback(items);
-//                    }
-//                }.bind(this)
-//            }).get({
-//                    //object: this.options.object,
-//                    offset: pOffset,
-//                    limit: pCount,
-//                    _lang: this.options.objectLanguage,
-//                    fields: this.objectFields ? this.objectFields.join(',') : null
-//                });
-//
-//        }
-        if (this.options.object) {
+        var cacheKey = offset + '.'+count;
+        if (this.cache[cacheKey]) {
+            callback(this.cache[cacheKey]);
+            return;
+        }
 
+        if (this.options.object) {
             this.lastRq = new Request.JSON({url: this.getObjectUrl(),
                 noErrorReporting: ['NoAccessException'],
                 onCancel: function() {
-                    pCallback(false);
+                    callback(false);
                 },
                 onComplete: function(response) {
 
                     if (response.error) {
-                        //todo, handle error
+                        //todo, handle NoAccessException error
                         return false;
                     } else {
 
@@ -432,13 +404,14 @@ ka.Select = new Class({
                             }.bind(this));
                         }
 
-                        pCallback(items);
+                        this.cache[cacheKey] = items;
+                        callback(items);
                     }
                 }.bind(this)
             }).get({
                     //object: this.options.object,
-                    offset: pOffset,
-                    limit: pCount,
+                    offset: offset,
+                    limit: count,
                     _lang: this.options.objectLanguage,
                     scope: this.options.objectScope,
                     fields: this.objectFields ? this.objectFields.join(',') : null
