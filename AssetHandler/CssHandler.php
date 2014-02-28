@@ -90,7 +90,7 @@ EOF
         $fileUpToDate = false;
         $md5Line = '/* ' . md5($md5String) . " */\n";
 
-        $oFile = 'cache/compressed-' . md5($md5String) . '.css';
+        $oFile = 'cache/compressed-css/' . md5($md5String) . '.css';
         $handle = @fopen($this->getKrynCore()->getKernel()->getRootDir() . '/../web/' . $oFile, 'r');
         if ($handle) {
             $line = fgets($handle);
@@ -103,7 +103,7 @@ EOF
         if (!$fileUpToDate) {
             $content = $this->getKrynCore()->getUtils()->compressCss(
                 $files,
-                'cache/'
+                'cache/compressed-css/'
             );
             $content = $md5Line . $content;
             $this->getKrynCore()->getWebFileSystem()->write($oFile, $content);

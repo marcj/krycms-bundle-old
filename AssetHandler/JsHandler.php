@@ -90,7 +90,7 @@ EOF
         $fileUpToDate = false;
         $md5Line = '/* ' . md5($md5String) . " */\n";
 
-        $oFile = 'cache/compressed-' . md5($md5String) . '.js';
+        $oFile = 'cache/compressed-js/' . md5($md5String) . '.js';
         $handle = @fopen($this->getKrynCore()->getKernel()->getRootDir() . '/../web/' . $oFile, 'r');
         if ($handle) {
             $line = fgets($handle);
