@@ -137,8 +137,12 @@ ka.FieldTypes.Text = new Class({
     _checkChange: function () {
 
         this.duringCheck = true;
+        var range = null;
 
-        var range = this.input.getSelectedRange();
+        try {
+            range = this.input.getSelectedRange();
+        } catch(e) {
+        }
 
         if (typeOf(this.options.modifier) == 'string') {
             var modifiers = this.options.modifier.toLowerCase().split('|');
@@ -157,7 +161,7 @@ ka.FieldTypes.Text = new Class({
             this.replace();
         }
 
-        if (document.activeElement == this.input) {
+        if (range && document.activeElement == this.input) {
             this.input.selectRange(range.start, range.end);
         }
 

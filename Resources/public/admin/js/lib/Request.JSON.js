@@ -88,10 +88,12 @@ Request.JSON = new Class({
 
             if (typeOf(this.options.noErrorReporting) == 'array' &&
                 this.options.noErrorReporting.contains(result.error)) {
+                this.fireEvent('exception', result);
                 return false;
             }
 
             if (true === this.options.noErrorReporting) {
+                this.fireEvent('exception', result);
                 return false;
             }
 

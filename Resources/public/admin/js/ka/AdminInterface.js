@@ -562,6 +562,10 @@ ka.AdminInterface = new Class({
         ka.wm.updateWindowBar();
     },
 
+    /**
+     *
+     * @returns {ka.Helpsystem}
+     */
     getHelpSystem: function() {
         return this.helpsystem;
     },

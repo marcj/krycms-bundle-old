@@ -30,7 +30,7 @@ ka.Helpsystem = new Class({
 
     },
 
-    newBubble: function (pTitle, pText, pDelay) {
+    newBubble: function (pTitle, pText, delay) {
 
         if (!ka.adminInterface.desktopContainer) {
             return;
@@ -58,10 +58,7 @@ ka.Helpsystem = new Class({
             }).inject(box);
         }
 
-        var delay = 4000; //4sec
-        if (pDelay) {
-            delay = pDelay;
-        }
+        delay = delay || 10000;
 
         var die = (function () {
             box.set('tween', {onComplete: function () {
@@ -71,7 +68,10 @@ ka.Helpsystem = new Class({
         });
 
         if (delay > 0) {
-            die.delay(delay);
+            var id = die.delay(delay);
+            box.addEvent('mouseover', function(){
+                clearTimeout(id);
+            });
         }
 
         new Element('a', {

@@ -753,7 +753,7 @@ ka.ObjectTree = new Class({
         this.items[url] = a;
 
         if (a.parent) {
-            var paddingLeft = 15;
+            var paddingLeft = 20;
             if (a.parent.getStyle('padding-left').toInt()) {
                 paddingLeft += a.parent.getStyle('padding-left').toInt();
             }

@@ -116,8 +116,6 @@
           <field id="link" type="text">
             <label>Link</label>
           </field>
-          <field id="lft" type="number"/>
-          <field id="rgt" type="number"/>
           <field id="target" type="text">
             <label>Link target</label>
           </field>

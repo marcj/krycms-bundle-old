@@ -16,6 +16,10 @@ class ScssHandler extends AbstractHandler implements CompileHandlerInterface
         $publicPath = $this->getPublicAssetPath($assetPath);
 
         $targetPath = 'cache/scss/' . substr($publicPath, 0, strrpos($publicPath, '.'));
+        if ('.css' !== substr($targetPath, -4)) {
+            $targetPath .= '.css';
+        }
+
         $needsCompilation = true;
         $sourceMTime = filemtime($localPath);
 

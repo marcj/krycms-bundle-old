@@ -6,7 +6,7 @@ use Kryn\CmsBundle\Tests\KernelAwareTestCase;
 use Test\Model\Item;
 use Test\Model\ItemQuery;
 
-class BasicTestX extends KernelAwareTestCase
+class BasicTest extends KernelAwareTestCase
 {
     public function setUp()
     {

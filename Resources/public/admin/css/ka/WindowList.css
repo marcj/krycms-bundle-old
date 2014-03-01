@@ -233,6 +233,12 @@
     top: 0;
 }
 
+.ka-WindowList-combine-left-top .ka-Select-box,
+.ka-WindowList-combine-left-top .ka-Select-box:link {
+    margin-left: 0;
+    line-height: 22px;
+}
+
 .ka-WindowList-combine-userfilter a img,
 .ka-WindowList-combine-userfilter a:link img {
     position: relative;
@@ -352,11 +358,6 @@ a.ka-WindowList-search-button-active:link {
     padding-left: 0;
 }
 
-.ka-WindowList-combine-left-top .ka-Select-box,
-.ka-WindowList-combine-left-top .ka-Select-box:link {
-    margin-left: 0;
-}
-
 .ka-WindowList-combine-items + .ka-Splitter-main {
     top: 35px;
     border-top: 1px solid #E2E2E2;
@@ -398,7 +399,6 @@ a.ka-WindowList-search-button-active:link {
 }
 
 .ka-WindowList-navigationBar {
-    border: 1px solid #cecece;
     margin-top: 7px;
 }
 

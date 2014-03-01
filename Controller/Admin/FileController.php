@@ -25,17 +25,16 @@ class FileController extends Controller
      *  description="Removes a file or folder (recursively) in /web"
      * )
      *
-     * @Rest\QueryParam(name="path", requirements=".+", strict=true, description="The file path")
+     * @Rest\RequestParam(name="path", requirements=".+", strict=true, description="The file path")
      *
      * @Rest\Delete("/admin/file")
      *
-     * @param ParamFetcher $paramFetcher
+     * @param string $path
      *
      * @return bool
      */
-    public function deleteFileAction(ParamFetcher $paramFetcher)
+    public function deleteFileAction($path)
     {
-        $path = $paramFetcher->get('path');
         $this->checkAccess($path);
 
         FileQuery::create()->filterByPath($path)->delete();

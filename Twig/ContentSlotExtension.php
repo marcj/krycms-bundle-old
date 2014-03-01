@@ -35,8 +35,8 @@ class ContentSlotExtension extends \Twig_Extension
     {
         return array(
             'contentSlot' => new \Twig_Function_Method($this, 'contentSlot', [
-                    'is_safe' => ['html']
-                ])
+                'is_safe' => ['html']
+            ])
         );
     }
 

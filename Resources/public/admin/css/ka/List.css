@@ -4,8 +4,6 @@
     top: 46px;
     bottom: 0px;
     right: 0;
-    border: 1px solid #ddd;
-    background-color: white;
     overflow: auto;
     -webkit-overflow-scrolling: touch;
 }

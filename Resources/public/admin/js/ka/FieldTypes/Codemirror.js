@@ -42,7 +42,8 @@ ka.FieldTypes.Codemirror = new Class({
         var options = {
             lineNumbers: true,
             mode: this.options.mode || 'htmlmixed',
-            value: ''
+            value: '',
+            styleActiveLine: true
             //onChange: this.fieldInstance.fireChange
         };
 

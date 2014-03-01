@@ -68,12 +68,7 @@ class Container
     public function getCompileHandlerByFileExtension($filePath)
     {
         $exploded = explode('.', $filePath);
-
-        $extensionSourceType = array_pop($exploded);
-        $extensionTargetType = array_pop($exploded);
-
-        $extension = "$extensionTargetType.$extensionSourceType";
-
+        $extension = array_pop($exploded);
         if ($serviceId = @$this->handlerByExtension[strtolower($extension)]) {
             return $this->container->get($serviceId);
         }

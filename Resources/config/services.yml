@@ -213,7 +213,7 @@ services:
         class: %kryn_cms.asset_handler.scss.class%
         arguments: ["@kryn_cms"]
         tags:
-            - { name: kryn_cms.asset_handler.compiler, extension: css.scss }
+            - { name: kryn_cms.asset_handler.compiler, extension: scss }
 
      kryn_cms.asset_handler.css:
         class: %kryn_cms.asset_handler.css.class%
