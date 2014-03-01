@@ -39,13 +39,13 @@ EOF;
 <script type="text/javascript">
 var c = 'cde'
 </script>
-<script type="text/javascript" src="cache/compressed-([a-z0-9]{32}).js"></script>
+<script type="text/javascript" src="cache/compressed-js/([a-z0-9]{32}).js"></script>
 EOF;
 
         $this->assertRegExp("#$expected#", $assetsTags['jsTags']);
 
-        preg_match('#compressed-([a-z0-9]{32}).js#', $assetsTags['jsTags'], $matches);
-        $compressedFile = 'cache/compressed-' . $matches[1] . '.js';
+        preg_match('#([a-z0-9]{32}).js#', $assetsTags['jsTags'], $matches);
+        $compressedFile = 'cache/compressed-js/' . $matches[1] . '.js';
 
         $expectedCompressed = <<<EOF
 
@@ -94,7 +94,7 @@ EOF;
 <style type="text/css">
 body {font-size: 12px;}
 </style>
-<link rel="stylesheet" type="text/css" href="cache/compressed-([a-z0-9]{32}).css" >
+<link rel="stylesheet" type="text/css" href="cache/compressed-css/([a-z0-9]{32}).css" >
 EOF;
 
         $this->assertRegExp("#$expected#", $assetsTags['cssTags']);

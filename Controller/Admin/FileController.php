@@ -48,7 +48,7 @@ class FileController extends Controller
      *  description="Creates a file in /web"
      * )
      *
-     * @Rest\QueryParam(name="path", requirements=".+", strict=true, description="The file path")
+     * @Rest\RequestParam(name="path", requirements=".+", strict=true, description="The file path")
      * @Rest\RequestParam(name="content", requirements=".*", strict=false, description="The file content")
      *
      * @Rest\Put("/admin/file")
@@ -141,7 +141,7 @@ class FileController extends Controller
      *  description="Creates a folder in /web"
      * )
      *
-     * @Rest\QueryParam(name="path", requirements=".+", strict=true, description="The file path")
+     * @Rest\RequestParam(name="path", requirements=".+", strict=true, description="The file path")
      *
      * @Rest\Put("/admin/file/dir")
      *
@@ -204,10 +204,10 @@ class FileController extends Controller
      *  description="Prepares a file upload process"
      * )
      *
-     * @Rest\QueryParam(name="path", requirements=".+", strict=true, description="The file path")
-     * @Rest\QueryParam(name="name", requirements=".*", strict=true, description="The file path")
-     * @Rest\QueryParam(name="overwrite", requirements=".*", default="false", description="If the target should be overwritten")
-     * @Rest\QueryParam(name="autoRename", requirements=".*", default="false", description="If the target name should be autoRenamed ($name-n) when already exists")
+     * @Rest\RequestParam(name="path", requirements=".+", strict=true, description="The file path")
+     * @Rest\RequestParam(name="name", requirements=".*", strict=true, description="The file path")
+     * @Rest\RequestParam(name="overwrite", requirements=".*", default="false", description="If the target should be overwritten")
+     * @Rest\RequestParam(name="autoRename", requirements=".*", default="false", description="If the target name should be autoRenamed ($name-n) when already exists")
      *
      * @Rest\Post("/admin/file/upload/prepare")
      *
@@ -270,7 +270,7 @@ class FileController extends Controller
 
         $this->getKrynCore()->getWebFileSystem()->write(
             $newPath,
-            "\0\1\2\3\4\5\6\nKrynBlockedFile\n" . $this->getKrynCore()->getAdminClient()->getTokenId()
+            "file-is-being-uploaded-by-" . hash('sha512', $this->getKrynCore()->getAdminClient()->getTokenId())
         );
         $res['ready'] = true;
 
@@ -283,10 +283,10 @@ class FileController extends Controller
      *  description="Uploads a file to $path with $name as name"
      * )
      *
-     * @Rest\QueryParam(name="path", requirements=".+", strict=true, description="The target path")
-     * @Rest\QueryParam(name="name", requirements=".*", strict=true, description="The file name")
-     * @Rest\QueryParam(name="overwrite", requirements=".*", default="false", description="If the target should be overwritten")
-     * @Rest\RequestParam(name="file", strict=true, description="The file")
+     * @Rest\RequestParam(name="path", requirements=".+", strict=true, description="The target path")
+     * @Rest\RequestParam(name="name", requirements=".*", strict=false, description="The file name if you want a different")
+     * @ #Rest\RequestParam(name="overwrite", requirements=".*", default="false", description="If the target should be overwritten")
+     * @Rest\RequestParam(name="file", strict=false, description="The file")
      *
      * @Rest\Post("/admin/file/upload")
      *
@@ -301,39 +301,37 @@ class FileController extends Controller
     public function doUploadAction(Request $request, ParamFetcher $paramFetcher)
     {
         $path = $paramFetcher->get('path');
-        $name = $paramFetcher->get('name');
-        $overwrite = filter_var($paramFetcher->get('overwrite'), FILTER_VALIDATE_BOOLEAN);
+        $overwriteName = $paramFetcher->get('name');
+//        $overwrite = filter_var($paramFetcher->get('overwrite'), FILTER_VALIDATE_BOOLEAN);
 
         /** @var $file UploadedFile */
         $file = $request->files->get('file');
         if (null == $file) {
-            throw new InvalidArgumentException("There is not file uploaded with name 'file'");
+            throw new InvalidArgumentException("There is no file uploaded.");
         }
 
-        $name2 = $file->getBasename();
-        if ($name) {
-            $name2 = $name;
+        $name = $file->getClientOriginalName();
+        if ($overwriteName) {
+            $name = $overwriteName;
         }
 
         if ($file->getError()) {
             $error = sprintf(
                 ('Failed to upload the file %s to %s. Error: %s'),
-                $name2,
+                $name,
                 $path,
                 $file->getErrorMessage()
             );
             throw new FileUploadException($error);
         }
 
-        $newPath = ($path == '/') ? '/' . $name2 : $path . '/' . $name2;
+        $newPath = ($path == '/') ? '/' . $name : $path . '/' . $name;
         if ($this->getKrynCore()->getWebFileSystem()->has($newPath)) {
-            if (!$overwrite) {
+//            if (!$overwrite) {
                 if ($this->getKrynCore()->getWebFileSystem()->has($newPath)) {
                     $content = $this->getKrynCore()->getWebFileSystem()->read($newPath);
 
-                    //todo change this check into something non-being-a-hack
-                    //like a check against a file named $path.'.cuploaded' with the sha512(session id) in it.
-                    $check = "\0\1\2\3\4\5\6\nKrynBlockedFile\n" . $this->getKrynCore()->getAdminClient()->getTokenId();
+                    $check = "file-is-being-uploaded-by-" . hash('sha512', $this->getKrynCore()->getAdminClient()->getTokenId());
                     if ($content != $check) {
                         //not our file, so cancel
                         throw new FileUploadException(sprintf(
@@ -343,7 +341,7 @@ class FileController extends Controller
                 } else {
                     throw new FileUploadException(sprintf('The target file has not be initialized.'));
                 }
-            }
+//            }
         }
 
         $krynFile = $this->getKrynCore()->getWebFileSystem()->getFile(dirname($path));

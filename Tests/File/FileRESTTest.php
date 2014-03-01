@@ -82,7 +82,9 @@ class FileRESTTest extends KernelAwareTestCase
     {
         $id = dechex(time() / mt_rand(100, 500));
         $testPath = '/test_' . $id;
-        $response = $this->restCall('/kryn/admin/file/dir?path=' . $testPath, 'PUT');
+        $response = $this->restCall('/kryn/admin/file/dir', 'PUT', [
+            'path' => $testPath
+        ]);
         $this->assertEquals(true, $response['data']);
 
         $response = $this->restCall('/kryn/admin/file/single?path=' . $testPath);
@@ -96,7 +98,9 @@ class FileRESTTest extends KernelAwareTestCase
         $this->assertEquals(true, $file['writeAccess']);
         $this->assertEquals('dir', $file['type']);
 
-        $response = $this->restCall('/kryn/admin/file?path=' . $testPath, 'DELETE');
+        $response = $this->restCall('/kryn/admin/file', 'DELETE', [
+            'path' => $testPath
+        ]);
 
         $this->assertEquals(true, $response['data']);
     }
@@ -105,7 +109,9 @@ class FileRESTTest extends KernelAwareTestCase
     {
         $id = dechex(time() / mt_rand(100, 500));
         $testPath = '/test_' . $id . '.txt';
-        $response = $this->restCall('/kryn/admin/file?path=' . $testPath, 'PUT');
+        $response = $this->restCall('/kryn/admin/file', 'PUT', [
+            'path' => $testPath
+        ]);
         $this->assertEquals(true, $response['data']);
 
         $response = $this->restCall('/kryn/admin/file/single?path=' . $testPath);
@@ -119,7 +125,9 @@ class FileRESTTest extends KernelAwareTestCase
         $this->assertEquals(true, $file['writeAccess']);
         $this->assertEquals('file', $file['type']);
 
-        $response = $this->restCall('/kryn/admin/file?path=' . $testPath, 'DELETE');
+        $response = $this->restCall('/kryn/admin/file', 'DELETE', [
+            'path' => $testPath
+        ]);
 
         $this->assertEquals(true, $response['data']);
     }
@@ -128,7 +136,9 @@ class FileRESTTest extends KernelAwareTestCase
     {
         $id = dechex(time() / mt_rand(100, 500));
         $testPath = '/test_' . $id . '.txt';
-        $response = $this->restCall('/kryn/admin/file?path=' . $testPath, 'PUT');
+        $response = $this->restCall('/kryn/admin/file', 'PUT', [
+            'path' => $testPath
+        ]);
         $this->assertEquals(true, $response['data']);
 
         $response = $this->restCall('/kryn/admin/file/single?path=' . $testPath);
@@ -145,7 +155,9 @@ class FileRESTTest extends KernelAwareTestCase
 
         $id = dechex(time() / mt_rand(100, 500));
         $testDirPath = '/test_' . $id;
-        $response = $this->restCall('/kryn/admin/file/dir?path=' . $testDirPath, 'PUT');
+        $response = $this->restCall('/kryn/admin/file/dir', 'PUT', [
+            'path' => $testDirPath
+        ]);
         $this->assertEquals(true, $response['data']);
 
         $response = $this->restCall('/kryn/admin/file/paste', 'POST', [
@@ -163,9 +175,13 @@ class FileRESTTest extends KernelAwareTestCase
         $this->assertEquals(basename($testPath), $file['name']);
         $this->assertEquals($testDirPath, $file['dir']);
 
-        $response = $this->restCall('/kryn/admin/file?path=' . $newPath, 'DELETE');
+        $response = $this->restCall('/kryn/admin/file', 'DELETE', [
+            'path' => $newPath
+        ]);
         $this->assertEquals(true, $response['data']);
-        $response = $this->restCall('/kryn/admin/file?path=' . $testDirPath, 'DELETE');
+        $response = $this->restCall('/kryn/admin/file?path=' . $testDirPath, 'DELETE', [
+            'path' => $testDirPath
+        ]);
         $this->assertEquals(true, $response['data']);
     }
 
@@ -173,7 +189,9 @@ class FileRESTTest extends KernelAwareTestCase
     {
         $id = dechex(time() / mt_rand(100, 500));
         $testPath = '/test_' . $id . '.txt';
-        $response = $this->restCall('/kryn/admin/file?path=' . $testPath, 'PUT');
+        $response = $this->restCall('/kryn/admin/file', 'PUT', [
+            'path' => $testPath
+        ]);
         $this->assertEquals(true, $response['data']);
 
         $response = $this->restCall('/kryn/admin/file/single?path=' . $testPath);
@@ -190,7 +208,9 @@ class FileRESTTest extends KernelAwareTestCase
 
         $id = dechex(time() / mt_rand(100, 500));
         $testDirPath = '/test_' . $id;
-        $response = $this->restCall('/kryn/admin/file/dir?path=' . $testDirPath, 'PUT');
+        $response = $this->restCall('/kryn/admin/file/dir', 'PUT', [
+            'path' => $testDirPath
+        ]);
         $this->assertEquals(true, $response['data']);
 
         $response = $this->restCall('/kryn/admin/file/paste', 'POST', [
@@ -220,11 +240,17 @@ class FileRESTTest extends KernelAwareTestCase
         $this->assertEquals(true, $file['writeAccess']);
         $this->assertEquals('file', $file['type']);
 
-        $response = $this->restCall('/kryn/admin/file?path=' . $testPath, 'DELETE');
+        $response = $this->restCall('/kryn/admin/file', 'DELETE', [
+            'path' => $testPath
+        ]);
         $this->assertEquals(true, $response['data']);
-        $response = $this->restCall('/kryn/admin/file?path=' . $newPath, 'DELETE');
+        $response = $this->restCall('/kryn/admin/file', 'DELETE', [
+            'path' => $newPath
+        ]);
         $this->assertEquals(true, $response['data']);
-        $response = $this->restCall('/kryn/admin/file?path=' . $testDirPath, 'DELETE');
+        $response = $this->restCall('/kryn/admin/file', 'DELETE', [
+            'path' => $testDirPath
+        ]);
         $this->assertEquals(true, $response['data']);
     }
 

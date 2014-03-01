@@ -141,7 +141,7 @@ ka.FileUploader = new Class({
 
             this.fileUploadCancelBtn = new ka.Button(t('Cancel All')).addEvent('click', function(){
                 this.cancelUploads(true);
-            }).inject(this.dialog.topBar);
+            }.bind(this)).inject(this.dialog.topBar);
 
             this.fileUploadMinimizeBtn = new ka.Button(t('Minimize')).addEvent('click', this.minimizeUpload.bind(this)).inject(this.dialog.topBar);
 
@@ -326,14 +326,16 @@ ka.FileUploader = new Class({
             this.uploadStart(file);
 
             file.post[window._session.tokenid] = window._session.sessionid;
-            var url = _pathAdmin + "admin/file/upload?" + Object.toQueryString(file.post);
+            var url = _pathAdmin + "admin/file/upload";
             xhr.open('POST', url, true);
 
             xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
 
             var formData = new FormData();
             formData.append('file', file);
-            formData.append('penis', 'hallo');
+            Object.each(file.post, function(value, key) {
+                formData.append(key, value);
+            });
             xhr.send(formData);
         }
     },

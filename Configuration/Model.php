@@ -309,8 +309,8 @@ class Model implements \ArrayAccess
                     if (1 === count($types)) {
                         $returnType = $types[0];
 
-                        if (!class_exists($clazz = $returnType)) {
-                            if (!class_exists($clazz = $namespace . $returnType)) {
+                        if (!class_exists($clazz = $namespace . $returnType)) {
+                            if (!class_exists($clazz = $returnType)) {
                                 if (!'string' == ($clazz = $returnType)) {
                                     $clazz = null;
                                 }
