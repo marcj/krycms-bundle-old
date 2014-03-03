@@ -7,9 +7,14 @@ class CssHandler extends AbstractHandler implements LoaderHandlerInterface
     protected function getTag(AssetInfo $assetInfo)
     {
         if ($assetInfo->getFile()) {
+            $path = $this->getAssetPath($assetInfo->getFile());
+            $pubPath = $this->getPublicAssetPath($assetInfo->getFile());
+            if (file_exists($path)) {
+                $pubPath .= '?c=' . substr(md5(filemtime($path)),0, 6);
+            }
             return sprintf(
                 '<link rel="stylesheet" type="text/css" href="%s" >',
-                $this->getPublicAssetPath($assetInfo->getFile())
+                $pubPath
             );
         } else {
             return sprintf(
