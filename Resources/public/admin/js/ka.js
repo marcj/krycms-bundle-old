@@ -576,7 +576,7 @@ ka.getObjectUrl = function(objectKey, id) {
 };
 
 /**
- * This just cut off object://<objectName>/ and returns the raw primary key part.
+ * This just cuts off object://<objectName>/ and returns the raw primary key part.
  *
  * @param {String} url
  *

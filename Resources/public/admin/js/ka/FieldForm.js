@@ -635,7 +635,7 @@ ka.FieldForm = new Class({
 
             selection = instanceOf(obj, ka.Field) ? obj.getDefinition().selection : null;
 
-            if (!selection || 1 === selection.length) {
+            if (!selection || !selection.length || 1 === selection.length) {
                 if (selection && 1 === selection.length) {
                     id = selection[0];
                 }

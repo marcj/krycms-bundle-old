@@ -107,7 +107,7 @@ class Controller extends KrynController
             $res = array();
             if ($returnKeyAsRequested) {
 
-                //map requetsed id to real ids
+                //map requested id to real ids
                 $requestedIds = explode('/', $this->getObjects()->getCroppedObjectId($url));
                 $map = array();
                 foreach ($requestedIds as $id) {

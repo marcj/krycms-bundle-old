@@ -412,9 +412,13 @@ class Objects
             $url = substr($url, 9);
         }
 
-        $idx = strpos($url, '/');
+        $idx = strpos($url, '/'); //cut of bundleName
+        $url = -1 === $idx ? $url : substr($url, $idx +1 );
 
-        return false === $idx ? $url : substr($url, $idx + 1);
+        $idx = strpos($url, '/'); //cut of objectName
+        $url = -1 === $idx ? $url : substr($url, $idx +1 );
+
+        return $url;
     }
 
     /**
