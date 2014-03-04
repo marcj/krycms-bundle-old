@@ -5,65 +5,65 @@ General
 -------
 
 Frontend Inline Edit
-![Administration Frontend Edit](https://raw.github.com/KrynCmsBundle/master/Resources/doc/images/admin-frontend-edit.png)
+![Administration Frontend Edit](images/admin-frontend-edit.png)
 
 File manager
-![Administration File manager](https://raw.github.com/KrynCmsBundle/master/Resources/doc/images/admin-files-context-image.png)
+![Administration File manager](images/admin-files-context-image.png)
 
 System
-![System settings](https://raw.github.com/KrynCmsBundle/master/Resources/doc/images/admin-system.png)
+![System settings](images/admin-system.png)
 
 CRUD Framework
 
-![Administration CRUD Framework Window List](https://raw.github.com/KrynCmsBundle/master/Resources/doc/images/admin-list.png)
-![Administration CRUD Framework Window](https://raw.github.com/KrynCmsBundle/master/Resources/doc/images/admin-users.png)
+![Administration CRUD Framework Window List](images/admin-list.png)
+![Administration CRUD Framework Window](images/admin-users.png)
 
 Administration login
-![Administration login](https://raw.github.com/KrynCmsBundle/master/Resources/doc/images/admin-login.png)
+![Administration login](images/admin-login.png)
 
 Object chooser
-![Object chooser](https://raw.github.com/KrynCmsBundle/master/Resources/doc/images/admin-object-chooser.png)
+![Object chooser](images/admin-object-chooser.png)
 
 
 Extension Editor
 ----------------
 
 General Tab
-![General Tab](https://raw.github.com/KrynCmsBundle/master/Resources/doc/images/admin-extensioneditor-general.png)
+![General Tab](images/admin-extensioneditor-general.png)
 
 EntryPoints Tab
-![EntryPoints Tab](https://raw.github.com/KrynCmsBundle/master/Resources/doc/images/admin-extensioneditor-entrypoints.png)
+![EntryPoints Tab](images/admin-extensioneditor-entrypoints.png)
 
 Plugins Tab
-![Plugins Tab](https://raw.github.com/KrynCmsBundle/master/Resources/doc/images/admin-extensioneditor-plugins.png)
+![Plugins Tab](images/admin-extensioneditor-plugins.png)
 
 Objects Tab
-![Objects Tab](https://raw.github.com/KrynCmsBundle/master/Resources/doc/images/admin-extensioneditor-objects1.png)
+![Objects Tab](images/admin-extensioneditor-objects1.png)
 
 Objects Tab Fields
-![Objects Tab Fields](https://raw.github.com/KrynCmsBundle/master/Resources/doc/images/admin-extensioneditor-objects2.png)
+![Objects Tab Fields](images/admin-extensioneditor-objects2.png)
 
 Objects Tab Field properties
-![Objects Tab Field properties](https://raw.github.com/KrynCmsBundle/master/Resources/doc/images/admin-extensioneditor-objects3.png)
+![Objects Tab Field properties](images/admin-extensioneditor-objects3.png)
 
 
 CRUD Window Editor
 ------------------
 
 General Tab
-![General Tab](https://raw.github.com/KrynCmsBundle/master/Resources/doc/images/admin-windoweditor-general.png)
+![General Tab](images/admin-windoweditor-general.png)
 
 Edit/Add Tab
-![Edit/Add Tab](https://raw.github.com/KrynCmsBundle/master/Resources/doc/images/admin-windoweditor-edit-add.png)
+![Edit/Add Tab](images/admin-windoweditor-edit-add.png)
 
 List Tab
-![List Tab](https://raw.github.com/KrynCmsBundle/master/Resources/doc/images/admin-windoweditor-list.png)
+![List Tab](images/admin-windoweditor-list.png)
 
 Class Methods Tab
-![Class Methods Tab](https://raw.github.com/KrynCmsBundle/master/Resources/doc/images/admin-windoweditor-classmethods1.png)
+![Class Methods Tab](images/admin-windoweditor-classmethods1.png)
 
 Class Methods Tab 2
-![Class Methods Tab 2](https://raw.github.com/KrynCmsBundle/master/Resources/doc/images/admin-windoweditor-classmethods2.png)
+![Class Methods Tab 2](images/admin-windoweditor-classmethods2.png)
 
 
 
@@ -71,26 +71,26 @@ Permission Management
 ------------------
 
 Entry points
-![Entry points](https://raw.github.com/KrynCmsBundle/master/Resources/doc/images/admin-permission-management1.png)
+![Entry points](images/admin-permission-management1.png)
 
 Objects 1
-![Objects 1](https://raw.github.com/KrynCmsBundle/master/Resources/doc/images/admin-permission-management2.png)
+![Objects 1](images/admin-permission-management2.png)
 
 Objects 2
-![Objects 2](https://raw.github.com/KrynCmsBundle/master/Resources/doc/images/admin-permission-management3.png)
+![Objects 2](images/admin-permission-management3.png)
 
 Objects 3
-![Objects 3](https://raw.github.com/KrynCmsBundle/master/Resources/doc/images/admin-permission-management4.png)
+![Objects 3](images/admin-permission-management4.png)
 
 
 Installer
 ------------------
 
 Step 3
-![Step 3](https://raw.github.com/KrynCmsBundle/master/Resources/doc/images/installer-step3.png)
+![Step 3](images/installer-step3.png)
 
 Stuff
 ------------------
 
 Errors/Exception Debug View
-![Errors/Exception Debug View](https://raw.github.com/KrynCmsBundle/master/Resources/doc/images/errors-exception-debug-view.png)
+![Errors/Exception Debug View](images/errors-exception-debug-view.png)
