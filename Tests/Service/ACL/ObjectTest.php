@@ -9,6 +9,7 @@ use Kryn\CmsBundle\Model\Group;
 use Kryn\CmsBundle\Model\Node;
 use Kryn\CmsBundle\Model\NodeQuery;
 use Kryn\CmsBundle\Model\User;
+use Kryn\CmsBundle\Tests\AuthTestCase;
 use Kryn\CmsBundle\Tests\KernelAwareTestCase;
 use Test\Model\Item;
 use Test\Model\ItemCategory;
@@ -16,7 +17,7 @@ use Test\Model\ItemCategoryQuery;
 use Test\Model\ItemQuery;
 use Test\Model\TestQuery;
 
-class ObjectTest extends KernelAwareTestCase
+class ObjectTest extends AuthTestCase
 {
     public function testConditionToSql()
     {
@@ -55,12 +56,10 @@ class ObjectTest extends KernelAwareTestCase
         $this->getACL()->setCaching(false);
         $this->getACL()->removeObjectRules('kryncms/node');
 
-        $this->getKrynCore()->getClient()->login('admin', 'admin');
-
+        $this->getKrynCore()->getClient()->login('test', 'test');
         $user = $this->getKrynCore()->getClient()->getUser();
 
         $domain = DomainQuery::create()->findOne();
-
         $root = NodeQuery::create()->findRoot($domain->getId());
 
         $subNode = new Node();
@@ -81,7 +80,7 @@ class ObjectTest extends KernelAwareTestCase
         $rule->setTargetId($user->getId());
         $rule->setMode(\Kryn\CmsBundle\ACL::ALL);
         $rule->setConstraintType(\Kryn\CmsBundle\ACL::CONSTRAINT_ALL);
-        $rule->setPrio(0);
+        $rule->setPrio(2);
         $rule->save();
 
         //revoke access for all children of `TestNode tree`
@@ -99,22 +98,43 @@ class ObjectTest extends KernelAwareTestCase
         $rule2->setSub(true);
         $rule2->save();
 
+        $this->assertFalse($this->getACL()->checkListExact('kryncms/node', $subNode->getId()));
+        $this->assertFalse($this->getACL()->checkListExact('kryncms/node', $subNode2->getId()));
+
         $items = $this->getObjects()->getBranch('kryncms/node', $subNode->getId(), null, 1, null, [
             'permissionCheck' => true
         ]);
         $this->assertNull($items, 'rule2 revokes the access to all elements');
+        $item = $this->getObjects()->get('kryncms/node', $subNode2->getId(), [
+            'permissionCheck' => true
+        ]);
+        $this->assertNull($item);
 
 
+
+        // Deactivate sub
         $rule2->setSub(false);
         $rule2->save();
+
+        $this->assertFalse($this->getACL()->checkListExact('kryncms/node', $subNode->getId()));
+        $this->assertTrue($this->getACL()->checkListExact('kryncms/node', $subNode2->getId()));
         $items = $this->getObjects()->getBranch('kryncms/node', $subNode->getId(), null, 1, null, [
             'permissionCheck' => true
         ]);
         $this->assertEquals('TestNode sub', $items[0]['title'], 'We got TestNode sub');
+        $item = $this->getObjects()->get('kryncms/node', $subNode2->getId(), [
+            'permissionCheck' => true
+        ]);
+        $this->assertEquals('TestNode sub', $item['title'], 'We got TestNode sub');
 
 
+
+        // Activate access
         $rule2->setAccess(true);
         $rule2->save();
+        $this->assertTrue($this->getACL()->checkListExact('kryncms/node', $subNode->getId()));
+        $this->assertTrue($this->getACL()->checkListExact('kryncms/node', $subNode2->getId()));
+
         $items = $this->getObjects()->getBranch('kryncms/node', $subNode->getId(), null, 1, null, [
             'permissionCheck' => true
         ]);
@@ -170,7 +190,7 @@ class ObjectTest extends KernelAwareTestCase
         $rule->setTargetId($user->getId());
         $rule->setMode(\Kryn\CmsBundle\ACL::ALL);
         $rule->setConstraintType(\Kryn\CmsBundle\ACL::CONSTRAINT_ALL);
-        $rule->setPrio(0);
+        $rule->setPrio(2);
         $rule->save();
 
         $rule = new Acl();
@@ -372,12 +392,12 @@ class ObjectTest extends KernelAwareTestCase
         $test1->save();
 
         $this->assertFalse(
-            $this->getACL()->checkList('test/item', $item1->getId(), $this->getACL()->GROUP, $group->getId()),
+            $this->getACL()->checkList('test/item', $item1->getId(), \Kryn\CmsBundle\ACL::GROUP, $group->getId()),
             'we have no rules, so everyone except admin user and admin group has no access.'
         );
 
         $this->assertTrue(
-            $this->getACL()->checkList('test/item', $item1->getId(), $this->getACL()->GROUP, 1),
+            $this->getACL()->checkList('test/item', $item1->getId(), \Kryn\CmsBundle\ACL::GROUP, 1),
             'we have no rules, so only group admin has access.'
         );
 
@@ -386,26 +406,26 @@ class ObjectTest extends KernelAwareTestCase
             'we have no rules, so only user admin has access.'
         );
 
-        $this->getACL()->setObjectList('test/item', $this->getACL()->GROUP, $group->getId(), true);
+        $this->getACL()->setObjectList('test/item', \Kryn\CmsBundle\ACL::GROUP, $group->getId(), true);
         $this->assertTrue(
-            $this->getACL()->checkList('test/item', $item1->getId(), $this->getACL()->GROUP, $group->getId()),
+            $this->getACL()->checkList('test/item', $item1->getId(), \Kryn\CmsBundle\ACL::GROUP, $group->getId()),
             'testGroup got list access to all test/item objects.'
         );
 
-        $this->getACL()->setObjectListExact('test/item', $item1->getId(), $this->getACL()->GROUP, $group->getId(), false);
+        $this->getACL()->setObjectListExact('test/item', $item1->getId(), \Kryn\CmsBundle\ACL::GROUP, $group->getId(), false);
         $this->assertFalse(
-            $this->getACL()->checkList('test/item', $item1->getId(), $this->getACL()->GROUP, $group->getId()),
+            $this->getACL()->checkList('test/item', $item1->getId(), \Kryn\CmsBundle\ACL::GROUP, $group->getId()),
             'testGroup got list access-denied to item 1.'
         );
 
         $this->assertTrue(
-            $this->getACL()->checkList('test/item', $item2->getId(), $this->getACL()->GROUP, $group->getId()),
+            $this->getACL()->checkList('test/item', $item2->getId(), \Kryn\CmsBundle\ACL::GROUP, $group->getId()),
             'testGroup still have access to item2.'
         );
 
-        $this->getACL()->setObjectListExact('test/item', $item2->getId(), $this->getACL()->GROUP, $group->getId(), false);
+        $this->getACL()->setObjectListExact('test/item', $item2->getId(), \Kryn\CmsBundle\ACL::GROUP, $group->getId(), false);
         $this->assertFalse(
-            $this->getACL()->checkList('test/item', $item2->getId(), $this->getACL()->GROUP, $group->getId()),
+            $this->getACL()->checkList('test/item', $item2->getId(), \Kryn\CmsBundle\ACL::GROUP, $group->getId()),
             'testGroup does not have access to item2 anymore.'
         );
 
@@ -424,17 +444,17 @@ class ObjectTest extends KernelAwareTestCase
         );
 
         //access to every item
-        $acl = $this->getACL()->setObjectList('test/item', $this->getACL()->GROUP, $group->getId(), true);
+        $acl = $this->getACL()->setObjectList('test/item', \Kryn\CmsBundle\ACL::GROUP, $group->getId(), true);
         $this->assertTrue(
             $this->getACL()->checkList('test/item', $item2->getId(), \Kryn\CmsBundle\ACL::USER, $user->getId()),
             'testUser has now access to all items through his group.'
         );
         $this->assertTrue(
-            $this->getACL()->checkList('test/item', $item1->getId(), $this->getACL()->GROUP, $group->getId()),
+            $this->getACL()->checkList('test/item', $item1->getId(), \Kryn\CmsBundle\ACL::GROUP, $group->getId()),
             'testGroup has now access to all items.'
         );
         $this->assertTrue(
-            $this->getACL()->checkList('test/item', $item2->getId(), $this->getACL()->GROUP, $group->getId()),
+            $this->getACL()->checkList('test/item', $item2->getId(), \Kryn\CmsBundle\ACL::GROUP, $group->getId()),
             'testGroup has now access to all items.'
         );
 
@@ -446,11 +466,11 @@ class ObjectTest extends KernelAwareTestCase
             'testUser has no access anymore, since we deleted the access-for-all rule.'
         );
         $this->assertFalse(
-            $this->getACL()->checkList('test/item', $item1->getId(), $this->getACL()->GROUP, $group->getId()),
+            $this->getACL()->checkList('test/item', $item1->getId(), \Kryn\CmsBundle\ACL::GROUP, $group->getId()),
             'testGroup has no access anymore to all items (item1).'
         );
         $this->assertFalse(
-            $this->getACL()->checkList('test/item', $item2->getId(), $this->getACL()->GROUP, $group->getId()),
+            $this->getACL()->checkList('test/item', $item2->getId(), \Kryn\CmsBundle\ACL::GROUP, $group->getId()),
             'testGroup has no access anymore to all items (item2).'
         );
 
@@ -458,37 +478,37 @@ class ObjectTest extends KernelAwareTestCase
         $this->getACL()->setObjectListCondition(
             'test/item',
             array(array('id', '>', $item1->getId())),
-            $this->getACL()->GROUP,
+            \Kryn\CmsBundle\ACL::GROUP,
             $group->getId(),
             true
         );
         $this->assertTrue(
-            $this->getACL()->checkList('test/item', $item2->getId(), $this->getACL()->GROUP, $group->getId()),
+            $this->getACL()->checkList('test/item', $item2->getId(), \Kryn\CmsBundle\ACL::GROUP, $group->getId()),
             'testGroup has access to all items after item1'
         );
 
         $this->assertFalse(
-            $this->getACL()->checkList('test/item', $item1->getId(), $this->getACL()->GROUP, $group->getId()),
+            $this->getACL()->checkList('test/item', $item1->getId(), \Kryn\CmsBundle\ACL::GROUP, $group->getId()),
             'testGroup has access to all items after item1, but only > , so not item1 itself.'
         );
 
         //revoke anything to object 'test\item'
-        $this->getACL()->setObjectList('test/item', $this->getACL()->GROUP, $group->getId(), false);
+        $this->getACL()->setObjectList('test/item', \Kryn\CmsBundle\ACL::GROUP, $group->getId(), false);
         $this->assertFalse(
-            $this->getACL()->checkList('test/item', $item2->getId(), $this->getACL()->GROUP, $group->getId()),
+            $this->getACL()->checkList('test/item', $item2->getId(), \Kryn\CmsBundle\ACL::GROUP, $group->getId()),
             'testGroup has no access to all items after item1'
         );
 
         //check against object test
-        $this->getACL()->setObjectListExact('test/test', $test1->getId(), $this->getACL()->GROUP, $group->getId(), true);
+        $this->getACL()->setObjectListExact('test/test', $test1->getId(), \Kryn\CmsBundle\ACL::GROUP, $group->getId(), true);
         $this->assertTrue(
-            $this->getACL()->checkList('test/test', $test1->getId(), $this->getACL()->GROUP, $group->getId()),
+            $this->getACL()->checkList('test/test', $test1->getId(), \Kryn\CmsBundle\ACL::GROUP, $group->getId()),
             'testGroup has access test1.'
         );
 
-        $this->getACL()->setObjectList('test/test', $this->getACL()->GROUP, $group->getId(), false);
+        $this->getACL()->setObjectList('test/test', \Kryn\CmsBundle\ACL::GROUP, $group->getId(), false);
         $this->assertFalse(
-            $this->getACL()->checkList('test/test', $test1->getId(), $this->getACL()->GROUP, $group->getId()),
+            $this->getACL()->checkList('test/test', $test1->getId(), \Kryn\CmsBundle\ACL::GROUP, $group->getId()),
             'testGroup has no access test1.'
         );
 

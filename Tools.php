@@ -76,8 +76,8 @@ class Tools {
     public static function dbQuote($value, $table = '')
     {
         if (is_array($value)) {
-            foreach ($value as &$value) {
-                $value = static::dbQuote($value);
+            foreach ($value as &$v) {
+                $v = static::dbQuote($v);
             }
 
             return $value;
@@ -100,13 +100,13 @@ class Tools {
     public static function urlEncode($string)
     {
         $string = rawurlencode($string);
-        $string = str_replace('%2F', '%25252F', $string);
+        $string = str_replace('%2F', '%252F', $string);
         return $string;
     }
 
     public static function urlDecode($string)
     {
-        $string = str_replace('%25252F', '%2F', $string);
+        $string = str_replace('%252F', '%2F', $string);
         return rawurldecode($string);
     }
 

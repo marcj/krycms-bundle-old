@@ -16,14 +16,14 @@ class PageResponseTest extends KernelAwareTestCase
 
         $assetsTags = $response->getAssetTags();
         $expected = <<<EOF
-<script type="text/javascript" src="bundles/test/page-response-test/javascript1.js"></script>
+<script type="text/javascript" src="bundles/test/page-response-test/javascript1.js\?c=([a-z0-9]{6})"></script>
 <script type="text/javascript">
 var c = 'cde'
 </script>
-<script type="text/javascript" src="bundles/test/page-response-test/javascript2.js"></script>
+<script type="text/javascript" src="bundles/test/page-response-test/javascript2.js\?c=([a-z0-9]{6})"></script>
 EOF;
 
-        $this->assertEquals($expected, $assetsTags['jsTags']);
+        $this->assertRegExp("#$expected#", $assetsTags['jsTags']);
     }
 
     public function testJsAssetsCompressed()
@@ -39,7 +39,7 @@ EOF;
 <script type="text/javascript">
 var c = 'cde'
 </script>
-<script type="text/javascript" src="cache/compressed-js/([a-z0-9]{32}).js"></script>
+<script type="text/javascript" src="cache/compressed-js/([a-z0-9]{32}).js\?c=([a-z0-9]{6})"></script>
 EOF;
 
         $this->assertRegExp("#$expected#", $assetsTags['jsTags']);
@@ -71,14 +71,14 @@ EOF;
 
         $assetsTags = $response->getAssetTags();
         $expected = <<<EOF
-<link rel="stylesheet" type="text/css" href="bundles/test/page-response-test/style1.css" >
+<link rel="stylesheet" type="text/css" href="bundles/test/page-response-test/style1.css\?c=([a-z0-9]{6})" >
 <style type="text/css">
 body {font-size: 12px;}
 </style>
-<link rel="stylesheet" type="text/css" href="bundles/test/page-response-test/style2.css" >
+<link rel="stylesheet" type="text/css" href="bundles/test/page-response-test/style2.css\?c=([a-z0-9]{6})" >
 EOF;
 
-        $this->assertEquals($expected, $assetsTags['cssTags']);
+        $this->assertRegExp("#$expected#", $assetsTags['cssTags']);
     }
 
     public function testCssAssetsCompressed()
@@ -94,7 +94,7 @@ EOF;
 <style type="text/css">
 body {font-size: 12px;}
 </style>
-<link rel="stylesheet" type="text/css" href="cache/compressed-css/([a-z0-9]{32}).css" >
+<link rel="stylesheet" type="text/css" href="cache/compressed-css/([a-z0-9]{32}).css\?c=([a-z0-9]{6})" >
 EOF;
 
         $this->assertRegExp("#$expected#", $assetsTags['cssTags']);

@@ -11,8 +11,13 @@ var kryncms_user_acl = new Class({
 
     currentAcls: [],
 
-    initialize: function (pWin) {
-        this.win = pWin;
+    /**
+     * @var {ka.Window}
+     */
+    win: null,
+
+    initialize: function (window) {
+        this.win = window;
         this.createLayout();
     },
 
@@ -40,7 +45,7 @@ var kryncms_user_acl = new Class({
                 clearTimeout(this.timeout);
             }
             this.timeout = this.loadList.delay(100, this);
-        }.bind(this))
+        }.bind(this));
 
         this.tabs = new ka.TabPane(this.right, true, this.win);
 
@@ -73,11 +78,11 @@ var kryncms_user_acl = new Class({
         this.loadList();
     },
 
-    loadObjectRules: function (pObjectKey) {
-        if (pObjectKey) {
-            pObjectKey = ka.normalizeObjectKey(pObjectKey);
+    loadObjectRules: function (objectKey) {
+        if (objectKey) {
+            objectKey = ka.normalizeObjectKey(objectKey);
             //ka.getObjectDefinition(pObjectKey);
-            this.currentObject = pObjectKey;
+            this.currentObject = objectKey;
         }
 
         if (!this.currentObject) {
@@ -152,10 +157,10 @@ var kryncms_user_acl = new Class({
         if (document.id(tree).alreadyMapped) return;
 
         document.id(tree).alreadyMapped = true;
-        document.id(tree).addEvent('mousedown:relay(.ka-objectTree-item)', function(pEvent, target) {
-            pEvent.stop();
+        document.id(tree).addEvent('mousedown:relay(.ka-objectTree-item)', function(event, target) {
+            event.stop();
         });
-        document.id(tree).addEvent('mouseover:relay(.ka-objectTree-item)', function(pEvent, target) {
+        document.id(tree).addEvent('mouseover:relay(.ka-objectTree-item)', function(event, target) {
             delete target.isMouseOut;
 
             if (target.lastPlusSign) {
@@ -177,7 +182,7 @@ var kryncms_user_acl = new Class({
             }.bind(this));
         }.bind(this));
 
-        document.id(tree).addEvent('mouseout:relay(.ka-objectTree-item)', function (pEvent, target) {
+        document.id(tree).addEvent('mouseout:relay(.ka-objectTree-item)', function (event, target) {
             target.isMouseOut = true;
 
             target.lastTimer = (function () {
@@ -403,14 +408,14 @@ var kryncms_user_acl = new Class({
         }.bind(this));
     },
 
-    filterRules: function (pConstraintType, pConstraintCode, pDomObject) {
+    filterRules: function (constraintType, constraintCode, domObject) {
 
-        if (pDomObject) {
+        if (domObject) {
             this.objectConstraintsContainer.getElements('.active').removeClass('active');
 
-            if (pDomObject) {
-                if (pDomObject.hasClass('ka-List-item')) {
-                    pDomObject.addClass('active');
+            if (domObject) {
+                if (domObject.hasClass('ka-List-item')) {
+                    domObject.addClass('active');
                     if (this.lastObjectTree) {
                         this.lastObjectTree.getFieldObject().getTree().deselect();
                     }
@@ -421,12 +426,12 @@ var kryncms_user_acl = new Class({
                 }
             }
 
-            if (typeOf(pConstraintType) != 'null') {
-                this.lastConstraintType = pConstraintType;
-                this.lastConstraintCode = pConstraintCode;
+            if (typeOf(constraintType) != 'null') {
+                this.lastConstraintType = constraintType;
+                this.lastConstraintCode = constraintCode;
             } else if (this.lastConstraintType) {
-                pConstraintType = this.lastConstraintType;
-                pConstraintCode = this.lastConstraintCode;
+                constraintType = this.lastConstraintType;
+                constraintCode = this.lastConstraintCode;
             }
         } else {
             delete this.lastConstraintType;
@@ -440,11 +445,11 @@ var kryncms_user_acl = new Class({
             var show = false;
             var completelyHide = false;
 
-            if (typeOf(pConstraintType) != 'null') {
-                if (pConstraintType === false || child.rule.constraintType == pConstraintType) {
+            if (typeOf(constraintType) != 'null') {
+                if (constraintType === false || child.rule.constraintType == constraintType) {
 
-                    if (pConstraintType === false || pConstraintType == 0 ||
-                        (pConstraintType >= 1 && pConstraintCode == child.rule.constraintCode)) {
+                    if (constraintType === false || constraintType == 0 ||
+                        (constraintType >= 1 && constraintCode == child.rule.constraintCode)) {
                         show = true;
                     }
                 }
@@ -1215,7 +1220,6 @@ var kryncms_user_acl = new Class({
     },
 
     loadEntryPoints: function () {
-
         this.currentEntrypointDoms = {};
 
         this.entryPointList = new Element('div', {
@@ -1235,7 +1239,7 @@ var kryncms_user_acl = new Class({
         })
             .inject(this.entryPointTab.pane);
 
-        this.adminEntryPointDom = this.addEntryPointTree(ka.getConfig('KrynCmsBundle'), 'KrynCmsBundle');
+        this.adminEntryPointDom = this.addEntryPointTree(ka.getConfig('KrynCmsBundle'), 'kryncms');
 
         Object.each(ka.settings.configs, function (ext, extCode) {
             if (extCode != 'KrynCmsBundle' && ext.entryPoints) {
@@ -1296,7 +1300,7 @@ var kryncms_user_acl = new Class({
     addEntryPointTree: function (bundleConfig, bundleName) {
         var title = ka.getBundleTitle(bundleName);
 
-        if (bundleName != 'KrynCmsBundle') {
+        if (bundleName !== 'kryncms') {
             title += ' ('+bundleName+')';
         }
 
@@ -1318,38 +1322,37 @@ var kryncms_user_acl = new Class({
             this.extContainer = childContainer;
         }
 
-        a.entryPath = path;
+        a.entryPath = ka.urlEncode(path);
         a.childContainer = childContainer;
         this.currentEntrypointDoms[a.entryPath] = a;
-        this.loadEntryPointChildren(bundleConfig.entryPoints, bundleName, childContainer);
+        this.loadEntryPointChildren(bundleConfig.entryPoints, '/' + bundleName, childContainer);
 
         return a;
-
     },
 
-    loadEntryPointChildren: function (pAdmin, pCode, pChildContainer) {
-        Object.each(pAdmin, function (item, index) {
+    loadEntryPointChildren: function (entryPoints, parentCode, childContainer) {
+        Object.each(entryPoints, function (item, index) {
             if (item.acl == false) {
                 return;
             }
 
+            var code = (parentCode == '/' ? '/' : parentCode + '/') + index;
             var element = new Element('a', {
                 href: 'javascript:;',
                 text: item.label,
-                title: this.getEntryPointTitle(item) + ', ' + pCode + index
-            }).inject(pChildContainer);
+                title: this.getEntryPointTitle(item) + ', ' + code
+            }).inject(childContainer);
 
             new Element('img', {
                 src: _path + '' + this.getEntryPointIcon(item)
             }).inject(element, 'top');
 
-            var code = (pCode == '/' ? '/' : pCode + '/') + index;
-            element.entryPath = code;
+            element.entryPath = ka.urlEncode(code);
             this.currentEntrypointDoms[element.entryPath] = element;
-            var childContainer = new Element('div',
-                {'class': 'ka-user-acl-tree-childcontainer', style: 'padding-left: 25px;'}).inject(pChildContainer);
+            var newChildContainer = new Element('div',
+                {'class': 'ka-user-acl-tree-childcontainer', style: 'padding-left: 25px;'}).inject(childContainer);
 
-            this.loadEntryPointChildren(item.children, code, childContainer);
+            this.loadEntryPointChildren(item.children, code, newChildContainer);
 
         }.bind(this));
     },
@@ -1604,10 +1607,10 @@ var kryncms_user_acl = new Class({
 
     },
 
-    clickEntryPointRule: function (pDom) {
+    clickEntryPointRule: function (domElement) {
 
-        if (pDom.rule) {
-            this.showEntrypointRule(pDom);
+        if (domElement.rule) {
+            this.showEntrypointRule(domElement);
         } else {
 
             var rule = {
@@ -1615,16 +1618,16 @@ var kryncms_user_acl = new Class({
                 constraintType: 1,
                 sub: 1,
                 prio: 0,
-                constraintCode: pDom.entryPath,
+                constraintCode: domElement.entryPath,
                 access: 1,
                 targetType: this.currentTargetType,
                 targetId: this.currentTargetRsn
             };
-            this.currentEntrypointDoms[pDom.entryPath] = pDom;
+            this.currentEntrypointDoms[domElement.entryPath] = domElement;
             this.currentAcls.push(rule);
             this.addEntryPointRuleToTree(rule);
 
-            this.clickEntryPointRule(pDom);
+            this.clickEntryPointRule(domElement);
         }
 
     },
@@ -1702,9 +1705,9 @@ var kryncms_user_acl = new Class({
 
     },
 
-    addEntryPointRuleToTree: function (pRule) {
+    addEntryPointRuleToTree: function (rule) {
 
-        var dom = this.currentEntrypointDoms[pRule.constraintCode];
+        var dom = this.currentEntrypointDoms[rule.constraintCode];
 
         if (dom.ruleIcon) {
             dom.ruleIcon.destroy();
@@ -1716,17 +1719,17 @@ var kryncms_user_acl = new Class({
             dom.ruleLineChildern.destroy();
         }
 
-        var accessIcon = pRule.access == 1 ? 'accept' : 'exclamation';
-        var accessColor = pRule.access == 1 ? 'green' : 'red';
+        var accessIcon = rule.access == 1 ? 'accept' : 'exclamation';
+        var accessColor = rule.access == 1 ? 'green' : 'red';
 
-        dom.rule = pRule;
+        dom.rule = rule;
 
         dom.ruleIcon = new Element('img', {
             src: _path + 'bundles/kryncms/admin/images/icons/' + accessIcon + '.png',
             style: 'position: absolute; left: -13px; top: 4px; width: 10px;'
         }).inject(dom);
 
-        if (pRule.sub == 1) {
+        if (rule.sub == 1) {
 
             dom.ruleLine = new Element('div', {
                 style: 'position: absolute; left: -9px; height: 4px; top: 14px; width: 1px; border-right: 1px solid ' +

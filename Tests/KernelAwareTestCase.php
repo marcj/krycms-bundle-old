@@ -24,8 +24,6 @@ class KernelAwareTestCase extends WebTestCase
         static::$kernel->boot();
 
         $this->container = static::$kernel->getContainer();
-
-        \Kryn\CmsBundle\Configuration\Model::$serialisationKrynCore = $this->getKrynCore();
     }
 
     public function login()

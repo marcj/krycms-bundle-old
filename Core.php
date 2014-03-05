@@ -94,7 +94,6 @@ class Core extends Controller
     function __construct(Container $container)
     {
         $this->container = $container;
-
         Configuration\Model::$serialisationKrynCore = $this;
     }
 
@@ -342,9 +341,7 @@ class Core extends Controller
             $systemConfigHash = file_exists($configFile) ? md5(filemtime($configFile)) : -1;
 
             if ($withCache && $systemConfigCached && $cachedSum === $systemConfigHash) {
-                Model::$serialisationKrynCore = $this;
                 $this->systemConfig = @unserialize($systemConfigCached);
-                Model::$serialisationKrynCore = null;
             }
 
             if (!$this->systemConfig) {
@@ -827,13 +824,11 @@ class Core extends Controller
         $hash = md5(implode('.', $hashes));
 
         if ($cached) {
-            Model::$serialisationKrynCore = $this;
             $cached = unserialize($cached);
             if (is_array($cached) && $cached['md5'] == $hash) {
                 $this->configs = $cached['data'];
                 $this->configs->setCore($this);
             }
-            Model::$serialisationKrynCore = null;
         }
 
         if (!$this->configs) {

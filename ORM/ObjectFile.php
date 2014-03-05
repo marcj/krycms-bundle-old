@@ -11,6 +11,14 @@ use Kryn\CmsBundle\Tools;
 
 class ObjectFile extends Propel
 {
+
+    /**
+     */
+    public function getNestedSubCondition(Condition $condition)
+    {
+        return null;
+    }
+
     /**
      * {@inheritDoc}
      *
@@ -169,6 +177,23 @@ class ObjectFile extends Propel
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function getParent($pk, $options = null)
+    {
+        $path = is_numeric($pk['id']) ? $this->getKrynCore()->getWebFileSystem()->getPath($pk['id']) : $pk['id'];
+
+        if ('/' === $path) {
+            return array();
+        }
+
+        $part = $path;
+        $part = substr($part, 0, strrpos($part, '/'));
+        $item = $this->getItem($part);
+        return $item;
+    }
+
+    /**
      * {@inheritDoc}
      */
     public function getItems(Condition $condition = null, $options = null)
@@ -270,12 +295,12 @@ class ObjectFile extends Propel
         }
 
         $c = 0;
-        $offset = $options['offset'];
-        $limit = $options['limit'];
+//        $offset = $options['offset'];
+//        $limit = $options['limit'];
         $result = array();
 
 
-        $blacklistedFiles = array('/index.php' => 1, '/install.php' => 1);
+        $blacklistedFiles = array();
         $showHiddenFiles = false; //todo
 
         foreach ($files as $file) {
@@ -285,19 +310,19 @@ class ObjectFile extends Propel
                 continue;
             }
 
-            if ($condition && $condition->hasRules() && !$condition->satisfy($file, 'KrynCmsBundle:file')) {
+            if ($condition && $condition->hasRules() && !$condition->satisfy($file, 'kryncms/file')) {
                 continue;
             }
 
             $file['writeAccess'] = $this->getKrynCore()->getACL()->checkUpdate('Core\\File', array('id' => $file['id']));
 
             $c++;
-            if ($offset && $offset >= $c) {
-                continue;
-            }
-            if ($limit && $limit < $c) {
-                continue;
-            }
+//            if ($offset && $offset >= $c) {
+//                continue;
+//            }
+//            if ($limit && $limit < $c) {
+//                break;
+//            }
 
             if ($depth > 0) {
                 $children = array();

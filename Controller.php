@@ -17,6 +17,10 @@ class Controller extends sController implements ContainerAwareInterface {
             $adminPrefix = substr($adminPrefix, 0, -1);
         }
 
+        if (!$this->getRequest()) {
+            return false;
+        }
+
         return (0 === strpos($this->getRequest()->getPathInfo(), $adminPrefix.'/'));
     }
 

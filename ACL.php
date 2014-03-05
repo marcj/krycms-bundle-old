@@ -170,16 +170,7 @@ class ACL
         $userId = '';
         if ($user) {
             $targetId = $userId = $user->getId();
-            $userGroups = $user->getUserGroups();
-
-            if (count($userGroups) > 0) {
-                foreach ($userGroups as $group) {
-                    $inGroups[] = $group->getGroupMembershipId();
-                }
-                $inGroups = implode(', ', $inGroups);
-            } else {
-                $inGroups = '0';
-            }
+            $inGroups = $user->getGroupIds();
         }
 
         $cacheKey = '';
@@ -224,7 +215,7 @@ class ACL
                 (
                     " . implode(' OR ', $targets) . "
                 )
-                ORDER BY prio DESC
+                ORDER BY prio ASC
         ";
 
         $stmt = $con->prepare($query);
@@ -270,7 +261,7 @@ class ACL
     {
         $objectKey = Objects::normalizeObjectKey($objectKey);
         $obj = $this->getObjects()->getClass($objectKey);
-        $rules =& self::getRules($objectKey, 1);
+        $rules =& self::getRules($objectKey, static::LISTING);
 
         if (count($rules) == 0) {
             return null;
@@ -316,12 +307,13 @@ class ACL
 
             if ($rule['access'] == 1) {
 
-                $conditionObject->addOr($condition);
-
                 if ($denyList) {
-                    $conditionObject->add('AND NOT', $denyList);
+                    $condition = array($condition, 'AND NOT', $denyList);
+                    $conditionObject->addOr($condition);
+//                    $conditionObject->add('AND NOT', $denyList);
+                } else {
+                    $conditionObject->addOr($condition);
                 }
-
             }
 
             if ($rule['access'] != 1) {
@@ -338,7 +330,7 @@ class ACL
         }
 
         if ($this->getCaching()) {
-            $this->getKrynCore()->setDistributedCache('core/acl-listing/' . $cacheKey, $conditionObject);
+            //$this->getKrynCore()->setDistributedCache('core/acl-listing/' . $cacheKey, $conditionObject);
         }
 
         return $conditionObject;
@@ -656,7 +648,7 @@ class ACL
         if ($pk && $this->getCaching()) {
             $pkString = $this->getObjects()->getObjectUrlId($objectKey, $pk);
             $cacheKey = md5($targetType.'.'.$targetId . '.'.$objectKey . '/' . $pkString . '/' . $field);
-            $cached = $this->getKrynCore()->getDistributedCache('core/acl/'.md5($cacheKey));
+            $cached = $this->getKrynCore()->getDistributedCache('core/acl/'.$cacheKey);
             if (null !== $cached) {
                 return $cached;
             }
@@ -731,6 +723,21 @@ class ACL
                  */
                 } else {
                     $match = true;
+                }
+
+                if (!$match && $acl['sub']) {
+                    // we need to check if a parent matches this $acl as we have sub=true
+                    $parentItem = $this->getObjects()->get($objectKey, $currentObjectPk);
+
+                    while ($parentItem = $this->getObjects()->getParent($objectKey, $this->getObjects()->getObjectPk($objectKey, $parentItem))) {
+                        if ($acl['constraint_type'] == 2 && $this->getObjects()->satisfy($parentItem, $acl['constraint_code'])) {
+                            $match = true;
+                            break;
+                        } else if ($acl['constraint_type'] == 1 && $acl['constraint_code'] == $this->getObjects()->getObjectUrlId($objectKey, $parentItem)) {
+                            $match = true;
+                            break;
+                        }
+                    }
                 }
 
                 if ($match) {

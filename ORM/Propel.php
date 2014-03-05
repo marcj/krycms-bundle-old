@@ -50,7 +50,7 @@ class Propel extends ORMAbstract
     }
 
     /**
-     * Propels uses for his nested-set objects `lft` and `rgt` fields.
+     * Propel uses for his nested-set objects `lft` and `rgt` fields.
      * So we include with this condition all entries 'inside' the entry
      * defined through $condition.
      *

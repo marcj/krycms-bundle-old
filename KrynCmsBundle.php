@@ -3,6 +3,8 @@
 namespace Kryn\CmsBundle;
 
 use Doctrine\Common\Annotations\AnnotationRegistry;
+use Kryn\CmsBundle\Configuration\Model;
+use Kryn\CmsBundle\Configuration\SystemConfig;
 use Kryn\CmsBundle\DependencyInjection\AssetCompilerCompilerPass;
 use Kryn\CmsBundle\DependencyInjection\ContentTypesCompilerPass;
 use Kryn\CmsBundle\DependencyInjection\FieldTypesCompilerPass;
@@ -18,6 +20,11 @@ class KrynCmsBundle extends Bundle
      * @var UniversalClassLoader
      */
     protected $additionalLoader;
+
+    /**
+     * @var SystemConfig
+     */
+    public static $systemConfig;
 
     public function build(ContainerBuilder $container)
     {
@@ -37,6 +44,8 @@ class KrynCmsBundle extends Bundle
 
         /** @var $krynCore Core */
         $krynCore = $this->container->get('kryn_cms');
+        static::$systemConfig = $krynCore->getSystemConfig();
+        Model::$serialisationKrynCore = $krynCore;
 
         $krynCore->prepareWebSymlinks();
         $krynCore->loadBundleConfigs();

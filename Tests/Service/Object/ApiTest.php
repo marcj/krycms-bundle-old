@@ -45,13 +45,13 @@ class ApiTest extends KernelAwareTestCase
         $this->assertEquals(array('id' => 24, 'id2' => 2), $pk);
 
         $pk = $this->getObjects()->getObjectUrlId('Test\Item', '25,asd24/');
-        $this->assertEquals('25%2Casd24%25252F', $pk);
+        $this->assertEquals('25%2Casd24%252F', $pk);
 
         $pk = $this->getObjects()->getObjectUrlId('Test\Item2', array('21,5', 'asd24/'));
-        $this->assertEquals('21%2C5,asd24%25252F', $pk);
+        $this->assertEquals('21%2C5,asd24%252F', $pk);
 
         $pk = $this->getObjects()->getObjectUrlId('Test\Item2', '215,asd24/');
-        $this->assertEquals('215%2Casd24%25252F,', $pk);
+        $this->assertEquals('215%2Casd24%252F,', $pk);
 
         $pk = $this->getObjects()->normalizePkString('Test\Item2', '215,asd24');
         $this->assertEquals(array('id' => '215', 'id2' => 'asd24'), $pk);
