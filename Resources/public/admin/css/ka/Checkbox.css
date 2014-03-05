@@ -7,7 +7,7 @@
     position: relative;
     cursor: default;
     display: inline-block;
-    line-height: 30px;
+    line-height: 28px;
 }
 
 .ka-Checkbox:focus {
@@ -49,7 +49,7 @@
 }
 
 .ka-Checkbox-on {
-    background-color: #4798cd;
+    background-color: #22638E;
 }
 
 .ka-Checkbox-knob {

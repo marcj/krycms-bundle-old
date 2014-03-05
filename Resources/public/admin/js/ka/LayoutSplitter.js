@@ -77,24 +77,24 @@ ka.LayoutSplitter = new Class({
                 self.fireEvent('end');
                 self.fireEvent('resized');
             },
-            onDrag: function(pElement) {
+            onDrag: function(element) {
 
                 if (key === 'n' || key == 'ne' || key == 'nw') {
-                    newHeight = height - pElement.dragY;
-                    newY = y + pElement.dragY;
+                    newHeight = height - element.dragY;
+                    newY = y + element.dragY;
                 }
 
                 if (key === 's' || key == 'se' || key == 'sw') {
-                    newHeight = height + pElement.dragY;
+                    newHeight = height + element.dragY;
                 }
 
                 if (key === 'e' || key == 'se' || key == 'ne') {
-                    newWidth = width + pElement.dragX;
+                    newWidth = width + element.dragX;
                 }
 
                 if (key === 'w' || key == 'sw' || key == 'nw') {
-                    newWidth = width - pElement.dragX;
-                    newX = x + pElement.dragX;
+                    newWidth = width - element.dragX;
+                    newX = x + element.dragX;
                 }
 
                 if (newWidth !== null && (newWidth > max.x || newWidth < minWidth)) {
@@ -106,19 +106,19 @@ ka.LayoutSplitter = new Class({
                 }
 
                 if (newX !== null && newX > 0) {
-                    pElement.setStyle('left', newX);
+                    element.setStyle('left', newX);
                 }
 
                 if (newY !== null && newY > 0) {
-                    pElement.setStyle('top', newY);
+                    element.setStyle('top', newY);
                 }
 
                 if (newWidth !== null) {
-                    pElement.setStyle('width', newWidth);
+                    element.setStyle('width', newWidth);
                 }
 
                 if (newHeight !== null) {
-                    pElement.setStyle('height', newHeight);
+                    element.setStyle('height', newHeight);
                 }
 
                 self.cell.fireEvent('resize');

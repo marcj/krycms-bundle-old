@@ -321,11 +321,13 @@ div.ka-Files-addressFaker + .ka-buttonGroup-item {
 }
 
 .ka-Files-item-title-dimensions {
-  color: #0055aa;
-  font-size: 12px;
+  color: #5A86B2;
+  color: #999;
+  font-size: 11px;
 }
 
-.ka-Files-item-selected .ka-Files-item-title-dimensions {
+.ka-Files-item-selected .ka-Files-item-title-dimensions,
+.ka-Files-item-drag-selected .ka-Files-item-title-dimensions {
   color: white;
 }
 
@@ -354,15 +356,21 @@ div.ka-Files-addressFaker + .ka-buttonGroup-item {
   z-index: 150000;
 }
 
+.ka-Files-item-drag-selected div.ka-Files-item-title,
+.ka-Files-item-drag-selected:hover div.ka-Files-item-title,
+.ka-Files-item-drag-selected:hover .ka-Files-item-miniatur-name,
+.ka-Files-item-drag-selected .ka-Files-item-miniatur-name,
 .ka-Files-item-selected div.ka-Files-item-title,
 .ka-Files-item-selected:hover div.ka-Files-item-title,
 .ka-Files-item-selected:hover .ka-Files-item-miniatur-name,
-.ka-Files-item-selected .ka-Files-item-miniatur-name {
+.ka-Files-item-selected .ka-Files-item-miniatur-name,
+{
   background-color: #22638E; /* 0%, #22638E*/
   color: white;
 }
 
-.ka-Files-item-selected {
+.ka-Files-item-selected,
+.ka-Files-item-drag-selected {
   background-color: #ddd;
   -moz-border-radius: 5px;
   -webkit-border-radius: 5px;
@@ -435,13 +443,13 @@ table.ka-files-search-table tr:hover td {
 }
 
 .ka-Files-listtype-miniatur .ka-Files-item {
-  width: 190px;
+  width: 210px;
 }
 
 .ka-Files-listtype-miniatur .ka-Files-item .ka-Files-item-icon {
   font-size: 150px;
-  height: 160px;
-  width: 190px;
+  height: 190px;
+  width: 210px;
   line-height: 160px;
   vertical-align: middle;
 }

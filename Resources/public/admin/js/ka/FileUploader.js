@@ -189,7 +189,6 @@ ka.FileUploader = new Class({
     },
 
     fileUploadCheck: function(pFile) {
-
         var name = pFile.name;
 
         this.uploadTrs[ pFile.id ].status.set('html', ('Pending ...'));
@@ -200,7 +199,6 @@ ka.FileUploader = new Class({
         }
 
         if (pFile.post && pFile.post.name && name != pFile.post.name) {
-
             name = pFile.post.name;
 
             this.uploadTrs[ pFile.id ].rename = new Element('div', {

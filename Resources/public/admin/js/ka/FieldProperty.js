@@ -12,8 +12,7 @@ ka.FieldProperty = new Class({
 
         label: {
             label: t('Label'),
-            type: 'text',
-            required: true
+            type: 'text'
         },
         'type': {
             label: t('Type'),

@@ -94,14 +94,14 @@ ka.Layout = new Class({
 
     cells: [],
 
-    initialize: function (pContainer, pOptions) {
+    initialize: function (container, options) {
 
-        this.setOptions(pOptions);
-        this.container = pContainer;
+        this.setOptions(options);
+        this.container = container;
 
         this.main = new Element('div', {
             'class': 'ka-Layout-main'
-        }).inject(pContainer);
+        }).inject(container);
 
         if (this.options.fixed) {
             this.main.addClass('ka-Layout-main-fixed');
@@ -128,23 +128,23 @@ ka.Layout = new Class({
         }.bind(this));
     },
 
-    connectCells: function (pCell1, pCell2) {
-        if (typeOf(pCell1) == 'array') {
-            pCell1 = this.getCell(pCell1[0], pCell1[1]);
+    connectCells: function (cellOne, cellTwo) {
+        if (typeOf(cellOne) == 'array') {
+            cellOne = this.getCell(cellOne[0], cellOne[1]);
         }
-        if (typeOf(pCell2) == 'array') {
-            pCell2 = this.getCell(pCell2[0], pCell2[1]);
-        }
-
-        if (pCell2.get('tag') != 'td') {
-            pCell2 = pCell2.getParent('td');
+        if (typeOf(cellTwo) == 'array') {
+            cellTwo = this.getCell(cellTwo[0], cellTwo[1]);
         }
 
-        pCell1.addEvent('resize', function () {
-            pCell2.setStyle('width', pCell1.getStyle('width'));
+        if (cellTwo.get('tag') != 'td') {
+            cellTwo = cellTwo.getParent('td');
+        }
+
+        cellOne.addEvent('resize', function () {
+            cellTwo.setStyle('width', cellOne.getStyle('width'));
         }.bind(this));
 
-        pCell1.fireEvent('resize');
+        cellOne.fireEvent('resize');
     },
 
     createResizer: function () {
@@ -163,29 +163,29 @@ ka.Layout = new Class({
         return this.resizer[row + '_' + column + '_' + direction];
     },
 
-    getCell: function (pRow, pColumn) {
+    getCell: function (rowNo, columnNo) {
         var row, cell;
-        if (row = this.getVertical().getHorizontal(pRow)) {
-            if (cell = row.getColumn(pColumn)) {
+        if (row = this.getVertical().getHorizontal(rowNo)) {
+            if (cell = row.getColumn(columnNo)) {
                 return cell;
             } else {
-                throw 'Column ' + pColumn + ' in row ' + pRow + ' does not exist.';
+                throw 'Column ' + columnNo + ' in row ' + rowNo + ' does not exist.';
             }
         } else {
-            throw 'Row ' + pRow + ' does not exist.';
+            throw 'Row ' + rowNo + ' does not exist.';
         }
     },
 
-    getTd: function(pRow, pColumn) {
+    getTd: function(rowNo, columnNo) {
         var row, cell;
-        if (row = this.getVertical().getHorizontal(pRow)) {
-            if (cell = row.getTd(pColumn)) {
+        if (row = this.getVertical().getHorizontal(rowNo)) {
+            if (cell = row.getTd(columnNo)) {
                 return cell;
             } else {
-                throw 'Column ' + pColumn + ' in row ' + pRow + ' does not exist.';
+                throw 'Column ' + columnNo + ' in row ' + rowNo + ' does not exist.';
             }
         } else {
-            throw 'Row ' + pRow + ' does not exist.';
+            throw 'Row ' + rowNo + ' does not exist.';
         }
     },
 
@@ -197,8 +197,12 @@ ka.Layout = new Class({
         return this.main;
     },
 
-    setVertical: function (pVertical) {
-        this.vertical = pVertical;
+    /**
+     *
+     * @param {Boolean} vertical
+     */
+    setVertical: function (vertical) {
+        this.vertical = vertical;
     },
 
     getVertical: function () {

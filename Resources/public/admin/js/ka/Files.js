@@ -124,11 +124,11 @@ ka.Files = new Class({
         this.initSWFUpload();
     },
 
-    newFileUpload: function(pFile) {
-        if (!pFile.target)
-            pFile.target = this.current;
+    newFileUpload: function(file) {
+        if (!file.target)
+            file.target = this.current;
 
-        this.fileUploader.newFileUpload(pFile, function() {
+        this.fileUploader.newFileUpload(file, function() {
             this.reload();
         }.bind(this));
     },
@@ -253,6 +253,7 @@ ka.Files = new Class({
             text: 'Actions',
             'class': 'light'
         }).inject(sidebar);
+
         var boxAction = new ka.ButtonGroup(sidebar);
         this.boxAction = boxAction;
         boxAction.addButton(t('New File'), '#icon-file-add', this.newFile.bind(this));
@@ -348,7 +349,7 @@ ka.Files = new Class({
             ] : [],
             layout: [
                 {
-                    columns: this.options.withSidebar ? [250, 15, null] : [null]
+                    columns: this.options.withSidebar ? [210, 15, null] : [null]
                 }
             ]
         });
@@ -371,18 +372,23 @@ ka.Files = new Class({
 
                 this.checkMouseClick(pEvent);
                 this.closeSearch();
-            }.bind(this)).addEvent('dblclick', function(pEvent) {
-                this.checkMouseDblClick(pEvent);
+            }.bind(this)).addEvent('dblclick', function(event) {
+                this.checkMouseDblClick(event);
                 this.closeSearch();
-            }.bind(this)).addEvent('mousemove', function(pEvent) {
-                this.checkMouseMove(pEvent);
+            }.bind(this)).addEvent('mousemove', function(event) {
+                this.checkMouseMove(event);
             }.bind(this)).inject(fileContainerCell);
 
-        if (ka.mobile) {
-            this.fileContainer.addEvent('click', function(pEvent) {
-                this.checkMouseDblClick(pEvent);
+        if (Modernizr.touch) {
+            Hammer(this.fileContainer).on('doubletap', function(event) {
+                this.checkMouseDblClick(event);
                 this.closeSearch();
-            }.bind(this))
+            }.bind(this));
+
+            Hammer(this.fileContainer).on('click', function(event) {
+                this.checkMouseClick(event);
+                this.closeSearch();
+            }.bind(this));
         }
 
         this.fileContainer.addEvent('scroll', this.loadImagesInViewPort.bind(this));
@@ -397,11 +403,13 @@ ka.Files = new Class({
         this.fileContainer.fileObj = this;
 
         if (this.options.withSidebar) {
-            this.infos = new Element('div', {
+            this.sidebarContainer = new Element('div', {
                 'class': 'ka-Files-infos'
             }).inject(sideBarCell, 'top');
 
-            this.mainLayout.getTable().setStyle('table-layout', 'fixed')
+            this.sidebarTd = sideBarCell;
+
+            this.mainLayout.getTable().setStyle('table-layout', 'fixed');
         }
 
         this.statusBar = new Element('div', {
@@ -430,6 +438,28 @@ ka.Files = new Class({
         }
 
         this.setListType('icon', true); //TODO retrieve cookie
+    },
+
+
+    shrinkSidebar: function() {
+        var width = this.sidebarTd.getSize().x;
+        if (width !== 43) {
+            this.sidebarContainer.setStyle('display', 'none');
+            this.lastSidebarWidth = width;
+            this.setSidebarWidth(43);
+        }
+    },
+
+    unShrinkSidebar: function() {
+        if (this.sidebarTd.getStyle('width').toInt() <= 45) {
+            this.setSidebarWidth(this.lastSidebarWidth);
+            this.sidebarContainer.setStyle('display');
+            delete this.lastSidebarWidth;
+        }
+    },
+
+    setSidebarWidth: function(width) {
+        this.sidebarTd.setStyle('width', width);
     },
 
     /**
@@ -663,6 +693,14 @@ ka.Files = new Class({
         this.optionsBarMoreInformation = new Element('div', {
             'class': 'ka-Window-sidebar-delimiter ka-Files-sidebar-more-information selectable'
         }).inject(this.optionsBarCopyLink, 'after');
+
+        this.win.addEvent('resizeSidebar', function(width){
+            if (width < 100) {
+                this.optionsBarMoreInformation.dispose()
+            } else {
+                this.optionsBarMoreInformation.inject(this.optionsBarCopyLink, 'after');
+            }
+        }.bind(this));
 
     },
 
@@ -978,7 +1016,7 @@ ka.Files = new Class({
                 object: 'kryncms/file',
                 onMove: this.sidebarTreeMoved.bind(this),
                 onReady: this.sidebarTreeReady.bind(this)
-            }, this.infos);
+            }, this.sidebarContainer);
 
             this.sideTree.addEvent('select', function(item) {
                 this.loadPath(item.path);
@@ -1015,7 +1053,7 @@ ka.Files = new Class({
             'class': 'ka-Files-droppables ' + icon
         }).addEvent('mousedown',function(e) {
                 e.stop()
-            }).addEvent('click', this.loadPath.bind(this, pFile.path)).inject(this.infos);
+            }).addEvent('click', this.loadPath.bind(this, pFile.path)).inject(this.sidebarContainer);
 
         item.fileItem = pFile;
         item.fileObj = this;
@@ -1152,8 +1190,8 @@ ka.Files = new Class({
 
         this.updateStatusBar();
 
-        if (this.infos) {
-            this.infos.getChildren().removeClass('ka-Files-item-selected');
+        if (this.sidebarContainer) {
+            this.sidebarContainer.getChildren().removeClass('ka-Files-item-selected');
         }
         this.fireDeselect();
 
@@ -1659,17 +1697,17 @@ ka.Files = new Class({
         event.dataTransfer.setData('text/x-kryn-file', this.currentDrag.path);
     },
 
-    checkFileDragOver: function(pEvent) {
+    checkFileDragOver: function(event) {
         var file;
 
-        var item = pEvent.target;
+        var item = event.target;
 
         if (!item.hasClass('ka-Files-item')) {
             item = item.getParent('.ka-Files-item');
         }
 
-        if (!item && pEvent.target.hasClass('ka-Files-droppables')) {
-            item = pEvent.target;
+        if (!item && event.target.hasClass('ka-Files-droppables')) {
+            item = event.target;
         }
 
         if (item) {
@@ -1678,7 +1716,6 @@ ka.Files = new Class({
 
         var validDrop = false;
         if (file && file.type == 'dir' && file.path != '/trash' && file.path != '/' && !item.hasClass('ka-Files-fileContainer') && file.writeAccess) {
-            item.addClass('ka-Files-item-selected');
             item.addClass('ka-Files-item-drag-selected');
             validDrop = true;
         } else if (this.currentFile.writeAccess) {
@@ -1689,55 +1726,62 @@ ka.Files = new Class({
         }
 
         if (validDrop) {
-            pEvent.stopPropagation();
-            pEvent.preventDefault();
-            pEvent.dataTransfer.dropEffect = 'move';
+            event.stopPropagation();
+            event.preventDefault();
+            event.dataTransfer.dropEffect = 'move';
         }
     },
 
-    checkFileDragLeave: function(pEvent) {
+    checkFileDragLeave: function(event) {
 
-        pEvent.stopPropagation();
-        pEvent.preventDefault();
+        event.stopPropagation();
+        event.preventDefault();
 
-        var item = pEvent.target;
+        var item = event.target;
+
+        if (!item || !item.hasClass) {
+            return;
+        }
 
         if (!item.hasClass('ka-Files-item')) {
             item = item.getParent('.ka-Files-item');
         }
-        if (!item && pEvent.target.hasClass('ka-Files-droppables')) {
-            item = pEvent.target;
+        if (!item && event.target.hasClass('ka-Files-droppables')) {
+            item = event.target;
         }
 
         if (item) {
-            item.removeClass('ka-Files-item-selected');
+            item.removeClass('ka-Files-item-drag-selected');
         }
 
         this.fileContainer.removeClass('ka-Files-fileContainer-selected');
 
     },
 
-    checkFileDrop: function(pEvent) {
+    checkFileDrop: function(event) {
         var file;
 
-        if (pEvent) {
-            pEvent.stopPropagation();
-            pEvent.preventDefault();
+        if (event) {
+            event.stopPropagation();
+            event.preventDefault();
         }
 
         this.fileContainer.removeClass('ka-Files-fileContainer-selected');
 
-        var files = (pEvent) ? pEvent.dataTransfer.files : this.uploadFileChooser.files;
+        var files = this.uploadFileChooser.files;
+        if (event) {
+            files = (event.dataTransfer.items && event.dataTransfer.items.length) ? event.dataTransfer.items : event.dataTransfer.files;
+        }
 
-        if (pEvent) {
-            var item = pEvent.target;
+        if (event) {
+            var item = event.target;
 
             if (!item.hasClass('ka-Files-item')) {
                 item = item.getParent('.ka-Files-item');
             }
 
-            if (!item && pEvent.target.hasClass('ka-Files-droppables')) {
-                item = pEvent.target;
+            if (!item && event.target.hasClass('ka-Files-droppables')) {
+                item = event.target;
             }
         }
 
@@ -1756,18 +1800,36 @@ ka.Files = new Class({
 
         if (files && 0 < files.length) {
             //external file drop
-            Array.each(files, function(chosenFile) {
-                if (file) {
-                    chosenFile.target = file.path;
+            var filesToUpload = [];
+            Array.each(files, function(chosenFile, idx) {
+                if (chosenFile.webkitGetAsEntry) {
+                    filesToUpload.push(chosenFile.webkitGetAsEntry());
+                } else if (chosenFile.getAsEntry) {
+                    filesToUpload.push(chosenFile.getAsEntry());
+                } else {
+                    filesToUpload.push(chosenFile);
                 }
-
-                chosenFile.html5 = true;
-
-                this.newFileUpload(chosenFile);
+            });
+            Array.each(filesToUpload, function(chosenFile) {
+                if (typeOf(chosenFile.file) === 'function') {
+                    chosenFile.file(function(fileToUpload) {
+                        if (file) {
+                            fileToUpload.target = file.path;
+                        }
+                        fileToUpload.html5 = true;
+                        this.newFileUpload(fileToUpload);
+                    }.bind(this));
+                } else {
+                    if (file) {
+                        chosenFile.target = file.path;
+                    }
+                    chosenFile.html5 = true;
+                    this.newFileUpload(chosenFile);
+                }
             }.bind(this));
         } else {
             //maybe internal drag'n'drop
-            var dragged = pEvent.dataTransfer.getData('text/x-kryn-file');
+            var dragged = event.dataTransfer.getData('text/x-kryn-file');
             if (dragged) {
                 this.move(dragged, file.path + '/' + dragged.basename(), null, function() {
                     this.sideTree.getFieldObject().updateBranch(file);
@@ -2012,7 +2074,7 @@ ka.Files = new Class({
 
     },
 
-    checkMouseMove: function(pEvent) {
+    checkMouseMove: function(event) {
         if (!ka.inFileDragMode) {
             return;
         }
@@ -2022,46 +2084,47 @@ ka.Files = new Class({
         }
     },
 
-    checkMouseClick: function(pEvent) {
+    checkMouseClick: function(event) {
         if (this.nextMouseClickIsInvalid == true) {
             this.nextMouseClickIsInvalid = false;
             return;
         }
 
-        if (!pEvent) {
+        if (!event) {
             return;
         }
 
-        if ((!pEvent.control && !pEvent.meta && !pEvent.shift ) && !pEvent.rightClick) {
+        if ((!event.control && !event.meta && !event.shift ) && !event.rightClick) {
             this.deselect();
         }
 
-        if (!pEvent.target) {
+
+        if (!event.target) {
             return;
         }
 
-        var item = pEvent.target;
+        var item = event.target;
 
         if (!item.hasClass('ka-Files-item')) {
             item = item.getParent('.ka-Files-item');
         }
 
         if (!item) {
-            item = pEvent.target.getParent('tr');
+            item = event.target.getParent('tr');
         }
 
         if (!item) {
 
             this.deselect();
 
-            if (pEvent.rightClick) {
-                this.openContext(this.currentFile, pEvent);
+            if (event.rightClick) {
+                this.openContext(this.currentFile, event);
             }
 
             return;
         }
 
-        if (pEvent.shift) {
+        if (event.shift) {
 
             var allSelected = this.fileContainer.getElements('.ka-Files-item-selected');
             var all = this.fileContainer.getElements('.ka-Files-item');
@@ -2093,13 +2156,13 @@ ka.Files = new Class({
         if (!item.hasClass('ka-Files-item-selected')) {
 
             this.selectItem(item);
-        } else if (pEvent.control || pEvent.meta) {
+        } else if (event.control || event.meta) {
             item.removeClass('ka-Files-item-selected');
             this.fireDeselect();
         }
 
-        if (pEvent.rightClick && file) {
-            this.openContext(file, pEvent);
+        if (event.rightClick && file) {
+            this.openContext(file, event);
         }
 
     },
@@ -2601,14 +2664,15 @@ ka.Files = new Class({
             fileIconClass = this.getIcon(pFile);
 
         }
-        base.fileObj = this;
 
         base.imageContainer = new Element('div', {
             'class': 'ka-Files-item-icon ' + (fileIconClass ? fileIconClass : '')
         }).inject(base);
 
         if (fileIcon) {
-            base.image = new Element('img').inject(base.imageContainer);
+            base.image = new Element('img', {
+                draggable: false
+            }).inject(base.imageContainer);
         }
 
         if (fileIcon) {
