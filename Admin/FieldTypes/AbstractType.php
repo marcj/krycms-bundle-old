@@ -113,45 +113,60 @@ abstract class AbstractType implements TypeInterface
             return [];
         }
 
-        foreach ($this->getColumns() as $column) {
-            $field = $this->getFieldDefinition();
-            $errors = [];
-            $value = @$values[$column->getName()];
+        $field = $this->getFieldDefinition();
 
-            if ($field->isHidden()) {
-                return $result;
-            }
+        if ($field->isHidden()) {
+            return $result;
+        }
 
-            if (($value === '' || $value === null)) {
-                $errors[] = 'Value is empty, but required.';
-            } else {
-                if ($regex = $column->getRequiredRegex()) {
-                    $valueString = (string)$value;
-
-                    if (!preg_match('/' . $regex . '/', $valueString)) {
-
-                        if (ColumnDefinition::isInteger($column) || ColumnDefinition::isFloat($column) || ColumnDefinition::isBoolean($column)) {
-                            $name = 'Integer';
-                            if (ColumnDefinition::isFloat($column)) {
-                                $name = 'Decimal';
-                            }
-                            if (ColumnDefinition::isBoolean($column)) {
-                                $name = 'Boolean';
-                            }
-                            $errors[] = sprintf('Value is not a %s (%s)', $name, $regex);
-                        } else {
-                            $errors[] = sprintf('Value requires format %s', $regex);
-                        }
-                    }
-                }
-            }
-
-            if ($errors) {
-                $result[$column->getName()] = $errors;
+        $columns = $this->getColumns();
+        if (1 === count($columns)) {
+            $this->validateColumn($values, $columns[0], $result);
+        } else {
+            foreach ($this->getColumns() as $column) {
+                $this->validateColumn(@$values[$column->getName()], $column, $result);
             }
         }
 
         return $result;
+    }
+
+    /**
+     * @param mixed $value
+     * @param ColumnDefinition $column
+     * @param array $result
+     */
+    protected function validateColumn($value, ColumnDefinition $column, array &$result)
+    {
+        $errors = [];
+
+        if ($value === '' || $value === null) {
+            $errors[] = 'Value is empty, but required.';
+        } else {
+            if ($regex = $column->getRequiredRegex()) {
+                $valueString = (string)$value;
+
+                if (!preg_match('/' . $regex . '/', $valueString)) {
+
+                    if (ColumnDefinition::isInteger($column) || ColumnDefinition::isFloat($column) || ColumnDefinition::isBoolean($column)) {
+                        $name = 'Integer';
+                        if (ColumnDefinition::isFloat($column)) {
+                            $name = 'Decimal';
+                        }
+                        if (ColumnDefinition::isBoolean($column)) {
+                            $name = 'Boolean';
+                        }
+                        $errors[] = sprintf('Value is not a %s (%s)', $name, $regex);
+                    } else {
+                        $errors[] = sprintf('Value requires format %s', $regex);
+                    }
+                }
+            }
+        }
+
+        if ($errors) {
+            $result[$column->getName()] = $errors;
+        }
     }
 
 	/**

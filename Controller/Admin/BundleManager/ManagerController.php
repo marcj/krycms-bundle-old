@@ -357,6 +357,7 @@ This is the bundle $bundleClassName.
                 ->name('*Bundle.php')
                 ->notPath('/\/Tests\//')
                 ->notPath('/\/Test\//')
+                ->notPath('Tests/Integration/skeletion')
                 ->notPath('Kryn/CmsBundle/vendor')
                 ->in($this->getKernel()->getRootDir() . '/../' . $path);
 
@@ -433,9 +434,9 @@ This is the bundle $bundleClassName.
         $finder
             ->files()
             ->name('*Bundle.php')
-            ->notPath('/\/Tests\//')
-            ->notPath('Kryn/CmsBundle/vendor')
-            ->notPath('/\/Test\//');
+            ->exclude('Kryn/CmsBundle/vendor')
+            ->exclude('/\/Test\//')
+            ->exclude('/\/Tests\//');
 
         if (file_exists($root . '/../vendor')) {
             $finder->in($root . '/../vendor');

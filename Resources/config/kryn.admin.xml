@@ -89,6 +89,11 @@
                 <method>apc</method>
             </stream>
 
+            <stream path="newsFeed">
+                <class>Kryn\CmsBundle\Controller\Admin\DashboardWidgets</class>
+                <method>newsFeed</method>
+            </stream>
+
         </streams>
     </bundle>
 </config>

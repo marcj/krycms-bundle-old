@@ -7,14 +7,14 @@
 }
 
 .ka-Dashboard-widget {
-    background-color: #fcfcfc;
+    background-color: #fafafa;
     margin: 4px;
     display: block;
     float: left;
     width: 255px;
     height: 215px;
     color: #444;
-    border: 1px solid #e2e2e2;
+    border: 1px solid #ececec;
 
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
@@ -52,4 +52,9 @@
 
 .ka-Dashboard-widget-grid-5 {
     width: 1115px;
+}
+
+
+.ka-Dashboard-widget-full {
+    width: 100%;
 }

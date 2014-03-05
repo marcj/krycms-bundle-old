@@ -1110,6 +1110,16 @@ ka.loadStream = function() {
 };
 
 /**
+ *
+ * @param {String} key
+ * @param {*} value
+ */
+ka.setStreamParam = function(key, value) {
+    if (!ka.streamParams.params) ka.streamParams.params = {};
+    ka.streamParams.params[key] = value;
+}
+
+/**
  * Returns the current value in the clipboard of the interface (not browser)
  *
  * @returns {Object} {type: {String}, value: {Mixed}}

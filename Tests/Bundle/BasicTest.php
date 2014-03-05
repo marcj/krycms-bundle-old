@@ -8,21 +8,6 @@ use Kryn\CmsBundle\Tools;
 
 class BasicTest extends KernelAwareTestCase
 {
-    public function testRelativePath()
-    {
-        $relative = Tools::getRelativePath('/anotherroot/web/file', '/root/web/other/dir');
-        $this->assertEquals('../../../../anotherroot/web/file', $relative);
-
-        $relative = Tools::getRelativePath('/root/web/file', '/root/web/other/dir');
-        $this->assertEquals('../../file', $relative);
-
-        $relative = Tools::getRelativePath('/root/web/dir/file/', '/root/web/dir');
-        $this->assertEquals('file', $relative);
-
-        $relative = Tools::getRelativePath('/root/web/other/file/', '/root/web/dir');
-        $this->assertEquals('../other/file', $relative);
-    }
-
     public function testGeneral()
     {
         $this->assertTrue($this->getKrynCore()->isActiveBundle('KrynCmsBundle'));

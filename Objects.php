@@ -582,9 +582,13 @@ class Objects
             return null;
         }
 
+        if (@$options['permissionCheck'] && !$this->getKrynCore()->getACL()->checkViewExact($objectKey, $pk)) {
+            return null;
+        }
+
         if ($limitDataSets = $obj->definition->getLimitDataSets()) {
             if (!$this->satisfy($item, $limitDataSets)) {
-                return false;
+                return null;
             }
         }
 
@@ -911,9 +915,10 @@ class Objects
      */
     public function update($objectKey, $pk, $values, $options = null)
     {
+        $item = $this->get($objectKey, $pk, $options);
+
         if ($options['permissionCheck']) {
 
-            $item = $this->get($objectKey, $pk, $options);
             if (!$item) {
                 return false;
             }
@@ -946,6 +951,10 @@ class Objects
 
         $result = $obj->update($primaryKey, $values);
 
+        if (@$options['newsFeed']) {
+            $this->newNewsFeed($objectKey, $item);
+        }
+
         $args['result'] = $result;
         $event = new GenericEvent($objectKey, $args);
 
@@ -953,6 +962,37 @@ class Objects
         $this->getKrynCore()->getEventDispatcher()->dispatch('core/object/update', $event);
 
         return $result;
+    }
+
+    protected function newNewsFeed($objectKey, $item, $message = '', $verb = 'updated')
+    {
+        $definition = $this->getDefinition($objectKey);
+
+        $itemLabel = '';
+        if ($labelField = $definition->getLabelField()) {
+            $itemLabel = $item[$labelField];
+        }
+
+        if (!$itemLabel) {
+            $pks = $definition->getPrimaryKeys();
+            $itemLabel = '#' . $item[$pks[0]->getId()];
+        }
+
+        if ($this->getKrynCore()->getClient()->getUser()->getFirstName() || $this->getKrynCore()->getClient()->getUser()->getLastName()) {
+            $username = $this->getKrynCore()->getClient()->getUser()->getFirstName();
+            if ($username) $username .= ' ';
+            $username .= $this->getKrynCore()->getClient()->getUser()->getLastName();
+        } else {
+            $username = $this->getKrynCore()->getClient()->getUser()->getUsername();
+        }
+
+        $newsFeed = new \Kryn\CmsBundle\Model\NewsFeed();
+        $newsFeed->setUser($username);
+        $newsFeed->setVerb($verb);
+        $newsFeed->setTarget($itemLabel);
+        $newsFeed->setCreated(time());
+        $newsFeed->setMessage($message);
+        $newsFeed->save();
     }
 
 
@@ -974,9 +1014,9 @@ class Objects
         $obj = $this->getClass($objectKey);
         $pk = $obj->normalizePrimaryKey($pk);
 
-        if ($options['permissionCheck']) {
+        $item = $this->get($objectKey, $pk, $options);
 
-            $item = $this->get($objectKey, $pk, $options);
+        if ($options['permissionCheck']) {
             if (!$item) {
                 return false;
             }
@@ -1000,6 +1040,10 @@ class Objects
         $this->getKrynCore()->getEventDispatcher()->dispatch('core/object/patch-pre', $eventPre);
 
         $result = $obj->patch($pk, $values);
+
+        if (@$options['newsFeed']) {
+            $this->newNewsFeed($objectKey, $item);
+        }
 
         $args['result'] = $result;
         $event = new GenericEvent($objectKey, $args);

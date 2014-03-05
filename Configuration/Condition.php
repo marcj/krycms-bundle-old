@@ -148,7 +148,7 @@ class  Condition extends Model
         if ($condition instanceof Condition) {
             return $condition->getRules();
         } else {
-            if (!is_array($condition[0])) {
+            if (!is_array($condition[0]) && !($condition[0] instanceof Condition)) {
                 $condition = [$condition];
             }
             return $condition;
@@ -201,7 +201,7 @@ class  Condition extends Model
 
         if (is_array($condition) && !is_numeric(key($condition))) {
             //array( 'bla' => 'hui' );
-            return static::create($this->primaryKeyToCondition($condition, $objectKey))->toSql(
+            return static::create($this->primaryKeyToCondition($condition, $objectKey), $this->getKrynCore())->toSql(
                 $params,
                 $objectKey,
                 $usedFieldNames
@@ -210,7 +210,7 @@ class  Condition extends Model
 
         if ($condition[0] && is_array($condition[0]) && !is_numeric(key($condition[0]))) {
             //array( array('bla' => 'bla', ... );
-            return static::create($this->primaryKeyToCondition($condition, $objectKey))->toSql(
+            return static::create($this->primaryKeyToCondition($condition, $objectKey), $this->getKrynCore())->toSql(
                 $params,
                 $objectKey,
                 $usedFieldNames
@@ -219,7 +219,7 @@ class  Condition extends Model
 
         if (!is_array($condition[0]) && !$condition[0] instanceof Condition) {
             //array( 1, 2, 3 );
-            return static::create($this->primaryKeyToCondition($condition, $objectKey))->toSql(
+            return static::create($this->primaryKeyToCondition($condition, $objectKey), $this->getKrynCore())->toSql(
                 $params,
                 $objectKey,
                 $usedFieldNames
@@ -445,8 +445,7 @@ class  Condition extends Model
      */
     public static function create($condition = null, \Kryn\CmsBundle\Core $krynCore = null)
     {
-        $obj = new static;
-        $obj->setKrynCore($krynCore);
+        $obj = new static(null, $krynCore);
         $obj->from($condition);
         return $obj;
     }
@@ -495,7 +494,8 @@ class  Condition extends Model
                 $res = $condition->satisfy($objectItem, $objectKey);
             } else if (is_array($condition)) {
                 //group
-                $res = static::create($condition)->satisfy($objectItem, $objectKey);
+                $res = static::create($condition, $this->getKrynCore())
+                    ->satisfy($objectItem, $objectKey);
             }
 
             if (is_null($complied)) {
@@ -694,14 +694,23 @@ class  Condition extends Model
     public function toArray($printDefaults = false)
     {
         $result = [];
-        if ($this->rules) {
-            foreach ($this->rules as $rule) {
-                if ($rule instanceof Condition) {
-                    $result[] = $rule->toArray();
-                } else {
-                    $result[] = $rule;
+
+        $ruleToArray = function($rule) use (&$ruleToArray) {
+            if (is_array($rule)) {
+                $result = [];
+                foreach ($rule as $v) {
+                    $result[] = $ruleToArray($v);
                 }
+                return $result;
+            } else if ($rule instanceof Condition) {
+                return $rule->toArray();
+            } else {
+                return $rule;
             }
+        };
+
+        if ($this->rules) {
+            return $ruleToArray($this->rules);
         }
         return $result;
     }

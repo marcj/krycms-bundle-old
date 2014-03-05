@@ -366,6 +366,22 @@
           <field id="description" type="text"/>
         </browserColumns>
       </object>
+      <object id="NewsFeed" crossRef="false">
+        <label>News Feed</label>
+        <table>system_news_feed</table>
+        <labelField>title</labelField>
+        <fields>
+          <field id="id" type="number" primaryKey="true" autoIncrement="true">
+            <label>id</label>
+          </field>
+          <field id="user" type="text"/>
+          <field id="verb" type="text"/>
+          <field id="target" type="text"/>
+          <field id="link" type="text"/>
+          <field id="message" type="textarea"/>
+          <field id="created" type="datetime"/>
+        </fields>
+      </object>
     </objects>
   </bundle>
 </config>

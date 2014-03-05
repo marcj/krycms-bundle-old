@@ -2,9 +2,29 @@
 
 namespace Kryn\CmsBundle\Controller\Admin;
 use Kryn\CmsBundle\Controller;
+use Kryn\CmsBundle\Model\NewsFeedQuery;
+use Propel\Runtime\ActiveQuery\Criteria;
+use Propel\Runtime\Map\TableMap;
 
 class DashboardWidgets extends Controller
 {
+    public function newsFeed(&$response, $params)
+    {
+        $items = NewsFeedQuery::create()
+            ->orderByCreated(Criteria::ASC);
+
+        if ($lastTime = @$params['newsFeed/lastTime']) {
+            $items->filterByCreated($lastTime, Criteria::GREATER_THAN);
+        }
+
+        $result = [
+            'time' => time(),
+            'items' => $items->find()->toArray(null, null, TableMap::TYPE_STUDLYPHPNAME)
+        ];
+
+        $response['kryncms/newsFeed'] = $result;
+    }
+
     public function load(&$response)
     {
         $load = function_exists('sys_getloadavg') ? \sys_getloadavg() : '';

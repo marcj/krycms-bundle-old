@@ -11,7 +11,7 @@ namespace Kryn\CmsBundle\Client;
 use Kryn\CmsBundle\Configuration\Client;
 use Kryn\CmsBundle\Configuration\SessionStorage;
 use Kryn\CmsBundle\Core;
-//use Kryn\CmsBundle\Utils;
+use Kryn\CmsBundle\KrynCmsBundle;
 use Kryn\CmsBundle\Model\Session;
 use Kryn\CmsBundle\Model\User;
 use Kryn\CmsBundle\Model\UserGroup;
@@ -720,15 +720,14 @@ abstract class ClientAbstract
      * Injects the passwd hash from config.php into $string
      *
      * @param  string $string
-     * @param  Core $krynCore
      *
      * @return string
      */
-    public static function injectConfigPasswdHash($string, Core $krynCore)
+    public static function injectConfigPasswdHash($string)
     {
         $result = '';
         $len = mb_strlen($string);
-        $hashKey = $krynCore->getSystemConfig()->getPasswordHashKey();
+        $hashKey = KrynCmsBundle::$systemConfig->getPasswordHashKey();
         $clen = mb_strlen($hashKey);
 
         for ($i = 0; $i < $len; $i++) {
@@ -747,7 +746,7 @@ abstract class ClientAbstract
     /**
      * Returns a hashed password with salt.
      */
-    public static function getHashedPassword($password, $salt, Core $krynCore)
+    public static function getHashedPassword($password, $salt)
     {
         $hash = hash('sha512', ($password . $salt) . $salt) . hash(
                 'sha512',
@@ -755,7 +754,7 @@ abstract class ClientAbstract
             );
 
         for ($i = 0; $i < 201; $i++) {
-            $hash = self::injectConfigPasswdHash($hash, $krynCore);
+            $hash = self::injectConfigPasswdHash($hash);
             $hash = hash(
                     'sha512',
                     $i % 2 ?

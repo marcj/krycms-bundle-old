@@ -39,7 +39,7 @@ class AclController extends Controller
         return AclQuery::create()
             ->filterByTargetType($type+0)
             ->filterByTargetId($id+0)
-            ->orderByPrio(Criteria::DESC)
+            ->orderByPrio(Criteria::ASC)
             ->find()
             ->toArray(null, null, TableMap::TYPE_STUDLYPHPNAME);
     }

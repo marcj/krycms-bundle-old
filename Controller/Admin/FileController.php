@@ -425,9 +425,8 @@ class FileController extends Controller
         foreach ($files as $key => $file) {
             $file = $file->toArray();
             if (!$this->getKrynCore()->getACL()->checkListExact(
-                'KrynCmsBundle:file',
-                array('id' => $file['id'])
-            )
+                'kryncms/file',
+                array('id' => $file['id']))
             ) {
                 continue;
             }
@@ -435,8 +434,8 @@ class FileController extends Controller
             if (isset($blacklistedFiles[$file['path']]) | (!$showHiddenFiles && substr($file['name'], 0, 1) == '.')) {
                 continue;
             } else {
-                $file['writeAccess'] = $this->getKrynCore()->getACL()->checkUpdate(
-                    'KrynCmsBundle:File',
+                $file['writeAccess'] = $this->getKrynCore()->getACL()->checkUpdateExact(
+                    'kryncms/file',
                     array('id' => $file['id'])
                 );
                 $this->appendImageInformation($file);
@@ -532,7 +531,7 @@ class FileController extends Controller
         }
 
         $file = $file->toArray();
-        $file['writeAccess'] = $this->getKrynCore()->getACL()->checkUpdate('KrynCmsBundle:File', $file['id']);
+        $file['writeAccess'] = $this->getKrynCore()->getACL()->checkUpdateExact('KrynCmsBundle:File', $file['id']);
 
         $this->appendImageInformation($file);
 

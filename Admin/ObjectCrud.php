@@ -1518,7 +1518,7 @@ class ObjectCrud extends ContainerAware implements ObjectCrudInterface
             $this->getObject(),
             $pk,
             $data,
-            array('permissionCheck' => $this->getPermissionCheck())
+            array('permissionCheck' => $this->getPermissionCheck(), 'newsFeed' => true)
         );
 
         return $result;
@@ -1552,7 +1552,7 @@ class ObjectCrud extends ContainerAware implements ObjectCrudInterface
             $this->getObject(),
             $pk,
             $changedData,
-            array('permissionCheck' => $this->getPermissionCheck())
+            array('permissionCheck' => $this->getPermissionCheck(), 'newsFeed' => true)
         );
 
         return $result;
