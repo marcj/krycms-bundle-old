@@ -34,7 +34,7 @@ Features
  - Based on Symfony
  - Based on Propel ORM (Propel supports MySQL, PostgreSQL, SQLite, MSSQL, and Oracle), http://www.propelorm.org
  - Advanced, fast and fresh administration interface
- - The administration API is completely abstracted through a RESTful JSON API
+ - The administration API is completely abstracted through a [REST API](Resources/doc/images/rest-api.png)
  - File abstraction layer (for mounts with external storages [s3, ftp, dropbox, etc]), CDN
  - i18n using `getText` (with all of its features [e.g. including plural support, contexts]) compatible .po files
  - High-Performance through several cache layers

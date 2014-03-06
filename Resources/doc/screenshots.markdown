@@ -109,3 +109,6 @@ Stuff
 
 Errors/Exception Debug View
 ![Errors/Exception Debug View](images/admin-logs.png)
+
+REST API
+![REST API](images/rest-api.png)
