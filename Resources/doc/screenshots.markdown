@@ -4,11 +4,20 @@ Screenshots
 General
 -------
 
+Administration login
+![Administration login](images/admin-login.png)
+
+Dashboard
+![Administration Frontend Edit](images/admin-dashboard.png)
+
 Frontend Inline Edit
 ![Administration Frontend Edit](images/admin-frontend-edit.png)
 
 File manager
 ![Administration File manager](images/admin-files-context-image.png)
+
+Nodes
+![Administration Nodes](images/admin-nodes.png)
 
 System
 ![System settings](images/admin-system.png)
@@ -18,9 +27,6 @@ CRUD Framework
 ![Administration CRUD Framework Window List](images/admin-list.png)
 ![Administration CRUD Framework Window](images/admin-users.png)
 
-Administration login
-![Administration login](images/admin-login.png)
-
 Object chooser
 ![Object chooser](images/admin-object-chooser.png)
 
@@ -28,23 +34,32 @@ Object chooser
 Extension Editor
 ----------------
 
+List
+![List](images/admin-extensioneditor.png)
+
+Create Bundle
+![Create Bundle](images/admin-extensioneditor-create.png)
+
 General Tab
 ![General Tab](images/admin-extensioneditor-general.png)
 
 EntryPoints Tab
 ![EntryPoints Tab](images/admin-extensioneditor-entrypoints.png)
 
-Plugins Tab
-![Plugins Tab](images/admin-extensioneditor-plugins.png)
-
 Objects Tab
-![Objects Tab](images/admin-extensioneditor-objects1.png)
+![Objects Tab ](images/admin-extensioneditor-objects.png)
 
 Objects Tab Fields
-![Objects Tab Fields](images/admin-extensioneditor-objects2.png)
+![Objects Tab Fields](images/admin-extensioneditor-objects-fields.png)
 
 Objects Tab Field properties
-![Objects Tab Field properties](images/admin-extensioneditor-objects3.png)
+![Objects Tab Field properties](images/admin-extensioneditor-objects-fields-properties.png)
+
+Windows Tab
+![Windows Tab](images/admin-extensioneditor-windows.png)
+
+Plugins Tab
+![Plugins Tab](images/admin-extensioneditor-plugins.png)
 
 
 CRUD Window Editor
@@ -79,9 +94,6 @@ Objects 1
 Objects 2
 ![Objects 2](images/admin-permission-management3.png)
 
-Objects 3
-![Objects 3](images/admin-permission-management4.png)
-
 
 Installer
 ------------------
@@ -93,4 +105,4 @@ Stuff
 ------------------
 
 Errors/Exception Debug View
-![Errors/Exception Debug View](images/errors-exception-debug-view.png)
+![Errors/Exception Debug View](images/admin-logs.png)

@@ -55,6 +55,7 @@ Screenshot
 ![Administration Dashboard](https://raw.github.com/kryncms/KrynCmsBundle/master/Resources/doc/images/admin-dashboard.png)
 ![Administration Frontend Edit](https://raw.github.com/kryncms/KrynCmsBundle/master/Resources/doc/images/admin-frontend-edit.png)
 ![Administration File manager](https://raw.github.com/kryncms/KrynCmsBundle/master/Resources/doc/images/admin-files-context-image.png)
+![Administration File manager Images](https://raw.github.com/kryncms/KrynCmsBundle/master/Resources/doc/images/admin-files-context-image2.png)
 ![Administration CRUD Framework Window List](https://raw.github.com/kryncms/KrynCmsBundle/master/Resources/doc/images/admin-list.png)
 ![Administration CRUD Framework Window](https://raw.github.com/kryncms/KrynCmsBundle/master/Resources/doc/images/admin-users.png)
 
