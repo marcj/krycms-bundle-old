@@ -16,6 +16,9 @@ Frontend Inline Edit
 File manager
 ![Administration File manager](images/admin-files-context-image.png)
 
+File manager Image View
+![Administration File manager](images/admin-files-context-image2.png)
+
 Nodes
 ![Administration Nodes](images/admin-nodes.png)
 
