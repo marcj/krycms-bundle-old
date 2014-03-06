@@ -227,13 +227,13 @@ ka.Dialog = new Class({
         this.cancelNextClosing = true;
     },
 
-    close: function (pInternal, pAnimated) {
+    close: function (internal, animated) {
         if (this.cancelNextClosing) {
             delete this.cancelNextClosing;
             return;
         }
 
-        if (pInternal) {
+        if (internal) {
             this.main.fireEvent('preClose');
         }
 
@@ -241,7 +241,7 @@ ka.Dialog = new Class({
             return;
         }
 
-        if (pInternal) {
+        if (internal) {
             this.fireEvent('close');
         }
 
@@ -260,8 +260,8 @@ ka.Dialog = new Class({
             this.container.getDocument().body.removeEvent('keyup', this.checkClose);
         }
 
-        this.doClose(pAnimated);
-        if (!pAnimated) {
+        this.doClose(animated);
+        if (!animated) {
             if (this.lastFocusedElement) {
                 this.lastFocusedElement.focus();
             }

@@ -456,10 +456,19 @@ ka.AdminInterface = new Class({
             text: tf('%s %s', window._session.firstName, window._session.lastName)
         }).inject(this.mainMenuUser);
 
-        new Element('img', {
-            'class': 'profile-image',
-            src: 'https://secure.gravatar.com/avatar/4cf03620f0f00793f5d034480654bd3c?s=200'
-        }).inject(this.mainMenuUser);
+        var profilePictureUrl;
+        if (window._session.imagePath) {
+            profilePictureUrl = _path + window._session.imagePath.substr(1);
+        } else if (window._session.emailMd5) {
+            profilePictureUrl = 'https://secure.gravatar.com/avatar/' + window._session.emailMd5;
+        }
+
+        if (profilePictureUrl) {
+            new Element('img', {
+                'class': 'profile-image',
+                src: profilePictureUrl
+            }).inject(this.mainMenuUser);
+        }
 
         new Element('br').inject(this.mainMenuUser);
 

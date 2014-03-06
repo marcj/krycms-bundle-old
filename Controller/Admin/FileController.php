@@ -12,6 +12,7 @@ use Kryn\CmsBundle\File\FileInfo;
 use Kryn\CmsBundle\File\FileSize;
 use Kryn\CmsBundle\Model\Base\FileQuery;
 use FOS\RestBundle\Controller\Annotations as Rest;
+use Kryn\CmsBundle\Model\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
@@ -36,10 +37,17 @@ class FileController extends Controller
     public function deleteFileAction($path)
     {
         $this->checkAccess($path);
+        if (!$file = $this->getKrynCore()->getWebFileSystem()->getFile($path)) {
+            return false;
+        }
 
         FileQuery::create()->filterByPath($path)->delete();
 
-        return $this->getKrynCore()->getWebFileSystem()->remove($path);
+        if ($result = $this->getKrynCore()->getWebFileSystem()->remove($path)) {
+            $this->newFeed($file, 'deleted', $path);
+        }
+
+        return $result;
     }
 
     /**
@@ -63,7 +71,16 @@ class FileController extends Controller
         $content = $paramFetcher->get('content');
         $this->checkAccess($path);
 
-        return $this->getKrynCore()->getWebFileSystem()->write($path, $content);
+        if ($this->getKrynCore()->getWebFileSystem()->has($path)) {
+            return ['targetExists' => true];
+        }
+
+        $result = $this->getKrynCore()->getWebFileSystem()->write($path, $content);
+        if ($result) {
+            $this->newFeed($path, 'created');
+        }
+
+        return $result;
     }
 
     /**
@@ -95,7 +112,10 @@ class FileController extends Controller
         $this->checkAccess($path);
         $this->checkAccess($target);
 
-        return $this->getKrynCore()->getWebFileSystem()->move($path, $target);
+        $this->newFeed($path, 'moved', sprintf('from %s to %s', $path, $target));
+        $result = $this->getKrynCore()->getWebFileSystem()->move($path, $target);
+
+        return $result;
     }
 
     /**
@@ -130,6 +150,8 @@ class FileController extends Controller
             if (!$overwrite && $this->getKrynCore()->getWebFileSystem()->has($newPath)) {
                 return ['targetExists' => true];
             }
+
+            $this->newFeed($file, $move ? 'moved': 'copied', sprintf('from %s to %s', $file, $newPath));
         }
 
         return $this->getKrynCore()->getWebFileSystem()->paste($files, $target, $move ? 'move' : 'copy');
@@ -154,7 +176,11 @@ class FileController extends Controller
         $path = $paramFetcher->get('path');
         $this->checkAccess(dirname($path));
 
-        return $this->getKrynCore()->getWebFileSystem()->mkdir($path);
+        if ($result = $this->getKrynCore()->getWebFileSystem()->mkdir($path)) {
+            $this->newFeed($path, 'created', $path);
+        }
+
+        return $result;
     }
 
     /**
@@ -189,7 +215,7 @@ class FileController extends Controller
         $method = $method ? 'check' . ucfirst($method) . 'Exact' : 'checkUpdateExact';
 
         if ($file && !$this->getKrynCore()->getACL()->$method(
-                'KrynCmsBundle:File',
+                'kryncms/file',
                 array('id' => $file->getId()),
                 $fields
             )
@@ -346,7 +372,7 @@ class FileController extends Controller
 
         $krynFile = $this->getKrynCore()->getWebFileSystem()->getFile(dirname($path));
         if ($krynFile && !$this->getKrynCore()->getACL()->checkUpdate(
-                'KrynCmsBundle:File',
+                'kryncms/file',
                 array('id' => $krynFile->getId())
             )
         ) {
@@ -354,10 +380,36 @@ class FileController extends Controller
         }
 
         $content = file_get_contents($file->getPathname());
-        $this->getKrynCore()->getWebFileSystem()->write($newPath, $content);
+        $result = $this->getKrynCore()->getWebFileSystem()->write($newPath, $content);
         @unlink($file->getPathname());
 
+        if ($result) {
+            $this->newFeed($newPath, 'uploaded', 'to ' . $newPath);
+        }
+
         return $newPath;
+    }
+
+    /**
+     * @param string|File $path
+     * @param string $verb
+     * @param string $message
+     */
+    protected function newFeed($path, $verb, $message = '')
+    {
+        $file = $path;
+        if (!($path instanceof File)) {
+            $file = $this->getKrynCore()->getWebFileSystem()->getFile($path);
+        }
+
+        if ($file instanceof File) {
+            $this->getKrynCore()->getUtils()->newNewsFeed(
+                'kryncms/file',
+                $file->toArray(),
+                $verb,
+                $message
+            );
+        }
     }
 
     /**
@@ -526,12 +578,12 @@ class FileController extends Controller
     protected function getFile($path)
     {
         $file = $this->getKrynCore()->getWebFileSystem()->getFile($path);
-        if (!$file || !$this->getKrynCore()->getACL()->checkListExact('KrynCmsBundle:File', array('id' => $file->getId()))) {
+        if (!$file || !$this->getKrynCore()->getACL()->checkListExact('kryncms/file', array('id' => $file->getId()))) {
             return null;
         }
 
         $file = $file->toArray();
-        $file['writeAccess'] = $this->getKrynCore()->getACL()->checkUpdateExact('KrynCmsBundle:File', $file['id']);
+        $file['writeAccess'] = $this->getKrynCore()->getACL()->checkUpdateExact('kryncms/file', $file['id']);
 
         $this->appendImageInformation($file);
 
@@ -679,7 +731,11 @@ class FileController extends Controller
             $content = base64_decode($content);
         }
 
-        return $this->getKrynCore()->getWebFileSystem()->write($path, $content);
+        if ($result = $this->getKrynCore()->getWebFileSystem()->write($path, $content)) {
+            $this->newFeed($path, 'changed content of');
+        }
+
+        return $result;
     }
 
     /**

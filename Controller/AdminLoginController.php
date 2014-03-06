@@ -35,6 +35,7 @@ class AdminLoginController extends PluginController
         $response = $this->getKrynCore()->getPageResponse();
         $response->addJs(
             "
+        tinymce.baseURL =  _path+'bundles/kryncms/tinymce',
         window.addEvent('domready', function(){
             ka.adminInterface = new ka.AdminInterface();
         });

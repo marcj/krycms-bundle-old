@@ -1899,6 +1899,9 @@ var kryncms_system_module_editWindow = new Class({
             var oldType = field.type;
             field.type = 'info';
             field.label = tf('ka.Field type `%s` is misconfigured: %s', oldType, e);
+            if (console) {
+                console.error(e, field);
+            }
             field = new ka.Field(
                 field,
                 target

@@ -879,6 +879,10 @@ class Objects
             $result = $obj->add($values, $targetPk, $position);
         }
 
+        if (@$options['newsFeed']) {
+            $this->getKrynCore()->getUtils()->newNewsFeed($objectKey, $values, 'added');
+        }
+
         $args['result'] = $result;
         $event = new GenericEvent($objectKey, $args);
 
@@ -952,7 +956,7 @@ class Objects
         $result = $obj->update($primaryKey, $values);
 
         if (@$options['newsFeed']) {
-            $this->newNewsFeed($objectKey, $item);
+            $this->getKrynCore()->getUtils()->newNewsFeed($objectKey, $item, 'updated');
         }
 
         $args['result'] = $result;
@@ -964,42 +968,9 @@ class Objects
         return $result;
     }
 
-    protected function newNewsFeed($objectKey, $item, $message = '', $verb = 'updated')
-    {
-        $definition = $this->getDefinition($objectKey);
-
-        $itemLabel = '';
-        if ($labelField = $definition->getLabelField()) {
-            $itemLabel = $item[$labelField];
-        }
-
-        if (!$itemLabel) {
-            $pks = $definition->getPrimaryKeys();
-            $itemLabel = '#' . $item[$pks[0]->getId()];
-        }
-
-        if ($this->getKrynCore()->getClient()->getUser()->getFirstName() || $this->getKrynCore()->getClient()->getUser()->getLastName()) {
-            $username = $this->getKrynCore()->getClient()->getUser()->getFirstName();
-            if ($username) $username .= ' ';
-            $username .= $this->getKrynCore()->getClient()->getUser()->getLastName();
-        } else {
-            $username = $this->getKrynCore()->getClient()->getUser()->getUsername();
-        }
-
-        $newsFeed = new \Kryn\CmsBundle\Model\NewsFeed();
-        $newsFeed->setUser($username);
-        $newsFeed->setVerb($verb);
-        $newsFeed->setTarget($itemLabel);
-        $newsFeed->setCreated(time());
-        $newsFeed->setMessage($message);
-        $newsFeed->save();
-    }
-
-
     /**
      * Patches a object entry. This means, only defined fields will be saved. Fields which are not defined will
      * not be overwritten.
-     *
      *
      * @param  string $objectKey
      * @param  mixed  $pk
@@ -1042,7 +1013,7 @@ class Objects
         $result = $obj->patch($pk, $values);
 
         if (@$options['newsFeed']) {
-            $this->newNewsFeed($objectKey, $item);
+            $this->getKrynCore()->getUtils()->newNewsFeed($objectKey, $item, 'updated');
         }
 
         $args['result'] = $result;
@@ -1062,11 +1033,11 @@ class Objects
      *
      * @return bool
      */
-    public function removeFromUrl($objectUrl)
+    public function removeFromUrl($objectUrl, $options)
     {
         list($objectKey, $objectIds, ) = $this->parseUrl($objectUrl);
 
-        return $this->remove($objectKey, $objectIds[0]);
+        return $this->remove($objectKey, $objectIds[0], $options);
     }
 
     /**
@@ -1074,14 +1045,21 @@ class Objects
      *
      * @param  string $objectKey
      * @param  mixed  $pk
+     * @param  array  $options
      *
      * @return boolean
      */
-    public function remove($objectKey, $pk)
+    public function remove($objectKey, $pk, $options)
     {
         $objectKey = Objects::normalizeObjectKey($objectKey);
         $obj = $this->getClass($objectKey);
         $primaryKey = $obj->normalizePrimaryKey($pk);
+
+        $item = $this->get($objectKey, $pk, $options);
+
+        if (!$item) {
+            return false;
+        }
 
         $args = [
             'pk' => $pk,
@@ -1096,6 +1074,10 @@ class Objects
 
         $args['result'] = $result;
         $event = new GenericEvent($objectKey, $args);
+
+        if (@$options['newsFeed']) {
+            $this->getKrynCore()->getUtils()->newNewsFeed($objectKey, $item, 'removed');
+        }
 
         $this->getKrynCore()->getEventDispatcher()->dispatch('core/object/modify', $event);
         $this->getKrynCore()->getEventDispatcher()->dispatch('core/object/remove', $event);
@@ -1495,6 +1477,7 @@ class Objects
      * @param  string $position        `first` (child), `last` (last child), `prev` (sibling), `next` (sibling)
      * @param  string $targetObjectKey
      * @param  array  $options
+     * @param  bool   $overwrite
      *
      * @return mixed
      */
@@ -1504,6 +1487,7 @@ class Objects
         $targetPk,
         $position = 'first',
         $targetObjectKey = null,
+        $options,
         $overwrite = false
     ) {
         $obj = $this->getClass($objectKey);
@@ -1512,6 +1496,11 @@ class Objects
         $targetPk = $this->normalizePk($targetObjectKey ? $targetObjectKey : $objectKey, $targetPk);
 
         //todo check access
+
+        if (@$options['newsFeed']) {
+            $item = $this->get($objectKey, $pk);
+            $this->getKrynCore()->getUtils()->newNewsFeed($objectKey, $item, 'moved');
+        }
 
         return $obj->move($pk2, $targetPk, $position, $targetObjectKey, $overwrite);
     }

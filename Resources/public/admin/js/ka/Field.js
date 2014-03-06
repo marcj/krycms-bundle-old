@@ -77,6 +77,9 @@ ka.Field = new Class({
 
         this.fieldForm = fieldForm;
 
+        definition.object = definition.options && definition.options.object ? definition.options.object : definition.object;
+        definition.field = definition.options && definition.options.field ? definition.options.field : definition.field;
+
         this.field = Object.clone(definition);
         this.calledDefinition = Object.clone(definition);
 

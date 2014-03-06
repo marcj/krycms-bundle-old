@@ -141,7 +141,9 @@ class AdminController extends Controller
      *    username: "admin",
      *    access: true, #administration access
      *    firstName: "Admini",
-     *    lastName: "strator"
+     *    lastName: "strator",
+     *    emailMd5: <emailAsMd5>, //for gravatar
+     *    imagePath: "/path/to/image.jpg"
      *}
      *
      * @Rest\RequestParam(name="username", requirements=".+", strict=true)
@@ -164,6 +166,8 @@ class AdminController extends Controller
             if ($status) {
                 $this->getKrynCore()->getAdminClient()->getUser()->setLastLogin(time());
 
+                $email = $this->getKrynCore()->getAdminClient()->getUser()->getEmail();
+
                 return array(
                     'token' => $this->getKrynCore()->getAdminClient()->getToken(),
                     'userId' => $this->getKrynCore()->getAdminClient()->getUserId(),
@@ -171,7 +175,9 @@ class AdminController extends Controller
                     'lastLogin' => $lastLogin,
                     'access' => $this->getKrynCore()->getACL()->check('KrynCmsBundle:entryPoint', '/admin'),
                     'firstName' => $this->getKrynCore()->getAdminClient()->getUser()->getFirstName(),
-                    'lastName' => $this->getKrynCore()->getAdminClient()->getUser()->getLastName()
+                    'lastName' => $this->getKrynCore()->getAdminClient()->getUser()->getLastName(),
+                    'emailMd5' => $email ? md5(strtolower(trim($email))) : null,
+                    'imagePath' => $this->getKrynCore()->getAdminClient()->getUser()->getImagePath()
                 );
             }
         }
@@ -222,6 +228,7 @@ class AdminController extends Controller
      * )
      *
      * @Rest\QueryParam(name="streams", array=true, requirements=".+", strict=true, description="List of stream ids")
+     * @Rest\QueryParam(name="params", array=true, description="Params")
      *
      * @Rest\Get("/admin/stream")
      *
@@ -239,12 +246,14 @@ class AdminController extends Controller
         $__streams = array_map('strtolower', $streams);
 
         $response = array();
+        $params = $paramFetcher->get('params');
         foreach ($this->getKrynCore()->getConfigs() as $bundleConfig) {
             if ($streams = $bundleConfig->getStreams()) {
                 foreach ($streams as $stream) {
-                    $id = strtolower($bundleConfig->getBundleName()) . '/' . $stream->getPath();
-                    if (false !== in_array($id, $__streams)) {
-                        $stream->run($response);
+                    $id = strtolower($bundleConfig->getBundleName() . '/' . $stream->getPath());
+                    $shortId = strtolower($bundleConfig->getName() . '/' . $stream->getPath());
+                    if (false !== in_array($id, $__streams) || false !== in_array($shortId, $__streams)) {
+                        $stream->run($response, $params);
                     }
                 }
             }

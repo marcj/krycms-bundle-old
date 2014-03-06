@@ -1,12 +1,13 @@
 <config>
   <bundle>
     <objects>
-      <object id="File">
+      <object id="File" crossRef="false">
         <label>File</label>
         <table>system_file</table>
         <class>Kryn\CmsBundle\ORM\ObjectFile</class>
-        <labelField>path</labelField>
+        <labelField>name</labelField>
         <dataModel>custom</dataModel>
+        <fieldLabel>path</fieldLabel>
         <nested>true</nested>
         <treeLabel>name</treeLabel>
         <treeIcon>type</treeIcon>
@@ -27,9 +28,6 @@
           </field>
           <field id="path" type="file">
             <label>Start path</label>
-            <options>
-              <option key="onlyFolders">true</option>
-            </options>
           </field>
           <field id="selectionOnlyFolders" type="checkbox">
             <label>Only folders</label>
@@ -341,6 +339,7 @@
           <field id="lastName" type="text">
             <label>Last name</label>
           </field>
+          <field id="imagePath" type="file"/>
         </fields>
       </object>
       <object id="Group">
@@ -376,7 +375,9 @@
           </field>
           <field id="user" type="text"/>
           <field id="verb" type="text"/>
-          <field id="target" type="text"/>
+          <field id="targetObject" type="text"/>
+          <field id="targetPk" type="text"/>
+          <field id="targetLabel" type="text"/>
           <field id="link" type="text"/>
           <field id="message" type="textarea"/>
           <field id="created" type="datetime"/>

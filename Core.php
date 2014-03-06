@@ -572,6 +572,14 @@ class Core extends Controller
     }
 
     /**
+     * @return string
+     */
+    public function getRoot()
+    {
+        return realpath($this->getKernel()->getRootDir() . '/..');
+    }
+
+    /**
      * Checks if a (kryn) bundle is activated.
      *
      * @param string $bundleName

@@ -2,10 +2,11 @@ ka.SystemDialog = new Class({
 
     Extends: ka.Dialog,
 
-    initialize: function(pParent, pOptions) {
-        pParent = ka.getAdminInterface().getDialogContainer();
+    initialize: function(parent, options) {
+        parent = ka.getAdminInterface().getDialogContainer();
         this.closeExistingDialog();
-        this.parent(pParent, pOptions);
+        options.noBottom = true;
+        this.parent(parent, options);
     },
 
     closeExistingDialog: function() {

@@ -55,6 +55,10 @@ class AdminAssets
             $session['lastLogin'] = $client->getUser()->getLastlogin();
             $session['firstName'] = $client->getUser()->getFirstName();
             $session['lastName'] = $client->getUser()->getLastName();
+
+            $email = $client->getUser()->getEmail();
+            $session['emailMd5'] = $email ? md5(strtolower(trim($email))) : null;
+            $session['imagePath'] = $client->getUser()->getImagePath();
         }
 
         $css = 'window._session = ' . json_encode($session) . ';';

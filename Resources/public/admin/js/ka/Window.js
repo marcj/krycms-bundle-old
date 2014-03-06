@@ -263,39 +263,39 @@ ka.Window = new Class({
 
     /**
      *
-     * @param pText
-     * @param pCallback
+     * @param text
+     * @param callback
      * @returns {ka.Dialog}
      */
-    alert: function (pText, pCallback) {
-        return this._alert(pText, pCallback);
+    alert: function (text, callback) {
+        return this._alert(text, callback);
     },
 
-    _alert: function (pText, pCallback) {
-        return this._prompt(pText, null, pCallback, {
+    _alert: function (text, callback) {
+        return this._prompt(text, null, callback, {
             'alert': 1
         });
     },
 
     /**
      *
-     * @param pText
-     * @param pCallback
+     * @param text
+     * @param callback
      * @returns {ka.Dialog}
      * @private
      */
-    _confirm: function (pText, pCallback) {
-        return this.confirm(pText, pCallback);
+    _confirm: function (text, callback) {
+        return this.confirm(text, callback);
     },
 
     /**
      *
-     * @param pText
-     * @param pCallback
+     * @param text
+     * @param callback
      * @returns {ka.Dialog}
      */
-    confirm: function (pText, pCallback) {
-        return this._prompt(pText, null, pCallback, {
+    confirm: function (text, callback) {
+        return this._prompt(text, null, callback, {
             'confirm': 1
         });
     },
@@ -314,29 +314,29 @@ ka.Window = new Class({
 
     /**
      *
-     * @param pDesc
-     * @param pDefaultValue
-     * @param pCallback
-     * @param pOpts
+     * @param description
+     * @param defaultValue
+     * @param callback
+     * @param options
      * @returns {ka.Dialog}
      * @private
      */
-    _prompt: function (pDesc, pDefaultValue, pCallback, pOpts) {
+    _prompt: function (description, defaultValue, callback, options) {
         var res = false;
-        if (!pOpts) {
-            pOpts = {};
+        if (!options) {
+            options = {};
         }
-        if (pOpts['confirm'] == 1) {
+        if (options['confirm'] == 1) {
             res = true;
         }
 
-        var main = this.newDialog(pDesc);
+        var main = this.newDialog(description);
 
-        if (pOpts['alert'] != 1 && pOpts['confirm'] != 1) {
+        if (options['alert'] != 1 && options['confirm'] != 1) {
             var input = main.input = new Element('input', {
                 'class': 'text',
-                'type': (pOpts.pw == 1) ? 'password' : 'text',
-                value: pDefaultValue
+                'type': (options.pw == 1) ? 'password' : 'text',
+                value: defaultValue
             }).inject(main.content);
 
             input.focus();
@@ -344,17 +344,17 @@ ka.Window = new Class({
 
         var ok = false;
 
-        if (pOpts['alert'] != 1) {
+        if (options['alert'] != 1) {
 
-            if (pCallback) {
+            if (callback) {
                 var closeEvent = function () {
-                    pCallback(false);
-                }
+                    callback(false);
+                };
                 main.addEvent('close', closeEvent);
             }
 
             new ka.Button(t('Cancel')).addEvent('click', function () {
-                main.close();
+                main.close(true);
             }.bind(this)).inject(main.bottom);
 
             ok = new ka.Button(t('OK')).addEvent('keyup',function (e) {
@@ -368,22 +368,22 @@ ka.Window = new Class({
                     if (input && input.value != '') {
                         res = input.value;
                     }
-                    if (pCallback) {
+                    if (callback) {
                         main.removeEvent('close', closeEvent);
                     }
-                    main.close();
-                    if (pCallback) {
-                        pCallback(res);
+                    main.close(true);
+                    if (callback) {
+                        callback(res);
                     }
                 }.bind(this))
                 .setButtonStyle('blue')
                 .inject(main.bottom);
         }
 
-        if (pOpts && pOpts['alert'] == 1) {
+        if (options && options['alert'] == 1) {
 
-            if (pCallback) {
-                main.addEvent('close', pCallback);
+            if (callback) {
+                main.addEvent('close', callback);
             }
 
             ok = new ka.Button('OK')
@@ -397,7 +397,7 @@ ka.Window = new Class({
                 .inject(main.bottom);
         }
 
-        if (pOpts['alert'] != 1 && pOpts['confirm'] != 1) {
+        if (options['alert'] != 1 && options['confirm'] != 1) {
             input.addEvent('keyup', function (e) {
                 if (e.key == 'enter') {
                     e.stopPropagation();
@@ -547,7 +547,7 @@ ka.Window = new Class({
         }
     },
 
-    addHotkey: function (pKey, pControlOrMeta, pAlt, pCallback) {
+    addHotkey: function (key, controlOrMeta, alt, callback) {
         if (!this.hotkeyBinds) {
             this.hotkeyBinds = [];
         }
@@ -560,27 +560,27 @@ ka.Window = new Class({
             }
             if (this.isInFront() && (!this.inOverlayMode)) {
 
-                if (pControlOrMeta && (!e.control && !e.meta)) {
+                if (controlOrMeta && (!e.control && !e.meta)) {
                     return;
                 }
-                if (pAlt && !e.alt) {
+                if (alt && !e.alt) {
                     return;
                 }
-                if (e.key == pKey) {
-                    pCallback(e);
+                if (e.key == key) {
+                    callback(e);
                 }
             }
         }.bind(this);
 
         this.hotkeyBinds.push(bind);
 
-        document.body.addEvent('keyup', bind);
+        document.body.addEvent('keydown', bind);
 
     },
 
     removeHotkeys: function () {
         Array.each(this.hotkeyBinds, function (bind) {
-            document.removeEvent('keyup', bind);
+            document.removeEvent('keydown', bind);
         })
     },
 
@@ -1060,7 +1060,7 @@ ka.Window = new Class({
                 absolute: true,
                 noBottom: true,
                 width: this.options.width || '75%',
-                height: this.options.height || '75%',
+                height: this.options.height || '92%',
                 minWidth: this.options.minWidth,
                 minHeight: this.options.minHeight
             });

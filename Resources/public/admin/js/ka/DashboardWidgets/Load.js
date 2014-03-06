@@ -16,11 +16,13 @@ ka.DashboardWidgets.Load = new Class({
         }).inject(this.main);
 
         this.speedmeter1 = new ka.ui.Speedmeter(this.main, {
-            title: 'CPU %'
+            title: 'CPU',
+            label: '%'
         });
 
         this.speedmeterRamPlaceholder = new ka.ui.Speedmeter(this.main, {
-            title: 'RAM'
+            title: 'RAM',
+            label: 'MB'
         });
     },
 

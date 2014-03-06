@@ -388,7 +388,7 @@ ka.Select = new Class({
                         if (null !== response.data) {
                             Array.each(response.data, function(item) {
 
-                                var id = ka.getObjectId(this.options.object, item);
+                                var id = ka.getObjectUrlId(this.options.object, item);
 
                                 if (this.hideOptions && this.hideOptions.contains(id)) {
                                     return;

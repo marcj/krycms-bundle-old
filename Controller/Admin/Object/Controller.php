@@ -93,7 +93,9 @@ class Controller extends KrynController
 
         $items = array();
         if (count($objectIds) == 1) {
-            $items[] = $this->getObjects()->get($objectKey, $objectIds[0], $options);
+            if ($item = $this->getObjects()->get($objectKey, $objectIds[0], $options)) {
+                $items[] = $item;
+            }
         } else {
             foreach ($objectIds as $primaryKey) {
                 if ($item = $this->getObjects()->get($objectKey, $primaryKey, $options)) {

@@ -190,4 +190,9 @@ abstract class AbstractType implements TypeInterface
 			}
 		}
 	}
+
+    public function isDiffAllowed()
+    {
+        return true;
+    }
 }

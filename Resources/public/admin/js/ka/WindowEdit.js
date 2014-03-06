@@ -178,7 +178,7 @@ ka.WindowEdit = new Class({
         this.win.setLoading(false);
         this.fireEvent('load', pItem);
 
-        this.ritem = this.retrieveData(true);
+//        this.ritem = this.retrieveData(true);
     },
 
     hideNotEditableFields: function(fields) {
@@ -191,18 +191,18 @@ ka.WindowEdit = new Class({
         }
     },
 
-    setValue: function(pValue, pInternal) {
+    setValue: function(value, internal) {
 
-        pValue = pValue || {};
+        value = value || {};
 
-        this.fieldForm.setValue(pValue, pInternal);
+        this.fieldForm.setValue(value, internal);
 
         if (this.getTitleValue()) {
             this.win.setTitle(this.getTitleValue());
         }
 
-        if (this.languageSelect && this.languageSelect.getValue() != pValue.lang) {
-            this.languageSelect.setValue(pValue.lang);
+        if (this.languageSelect && this.languageSelect.getValue() != value.lang) {
+            this.languageSelect.setValue(value.lang);
             this.changeLanguage();
         }
     },
@@ -577,14 +577,14 @@ ka.WindowEdit = new Class({
             this.win.setLoading(true, null, this.container.getCoordinates(this.win));
             var itemPk = ka.getObjectUrlId(this.classProperties['object'], this.winParams.item);
 
-            this.lastDeleteRq = new Request.JSON({url: _pathAdmin + this.getEntryPoint() + '/',
+            this.lastDeleteRq = new Request.JSON({url: _pathAdmin + this.getEntryPoint() + '/' + itemPk,
                 onComplete: function(pResponse) {
                     this.win.setLoading(false);
                     this.fireEvent('remove', this.winParams.item);
                     ka.getAdminInterface().objectChanged(this.classProperties['object']);
                     this.destroy();
                     this.win.close();
-                }.bind(this)}).post({_method: 'delete', pk: itemPk});
+                }.bind(this)}).post({_method: 'delete'});
 
         }.bind(this));
     },
@@ -732,12 +732,12 @@ ka.WindowEdit = new Class({
 
     /**
      *
-     * @param [pWithoutEmptyCheck]
+     * @param [withoutEmptyCheck]
      * @param [patch]
      * @returns {*}
      */
-    retrieveData: function(pWithoutEmptyCheck, patch) {
-        if (!pWithoutEmptyCheck && !this.fieldForm.checkValid()) {
+    retrieveData: function(withoutEmptyCheck, patch) {
+        if (!withoutEmptyCheck && !this.fieldForm.checkValid()) {
             var invalidFields = this.fieldForm.getInvalidFields();
 
             Object.each(invalidFields, function(item, fieldId) {
@@ -770,7 +770,7 @@ ka.WindowEdit = new Class({
         var req = this.fieldForm.getValue(null, patch);
 
         if (this.languageSelect) {
-            if (!pWithoutEmptyCheck && this.languageSelect.getValue() == '') {
+            if (!withoutEmptyCheck && this.languageSelect.getValue() == '') {
 
                 if (!this.languageTip) {
                     this.languageTip = new ka.Tooltip(this.languageSelect, _('Please fill!'), null, null, _path + 'bundles/kryncms/admin/images/icons/error.png');
@@ -778,7 +778,7 @@ ka.WindowEdit = new Class({
                 this.languageTip.show();
 
                 return false;
-            } else if (!pWithoutEmptyCheck && this.languageTip) {
+            } else if (!withoutEmptyCheck && this.languageTip) {
                 this.languageTip.stop();
             }
             req['lang'] = this.languageSelect.getValue();
@@ -789,16 +789,13 @@ ka.WindowEdit = new Class({
     },
 
     hasUnsavedChanges: function() {
-        if (!this.ritem) {
-            return false;
-        }
+//        if (!this.ritem) {
+//            return false;
+//        }
 
-        var currentData = this.retrieveData(true);
-        if (!currentData) {
-            return true;
-        }
+        var currentData = this.retrieveData(true, true);
 
-        return JSON.encode(currentData) == JSON.encode(this.ritem) ? false : true;
+        return currentData && 0 !== Object.getLength(currentData);
     },
 
     checkClose: function() {
@@ -830,7 +827,7 @@ ka.WindowEdit = new Class({
             return;
         }
 
-        this.ritem = data;
+//        this.ritem = data;
 
         if (this.winParams.item) {
             req = Object.merge(this.winParams.item, data);
@@ -918,6 +915,8 @@ ka.WindowEdit = new Class({
                     if (this.classProperties.loadSettingsAfterSave == true) {
                         ka.loadSettings();
                     }
+
+                    this.fieldForm.resetPatch();
 
                     this.fireEvent('save', [request, response]);
                     ka.getAdminInterface().objectChanged(this.classProperties['object']);

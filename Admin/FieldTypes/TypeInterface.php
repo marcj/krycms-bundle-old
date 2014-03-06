@@ -108,4 +108,6 @@ interface TypeInterface
 	 */
 	public function getPhpDataType();
 
+    public function isDiffAllowed();
+
 }

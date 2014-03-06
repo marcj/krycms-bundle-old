@@ -291,7 +291,7 @@ ka.ObjectTree = new Class({
     startupWithObjectInfo: function(pId, pCallback) {
         var objectKey = this.options.objectKey;
         if ('object' === typeOf(pId)) {
-            pId = ka.getObjectId(this.options.objectKey, pId);
+            pId = ka.getObjectUrlId(this.options.objectKey, pId);
         } else {
             //we assume its a objectUrl
             objectKey = ka.getCroppedObjectKey(pId) || this.options.objectKey;
@@ -307,7 +307,7 @@ ka.ObjectTree = new Class({
             return;
         }
 
-        new Request.JSON({url: this.getUrl() + ka.getObjectUrlIdFromId(objectKey, pId) + '/:parents', noCache: 1, onComplete: function(response) {
+        new Request.JSON({url: this.getUrl() + pId + '/:parents', noCache: 1, onComplete: function(response) {
             this.load_object_children = [];
             Array.each(response.data, function(item) {
                 if (item._object && ka.normalizeObjectKey(item._object) && ka.normalizeObjectKey(this.options.objectKey)) {
@@ -1325,7 +1325,7 @@ ka.ObjectTree = new Class({
     },
 
     getItem: function(pId) {
-        var id = 'string' === typeOf(pId) ? pId : this.options.objectKey + '/' + ka.getObjectId(this.options.objectKey, pId);
+        var id = 'string' === typeOf(pId) ? pId : this.options.objectKey + '/' + ka.getObjectUrlId(this.options.objectKey, pId);
         return this.items[id];
     },
 
@@ -1357,7 +1357,7 @@ ka.ObjectTree = new Class({
             if ('object' === typeOf(pPk)) {
                 id = ka.getObjectUrlId(this.options.objectKey, pPk);
             } else {
-                id = ka.getObjectUrlIdFromId(this.options.objectKey, pPk);
+                id = pPk;
             }
             id = this.options.objectKey + '/' + id;
         }

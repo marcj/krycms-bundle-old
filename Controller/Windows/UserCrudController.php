@@ -135,6 +135,9 @@ class UserCrudController extends WindowController
                     'type' => 'text',
                     'target' => 'names'
                 ),
+                'imagePath' => array (
+                    'label' => 'Picture'
+                ),
                 'company' => array(
                     'label' => 'Company',
                     'type' => 'text'

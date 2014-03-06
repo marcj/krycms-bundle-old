@@ -815,7 +815,7 @@ ka.Files = new Class({
                 if (callback) callback(false);
                 return;
             }
-            this.move(this.current + pFile.name, this.current + name, null, function(renamed) {
+            this.move(this.current + '/' + pFile.name, this.current + '/' + name, null, function(renamed) {
                 if (callback) callback(renamed, name);
             });
         }.bind(this));
@@ -879,6 +879,8 @@ ka.Files = new Class({
             return;
         }
 
+        this.optionsBarPaste.startLoading('Pasting ...');
+
         var files = [];
 
         var clipboard = ka.getClipboard('filemanager');
@@ -895,55 +897,85 @@ ka.Files = new Class({
             });
         }
 
+        var done = function(success) {
+            if (success) {
+                this.optionsBarPaste.doneLoading('Pasted!');
+            } else {
+                this.optionsBarPaste.failedLoading('Paste failed');
+            }
+        }.bind(this);
+
         if (move == 1) {
-            this.moveFiles(files, this.current);
+            this.moveFiles(files, this.current, null, done);
         } else {
-            this.copyFiles(files, this.current);
+            this.copyFiles(files, this.current, null, done);
         }
     },
 
-    moveFiles: function(pFilePaths, pTargetDirectory, pOverwrite, pCallback) {
-        if ('/' !== pTargetDirectory.substr(pTargetDirectory.length - 1)) {
-            pTargetDirectory += '/';
+    moveFiles: function(filePaths, targetDirectory, overwrite, callback) {
+        if ('/' !== targetDirectory.substr(targetDirectory.length - 1)) {
+            targetDirectory += '/';
         }
 
-        new Request.JSON({url: _pathAdmin + 'admin/file/paste', noCache: 1, onComplete: function(res) {
-            if (res.data && res.data.targetExists) {
-                this.win._confirm(_('One or more files already exist. Overwrite ?'), function(p) {
-
-                    if (!p) {
-                        return;
-                    }
-                    this.moveFiles(pFilePaths, pTargetDirectory, true);
-
-                }.bind(this));
-            } else {
-                this.reload();
-                if (pCallback) {
-                    pCallback();
+        new Request.JSON({url: _pathAdmin + 'admin/file/paste', noCache: 1,
+            onException: function(error) {
+                if (callback) {
+                    callback(false);
                 }
-            }
-        }.bind(this)}).post({files: pFilePaths, target: pTargetDirectory, overwrite: pOverwrite, move: 1});
+            },
+            onComplete: function(res) {
+                if (res.data && res.data.targetExists) {
+                    this.win._confirm(_('One or more files already exist. Overwrite ?'), function(p) {
+                        if (!p) {
+                            if (callback) {
+                                callback(false);
+                            }
+                            return;
+                        }
+                        this.moveFiles(filePaths, targetDirectory, true, callback);
+
+                    }.bind(this));
+                } else {
+                    this.reload();
+                    if (callback) {
+                        callback(true);
+                    }
+                }
+            }.bind(this)
+        }).post({files: filePaths, target: targetDirectory, overwrite: overwrite, move: 1});
 
     },
 
-    copyFiles: function(pFilePaths, pTargetDirectory, pOverwrite) {
-        if ('/' !== pTargetDirectory.substr(pTargetDirectory.length - 1)) {
-            pTargetDirectory += '/';
+    copyFiles: function(filePaths, targetDirectory, overwrite, callback) {
+        if ('/' !== targetDirectory.substr(targetDirectory.length - 1)) {
+            targetDirectory += '/';
         }
 
-        new Request.JSON({url: _pathAdmin + 'admin/file/paste', noCache: 1, onComplete: function(res) {
-            if (res.data && res.data.targetExists) {
-                this.win._confirm(_('One or more files already exist. Overwrite ?'), function(p) {
-                    if (!p) {
-                        return;
+        new Request.JSON({url: _pathAdmin + 'admin/file/paste', noCache: 1,
+            onException: function(error) {
+                if (callback) {
+                    callback(false);
+                }
+            },
+            onComplete: function(res) {
+                if (res.data && res.data.targetExists) {
+                    this.win._confirm(_('One or more files already exist. Overwrite ?'), function(p) {
+                        if (!p) {
+                            if (callback) {
+                                callback(false);
+                            }
+                            return;
+                        }
+                        this.copyFiles(filePaths, targetDirectory, true, callback);
+                    }.bind(this));
+                } else {
+                    this.reload();
+                    if (callback) {
+                        callback(true);
                     }
-                    this.copyFiles(pFilePaths, pTargetDirectory, true);
-                }.bind(this));
-            } else {
-                this.reload();
-            }
-        }.bind(this)}).post({files: pFilePaths, target: pTargetDirectory, overwrite: pOverwrite});
+                }
+            }.bind(this)
+        }).post({files: filePaths, target: targetDirectory, overwrite: overwrite});
 
     },
 
@@ -2351,12 +2383,12 @@ ka.Files = new Class({
 
     },
 
-    preview: function(pEvent) {
-        if (pEvent && 'stop' in pEvent) {
-            pEvent.stop();
+    preview: function(event) {
+        if (event && event.stop) {
+            event.stop();
         }
 
-        if (pEvent.target && pEvent.target.get('tag') == 'input' && !pEvent.target.hasClass('ka-Files-preview-input')) {
+        if (event.target && event.target.get('tag') == 'input' && !event.target.hasClass('ka-Files-preview-input')) {
             return;
         }
 
@@ -2371,7 +2403,7 @@ ka.Files = new Class({
 
             var item, file, image;
 
-            pEvent.preventDefault();
+            event.preventDefault();
 
             this.lastPreviewedItem = this.lastClickedItem;
             file = this.lastClickedItem.fileItem;
@@ -2810,12 +2842,11 @@ ka.Files = new Class({
         }
 
         if (selectedFiles.length > 1) {
-            title = _('%d file copied', selectedFiles.length).replace('%d', Object.getLength(selectedFiles));
+            title = tf('%d copied!', selectedFiles.length);
         } else {
-            Array.each(selectedFiles, function(item) {
-                title = _('%s file copied').replace('%s', item.name.substr(0, 25) + ((item.name.length > 25) ? '...' : ''));
-            });
+            title = tf('Copied!');
         }
+        this.optionsBarCopy.highlight(title);
         ka.setClipboard(title, 'filemanager', selectedFiles);
     },
 

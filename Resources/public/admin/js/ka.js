@@ -200,7 +200,7 @@ ka.entrypoint = {
         }
 
         var splitted = path.split('/');
-        var extension = splitted[0];
+        var bundleName = splitted[0];
 
         splitted.shift();
 
@@ -209,10 +209,10 @@ ka.entrypoint = {
         var config, notFound = false, item;
         path = [];
 
-        config = ka.getConfig(extension);
+        config = ka.getConfig(bundleName);
 
         if (!config) {
-            throw 'Config not found for module ' + extension;
+            throw 'Config not found for bundleName: ' + bundleName;
         }
 
         var tempEntry = config.entryPoints[splitted.shift()]
@@ -236,7 +236,7 @@ ka.entrypoint = {
         }
 
         tempEntry._path = path;
-        tempEntry._module = extension;
+        tempEntry._module = bundleName;
         tempEntry._code = code;
 
         return tempEntry;
@@ -504,15 +504,12 @@ ka.getObjectPk = function(objectKey, item) {
 /**
  * Return the internal representation (id) of object primary keys.
  *
- * If the object has a composite primaryKey it all values are joined together
- * separated with a slash character. All primary parts are urlEncoded: urlEncode(<pk1>)/urlEncode(<pk2>)
- *
  * @param {String} objectKey
  * @param {Object} item
  *
  * @return {String}
  */
-ka.getObjectId = function(objectKey, item) {
+ka.getObjectUrlId = function(objectKey, item) {
     var pks = ka.getObjectPrimaryList(objectKey);
 
     if (1 < pks.length) {
@@ -523,29 +520,14 @@ ka.getObjectId = function(objectKey, item) {
         return values.join('/');
     }
 
-    return item[pks[0]];
-};
-
-/**
- * Returns the id part of a object url (object://<objectName>/<id>).
- *
- * If you need the full uri, use ka.getObjectUrl.
- *
- * @param {String} objectKey
- * @param {Array}  item
- *
- * @return {String} already urlEncoded
- */
-ka.getObjectUrlId = function(objectKey, item) {
-    var id = ka.getObjectId(objectKey, item);
-    return ka.hasCompositePk(objectKey) ? id : ka.urlEncode(id);
+    return ka.urlEncode(item[pks[0]]);
 };
 
 /**
  * Returns the correct escaped id part of the object url (object://<objectName>/<id>).
  *
  * @param {String} objectKey
- * @param {String} id String from ka.getObjectId or ka.getObjectIdFromUrl e.g.
+ * @param {String} id String from ka.getObjectUrlId or ka.getObjectIdFromUrl e.g.
  */
 ka.getObjectUrlIdFromId = function(objectKey, id) {
     return ka.hasCompositePk(objectKey) ? id : ka.urlEncode(id);
@@ -636,7 +618,7 @@ ka.getCroppedObjectKey = function(url) {
  *  url = object://kryncms/user/1
  *  => 1
  *
- *  url = object://kryncms/file/%2Fadmin%2Fimages%2Fhi.jpg
+ *  url = object://kryncms/file/%252Fadmin%252Fimages%252Fhi.jpg
  *  => /admin/images/hi.jpg
  *
  *  url = object://kryncms/test/pk1/pk2
@@ -651,9 +633,9 @@ ka.getObjectIdFromUrl = function(url) {
 
     var pkString = ka.getCroppedObjectId(url);
 
-    if (1 < pks.length) {
-        return pkString; //already correct formatted
-    }
+//    if (1 < pks.length) {
+//        return pkString; //already correct formatted
+//    }
 
     return ka.urlDecode(pkString);
 };
@@ -718,7 +700,7 @@ ka.getObjectLabel = function(uri, callback) {
                     }
 
                     fullId = 'object://' + objectKey + '/' + pk;
-                    result = ka.getObjectLabelByItem(objectKey, item);
+                    result = ka.getObjectLabelByItem(objectKey, item, 'field');
 
                     if (ka.getObjectLabelQ[objectKey][fullId]) {
                         while ((cb = ka.getObjectLabelQ[objectKey][fullId].pop())) {
@@ -1116,7 +1098,11 @@ ka.loadStream = function() {
  */
 ka.setStreamParam = function(key, value) {
     if (!ka.streamParams.params) ka.streamParams.params = {};
-    ka.streamParams.params[key] = value;
+    if (null === value) {
+        delete ka.streamParams.params[key];
+    } else {
+        ka.streamParams.params[key] = value;
+    }
 }
 
 /**

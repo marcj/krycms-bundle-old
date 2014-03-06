@@ -171,10 +171,6 @@ ka.FieldTypes.Object = new Class({
                 var placeHolder = new Element('span');
                 row.include(placeHolder);
 
-                if (typeOf(id) == 'object') {
-                    id = ka.getObjectUrlId(this.options.object, id);
-                }
-
                 ka.getObjectLabel(ka.getObjectUrl(this.options.object, id), function (label) {
                     placeHolder.set('html', label);
                 });
@@ -225,7 +221,7 @@ ka.FieldTypes.Object = new Class({
 
         this.field = new ka.Field({
             noWrapper: true
-        }, leftTd)
+        }, leftTd);
 
         this.input = this.field.getFieldObject().input;
         this.input.addClass('ka-Input-text-disabled');
@@ -378,12 +374,12 @@ ka.FieldTypes.Object = new Class({
         }
 
         var chooserParams = {
-            onSelect: function (pId) {
+            onSelect: function (internalUri) {
                 if (!this.objectId) {
                     this.objectId = [];
                 }
 
-                this.objectId.include(ka.getCroppedObjectId(pId));
+                this.objectId.include(ka.getObjectIdFromUrl(internalUri));
                 this.renderObjectTable();
             }.bind(this),
             value: this.objectId,
@@ -420,17 +416,15 @@ ka.FieldTypes.Object = new Class({
         button.inject(this.actionBar);
 
         this.setValue = function (value) {
+            this.objectId = [];
 
-            console.log(value);
-            this.objectId = value;
+            Array.each(value, function(v) {
+                if ('object' === typeOf(v)) {
+                    v = ka.getObjectUrlId(this.options.objects[0], v);
+                }
 
-            if (!this.objectId) {
-                this.objectId = [];
-            }
-
-            if (typeOf(this.objectId) != 'array') {
-                this.objectId = [this.objectId];
-            }
+                this.objectId.push(String.from(v));
+            }.bind(this));
 
             this.renderObjectTable();
 

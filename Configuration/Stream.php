@@ -92,7 +92,7 @@ class Stream extends Model
         return $this->method;
     }
 
-    public function run(&$response)
+    public function run(&$response, array $params = array())
     {
         $clazz = $this->getClass();
         $method = $this->getMethod();
@@ -103,7 +103,7 @@ class Stream extends Model
         }
 
         $callable = array($controller, $method);
-        $parameters = array(&$response);
+        $parameters = array(&$response, $params);
         call_user_func_array($callable, $parameters);
     }
 

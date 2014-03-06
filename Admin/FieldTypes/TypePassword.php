@@ -9,4 +9,9 @@ class TypePassword extends AbstractSingleColumnType
     protected $phpDataType = 'string';
 
     protected $sqlDataType = 'VARCHAR(255)';
+
+    public function isDiffAllowed()
+    {
+        return false;
+    }
 }

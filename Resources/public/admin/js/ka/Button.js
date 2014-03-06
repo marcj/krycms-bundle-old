@@ -133,7 +133,7 @@ ka.Button = new Class({
 
     startLoading: function(text) {
         if (this.main.hasClass('ka-Button-loading')) {
-            this.stopLoading();
+            this.stopLoading(null, null, true);
         }
         this.mainLabel.dispose();
 
@@ -166,8 +166,8 @@ ka.Button = new Class({
         this.progress.setStyle('width', value+'%');
     },
 
-    stopLoading: function(text, highlightClass) {
-        if (!this.main.hasClass('ka-Button-loading')) return;
+    stopLoading: function(text, highlightClass, noTextDisplay) {
+        highlightClass = highlightClass || 'done';
         if (this.hideOldTextDelay) clearTimeout(this.hideOldTextDelay);
         this.main.removeClass('ka-Button-loading');
 
@@ -186,13 +186,32 @@ ka.Button = new Class({
             this.progress.destroy();
         }
 
-        if (text) {
+        if (text && !noTextDisplay) {
             this.loadingLabel.set('text', text);
             this.main.addClass('ka-Button-stopLoading-' + highlightClass);
             this.hideOldTextDelay = displayOldText.delay(2000);
         } else {
             displayOldText();
         }
+    },
+
+    highlight: function(text, highlightClass) {
+        highlightClass = highlightClass || 'done';
+        this.mainLabel.dispose();
+
+        this.highlightLabel = new Element('span', {
+            text: text
+        }).inject(this.main);
+
+        var displayOldText = function(){
+            this.highlightLabel.destroy();
+            this.mainLabel.inject(this.main);
+            this.main.removeClass('ka-Button-stopLoading-' + highlightClass);
+        }.bind(this);
+
+        this.highlightLabel.set('text', text);
+        this.main.addClass('ka-Button-stopLoading-' + highlightClass);
+        this.hideOldTextDelay = displayOldText.delay(1000);
     },
 
     doneLoading: function(text){

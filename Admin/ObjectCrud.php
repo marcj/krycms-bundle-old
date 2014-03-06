@@ -1283,7 +1283,7 @@ class ObjectCrud extends ContainerAware implements ObjectCrudInterface
 
     public function moveItem($sourceUrl, $targetUrl, $position = 'first', $targetObjectKey = '', $overwrite = false)
     {
-        $options = array('permissionCheck' => $this->getPermissionCheck());
+        $options = array('permissionCheck' => $this->getPermissionCheck(), 'newsFeed' => true);
 
         $sourceObjectKey = $this->getKrynCore()->getObjects()->getObjectKey($sourceUrl) ? : $this->getObject();
         $targetObjectKey = $this->getKrynCore()->getObjects()->getObjectKey($targetUrl) ? : $this->getObject();
@@ -1459,7 +1459,7 @@ class ObjectCrud extends ContainerAware implements ObjectCrudInterface
             $pk,
             $position,
             $targetObjectKey,
-            array('permissionCheck' => $this->getPermissionCheck())
+            array('permissionCheck' => $this->getPermissionCheck(), 'newsFeed' => true)
         );
 
         //handle customPostSave
@@ -1472,7 +1472,6 @@ class ObjectCrud extends ContainerAware implements ObjectCrudInterface
         return $this->primaryKey;
     }
 
-
     /**
      * @param $pk
      *
@@ -1482,10 +1481,10 @@ class ObjectCrud extends ContainerAware implements ObjectCrudInterface
     {
         $this->primaryKey = $pk;
         $options['permissionCheck'] = $this->getPermissionCheck();
+        $options['newsFeed'] = true;
 
         return $this->getKrynCore()->getObjects()->remove($this->getObject(), $pk, $options);
     }
-
 
     /**
      * Updates a object entry. This means, all fields which are not defined will be saved as NULL.

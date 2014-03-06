@@ -204,7 +204,7 @@ class ACL
             $data[] = $userId;
         }
 
-        $con = Propel::getWriteConnection('default');
+        $con = Propel::getReadConnection('default');
 
         $query = "
                 SELECT constraint_type, constraint_code, mode, access, sub, fields
@@ -641,13 +641,21 @@ class ACL
             $targetType = ACL::USER;
         }
 
+        $user = $this->getKrynCore()->getAdminClient()->getUser();
+        if ($user) {
+            $groupIds = $user->getGroupIds();
+            if (false !== strpos(','.$groupIds.',', ',1,')) {
+                return true;
+            }
+        }
+
         if ($targetId == 1) {
             return true;
         }
 
         if ($pk && $this->getCaching()) {
             $pkString = $this->getObjects()->getObjectUrlId($objectKey, $pk);
-            $cacheKey = md5($targetType.'.'.$targetId . '.'.$objectKey . '/' . $pkString . '/' . $field);
+            $cacheKey = md5($targetType.'.'.$targetId . '.'.$objectKey . '/' . $pkString . '/' . json_encode($field));
             $cached = $this->getKrynCore()->getDistributedCache('core/acl/'.$cacheKey);
             if (null !== $cached) {
                 return $cached;

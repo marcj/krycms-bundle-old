@@ -651,10 +651,13 @@ ka.FieldForm = new Class({
             obj.setValue(value, internal);
         }.bind(this));
 
+        this.value = Object.clone(this.getValue());
+
         if (true !== internal) {
             this.fireEvent('change', this.value);
             this.fireEvent('setValue', this.value);
         }
+
     },
 
     /**
@@ -744,11 +747,18 @@ ka.FieldForm = new Class({
     },
 
     /**
+     * Resets the patch status. Next getValue() only returns changed that will be made from now on.
+     */
+    resetPatch: function() {
+        this.value = this.getValue();
+    },
+
+    /**
      * Returns the value of a field.
      *
      * @param {String} [pField]
-     * @param {Boolean} [patch] return only values that has been changed since the last setValue() vall.
-     * @return {Mixed}
+     * @param {Boolean} [patch] return only values that has been changed since the last setValue() call.
+     * @return {*}
      */
     getValue: function (pField, patch) {
         var val;
@@ -820,17 +830,52 @@ ka.FieldForm = new Class({
         }
 
         if (patch) {
-            var patch = {};
+            var patchValue = {};
 
             Object.each(res, function(v, k) {
-                if (v != this.value[k]) {
-                    patch[k] = v;
+                if (this.isDifferent(v, this.value[k])) {
+                    patchValue[k] = v;
+                    console.log('diff', k, this.value[k], v);
                 }
             }.bind(this));
 
-            return patch;
+            return patchValue;
         }
 
         return res;
+    },
+
+    isDifferent: function(a, b) {
+        if (typeOf(a) !== typeOf(b)) {
+            return true;
+        }
+
+        var changed;
+        if ('object' === typeOf(a)) {
+            changed = false;
+            if (Object.getLength(a) !== Object.getLength(b)) {
+                return true;
+            }
+            Object.each(a, function(v, k) {
+                if (changed) return false;
+                changed = this.isDifferent(v, b[k]);
+            }.bind(this));
+            return changed;
+        }
+
+        if ('array' === typeOf(a)) {
+            changed = false;
+            if (a.length !== b.length) {
+                return true;
+            }
+            Array.each(a, function(v, k) {
+                if (changed) return false;
+                changed = this.isDifferent(v, b[k]);
+            }.bind(this));
+            return changed;
+        }
+
+
+        return a !== b;
     }
 });

@@ -216,6 +216,8 @@ class EditorController extends ContainerAware
             ->in($path)
             ->name('*Controller.php');
 
+        $root = $this->getKrynCore()->getRoot();
+
         foreach ($finder as $class) {
             $content = file_get_contents($class->getPathname());
 
@@ -235,7 +237,7 @@ class EditorController extends ContainerAware
                     if (class_exists($clazz)) {
                         $reflection = new \ReflectionClass($clazz);
                         if (!$reflection->isAbstract() && $reflection->isSubclassOf('\Kryn\CmsBundle\Admin\ObjectCrudInterface')) {
-                            $windows[$class->getPathname()] = $clazz;
+                            $windows[Tools::getRelativePath($class->getPathname(), $root)] = $clazz;
                         }
                     }
                 }
@@ -834,7 +836,7 @@ class EditorController extends ContainerAware
 
     protected function normalizeField(&$field, $key, $res)
     {
-        if ('predefined' === $field['type']) {
+        if ('predefined' === @$field['type']) {
             if (!@$field['object']) {
                 $field['object'] = @$res['properties']['object'];
             }

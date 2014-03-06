@@ -2,6 +2,7 @@
 
 namespace Kryn\CmsBundle;
 
+use Icap\HtmlDiff\HtmlDiff;
 use Kryn\CmsBundle\Model\AppLockQuery;
 use Kryn\CmsBundle\Model\Base\NodeQuery;
 use Symfony\Component\HttpFoundation\Response;
@@ -34,6 +35,96 @@ class Utils
     public function getKrynCore()
     {
         return $this->krynCore;
+    }
+
+    protected function generateDiff($objectKey, $origItem)
+    {
+        $repo = $this->getKrynCore()->getObjects();
+        $pk = $repo->getObjectPk($objectKey, $origItem);
+        $currentItem = $repo->get($objectKey, $pk);
+        $definition = $repo->getDefinition($objectKey);
+
+        $changes = [];
+        foreach ($definition->getFields() as $field) {
+            if (!$field->getFieldType()->isDiffAllowed()) {
+                //todo, made $field->isDiffAllowed() as well
+                continue;
+            }
+
+            $k = $field->getId();
+            if (!isset($origItem[$k]) || !isset($currentItem[$k])) {
+                continue;
+            }
+
+            if (!is_string($origItem[$k]) && !is_numeric($origItem[$k])) {
+                continue;
+            }
+
+            if (!is_string($currentItem[$k]) && !is_numeric($currentItem[$k])) {
+                continue;
+            }
+
+            $from = strip_tags($origItem[$k]);
+            $to = strip_tags($currentItem[$k]);
+
+            if ($from != $to) {
+                $htmlDiff = new HtmlDiff($from, $to, true);
+                $out = $htmlDiff->outputDiff();
+                $changes[$k] = $out->toString();
+            }
+        }
+
+        $message = [];
+        foreach ($changes as $changedKey => $diff) {
+            if ($field = $definition->getField($changedKey)) {
+                $message[] = ($field->getLabel() ?: $field->getId()).': '.$diff;
+            }
+        }
+
+        return '<div class="change">'.implode('</div><div class="change">', $message).'</div>';
+    }
+
+    /**
+     * Adds a new news-feed entry. If not message (means null) is passed we generate a diff.
+     *
+     * @param string $objectKey
+     * @param array $item
+     * @param string $verb
+     * @param string|null $message
+     */
+    public function newNewsFeed($objectKey, $item, $verb, $message = null)
+    {
+        $repo = $this->getKrynCore()->getObjects();
+        $definition = $repo->getDefinition($objectKey);
+
+        $itemLabel = '';
+        if ($labelField = $definition->getLabelField()) {
+            $itemLabel = $item[$labelField];
+        }
+
+        if (!$itemLabel) {
+            $pks = $definition->getPrimaryKeys();
+            $itemLabel = '#' . $item[$pks[0]->getId()];
+        }
+
+        if ($this->getKrynCore()->getClient()->getUser()->getFirstName() || $this->getKrynCore()->getClient()->getUser()->getLastName()) {
+            $username = $this->getKrynCore()->getClient()->getUser()->getFirstName();
+            if ($username) $username .= ' ';
+            $username .= $this->getKrynCore()->getClient()->getUser()->getLastName();
+        } else {
+            $username = $this->getKrynCore()->getClient()->getUser()->getUsername();
+        }
+
+        $newsFeed = new \Kryn\CmsBundle\Model\NewsFeed();
+        $newsFeed->setUser($username);
+        $newsFeed->setVerb($verb);
+
+        $newsFeed->setTargetObject($objectKey);
+        $newsFeed->setTargetPk($repo->getObjectUrlId($objectKey, $item));
+        $newsFeed->setTargetLabel($itemLabel);
+        $newsFeed->setCreated(time());
+        $newsFeed->setMessage(null === $message ? $this->generateDiff($objectKey, $item) : $message);
+        $newsFeed->save();
     }
 
     public function getComposerArray($bundleClass)
@@ -495,7 +586,7 @@ class Utils
             $pk = urlencode($objectPk);
         }
 
-        $cacheKey = 'core/object-caching.' . strtolower(preg_replace('/[^\w]/', '.', $objectClassName)) . '/' . $pk;
+        $cacheKey = 'core/object-caching/' . strtolower(preg_replace('/[^\w]/', '.', $objectClassName)) . '/' . $pk;
         if ($serialized = $this->getKrynCore()->getDistributedCache($cacheKey)) {
             return unserialize($serialized);
         }

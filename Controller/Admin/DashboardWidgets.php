@@ -15,6 +15,8 @@ class DashboardWidgets extends Controller
 
         if ($lastTime = @$params['newsFeed/lastTime']) {
             $items->filterByCreated($lastTime, Criteria::GREATER_THAN);
+        } else {
+            $items->limit(25);
         }
 
         $result = [

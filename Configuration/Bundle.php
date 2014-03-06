@@ -392,7 +392,7 @@ class Bundle extends Model
     }
 
     /**
-     * Returns the bundle name without the 'Bundle' suffix.
+     * Returns the bundle name without the 'Bundle' suffix, lowercased.
      *
      * Example: `Core`.
      *

@@ -2101,6 +2101,7 @@ var kryncms_system_module_edit = new Class({
             this.lr.cancel();
         }
         this.currentButton = withBuildAndUpdate ? this.saveButtonORM : this.saveButton;
+        console.log(withBuildAndUpdate,this.currentButton);
 
         var req = {};
         req.objects = objects;
@@ -2112,7 +2113,7 @@ var kryncms_system_module_edit = new Class({
         this.lr = new Request.JSON({
             url: _pathAdmin + 'admin/system/bundle/editor/objects?bundle=' + this.mod,
             noCache: 1,
-            saveButton: this.currentButton,
+            saveStatusButton: this.currentButton,
             onSuccess: function(response) {
                 ka.loadSettings(['configs']);
                 if (withBuildAndUpdate) {
