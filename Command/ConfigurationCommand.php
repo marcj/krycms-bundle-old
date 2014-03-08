@@ -48,7 +48,7 @@ You can set with this command configuration values inside the app/config/config.
 
         $mainConnection->setPassword($input->getOption('pw'));
 
-        $server = $input->getOption('server') ?: '';
+        $server = $input->getOption('server') ?: '127.0.0.1';
         if ('sqlite' === $mainConnection->getType()) {
             @touch($server);
             $server = realpath($server);
