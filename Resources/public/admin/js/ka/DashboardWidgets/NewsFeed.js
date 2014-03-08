@@ -51,7 +51,7 @@ ka.DashboardWidgets.NewsFeed = new Class({
 
         new Element('a', {
             'class': 'ka-Dashboard-newsFeed-item-user',
-            text: item.user
+            text: item.username
         }).inject(div);
 
         new Element('span', {
@@ -78,11 +78,13 @@ ka.DashboardWidgets.NewsFeed = new Class({
             text: new Date(item.created*1000).format('%B %e at %H:%M')
         }).inject(div);
 
-        new Element('div', {
-            'style': 'padding: 5px;',
-            'class': 'ka-Dashboard-newsFeed-item-message',
-            html: item.message
-        }).inject(div);
+        if (item.message) {
+            new Element('div', {
+                'style': 'padding: 5px;',
+                'class': 'ka-Dashboard-newsFeed-item-message',
+                html: item.message
+            }).inject(div);
+        }
         div.inject(this.container, 'top');
     }
 });

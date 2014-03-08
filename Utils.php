@@ -81,7 +81,7 @@ class Utils
             }
         }
 
-        return '<div class="change">'.implode('</div><div class="change">', $message).'</div>';
+        return $message ? '<div class="change">'.implode('</div><div class="change">', $message).'</div>' : '';
     }
 
     /**
@@ -116,7 +116,7 @@ class Utils
         }
 
         $newsFeed = new \Kryn\CmsBundle\Model\NewsFeed();
-        $newsFeed->setUser($username);
+        $newsFeed->setUsername($username);
         $newsFeed->setVerb($verb);
 
         $newsFeed->setTargetObject($objectKey);

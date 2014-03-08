@@ -4,6 +4,7 @@ namespace Kryn\CmsBundle\Command;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class ConfigurationCommand extends AbstractCommand
@@ -20,15 +21,12 @@ class ConfigurationCommand extends AbstractCommand
             ->setDescription('Builds all propel models in kryn bundles.')
             ->addArgument('type', InputArgument::REQUIRED, 'database type: mysql|pgsql|sqlite')
             ->addArgument('database-name', InputArgument::REQUIRED, 'database name')
-            ->addArgument('username', InputArgument::REQUIRED, 'database login username')
-            ->addArgument('pw', InputArgument::OPTIONAL, "use '' to define a empty password")
-            ->addArgument('server', InputArgument::OPTIONAL, 'hostname or ip')
-            ->addArgument('port', InputArgument::OPTIONAL)
+            ->addArgument('username', InputArgument::OPTIONAL, 'database login username')
+            ->addOption('pw', null, InputOption::VALUE_OPTIONAL)
+            ->addOption('server', null, InputOption::VALUE_OPTIONAL, 'hostname or ip. for SQLITE the path')
+            ->addOption('port', null, InputOption::VALUE_OPTIONAL)
             ->setHelp('
 You can set with this command configuration values inside the app/config/config.kryn.xml file.
-
-It overwrites only options that you provide.
-
 ')
         ;
     }
@@ -48,17 +46,16 @@ It overwrites only options that you provide.
         $mainConnection->setName($input->getArgument('database-name'));
         $mainConnection->setUsername($input->getArgument('username'));
 
-        if (null !== $input->getArgument('pw')) {
-            $mainConnection->setPassword($input->getArgument('pw'));
-        }
+        $mainConnection->setPassword($input->getOption('pw'));
 
-        if (null !== $input->getArgument('server')) {
-            $mainConnection->setServer($input->getArgument('server'));
+        $server = $input->getOption('server') ?: '';
+        if ('sqlite' === $mainConnection->getType()) {
+            @touch($server);
+            $server = realpath($server);
         }
+        $mainConnection->setServer($server);
 
-        if (null !== $input->getArgument('port')) {
-            $mainConnection->setPort($input->getArgument('port'));
-        }
+        $mainConnection->setPort($input->getOption('port'));
 
         $path = realpath($this->getApplication()->getKernel()->getRootDir().'/..') . '/app/config/config.kryn.xml';
         $systemConfig->save($path);

@@ -284,8 +284,11 @@ class Core extends Controller
         $defaultClientClass = $systemClientConfig->getClass();
 
         if (null === $this->adminClient) {
-            $this->client = $this->adminClient = new $defaultClientClass($this, $systemClientConfig);
+            $this->adminClient = new $defaultClientClass($this, $systemClientConfig);
             $this->adminClient->start();
+            if (null === $this->client) {
+                $this->client = $this->adminClient;
+            }
         }
 
         return $this->adminClient;

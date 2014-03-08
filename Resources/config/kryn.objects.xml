@@ -373,7 +373,7 @@
           <field id="id" type="number" primaryKey="true" autoIncrement="true">
             <label>id</label>
           </field>
-          <field id="user" type="text"/>
+          <field id="username" type="text"/>
           <field id="verb" type="text"/>
           <field id="targetObject" type="text"/>
           <field id="targetPk" type="text"/>

@@ -78,6 +78,7 @@ class PackageManager extends ContainerAware {
         \Kryn\CmsBundle\Model\NodeQuery::create()->deleteAll();
         \Kryn\CmsBundle\Model\ContentQuery::create()->deleteAll();
         \Kryn\CmsBundle\Model\AppLockQuery::create()->deleteAll();
+        \Kryn\CmsBundle\Model\AclQuery::create()->deleteAll();
 
         $domainName = $this->getDomain();
 

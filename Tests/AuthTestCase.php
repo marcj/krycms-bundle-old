@@ -2,6 +2,8 @@
 
 namespace Kryn\CmsBundle\Tests;
 
+use Kryn\CmsBundle\Model\GroupQuery;
+use Kryn\CmsBundle\Model\UserQuery;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class AuthTestCase extends KernelAwareTestCase
@@ -12,6 +14,10 @@ class AuthTestCase extends KernelAwareTestCase
     public function setUp()
     {
         parent::setUp();
+
+        UserQuery::create()->filterByUsername('test')->delete();
+        GroupQuery::create()->filterByName('TestGroup')->delete();
+
         if ($this->testGroupPk) {
             return;
         }

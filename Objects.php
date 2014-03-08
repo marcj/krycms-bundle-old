@@ -651,7 +651,7 @@ class Objects
             $conditionObject->mergeAnd($limit);
         }
 
-        if (isset($options['permissionCheck']) && $aclCondition = $this->getKrynCore()->getACL()->getListingCondition($objectKey)) {
+        if (@$options['permissionCheck'] && $aclCondition = $this->getKrynCore()->getACL()->getListingCondition($objectKey)) {
             $conditionObject->mergeAndBegin($aclCondition);
         }
 
@@ -730,7 +730,7 @@ class Objects
      *
      * @return array
      */
-    public function getCount($objectKey, $condition = null, $options = null)
+    public function getCount($objectKey, $condition = null, array $options = array())
     {
         $obj = $this->getClass($objectKey);
 
@@ -748,7 +748,7 @@ class Objects
             $conditionObject->mergeAnd($limit);
         }
 
-        if ($options['permissionCheck'] && $aclCondition = $this->getKrynCore()->getACL()->getListingCondition($objectKey)) {
+        if (@$options['permissionCheck'] && $aclCondition = $this->getKrynCore()->getACL()->getListingCondition($objectKey)) {
             $conditionObject->mergeAndBegin($aclCondition);
         }
 
@@ -772,7 +772,7 @@ class Objects
         $pk = null,
         $condition = null,
         $scope = null,
-        $options = null
+        array $options = array()
     ) {
         $obj = $this->getClass($objectKey);
 
@@ -790,7 +790,7 @@ class Objects
             $conditionObject->mergeAnd($limit);
         }
 
-        if ($options['permissionCheck'] && $aclCondition = $this->getKrynCore()->getACL()->getListingCondition($objectKey)) {
+        if (@$options['permissionCheck'] && $aclCondition = $this->getKrynCore()->getACL()->getListingCondition($objectKey)) {
             $conditionObject->mergeAndBegin($aclCondition);
         }
 
@@ -820,7 +820,7 @@ class Objects
         $targetPk = null,
         $position = 'first',
         $targetObjectKey = null,
-        $options = array()
+        array $options = array()
     ) {
 
         $targetPk = $this->normalizePk($objectKey, $targetPk);
@@ -917,11 +917,11 @@ class Objects
      *
      * @return bool
      */
-    public function update($objectKey, $pk, $values, $options = null)
+    public function update($objectKey, $pk, $values, array $options = array())
     {
         $item = $this->get($objectKey, $pk, $options);
 
-        if ($options['permissionCheck']) {
+        if (@$options['permissionCheck']) {
 
             if (!$item) {
                 return false;
@@ -979,7 +979,7 @@ class Objects
      *
      * @return bool
      */
-    public function patch($objectKey, $pk, $values, $options = null)
+    public function patch($objectKey, $pk, $values, array $options = array())
     {
         $objectKey = Objects::normalizeObjectKey($objectKey);
         $obj = $this->getClass($objectKey);
@@ -987,7 +987,7 @@ class Objects
 
         $item = $this->get($objectKey, $pk, $options);
 
-        if ($options['permissionCheck']) {
+        if (@$options['permissionCheck']) {
             if (!$item) {
                 return false;
             }
@@ -1033,7 +1033,7 @@ class Objects
      *
      * @return bool
      */
-    public function removeFromUrl($objectUrl, $options)
+    public function removeFromUrl($objectUrl, array $options = array())
     {
         list($objectKey, $objectIds, ) = $this->parseUrl($objectUrl);
 
@@ -1049,7 +1049,7 @@ class Objects
      *
      * @return boolean
      */
-    public function remove($objectKey, $pk, $options)
+    public function remove($objectKey, $pk, array $options = array())
     {
         $objectKey = Objects::normalizeObjectKey($objectKey);
         $obj = $this->getClass($objectKey);
@@ -1105,12 +1105,12 @@ class Objects
      *
      * @param  string $objectKey
      * @param  mixed  $scope
-     * @param  bool   $options
+     * @param  array  $options
      *
      * @return array
      * @throws \Exception
      */
-    public function getRoot($objectKey, $scope, $options = false)
+    public function getRoot($objectKey, $scope, array $options = array())
     {
         $definition = $this->getDefinition($objectKey);
 
@@ -1133,7 +1133,7 @@ class Objects
      * @return array
      * @throws \Exception
      */
-    public function getRoots($objectKey, $condition = null, $options = null)
+    public function getRoots($objectKey, $condition = null, array $options = array())
     {
         $definition = $this->getDefinition($objectKey);
 
@@ -1156,7 +1156,7 @@ class Objects
                 $conditionObject->fromPk($condition, $objectKey);
             }
 
-            if ($options['permissionCheck'] && $aclCondition = $this->getKrynCore()->getACL()->getListingCondition($objectKey)) {
+            if (@$options['permissionCheck'] && $aclCondition = $this->getKrynCore()->getACL()->getListingCondition($objectKey)) {
                 $conditionObject->mergeAndBegin($aclCondition);
             }
 
@@ -1184,7 +1184,7 @@ class Objects
         $condition = null,
         $depth = 1,
         $scope = null,
-        $options = false
+        array $options = array()
     ) {
         $obj = $this->getClass($objectKey);
         $definition = $this->getDefinition($objectKey);

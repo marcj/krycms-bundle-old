@@ -57,7 +57,7 @@ class RelationTest extends KernelAwareTestCase
 
         $reflection = new \ReflectionClass('Test\Model\ItemCategory');
         $this->assertTrue($reflection->hasMethod('getItems')); //<objectRefRelationName>Items</objectRefRelationName>
-        $this->assertTrue($reflection->hasMethod('getCrossItems')); //<objectRefRelationName>CrossItems</objectRefRelationName>
+        $this->assertTrue($reflection->hasMethod('getCategoryCrossItems')); //<objectRefRelationName>CategoryCrossItems</objectRefRelationName>
     }
 
     public function testManyToOne()

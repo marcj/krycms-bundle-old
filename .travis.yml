@@ -5,12 +5,12 @@ php:
   - 5.5
 
 env:
-  - DB_TYPE=mysql DB_USER=root
-#  - DB_TYPE=pgsql DB_USER=postgres DB_NAME=postgres
-#  - DB_TYPE=sqlite DB_SERVER=test.sq3
+  - DB_TYPE=mysql DB_USER=root DB_NAME=test
+  - DB_TYPE=pgsql DB_USER=postgres DB_NAME=test
+  - DB_TYPE=sqlite DB_NAME=test DB_SERVER=test.sq3
 
 before_script:
-  - composer install --dev
+  - composer install --prefer-dist
 
   # DB
   - sh -c "if [ '$DB_TYPE' = 'mysql' ]; then mysql -e 'DROP DATABASE IF EXISTS test; CREATE DATABASE test;'; fi"
@@ -19,5 +19,5 @@ before_script:
 
   - sudo chown -R www-data .
 
-  - Tests/Integration/skeletion/app/console kryncms:models:build
+  - Tests/Integration/skeletion/app/console kryncms:configuration:database $DB_TYPE $DB_NAME $DB_USER --server=$DB_SERVER
   - Tests/Integration/skeletion/app/console kryncms:install:demo localhost /

@@ -66,7 +66,7 @@
             <type>object</type>
             <object>test/itemCategory</object>
             <objectRelation>nToM</objectRelation>
-            <objectRefRelationName>CrossItems</objectRefRelationName>
+            <objectRefRelationName>CategoryCrossItems</objectRefRelationName>
           </field>
           <field id="oneCategory">
             <type>object</type>

@@ -139,7 +139,6 @@ class ACL
      *  4 update
      *  5 delete
      *
-     *
      * @static
      *
      * @param        $objectKey
@@ -641,7 +640,7 @@ class ACL
             $targetType = ACL::USER;
         }
 
-        $user = $this->getKrynCore()->getAdminClient()->getUser();
+        $user = $this->getKrynCore()->getClient()->getUser();
         if ($user) {
             $groupIds = $user->getGroupIds();
             if (false !== strpos(','.$groupIds.',', ',1,')) {
@@ -653,6 +652,7 @@ class ACL
             return true;
         }
 
+        $cacheKey = null;
         if ($pk && $this->getCaching()) {
             $pkString = $this->getObjects()->getObjectUrlId($objectKey, $pk);
             $cacheKey = md5($targetType.'.'.$targetId . '.'.$objectKey . '/' . $pkString . '/' . json_encode($field));
@@ -676,6 +676,10 @@ class ACL
 
         $not_found = true;
         $parent_acl = $asParent;
+
+        $fCount = null;
+        $fKey = null;
+        $fValue = null;
 
         $fIsArray = is_array($field);
         if ($fIsArray) {

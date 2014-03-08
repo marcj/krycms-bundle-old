@@ -244,7 +244,7 @@ class PropelHelper
         if ('sqlite' === $dsn) {
             $file = $connection->getServer();
             if (substr($file, 0, 1) != '/') {
-                $file = PATH . $file;
+                $file = realpath($file);
             }
             $dsn .= ':' . $file;
         } else {

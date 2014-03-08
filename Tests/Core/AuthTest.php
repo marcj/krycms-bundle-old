@@ -13,7 +13,6 @@ class AuthTest extends AuthTestCase
 
     public function tearDown()
     {
-
         if ($this->acls) {
             foreach ($this->acls as $acl) {
                 $acl->delete();
