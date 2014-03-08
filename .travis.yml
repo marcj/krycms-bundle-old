@@ -20,4 +20,5 @@ before_script:
   - sudo chown -R www-data .
 
   - Tests/Integration/skeletion/app/console kryncms:configuration:database $DB_TYPE $DB_NAME $DB_USER --server=$DB_SERVER
+  - rm -rf Tests/Integration/skeletion/app/cache/*
   - Tests/Integration/skeletion/app/console kryncms:install:demo localhost /
